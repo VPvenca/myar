@@ -15,7 +15,7 @@ body {
     display: flex; /* Umožní flexbox layout pro page-wrapper */
     flex-direction: column; /* Obsah půjde pod sebe */
     background-color: #e9eef2; /* Základní světlejší barva pozadí */
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: linear-gradient(135deg, #a8d8ff 0%, #3c8ce7 100%);
     /* --- Možnost 1: Pozadí s obrázkem --- */
     /* background-image: url('images/pozadi.jpg'); */
     /* background-size: cover; */
@@ -54,7 +54,8 @@ h1 {
     color: #2c3e50; /* Tmavší, méně ostrá barva */
     margin-top: 0; /* Odstraní horní margin, už je v header paddingu */
     margin-bottom: 20px; /* Odsazení pod nadpisem */
-    font-weight: 400; /* Tučnější písmo pro nadpis */
+    font-weight: 400; /* Normální tloušťka písma (pozor, 700 je tučné) */
+    font-size: 26px; /* Přidáno: Nastaví velikost písma na 36 pixelů */
 }
 
 /* --- Hlavní obsah (menu) --- */
