@@ -3,51 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Menu</title>
-    <style>
-        /* Jednoduché styly pro tlačítka a layout */
-        body {
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #f0f0f0;
-            margin: 0;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 30px;
-        }
-        .menu-button {
-            display: inline-block;
-            padding: 15px 30px;
-            margin: 10px;
-            font-size: 18px;
-            color: white;
-            background-color: #007bff;
-            border: none;
-            border-radius: 5px;
-            text-decoration: none; /* Odstraní podtržení u odkazu */
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .menu-button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+    <title>AR Menu Aplikace</title> <!-- Mírně upravený titulek -->
+    <link rel="stylesheet" href="style.css"> <!-- Odkaz na externí CSS soubor -->
+    <!-- Pokud chcete použít Google Font (viz níže), přidejte sem link -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <h1>Vyberte AR Scénu</h1>
+    <div class="page-wrapper"> <!-- Obalovač pro flexbox layout s patičkou dole -->
 
-    <!-- Tlačítko/Odkaz na vaši první scénu -->
-    <a href="scena_1.html" class="menu-button">Spustit Scénu 1</a>
+        <header class="app-header">
+            <!-- Sem umístěte logo -->
+            <img src="images/logo.png" alt="Logo AR Aplikace" id="app-logo">
+            <h1>Vyberte AR Scénu</h1>
+        </header>
 
-    <!-- Sem můžete přidat tlačítka pro další scény -->
-    <!-- <a href="scena_joklik.html" class="menu-button">Spustit Scénu Joklík</a> -->
-    <!-- <a href="scena_treti.html" class="menu-button">Spustit Třetí Scénu</a> -->
+        <main class="menu-content">
+            <!-- Tlačítko/Odkaz na vaši první scénu -->
+            <a href="scena_1.html" class="menu-button">Spustit Scénu 1</a>
+
+            <!-- Sem můžete přidat tlačítka pro další scény -->
+            <!-- <a href="scena_joklik.html" class="menu-button">Spustit Scénu Joklík</a> -->
+            <!-- <a href="scena_treti.html" class="menu-button">Spustit Třetí Scénu</a> -->
+        </main>
+
+        <footer class="app-footer">
+            <p>© 2025 Vytvořil Václav Pěnčík.</p>
+        </footer>
+
+    </div> <!-- Konec page-wrapper -->
 
 </body>
 </html>
