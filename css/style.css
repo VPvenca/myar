@@ -53,7 +53,7 @@ body {
 h1 {
     color: #2c3e50; /* Tmavší, méně ostrá barva */
     margin-top: 0; /* Odstraní horní margin, už je v header paddingu */
-    margin-bottom: 20px; /* Odsazení pod nadpisem */
+    margin-bottom: 40px; /* Odsazení pod nadpisem */
     font-weight: 400; /* Normální tloušťka písma (pozor, 700 je tučné) */
     font-size: 26px; /* Přidáno: Nastaví velikost písma na 36 pixelů */
 }
