@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- A-Frame a MindAR knihovny -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+</head>
+<body>
+    <a-scene mindar-image="imageTargetSrc:assets/mind/targets_2.mind; 
+        uiLoading: yes; uiError: yes; 
+        renderer: {colorManagement: true}; 
+        physicallyCorrectLights: true; 
+        vr-mode-ui: {enabled: false}; 
+        device-orientation-permission-ui: {enabled: false}">
+
+        <a-assets>
+            <img id="marker1" src="https://i.imgur.com/JVDUaQZ.jpeg">
+            <img id="marker2" src="https://i.imgur.com/MnxuD94.jpeg">
+            <img id="marker3" src="https://i.imgur.com/F172Vkt.jpeg">
+            <img id="marker4" src="https://i.imgur.com/3ESDric.png">
+            <img id="marker5" src="https://i.imgur.com/F4BeRo5.jpeg">
+            <img id="marker6" src="https://i.imgur.com/tkAqz3B.png">
+            <a-asset-item id="model1" src="https://your_model_url1.gltf"></a-asset-item>
+            <a-asset-item id="model2" src="https://your_model_url2.gltf"></a-asset-item>
+            <a-asset-item id="model3" src="https://your_model_url3.gltf"></a-asset-item>
+            <a-asset-item id="model4" src="https://your_model_url4.gltf"></a-asset-item>
+            <a-asset-item id="model5" src="https://your_model_url5.gltf"></a-asset-item>
+            <a-asset-item id="model6" src="https://your_model_url6.gltf"></a-asset-item>
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-plane src="#marker1" position="0 0 0" scale="2 2 1" material="transparent: true;"></a-plane>
+            <a-gltf-model src="#model1" position="0 0 0.1" scale="0.005 0.005 0.005"></a-gltf-model>
+        </a-entity>
+
+        <a-entity mindar-image-target="targetIndex: 1">
+            <a-plane src="#marker2" position="0 0 0" scale="2 2 1" material="transparent: true;"></a-plane>
+            <a-gltf-model src="#model2" position="0 0 0.1" scale="0.005 0.005 0.005"></a-gltf-model>
+        </a-entity>
+
+        <a-entity mindar-image-target="targetIndex: 2">
+            <a-plane src="#marker3" position="0 0 0" scale="2 1.5 1" material="transparent: true;"></a-plane>
+            <a-gltf-model src="#model3" position="0 0 0.1" scale="0.005 0.005 0.005"></a-gltf-model>
+        </a-entity>
+
+        <a-entity mindar-image-target="targetIndex: 3">
+            <a-plane src="#marker4" position="0 0 0" material="transparent: true" scale="2 2 1"></a-plane>
+            <a-gltf-model src="#model4" position="0 0 0.1" scale="0.005 0.005 0.005"></a-gltf-model>
+        </a-entity>
+
+        <a-entity mindar-image-target="targetIndex: 4">
+            <a-plane src="#marker5" position="0 -1 0" scale="2 0.5 1" material="transparent: true;"></a-plane>
+            <a-gltf-model src="#model5" position="0 -3 0.1" scale="0.005 0.005 0.005"></a-gltf-model>
+        </a-entity>
+
+        <a-entity mindar-image-target="targetIndex: 5">
+            <a-plane src="#marker6" position="0 0 0" material="transparent: true" scale="3.5 3.5 1"></a-plane>
+            <a-gltf-model src="#model6" position="0 0 0.1" scale="0.005 0.005 0.005"></a-gltf-model>
+        </a-entity>
+    </a-scene>
+
+    <script>
+    function enableCamera() {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
+                .then(function(stream) {
+                    console.log("✅ Přístup k zadní kameře povolen!");
+                })
+                .catch(function(error) {
+                    console.error("❌ Chyba přístupu k zadní kameře: ", error);
+                });
+        } else {
+            console.error("❌ Tento prohlížeč nepodporuje přístup k médiím.");
+        }
+    }
+
+    window.onload = function() {
+        enableCamera(); 
+
+        // Spustí MindAR po načtení scény
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+            document.querySelector('[mindar-image]').components['mindar-image-system'].start();
+        });
+    };
+    </script>
+</body>
+</html>
