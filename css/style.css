@@ -70,8 +70,9 @@ h1 {
 
 /* --- Tlačítka --- */
 .menu-button {
-    display: inline-block; /* Nebo 'block' pokud chcete, aby zabíraly celou šířku */
-    /* width: 250px; /* Pevná šířka, pokud chcete */ */
+    display: inline-block;
+    width: 250px; /* Pevná šířka 300px */
+    height: 80px;
     padding: 30px 60px; /* Více paddingu do stran */
     margin: 12px;
     font-size: 30px;
