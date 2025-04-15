@@ -37,7 +37,6 @@ body {
 .app-header {
     text-align: center;
     padding: 20px 15px;
-    border-bottom: 1px solid #ccc;
     /* background-color: rgba(255, 255, 255, 0.8); /* Lehce průhledné pozadí, pokud máte obrázek */ */
     /* border-bottom: 1px solid #ccc; /* Jemná linka oddělující hlavičku */ */
 }
@@ -45,7 +44,7 @@ body {
 #app-logo {
     max-width: 300px; /* Maximální šířka loga */
     height: auto; /* Zachová poměr stran */
-    margin-bottom: 15px; /* Odsazení pod logem */
+    margin-bottom: 25px; /* Odsazení pod logem */
     display: block; /* Umožní centrování pomocí margin: auto */
     margin-left: auto;
     margin-right: auto;
