@@ -42,7 +42,7 @@ body {
 }
 
 #app-logo {
-    max-width: 220px; /* Maximální šířka loga */
+    max-width: 300px; /* Maximální šířka loga */
     height: auto; /* Zachová poměr stran */
     margin-bottom: 15px; /* Odsazení pod logem */
     display: block; /* Umožní centrování pomocí margin: auto */
@@ -54,7 +54,7 @@ h1 {
     color: #2c3e50; /* Tmavší, méně ostrá barva */
     margin-top: 0; /* Odstraní horní margin, už je v header paddingu */
     margin-bottom: 20px; /* Odsazení pod nadpisem */
-    font-weight: 500; /* Tučnější písmo pro nadpis */
+    font-weight: 400; /* Tučnější písmo pro nadpis */
 }
 
 /* --- Hlavní obsah (menu) --- */
@@ -71,7 +71,7 @@ h1 {
 .menu-button {
     display: inline-block; /* Nebo 'block' pokud chcete, aby zabíraly celou šířku */
     /* width: 250px; /* Pevná šířka, pokud chcete */ */
-    padding: 15px 35px; /* Více paddingu do stran */
+    padding: 25px 45px; /* Více paddingu do stran */
     margin: 12px;
     font-size: 18px;
     font-weight: 700; /* Tučnější text tlačítka */
