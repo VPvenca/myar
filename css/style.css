@@ -71,21 +71,23 @@ h1 {
 /* --- Tlačítka --- */
 .menu-button {
     display: inline-block;
-    width: 250px; /* Pevná šířka 300px */
-    height: 80px;
-    padding: 30px 60px; /* Více paddingu do stran */
+    width: 250px; /* Pevná šířka může zůstat, pokud chcete */
+    /* height: 60px;  <-- TOTO SMAŽTE NEBO ZAKOMENTUJTE */
+    padding: 15px 40px; /* Upravte padding, aby tlačítko vypadalo dobře (např. menší vertikální) */
     margin: 12px;
-    font-size: 30px;
-    font-weight: 700; /* Tučnější text tlačítka */
+    font-size: 25px; /* Možná budete chtít mírně zmenšit i písmo, pokud je 30px moc */
+    font-weight: 700;
     color: white;
-    background-color: #3498db; /* Jiný odstín modré */
+    background-color: #3498db;
     border: none;
-    border-radius: 8px; /* Více zakulacené rohy */
+    border-radius: 8px;
     text-decoration: none;
     text-align: center;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease; /* Přidána transition pro transform a shadow */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Jemný stín */
+    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    /* Přidáno pro lepší jistotu s výpočty velikosti: */
+    box-sizing: border-box;
 }
 
 .menu-button:hover {
