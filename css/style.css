@@ -1,0 +1,114 @@
+/* --- Základní reset a nastavení --- */
+* {
+    box-sizing: border-box; /* Lepší práce s paddingem a borderem */
+}
+
+html {
+    height: 100%; /* Zajistí, že html a body zaberou celou výšku */
+}
+
+body {
+    font-family: 'Roboto', sans-serif; /* Příklad Google Font */
+    margin: 0;
+    padding: 0;
+    min-height: 100vh; /* Zajistí, že body zabere minimálně celou výšku viewportu */
+    display: flex; /* Umožní flexbox layout pro page-wrapper */
+    flex-direction: column; /* Obsah půjde pod sebe */
+    background-color: #e9eef2; /* Základní světlejší barva pozadí */
+
+    /* --- Možnost 1: Pozadí s obrázkem --- */
+    /* background-image: url('images/pozadi.jpg'); */
+    /* background-size: cover; */
+    /* background-position: center center; */
+    /* background-attachment: fixed; */ /* Volitelné: fixuje pozadí při scrollování */
+
+    /* --- Možnost 2: Pozadí s gradientem --- */
+    /* background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); */
+}
+
+.page-wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Wrapper zabere celou výšku */
+    width: 100%;
+}
+
+/* --- Hlavička s logem a titulkem --- */
+.app-header {
+    text-align: center;
+    padding: 20px 15px;
+    /* background-color: rgba(255, 255, 255, 0.8); /* Lehce průhledné pozadí, pokud máte obrázek */ */
+    /* border-bottom: 1px solid #ccc; /* Jemná linka oddělující hlavičku */ */
+}
+
+#app-logo {
+    max-width: 150px; /* Maximální šířka loga */
+    height: auto; /* Zachová poměr stran */
+    margin-bottom: 15px; /* Odsazení pod logem */
+    display: block; /* Umožní centrování pomocí margin: auto */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+h1 {
+    color: #2c3e50; /* Tmavší, méně ostrá barva */
+    margin-top: 0; /* Odstraní horní margin, už je v header paddingu */
+    margin-bottom: 20px; /* Odsazení pod nadpisem */
+    font-weight: 700; /* Tučnější písmo pro nadpis */
+}
+
+/* --- Hlavní obsah (menu) --- */
+.menu-content {
+    flex-grow: 1; /* Tento kontejner se roztáhne a odsune patičku dolů */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Vertikální centrování tlačítek */
+    align-items: center; /* Horizontální centrování tlačítek */
+    padding: 20px;
+}
+
+/* --- Tlačítka --- */
+.menu-button {
+    display: inline-block; /* Nebo 'block' pokud chcete, aby zabíraly celou šířku */
+    /* width: 250px; /* Pevná šířka, pokud chcete */ */
+    padding: 15px 35px; /* Více paddingu do stran */
+    margin: 12px;
+    font-size: 18px;
+    font-weight: 700; /* Tučnější text tlačítka */
+    color: white;
+    background-color: #3498db; /* Jiný odstín modré */
+    border: none;
+    border-radius: 8px; /* Více zakulacené rohy */
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease; /* Přidána transition pro transform a shadow */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Jemný stín */
+}
+
+.menu-button:hover {
+    background-color: #2980b9; /* Tmavší modrá při najetí */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Výraznější stín při najetí */
+    transform: translateY(-2px); /* Lehké posunutí nahoru */
+}
+
+.menu-button:active {
+    background-color: #1f618d; /* Ještě tmavší při kliknutí */
+    transform: translateY(0px); /* Vrátí se zpět */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Menší stín při kliknutí */
+}
+
+/* --- Patička --- */
+.app-footer {
+    text-align: center;
+    padding: 15px;
+    margin-top: auto; /* Přilepí se dolů díky flex-grow na .menu-content */
+    background-color: #dcdcdc; /* Lehce odlišené pozadí patičky */
+    color: #555; /* Tmavě šedá barva textu */
+    font-size: 14px;
+    /* border-top: 1px solid #ccc; /* Jemná linka nad patičkou */ */
+}
+
+.app-footer p {
+    margin: 0; /* Odstraní výchozí margin odstavce */
+}
