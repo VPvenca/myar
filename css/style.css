@@ -44,7 +44,7 @@ body {
 #app-logo {
     max-width: 300px; /* Maximální šířka loga */
     height: auto; /* Zachová poměr stran */
-    margin-bottom: 25px; /* Odsazení pod logem */
+    margin-bottom: 30px; /* Odsazení pod logem */
     display: block; /* Umožní centrování pomocí margin: auto */
     margin-left: auto;
     margin-right: auto;
@@ -74,7 +74,7 @@ h1 {
     /* width: 250px; /* Pevná šířka, pokud chcete */ */
     padding: 25px 45px; /* Více paddingu do stran */
     margin: 12px;
-    font-size: 18px;
+    font-size: 25px;
     font-weight: 700; /* Tučnější text tlačítka */
     color: white;
     background-color: #3498db; /* Jiný odstín modré */
