@@ -31,6 +31,7 @@ body {
     flex-direction: column;
     min-height: 100vh; /* Wrapper zabere celou výšku */
     width: 100%;
+    border-bottom: 1px solid #ccc;
 }
 
 /* --- Hlavička s logem a titulkem --- */
