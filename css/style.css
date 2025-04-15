@@ -15,7 +15,7 @@ body {
     display: flex; /* Umožní flexbox layout pro page-wrapper */
     flex-direction: column; /* Obsah půjde pod sebe */
     background-color: #e9eef2; /* Základní světlejší barva pozadí */
-    background: linear-gradient(135deg, #a8d8ff 0%, #9face6 100%);
+    background: linear-gradient(135deg, #a8d8ff 0%, #3c8ce7 100%);
     /* --- Možnost 1: Pozadí s obrázkem --- */
     /* background-image: url('images/pozadi.jpg'); */
     /* background-size: cover; */
