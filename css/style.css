@@ -15,7 +15,7 @@ body {
     display: flex; /* Umožní flexbox layout pro page-wrapper */
     flex-direction: column; /* Obsah půjde pod sebe */
     background-color: #e9eef2; /* Základní světlejší barva pozadí */
-    background: linear-gradient(135deg, #a8d8ff 0%, #3c8ce7 100%);
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     /* --- Možnost 1: Pozadí s obrázkem --- */
     /* background-image: url('images/pozadi.jpg'); */
     /* background-size: cover; */
@@ -31,13 +31,13 @@ body {
     flex-direction: column;
     min-height: 100vh; /* Wrapper zabere celou výšku */
     width: 100%;
-    border-bottom: 1px solid #ccc;
 }
 
 /* --- Hlavička s logem a titulkem --- */
 .app-header {
     text-align: center;
     padding: 20px 15px;
+    border-bottom: 1px solid #ccc;
     /* background-color: rgba(255, 255, 255, 0.8); /* Lehce průhledné pozadí, pokud máte obrázek */ */
     /* border-bottom: 1px solid #ccc; /* Jemná linka oddělující hlavičku */ */
 }
