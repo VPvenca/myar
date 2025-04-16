@@ -101,7 +101,15 @@ h1 {
     transform: translateY(0px); /* Vrátí se zpět */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Menší stín při kliknutí */
 }
+/* tlačítko zpět */
+.back-button {
+    background-color: #6c757d; /* Například šedá barva */
+    margin-top: 20px; /* Přidá trochu více místa nad tlačítkem zpět */
+}
 
+.back-button:hover {
+    background-color: #5a6268;
+}
 /* --- Patička --- */
 .app-footer {
     text-align: center;
