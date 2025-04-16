@@ -116,3 +116,87 @@ h1 {
 .app-footer p {
     margin: 0; /* Odstraní výchozí margin odstavce */
 }
+/* --- Styly pro tlačítko nápovědy --- */
+.help-icon-button {
+    position: fixed; /* Fixní pozice vůči oknu prohlížeče */
+    bottom: 20px;    /* 20px od dolního okraje */
+    right: 20px;     /* 20px od pravého okraje */
+    width: 50px;     /* Šířka */
+    height: 50px;    /* Výška */
+    background-color: #5bc0de; /* Barva pozadí (např. světle modrá) */
+    color: white;           /* Barva textu (otazníku) */
+    border: none;
+    border-radius: 50%; /* Udělá tlačítko kulaté */
+    font-size: 24px;    /* Velikost otazníku */
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Jemný stín */
+    z-index: 999; /* Zajistí, že je nad většinou obsahu, ale pod modálním oknem */
+    display: flex;       /* Pro snadné centrování obsahu (otazníku) */
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.help-icon-button:hover {
+    background-color: #31b0d5; /* Tmavší při najetí */
+    transform: scale(1.1);    /* Lehce zvětšit při najetí */
+}
+
+/* --- Styly pro modální okno (overlay a obsah) --- */
+.modal-overlay {
+    display: none; /* ** Důležité: Výchozí stav - skryto ** */
+    position: fixed; /* Fixní pozice, překryje vše */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Poloprůhledné černé pozadí */
+    z-index: 1000; /* Vyšší než tlačítko nápovědy */
+    justify-content: center; /* Centrování obsahu horizontálně */
+    align-items: center;     /* Centrování obsahu vertikálně */
+    padding: 20px; /* Odsazení pro menší obrazovky */
+    box-sizing: border-box;
+}
+
+/* Třída pro zobrazení modálního okna (přidána/odebrána pomocí JS) */
+.modal-overlay.visible {
+    display: flex; /* Změníme na flex pro zobrazení a centrování */
+}
+
+.modal-content {
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    max-width: 600px; /* Maximální šířka okna nápovědy */
+    width: 90%;       /* Šířka na menších zařízeních */
+    text-align: left; /* Zarovnání textu v nápovědě */
+    max-height: 80vh; /* Maximální výška, aby se vešlo na obrazovku */
+    overflow-y: auto; /* Povolit rolování, pokud je obsah delší */
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.modal-content p {
+    color: #555;
+    line-height: 1.6; /* Lepší čitelnost delšího textu */
+    margin-bottom: 15px;
+}
+
+.modal-close-button {
+    display: block; /* Aby zabralo celou šířku a šlo snadno vycentrovat */
+    margin: 25px auto 0 auto; /* Odsazení nahoře, automatické strany pro centrování */
+    /* Můžete použít specifické styly pro toto tlačítko nebo zdědit z .menu-button */
+    background-color: #6c757d; /* Např. šedá barva */
+}
+
+.modal-close-button:hover {
+     background-color: #5a6268;
+}
