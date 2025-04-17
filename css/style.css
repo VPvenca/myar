@@ -177,6 +177,61 @@ h1 {
         opacity: 1; /* Můžete nechat plnou opacitu pro výraznější červenou */
     }
 }
+/* --- Styly pro ios instal hlášku --- */
+.ios-install-prompt {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: rgba(50, 50, 50, 0.9); /* Tmavší poloprůhledné pozadí */
+  color: white;
+  padding: 15px 20px 20px 20px;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+  z-index: 1001;
+  font-size: 14px;
+  text-align: center;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  transition: transform 0.4s ease-out;
+  transform: translateY(100%); /* Začíná schované pod obrazovkou */
+}
+
+.ios-install-prompt.visible {
+   transform: translateY(0); /* Vysune se nahoru */
+}
+
+.ios-install-prompt p {
+  margin: 5px 0 10px 0;
+  line-height: 1.4;
+}
+
+.ios-install-prompt .inline-icon {
+  height: 20px; /* Velikost ikonek v textu */
+  vertical-align: middle; /* Zarovnání ikonek s textem */
+  margin: 0 2px;
+}
+
+.ios-install-prompt .close-button {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.ios-install-prompt .close-button:hover {
+    color: white;
+}
+
+/* Skrytí pomocí třídy hidden */
+.ios-install-prompt.hidden {
+  display: none; /* Nebo jiný způsob skrytí */
+}
 /* --- Styly pro modální okno (overlay a obsah) --- */
 .modal-overlay {
     display: none; /* ** Důležité: Výchozí stav - skryto ** */
