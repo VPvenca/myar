@@ -45,5 +45,27 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.error("Některý z elementů pro nápovědu nebyl nalezen!");
     }
+    // --- Registrace Service Workeru ---
+
+// Zkontrolujeme, zda prohlížeč podporuje Service Worker
+if ('serviceWorker' in navigator) {
+  // Počkáme, až se stránka úplně načte, než zaregistrujeme SW
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js') // Cesta k vašemu sw.js
+      .then(registration => {
+        console.log('Service Worker úspěšně zaregistrován. Scope:', registration.scope);
+      })
+      .catch(error => {
+        console.error('Registrace Service Workeru selhala:', error);
+      });
+  });
+} else {
+  console.log('Service Worker není podporován tímto prohlížečem.');
+}
+
+// --- Konec Registrace Service Workeru ---
+
+// Zde pokračuje váš ostatní kód (listenery tlačítek, MindAR logika atd.)
+// ...
 
 });
