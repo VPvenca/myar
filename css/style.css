@@ -151,7 +151,20 @@ h1 {
     background-color: #31b0d5; /* Tmavší při najetí */
     transform: scale(1.1);    /* Lehce zvětšit při najetí */
 }
-
+@keyframes blink-attention {
+    0%, 100% {
+        /* Výchozí stav */
+        transform: scale(1);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Váš původní stín */
+        opacity: 1;
+    }
+    50% {
+        /* Stav "bliknutí" - zvýraznění */
+        transform: scale(1.15); /* Lehce zvětšíme */
+        box-shadow: 0 4px 15px rgba(88, 191, 222, 0.5); /* Výraznější stín, možná v barvě tlačítka */
+        opacity: 0.8; /* Mírně průhlednější pro efekt bliknutí */
+    }
+}
 /* --- Styly pro modální okno (overlay a obsah) --- */
 .modal-overlay {
     display: none; /* ** Důležité: Výchozí stav - skryto ** */
