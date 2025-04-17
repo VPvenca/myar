@@ -1,0 +1,25 @@
+{
+  "name": "AugView AR Aplikace", // Plný název aplikace
+  "short_name": "AugView",           // Krátký název (např. pod ikonou)
+  "description": "Webová aplikace pro zobrazení AR scén.", // Popis aplikace
+  "start_url": "/index.html",       // Stránka, která se otevře po spuštění (může být i "/")
+  "display": "standalone",          // Režim zobrazení: standalone = jako aplikace bez UI prohlížeče
+  "orientation": "portrait",        // Vynucení orientace na výšku
+  "background_color": "#ffffff",    // Barva pozadí při načítání (splash screen)
+  "theme_color": "#007bff",         // Barva motivu (může ovlivnit barvu záhlaví okna/stavového řádku)
+  "icons": [
+    // Zde přidáme ikony v Kroku 6
+    {
+      "src": "/img/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable" // 'maskable' pomůže ikoně lépe zapadnout na různých OS
+    },
+    {
+      "src": "/img/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
