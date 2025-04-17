@@ -126,30 +126,40 @@ h1 {
 }
 /* --- Styly pro tlačítko nápovědy --- */
 .help-icon-button {
-    position: fixed; /* Fixní pozice vůči oknu prohlížeče */
-    bottom: 20px;    /* 20px od dolního okraje */
-    right: 20px;     /* 20px od pravého okraje */
-    width: 50px;     /* Šířka */
-    height: 50px;    /* Výška */
-    background-color: #5bc0de; /* Barva pozadí (např. světle modrá) */
-    color: white;           /* Barva textu (otazníku) */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: #5bc0de;
+    color: white;
     border: none;
-    border-radius: 50%; /* Udělá tlačítko kulaté */
-    font-size: 24px;    /* Velikost otazníku */
+    border-radius: 50%;
+    font-size: 24px;
     font-weight: bold;
     text-align: center;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Jemný stín */
-    z-index: 999; /* Zajistí, že je nad většinou obsahu, ale pod modálním oknem */
-    display: flex;       /* Pro snadné centrování obsahu (otazníku) */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    display: flex;
     justify-content: center;
     align-items: center;
     transition: background-color 0.3s ease, transform 0.2s ease;
+
+    /* --- Nové vlastnosti pro animaci --- */
+    animation-name: blink-attention;         /* Název keyframes animace */
+    animation-duration: 1.2s;                /* Jak dlouho trvá jeden cyklus bliknutí (v sekundách) */
+    animation-timing-function: ease-in-out;  /* Způsob přechodu animace */
+    animation-iteration-count: 3;            /* Kolikrát se má animace opakovat (např. 3x blikne) */
+    animation-delay: 0.5s;                   /* Malá prodleva po načtení stránky, než začne blikat */
+    /* --- Konec nových vlastností --- */
 }
 
 .help-icon-button:hover {
-    background-color: #31b0d5; /* Tmavší při najetí */
-    transform: scale(1.1);    /* Lehce zvětšit při najetí */
+    background-color: #31b0d5;
+    transform: scale(1.1);
+    /* Důležité: Zastavíme blikající animaci, když na ni najedeme myší */
+    animation-name: none;
 }
 @keyframes blink-attention {
     0%, 100% {
