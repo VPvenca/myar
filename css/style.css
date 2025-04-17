@@ -163,16 +163,18 @@ h1 {
 }
 @keyframes blink-attention {
     0%, 100% {
-        /* Výchozí stav */
+        /* Výchozí stav - Důležité je zde mít původní barvu pozadí */
         transform: scale(1);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Váš původní stín */
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        background-color: #5bc0de; /* Vaše původní modrá barva */
         opacity: 1;
     }
     50% {
-        /* Stav "bliknutí" - zvýraznění */
-        transform: scale(1.15); /* Lehce zvětšíme */
-        box-shadow: 0 4px 15px rgba(88, 191, 222, 0.5); /* Výraznější stín, možná v barvě tlačítka */
-        opacity: 0.8; /* Mírně průhlednější pro efekt bliknutí */
+        /* Stav "bliknutí" - změna na červenou */
+        transform: scale(1.1); /* Můžete lehce zmenšit scale pro méně pohybu */
+        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4); /* Červený stín */
+        background-color: #e74c3c; /* <<< ZDE JE ZMĚNA NA ČERVENOU */
+        opacity: 1; /* Můžete nechat plnou opacitu pro výraznější červenou */
     }
 }
 /* --- Styly pro modální okno (overlay a obsah) --- */
