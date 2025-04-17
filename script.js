@@ -45,6 +45,70 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.error("Některý z elementů pro nápovědu nebyl nalezen!");
     }
+    // --- Logika pro zobrazení iOS instalačního návodu ---
+
+function isIOS() {
+  // Jednoduchá detekce (může být v budoucnu méně spolehlivá)
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  // Nebo robustnější:
+  // return [
+  //   'iPad Simulator',
+  //   'iPhone Simulator',
+  //   'iPod Simulator',
+  //   'iPad',
+  //   'iPhone',
+  //   'iPod'
+  // ].includes(navigator.platform)
+  // // iPad na iOS 13+ může hlásit MacIntel, přidáme další check
+  // || (navigator.userAgent.includes("Mac") && "ontouchend" in document)
+}
+
+// Zjistíme, zda aplikace běží v režimu standalone (nainstalovaná PWA)
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+const iosInstallPrompt = document.getElementById('ios-install-prompt');
+const closeIosPromptButton = document.getElementById('close-ios-prompt');
+
+if (iosInstallPrompt && closeIosPromptButton) {
+    // Zobrazíme návod pouze pokud je to iOS A aplikace NEběží jako nainstalovaná
+    if (isIOS() && !isStandalone()) {
+        console.log("Detekován iOS, zobrazuji instalační návod.");
+        // Po malé prodlevě zobrazíme banner (dáme uživateli čas se zorientovat)
+        setTimeout(() => {
+             iosInstallPrompt.classList.remove('hidden'); // Odstraní display:none
+             // Pokud používáte animaci vysunutí:
+             requestAnimationFrame(() => { // Zajistí, že prohlížeč stihne aplikovat display:block
+                iosInstallPrompt.classList.add('visible');
+             });
+        }, 1500); // Zobrazí po 1.5 sekundách
+    } else {
+        iosInstallPrompt.classList.add('hidden'); // Ujistíme se, že je skrytý
+    }
+
+    // Funkce pro zavření návodu
+    closeIosPromptButton.addEventListener('click', () => {
+        iosInstallPrompt.classList.remove('visible'); // Zasune banner
+        // Můžete přidat i 'hidden' po dokončení animace, pokud nepoužíváte display:none
+        setTimeout(() => {
+             iosInstallPrompt.classList.add('hidden'); // Skryje úplně
+        }, 400); // Musí odpovídat délce transition v CSS
+
+        // Můžete si uložit do localStorage, že uživatel banner zavřel,
+        // aby se nezobrazoval při každé návštěvě session
+        // localStorage.setItem('iosInstallPromptDismissed', 'true');
+        // Pak byste na začátku kontrolovali:
+        // if (isIOS() && !isStandalone() && !localStorage.getItem('iosInstallPromptDismissed')) { ... }
+    });
+
+} else {
+     console.warn("Element pro iOS instalační návod (#ios-install-prompt) nebo jeho zavírací tlačítko nebylo nalezeno.");
+}
+
+// --- Konec logiky pro iOS návod ---
+
+
     // --- Registrace Service Workeru ---
 
 // Zkontrolujeme, zda prohlížeč podporuje Service Worker
