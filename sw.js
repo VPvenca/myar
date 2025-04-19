@@ -6,13 +6,12 @@ const CACHE_NAME = 'ar-app-cache-v1'; // Název cache (změňte 'v1' při aktual
 const urlsToCache = [
   '/', // Často alias pro index.html
   '/index.html',
-  '/style.css',
+  '/css/style.css',
   '/script.js',
-  '/images/logo.png', // Přidejte vaše logo
+  '/img/logo.png', // Přidejte vaše logo
   // Přidejte další klíčové soubory, které tvoří základní UI
   // Např. soubory podmenu, pokud jsou důležité pro offline start:
-  '/podmenu_vyukove.html',
-  '/podmenu_zabavne.html',
+  '/kyjov.html',
   // POZOR: Velké soubory (videa, .mind) zde raději NECACHUJTE automaticky!
   // Ty se načtou ze sítě, když budou potřeba.
 ];
