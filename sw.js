@@ -8,7 +8,8 @@ const urlsToCache = [
   '/index.html',
   '/css/style.css',
   '/script.js',
-  '/img/logo.png', // Přidejte vaše logo
+  '/sw.js',
+  '/img/augview.png', // Přidejte vaše logo
   // Přidejte další klíčové soubory, které tvoří základní UI
   // Např. soubory podmenu, pokud jsou důležité pro offline start:
   '/kyjov.html',
