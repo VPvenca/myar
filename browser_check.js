@@ -1,6 +1,4 @@
-<!-- ======================================================= -->
-    <!-- ZDE VLOŽTE VÁŠ DETEKČNÍ JAVASCRIPT                -->
-    <!-- ======================================================= -->
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const ua = navigator.userAgent || navigator.vendor || window.opera;
@@ -51,6 +49,4 @@
             // Případně zde můžete skrýt nějaký načítací indikátor, pokud jej používáte.
         }
     </script>
-    <!-- ======================================================= -->
-    <!-- KONEC DETEKČNÍHO JAVASCRIPTU                        -->
-    <!-- ======================================================= -->
+  
