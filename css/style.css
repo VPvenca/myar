@@ -110,7 +110,7 @@ h1 {
     width: 150px;           /* Výrazně menší šířka pro ikony */
     min-height: 120px;      /* Minimální výška pro konzistenci */
     padding: 15px 10px;     /* Menší horizontální padding */
-    margin: 8px;            /* Menší margin */
+    margin: 4px 8px;            /* Menší margin */
     background-color: #f8f9fa; /* Světlejší pozadí pro ikony */
     color: #343a40;         /* Tmavší text */
     border: 1px solid #dee2e6; /* Jemný okraj */
