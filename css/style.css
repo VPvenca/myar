@@ -134,11 +134,21 @@ h1 {
 
 /* Upravíme kontejner na home page, aby se tlačítka zobrazovala vedle sebe */
 .home-page .menu-content {
+    flex-grow: 1;
+    display: flex;
     flex-direction: row; /* Ikony vedle sebe */
-    flex-wrap: wrap;     /* Zalamování na menších obrazovkách */
-    justify-content: center; /* Centrování řádků tlačítek */
-    align-items: center; /* Vertikální zarovnání tlačítek na řádku */
-    /* overflow-y: auto; stále platí pro případ, že by se ani zalomený obsah nevešel */
+    flex-wrap: wrap;     /* Zalamování */
+    justify-content: center; /* Centrování řádků tlačítek horizontálně */
+    align-items: center; /* Vertikální zarovnání tlačítek V RÁMCI řádku */
+    /* === PŘIDAT NEBO UPRAVIT TOTO === */
+    align-content: flex-start; /* Zarovná všechny řádky nahoru v kontejneru */
+    /* Další možnosti k vyzkoušení: */
+    /* align-content: center; */ /* Vycentruje blok řádků vertikálně */
+    /* align-content: space-between; */ /* Rozmístí řádky s max. mezerou */
+    /* align-content: space-around; */ /* Rozmístí řádky s mezerami kolem */
+    /* ============================== */
+    padding: 15px;
+    overflow-y: auto;
 }
 
 
