@@ -46,11 +46,11 @@ function displayInAppBrowserWarning() {
     warningDiv.innerHTML = `
         <div style="background: white; color: black; padding: 30px; border-radius: 10px; max-width: 90%;">
             <h2>Problém s prohlížečem</h2>
-            <p>Zdá se, že otevíráte aplikaci ve vestavěném prohlížeči Messengeru (nebo jiné aplikace), který nemusí správně podporovat rozšířenou realitu.</p>
-            <p><strong>Prosím, otevřete tento odkaz ve Vašem hlavním internetovém prohlížeči (např. Google Chrome).</strong></p>
+            <p>Zdá se, že otevíráte aplikaci ve vestavěném prohlížeči Messengeru, který nemusí správně podporovat rozšířenou realitu.</p>
+            <p><strong>Prosím, otevřete tento odkaz ve Vašem hlavním internetovém prohlížeči (např. Google Chrome). Obvykle tři tečky ⋮ vpravo nahoře, zvolit "Otevřít v prohlížeči".</strong></p>
+            <p style="margin-top: 25px; font-size: 12px; color: grey;">Pro zkušenější uživatele: Stiskněte tlačítko "Kopírovat odkaz". Poté odkaz vložte do adresního řádku prohlížeče.</p>
             <button id="copyLinkBtn" style="background-color: #4CAF50; color: white; padding: 12px 25px; border: none; border-radius: 5px; margin-top: 20px; font-size: 16px; cursor: pointer;">Kopírovat odkaz</button>
-            <p style="margin-top: 15px; font-size: 14px;">Poté odkaz vložte do adresního řádku prohlížeče Chrome.</p>
-            <p style="margin-top: 25px; font-size: 12px; color: grey;">Pro zkušenější uživatele: Můžete také zkusit v menu (obvykle tři tečky ⋮ vpravo nahoře) zvolit "Otevřít v prohlížeči".</p>
+            
         </div>
     `;
     document.body.appendChild(warningDiv);
