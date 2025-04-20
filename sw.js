@@ -2,7 +2,7 @@
 console.log('Service Worker soubor načten.');
 // Service Worker soubor
 
-const CACHE_NAME = 'ar-app-cache-v3'; // Název cache (změňte 'v1' při aktualizaci cache)
+const CACHE_NAME = 'ar-app-cache-v4'; // Název cache (změňte 'v1' při aktualizaci cache)
 const urlsToCache = [
   '/', // Často alias pro index.html
   '/index.html',
@@ -13,6 +13,7 @@ const urlsToCache = [
   // Přidejte další klíčové soubory, které tvoří základní UI
   // Např. soubory podmenu, pokud jsou důležité pro offline start:
   '/kyjov.html',
+  '/info.html',
   // POZOR: Velké soubory (videa, .mind) zde raději NECACHUJTE automaticky!
   // Ty se načtou ze sítě, když budou potřeba.
 ];
