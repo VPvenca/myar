@@ -293,3 +293,48 @@ h1 {
     transform: translateY(0px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+/* --- Styly pro textový blok na podstránkách --- */
+
+.text-content-block {
+    background-color: rgba(255, 255, 255, 0.7); /* Lehce průhledné bílé pozadí pro lepší kontrast */
+    padding: 20px 25px;         /* Vnitřní odsazení textového bloku */
+    border-radius: 8px;         /* Zaoblené rohy */
+    margin-bottom: 30px;        /* Odsazení pod textovým blokem (před tlačítkem Zpět) */
+    width: 90%;                 /* Šířka bloku (v procentech pro responzivitu) */
+    max-width: 700px;           /* Maximální šířka na velkých obrazovkách (lepší čitelnost) */
+    text-align: left;           /* Zarovnání textu doleva (lepší pro čtení delšího textu) */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Jemný stín */
+    /* display: block; - Není nutné, div je blokový element */
+    /* margin-left: auto; margin-right: auto; - Není nutné, rodič .menu-content centruje pomocí align-items: center */
+}
+
+.text-content-block h2 {
+    color: #2c3e50;             /* Barva nadpisu */
+    margin-top: 0;              /* Odstranit horní okraj prvního nadpisu */
+    margin-bottom: 15px;        /* Okraj pod nadpisem */
+    text-align: center;         /* Nadpis můžeme vycentrovat */
+    font-size: 1.4em;           /* Velikost nadpisu */
+}
+
+.text-content-block p,
+.text-content-block li {
+    color: #333;                /* Barva textu v odstavcích a seznamu */
+    font-size: 16px;            /* Základní velikost písma pro dobrou čitelnost na mobilu */
+    /* Můžete použít i 1em nebo 1.1em */
+    line-height: 1.6;           /* Výška řádku pro lepší čitelnost */
+    margin-bottom: 12px;        /* Mezera mezi odstavci/položkami seznamu */
+}
+
+.text-content-block ul {
+    padding-left: 25px;         /* Odsazení seznamu zleva */
+    margin-top: 5px;            /* Menší mezera nad seznamem */
+}
+
+.text-content-block li::marker {
+    color: #3498db;             /* Barva odrážek (pokud chcete) */
+}
+
+/* Zajistíme, aby tlačítko Zpět mělo dostatečný prostor a bylo jasně oddělené */
+.menu-content .back-button {
+     margin-top: 10px; /* Upravte podle potřeby - může být menší, protože textový blok má margin-bottom */
+}
