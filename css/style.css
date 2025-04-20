@@ -147,7 +147,7 @@ h1 {
     /* align-content: space-between; */ /* Rozmístí řádky s max. mezerou */
     /* align-content: space-around; */ /* Rozmístí řádky s mezerami kolem */
     /* ============================== */
-    padding: 15px;
+    padding: 25px;
     overflow-y: auto;
 }
 
