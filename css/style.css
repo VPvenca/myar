@@ -1,6 +1,6 @@
-/* --- Základní reset a nastavení --- */
-* {
-    box-sizing: border-box; /* Lepší práce s paddingem a borderem */
+/* --- Základní preset a nastavení --- */
+* { /* Hvězdička jako selektor pro všechny elementy */
+    box-sizing: border-box;
 }
 
 html {
@@ -44,7 +44,7 @@ body {
 #app-logo {
     max-width: 300px; /* Maximální šířka loga */
     height: auto; /* Zachová poměr stran */
-    margin-bottom: 30px; /* Odsazení pod logem */
+    margin-bottom: 20px; /* Odsazení pod logem */
     display: block; /* Umožní centrování pomocí margin: auto */
     margin-left: auto;
     margin-right: auto;
@@ -53,7 +53,7 @@ body {
 h1 {
     color: #2c3e50; /* Tmavší, méně ostrá barva */
     margin-top: 0; /* Odstraní horní margin, už je v header paddingu */
-    margin-bottom: 30px; /* Odsazení pod nadpisem */
+    margin-bottom: 10px; /* Odsazení pod nadpisem */
     font-weight: 400; /* Normální tloušťka písma (pozor, 700 je tučné) */
     font-size: 26px; /* Přidáno: Nastaví velikost písma na 36 pixelů */
 }
@@ -70,11 +70,11 @@ h1 {
 /* --- Tlačítka --- */
 .menu-button {
     display: inline-block;
-    width: 250px; /* Pevná šířka může zůstat, pokud chcete */
+    width: 280px; /* Pevná šířka může zůstat, pokud chcete */
     /* height: 60px;  <-- TOTO SMAŽTE NEBO ZAKOMENTUJTE */
     padding: 15px 40px; /* Upravte padding, aby tlačítko vypadalo dobře (např. menší vertikální) */
     margin: 12px;
-    font-size: 25px; /* Možná budete chtít mírně zmenšit i písmo, pokud je 30px moc */
+    font-size: 20px; /* Možná budete chtít mírně zmenšit i písmo, pokud je 30px moc */
     font-weight: 700;
     color: white;
     background-color: #3498db;
