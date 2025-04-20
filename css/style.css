@@ -110,7 +110,6 @@ h1 {
     width: 150px;           /* Výrazně menší šířka pro ikony */
     min-height: 120px;      /* Minimální výška pro konzistenci */
     padding: 15px 10px;     /* Menší horizontální padding */
-    margin: 4px 8px;            /* Menší margin */
     background-color: #f8f9fa; /* Světlejší pozadí pro ikony */
     color: #343a40;         /* Tmavší text */
     border: 1px solid #dee2e6; /* Jemný okraj */
@@ -147,7 +146,9 @@ h1 {
     /* align-content: space-between; */ /* Rozmístí řádky s max. mezerou */
     /* align-content: space-around; */ /* Rozmístí řádky s mezerami kolem */
     /* ============================== */
-    padding: 25px;
+    gap: 10px 16px; /* 8px vertikální mezera, 16px horizontální mezera */
+                   /* Upravte hodnoty podle potřeby */
+    padding: 15px;
     overflow-y: auto;
 }
 
