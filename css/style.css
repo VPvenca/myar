@@ -4,77 +4,74 @@
 }
 
 html {
-    height: 100%; /* Zajistí, že html a body zaberou celou výšku */
+    height: 100%;
 }
 
 body {
-    font-family: 'Roboto', sans-serif; /* Příklad Google Font */
+    font-family: 'Roboto', sans-serif;
     margin: 0;
     padding: 0;
-    min-height: 100vh; /* Zajistí, že body zabere minimálně celou výšku viewportu */
-    display: flex; /* Umožní flexbox layout pro page-wrapper */
-    flex-direction: column; /* Obsah půjde pod sebe */
-    background-color: #e9eef2; /* Základní světlejší barva pozadí */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #e9eef2;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    /* --- Možnost 1: Pozadí s obrázkem --- */
-    /* background-image: url('images/pozadi.jpg'); */
-    /* background-size: cover; */
-    /* background-position: center center; */
-    /* background-attachment: fixed; */ /* Volitelné: fixuje pozadí při scrollování */
-
-    /* --- Možnost 2: Pozadí s gradientem --- */
-    /* background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); */
 }
+
+/* Přidejte třídu .home-page do <body> tagu v index.html */
+/* Pokud ji tam nemáte, tyto specifické styly nebudou fungovat */
 
 .page-wrapper {
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* Wrapper zabere celou výšku */
+    min-height: 100vh;
     width: 100%;
 }
 
-/* --- Hlavička s logem a titulkem --- */
+/* --- Hlavička --- */
 .app-header {
     text-align: center;
     padding: 20px 15px;
-    /* background-color: rgba(255, 255, 255, 0.8); /* Lehce průhledné pozadí, pokud máte obrázek */ */
-    /* border-bottom: 1px solid #ccc; /* Jemná linka oddělující hlavičku */ */
+    /* Zmenšíme padding, abychom získali trochu místa */
+    padding-bottom: 10px;
 }
 
 #app-logo {
-    max-width: 300px; /* Maximální šířka loga */
-    height: auto; /* Zachová poměr stran */
-    margin-bottom: 20px; /* Odsazení pod logem */
-    display: block; /* Umožní centrování pomocí margin: auto */
+    max-width: 250px; /* Trochu zmenšíme logo */
+    height: auto;
+    margin-bottom: 15px; /* Menší odsazení */
+    display: block;
     margin-left: auto;
     margin-right: auto;
 }
 
 h1 {
-    color: #2c3e50; /* Tmavší, méně ostrá barva */
-    margin-top: 0; /* Odstraní horní margin, už je v header paddingu */
-    margin-bottom: 10px; /* Odsazení pod nadpisem */
-    font-weight: 400; /* Normální tloušťka písma (pozor, 700 je tučné) */
-    font-size: 26px; /* Přidáno: Nastaví velikost písma na 36 pixelů */
+    color: #2c3e50;
+    margin-top: 0;
+    margin-bottom: 15px; /* Menší odsazení */
+    font-weight: 400;
+    font-size: 24px; /* Trochu menší nadpis */
 }
 
 /* --- Hlavní obsah (menu) --- */
 .menu-content {
-    flex-grow: 1; /* Tento kontejner se roztáhne a odsune patičku dolů */
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Horizontální centrování tlačítek */
-    padding: 20px;
+    align-items: center;
+    padding: 15px; /* Mírně zmenšený padding */
+    /* === KLÍČOVÁ ÚPRAVA PRO PŘETÉKÁNÍ === */
+    overflow-y: auto; /* Povolí vertikální rolování, POKUD je obsah vyšší než kontejner */
+    /* Zajistí, že obsah nepřeteče přes patičku, ale bude se rolovat uvnitř .menu-content */
 }
 
-/* --- Tlačítka --- */
+/* --- Obecné Tlačítka (pro ostatní stránky) --- */
 .menu-button {
-    display: inline-block;
-    width: 280px; /* Pevná šířka může zůstat, pokud chcete */
-    /* height: 60px;  <-- TOTO SMAŽTE NEBO ZAKOMENTUJTE */
-    padding: 15px 40px; /* Upravte padding, aby tlačítko vypadalo dobře (např. menší vertikální) */
-    margin: 12px;
-    font-size: 20px; /* Možná budete chtít mírně zmenšit i písmo, pokud je 30px moc */
+    display: inline-block; /* Nebo block, pokud mají být pod sebou na jiných str. */
+    width: 280px;
+    padding: 15px 20px; /* Upravený padding */
+    margin: 10px; /* Trochu menší margin */
+    font-size: 18px; /* Trochu menší písmo */
     font-weight: 700;
     color: white;
     background-color: #3498db;
@@ -85,44 +82,92 @@ h1 {
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    /* Přidáno pro lepší jistotu s výpočty velikosti: */
     box-sizing: border-box;
 }
 
+/* Hover a Active stavy zůstávají stejné */
 .menu-button:hover {
-    background-color: #2980b9; /* Tmavší modrá při najetí */
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Výraznější stín při najetí */
-    transform: translateY(-2px); /* Lehké posunutí nahoru */
+    background-color: #2980b9;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
 }
 
 .menu-button:active {
-    background-color: #1f618d; /* Ještě tmavší při kliknutí */
-    transform: translateY(0px); /* Vrátí se zpět */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Menší stín při kliknutí */
+    background-color: #1f618d;
+    transform: translateY(0px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-/* tlačítko zpět */
+
+/* --- SPECIFICKÉ STYLY PRO TLAČÍTKA S IKONOU NA HOME PAGE --- */
+/* Ujistěte se, že <body> v index.html má class="home-page" */
+
+.home-page .menu-button.icon-button {
+    /* Přepis obecných stylů + přidání flex layoutu */
+    display: flex;          /* Použijeme flex pro vnitřní layout */
+    flex-direction: column; /* Ikona nad textem */
+    align-items: center;    /* Horizontální centrování obsahu (ikony a textu) */
+    justify-content: center;/* Vertikální centrování (pokud je výška větší než obsah) */
+    width: 150px;           /* Výrazně menší šířka pro ikony */
+    min-height: 120px;      /* Minimální výška pro konzistenci */
+    padding: 15px 10px;     /* Menší horizontální padding */
+    margin: 8px;            /* Menší margin */
+    background-color: #f8f9fa; /* Světlejší pozadí pro ikony */
+    color: #343a40;         /* Tmavší text */
+    border: 1px solid #dee2e6; /* Jemný okraj */
+    /* Ostatní vlastnosti jako border-radius, transition, cursor, text-decoration jsou zděděny nebo mohou zůstat */
+}
+
+.home-page .icon-button .button-icon {
+    width: 48px;        /* Velikost ikony */
+    height: 48px;       /* Velikost ikony */
+    margin-bottom: 8px; /* Mezera pod ikonou */
+    object-fit: contain; /* Zachová poměr stran ikony */
+}
+
+.home-page .icon-button .button-text {
+    font-size: 14px;    /* Menší písmo pro text pod ikonou */
+    font-weight: 500;   /* Mírně tenčí než bold */
+    color: inherit;     /* Zdědí barvu z .icon-button */
+    text-align: center; /* Zajistí centrování textu */
+    display: block;     /* Zajistí, že zabere celou šířku a správně se centruje */
+}
+
+/* Upravíme kontejner na home page, aby se tlačítka zobrazovala vedle sebe */
+.home-page .menu-content {
+    flex-direction: row; /* Ikony vedle sebe */
+    flex-wrap: wrap;     /* Zalamování na menších obrazovkách */
+    justify-content: center; /* Centrování řádků tlačítek */
+    align-items: center; /* Vertikální zarovnání tlačítek na řádku */
+    /* overflow-y: auto; stále platí pro případ, že by se ani zalomený obsah nevešel */
+}
+
+
+/* --- Tlačítko zpět (pokud je potřeba) --- */
 .back-button {
-    background-color: #6c757d; /* Například šedá barva */
-    margin-top: 20px; /* Přidá trochu více místa nad tlačítkem zpět */
+    background-color: #6c757d;
+    margin-top: 20px;
 }
 
 .back-button:hover {
     background-color: #5a6268;
 }
+
 /* --- Patička --- */
 .app-footer {
     text-align: center;
-    padding: 15px;
-    margin-top: auto; /* Přilepí se dolů díky flex-grow na .menu-content */
-    background-color: #dcdcdc; /* Lehce odlišené pozadí patičky */
-    color: #555; /* Tmavě šedá barva textu */
-    font-size: 14px;
-    /* border-top: 1px solid #ccc; /* Jemná linka nad patičkou */ */
+    padding: 10px 15px; /* Menší padding patičky */
+    margin-top: auto;
+    background-color: #dee2e6; /* Mírně upravená barva pozadí */
+    color: #495057;
+    font-size: 12px; /* Menší písmo v patičce */
+    flex-shrink: 0; /* Zabrání patičce, aby se zmenšovala */
 }
 
 .app-footer p {
-    margin: 0; /* Odstraní výchozí margin odstavce */
+    margin: 0;
 }
+
+/* Styly pro tlačítko nápovědy a modální okno zůstávají stejné... */
 /* --- Styly pro tlačítko nápovědy --- */
 .help-icon-button {
     position: fixed;
@@ -144,58 +189,51 @@ h1 {
     justify-content: center;
     align-items: center;
     transition: background-color 0.3s ease, transform 0.2s ease;
-
-    /* --- Nové vlastnosti pro animaci --- */
-    animation-name: blink-attention;         /* Název keyframes animace */
-    animation-duration: 1.2s;                /* Jak dlouho trvá jeden cyklus bliknutí (v sekundách) */
-    animation-timing-function: ease-in-out;  /* Způsob přechodu animace */
-    animation-iteration-count: 3;            /* Kolikrát se má animace opakovat (např. 3x blikne) */
-    animation-delay: 0.5s;                   /* Malá prodleva po načtení stránky, než začne blikat */
-    /* --- Konec nových vlastností --- */
+    animation-name: blink-attention;
+    animation-duration: 1.2s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: 3;
+    animation-delay: 0.5s;
 }
 
 .help-icon-button:hover {
     background-color: #31b0d5;
     transform: scale(1.1);
-    /* Důležité: Zastavíme blikající animaci, když na ni najedeme myší */
     animation-name: none;
 }
 @keyframes blink-attention {
     0%, 100% {
-        /* Výchozí stav - Důležité je zde mít původní barvu pozadí */
         transform: scale(1);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        background-color: #5bc0de; /* Vaše původní modrá barva */
+        background-color: #5bc0de;
         opacity: 1;
     }
     50% {
-        /* Stav "bliknutí" - změna na červenou */
-        transform: scale(1.1); /* Můžete lehce zmenšit scale pro méně pohybu */
-        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4); /* Červený stín */
-        background-color: #e74c3c; /* <<< ZDE JE ZMĚNA NA ČERVENOU */
-        opacity: 1; /* Můžete nechat plnou opacitu pro výraznější červenou */
+        transform: scale(1.1);
+        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+        background-color: #e74c3c;
+        opacity: 1;
     }
 }
 
 /* --- Styly pro modální okno (overlay a obsah) --- */
 .modal-overlay {
-    display: none; /* ** Důležité: Výchozí stav - skryto ** */
-    position: fixed; /* Fixní pozice, překryje vše */
+    display: none;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6); /* Poloprůhledné černé pozadí */
-    z-index: 1000; /* Vyšší než tlačítko nápovědy */
-    justify-content: center; /* Centrování obsahu horizontálně */
-    align-items: center;     /* Centrování obsahu vertikálně */
-    padding: 20px; /* Odsazení pro menší obrazovky */
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
     box-sizing: border-box;
 }
 
-/* Třída pro zobrazení modálního okna (přidána/odebrána pomocí JS) */
 .modal-overlay.visible {
-    display: flex; /* Změníme na flex pro zobrazení a centrování */
+    display: flex;
 }
 
 .modal-content {
@@ -203,11 +241,11 @@ h1 {
     padding: 30px 40px;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    max-width: 600px; /* Maximální šířka okna nápovědy */
-    width: 90%;       /* Šířka na menších zařízeních */
-    text-align: left; /* Zarovnání textu v nápovědě */
-    max-height: 80vh; /* Maximální výška, aby se vešlo na obrazovku */
-    overflow-y: auto; /* Povolit rolování, pokud je obsah delší */
+    max-width: 600px;
+    width: 90%;
+    text-align: left;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .modal-content h2 {
@@ -219,15 +257,17 @@ h1 {
 
 .modal-content p {
     color: #555;
-    line-height: 1.6; /* Lepší čitelnost delšího textu */
+    line-height: 1.6;
     margin-bottom: 15px;
 }
 
 .modal-close-button {
-    display: block; /* Aby zabralo celou šířku a šlo snadno vycentrovat */
-    margin: 25px auto 0 auto; /* Odsazení nahoře, automatické strany pro centrování */
-    /* Můžete použít specifické styly pro toto tlačítko nebo zdědit z .menu-button */
-    background-color: #6c757d; /* Např. šedá barva */
+    display: block;
+    margin: 25px auto 0 auto;
+    background-color: #6c757d;
+    /* Zdědí ostatní styly z .menu-button */
+    padding: 10px 25px; /* Přizpůsobený padding */
+    font-size: 16px; /* Přizpůsobená velikost písma */
 }
 
 .modal-close-button:hover {
