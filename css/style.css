@@ -63,7 +63,6 @@ h1 {
     flex-grow: 1; /* Tento kontejner se roztáhne a odsune patičku dolů */
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Vertikální centrování tlačítek */
     align-items: center; /* Horizontální centrování tlačítek */
     padding: 20px;
 }
