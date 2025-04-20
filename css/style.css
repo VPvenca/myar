@@ -262,14 +262,34 @@ h1 {
 }
 
 .modal-close-button {
-    display: block;
-    margin: 25px auto 0 auto;
+    display: block;         /* Zůstává block pro margin: auto */
+    width: fit-content;     /* <<< KLÍČOVÁ ZMĚNA: Šířka se přizpůsobí obsahu (text + padding) */
+    /* Alternativně můžete zkusit width: auto;, často má podobný efekt */
+    min-width: 120px;       /* Volitelné: Pokud chcete minimální šířku */
+    margin: 25px auto 0 auto; /* Automatické okraje pro horizontální centrování */
+    padding: 10px 25px;
+    font-size: 16px;
+    font-weight: 700;      /* Přidáno - pravděpodobně zděděno z .menu-button */
+    color: white;          /* Přidáno - pravděpodobně zděděno z .menu-button */
     background-color: #6c757d;
-    /* Zdědí ostatní styly z .menu-button */
-    padding: 10px 25px; /* Přizpůsobený padding */
-    font-size: 16px; /* Přizpůsobená velikost písma */
+    border: none;          /* Přidáno - pravděpodobně zděděno z .menu-button */
+    border-radius: 8px;    /* Přidáno - pravděpodobně zděděno z .menu-button */
+    text-decoration: none; /* Přidáno - pravděpodobně zděděno z .menu-button */
+    text-align: center;    /* Důležité pro text uvnitř tlačítka */
+    cursor: pointer;       /* Přidáno - pravděpodobně zděděno z .menu-button */
+    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease; /* Zděděno */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Zděděno */
+    box-sizing: border-box; /* Zděděno */
 }
 
 .modal-close-button:hover {
      background-color: #5a6268;
+     /* Přidat případné další hover efekty z .menu-button, pokud je chcete */
+     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+     transform: translateY(-2px);
+}
+.modal-close-button:active {
+    background-color: #4e555b; /* Trochu tmavší pro active */
+    transform: translateY(0px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
