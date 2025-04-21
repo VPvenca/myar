@@ -63,6 +63,7 @@ h1 {
     /* === KLÍČOVÁ ÚPRAVA PRO PŘETÉKÁNÍ === */
     overflow-y: auto; /* Povolí vertikální rolování, POKUD je obsah vyšší než kontejner */
     /* Zajistí, že obsah nepřeteče přes patičku, ale bude se rolovat uvnitř .menu-content */
+    padding-bottom: 30px;
 }
 
 /* --- Obecné Tlačítka (pro ostatní stránky) --- */
