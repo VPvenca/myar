@@ -13,6 +13,39 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/img/apple_touch_icon_192x192.png">
+   <!-- === SKRIPT PRO KONTROLU PRVNÍ NÁVŠTĚVY === -->
+    <script>
+      (function() { // Použití IIFE pro izolaci scope
+        const visitedInfoFlagKey = 'arAppVisitedInfo_v1'; // Unikátní klíč pro localStorage
+
+        try {
+          // Zkusíme získat hodnotu z localStorage
+          const hasVisited = localStorage.getItem(visitedInfoFlagKey);
+
+          // Pokud hodnota neexistuje nebo není 'true' -> první návštěva
+          if (hasVisited !== 'true') {
+            console.log('První návštěva detekována. Přesměrovávám na info.html');
+
+            // Nastavíme flag, že uživatel stránku navštívil
+            localStorage.setItem(visitedInfoFlagKey, 'true');
+
+            // Přesměrujeme na info.html
+            // window.location.replace() je lepší než .href, protože nenahraje index.html do historie
+            // a uživatel se tlačítkem zpět nevrátí nechtěně na index.html před info.html
+            window.location.replace('info.html');
+          } else {
+            // Pokud flag existuje a je 'true' -> opakovaná návštěva
+            console.log('Opakovaná návštěva. Načítám index.html normálně.');
+            // Neděláme nic, stránka pokračuje v načítání
+          }
+        } catch (e) {
+          // Chyba při práci s localStorage (např. zakázané cookies/storage, plné úložiště)
+          console.error('Nepodařilo se pracovat s localStorage:', e);
+          // V případě chyby raději necháme načíst index.html, než abychom zablokovali aplikaci
+        }
+      })(); // Okamžité spuštění funkce
+    </script>
+    <!-- === KONEC SKRIPTU === -->
 </head>
 <body class="home-page">
 
