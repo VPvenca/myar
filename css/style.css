@@ -172,10 +172,12 @@ h1 {
     color: #495057;
     font-size: 12px; /* Menší písmo v patičce */
     flex-shrink: 0; /* Zabrání patičce, aby se zmenšovala */
+    border-top: 1px solid #adb5bd; /* Např. světle šedá linka */
 }
 
 .app-footer p {
     margin: 0;
+    
 }
 
 /* Styly pro tlačítko nápovědy a modální okno zůstávají stejné... */
