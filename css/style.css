@@ -14,8 +14,8 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background-color: #e9eef2;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    /*background-color: #e9eef2;*/
+    /*background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);*/
 }
 
 /* Přidejte třídu .home-page do <body> tagu v index.html */
