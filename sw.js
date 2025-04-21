@@ -12,7 +12,7 @@ const urlsToCache = [
   '/img/augview.png', // Přidejte vaše logo
   // Přidejte další klíčové soubory, které tvoří základní UI
   // Např. soubory podmenu, pokud jsou důležité pro offline start:
-  '/assets/kyjov/kyjov.html',
+  '/kyjov.html',
   '/info.html',
   // POZOR: Velké soubory (videa, .mind) zde raději NECACHUJTE automaticky!
   // Ty se načtou ze sítě, když budou potřeba.
