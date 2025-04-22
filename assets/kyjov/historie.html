@@ -31,7 +31,7 @@
 
 <!-- Váš stávající kód <a-scene> ... </a-scene> atd. -->
 
-    <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/targets.mind; 
+    <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/historie.mind; 
         uiLoading: yes; uiError: yes; 
         renderer: {colorManagement: true}; 
         physicallyCorrectLights: true; 
@@ -39,10 +39,17 @@
         device-orientation-permission-ui: {enabled: false}">
 
         <a-assets>
-            <video id="video1" src="/assets/kyjov/mp4/dinosauri.mp4" preload="auto" loop playsinline></video>
-            <video id="video2" src="/assets/kyjov/mp4/joklik_animate.mp4" preload="auto" loop playsinline></video>
-            <audio id="audio1" src="/assets/kyjov/mp3/rainforest.mp3" preload="auto"></audio>
-            <audio id="audio2" src="/assets/kyjov/mp3/joklik.mp3" preload="auto"></audio>
+            <video id="video1" src="/assets/kyjov/mp4/selim.mp4" preload="auto" loop playsinline></video>
+            <video id="video2" src="/assets/kyjov/mp4/terc_1.mp4" preload="auto" loop playsinline></video>
+            <video id="video3" src="/assets/kyjov/mp4/terc_2.mp4" preload="auto" loop playsinline></video>
+            <video id="video4" src="/assets/kyjov/mp4/terc_3.mp4" preload="auto" loop playsinline></video>
+            <video id="video5" src="/assets/kyjov/mp4/florian.mp4" preload="auto" loop playsinline></video>
+            
+            <audio id="audio1" src="/assets/kyjov/mp3/selim.mp3" preload="auto"></audio>
+            <audio id="audio2" src="/assets/kyjov/mp3/terc_1.mp3" preload="auto"></audio>
+            <audio id="audio3" src="/assets/kyjov/mp3/terc_2.mp3" preload="auto"></audio>
+            <audio id="audio4" src="/assets/kyjov/mp3/terc_3.mp3" preload="auto"></audio>
+            <audio id="audio5" src="/assets/kyjov/mp3/florian.mp3" preload="auto"></audio>
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -53,6 +60,18 @@
 
         <a-entity mindar-image-target="targetIndex: 1">
             <a-video id="videoEntity2" src="#video2" position="0 0 0" scale="1 1.3 1" autoplay="false"></a-video>
+        </a-entity>
+
+        <a-entity mindar-image-target="targetIndex: 2">
+            <a-video id="videoEntity2" src="#video2" position="0 0 0" scale="1 1 1" autoplay="false"></a-video>
+        </a-entity>
+
+        <a-entity mindar-image-target="targetIndex: 3">
+            <a-video id="videoEntity2" src="#video2" position="0 0 0" scale="1 1 1" autoplay="false"></a-video>
+        </a-entity>
+
+        <a-entity mindar-image-target="targetIndex: 4">
+            <a-video id="videoEntity2" src="#video2" position="0 0 0" scale="1 1 1" autoplay="false"></a-video>
         </a-entity>
     </a-scene>
 
