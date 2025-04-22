@@ -166,11 +166,59 @@ h1 {
 .back-button:hover {
     background-color: #5a6268;
 }
+* --- Odkaz na Licence --- */
+.license-link-container {
+    /* Kontejner pro snadné centrování a odsazení */
+    width: 100%; /* Zabere celou šířku */
+    text-align: center; /* Vycentruje obsah (odkaz) */
+    padding: 0 15px; /* Postranní padding jako u ostatních prvků */
+    box-sizing: border-box; /* Zajistí, že padding je zahrnut */
+    /* Odsazení od obsahu nad a patičky pod */
+    margin-top: 15px; /* Mezera nad odkazem (upravte podle potřeby) */
+    margin-bottom: 10px; /* Mezera pod odkazem, nad patičkou (upravte podle potřeby) */
+}
+
+a.license-link {
+    /* Specifický styl pro odkaz, aby nevypadal jako tlačítko */
+    font-size: 12px;        /* Malá velikost písma */
+    color: #6c757d;         /* Nenápadná barva (např. šedá) */
+    text-decoration: none;  /* Odstraní výchozí podtržení */
+    background-color: transparent; /* Bez pozadí */
+    border: none;           /* Bez rámečku */
+    padding: 2px 5px;       /* Minimální padding, pokud je potřeba */
+    border-radius: 0;       /* Bez zakulacených rohů */
+    box-shadow: none;       /* Bez stínu */
+    display: inline;        /* Chová se jako běžný textový odkaz */
+    width: auto;            /* Šířka se přizpůsobí textu */
+    margin: 0;              /* Bez vnějších okrajů (řeší kontejner) */
+    cursor: pointer;        /* Kurzor zůstává ukazovátko */
+    font-weight: normal;    /* Normální tloušťka písma */
+    transition: color 0.2s ease; /* Plynulý přechod barvy při najetí */
+}
+
+a.license-link:hover {
+    /* Efekt při najetí myší */
+    color: #343a40;           /* Ztmavíme barvu */
+    text-decoration: underline; /* Zobrazíme podtržení pro lepší indikaci odkazu */
+    background-color: transparent; /* Ujistíme se, že pozadí zůstává průhledné */
+    box-shadow: none;         /* Ujistíme se, že se nepřidá stín */
+    transform: none;          /* Ujistíme se, že se nepohne */
+}
+
+a.license-link:active {
+    /* Efekt při kliknutí */
+    color: #343a40; /* Může zůstat stejná jako hover */
+    transform: none; /* Žádný posun */
+    box-shadow: none; /* Žádný stín */
+}
 
 /* --- Patička --- */
 .app-footer {
     text-align: center;
-    padding: 10px 15px; /* Menší padding patičky */
+    padding-top: 10px; /* Přidat nebo zajistit horní padding */
+    padding-bottom: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
     margin-top: auto;
     background-color: #dee2e6; /* Mírně upravená barva pozadí */
     color: #495057;
