@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- A-Frame a MindAR knihovny -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+</head>
+<body>
+    <a href="kyjov.html" style="position: absolute; top: 10px; left: 10px; z-index: 1001; padding: 8px 15px; background-color: rgba(0,0,0,0.5); color: white; text-decoration: none; border-radius: 3px; font-size: 14px;">
+    Zpět do Menu
+</a>
+    <a-scene mindar-image="imageTargetSrc:assets/kyjov/mind/targets_2.mind; 
+        uiLoading: yes; uiError: yes; 
+        renderer: {colorManagement: true}; 
+        physicallyCorrectLights: true; 
+        vr-mode-ui: {enabled: false}; 
+        device-orientation-permission-ui: {enabled: false}">
+
+        <a-assets>
+            <a-asset-item id="model1" src="assets/kyjov/3d/vedro.glb"></a-asset-item>
+           
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-gltf-model 
+    src="#model1" 
+    position="0 0 0.1" 
+    scale="2.5 2.5 2.5"  
+    rotation="90 0 0"> 
+</a-gltf-model>
+<!-- Nebo třeba scale="0.1 0.1 0.1" -->
+        </a-entity>
+
+    </a-scene>
+
+    <script>
+    function enableCamera() {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
+                .then(function(stream) {
+                    console.log("✅ Přístup k zadní kameře povolen!");
+                })
+                .catch(function(error) {
+                    console.error("❌ Chyba přístupu k zadní kameře: ", error);
+                });
+        } else {
+            console.error("❌ Tento prohlížeč nepodporuje přístup k médiím.");
+        }
+    }
+
+    window.onload = function() {
+        enableCamera(); 
+
+        // Spustí MindAR po načtení scény
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+            document.querySelector('[mindar-image]').components['mindar-image-system'].start();
+        });
+    };
+    </script>
+</body>
+</html>
