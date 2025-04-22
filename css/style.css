@@ -166,11 +166,12 @@ h1 {
 .back-button:hover {
     background-color: #5a6268;
 }
-* --- Odkaz na Licence --- */
+/* --- Odkaz na Licence --- */
 .license-link-container {
     /* Kontejner pro snadné centrování a odsazení */
     width: 100%; /* Zabere celou šířku */
-    text-align: center; /* Vycentruje obsah (odkaz) */
+    display: flex;           /* Nastaví kontejner jako flex kontejner */
+    justify-content: center; /* Vycentruje položku(y) uvnitř horizontálně */
     padding: 0 15px; /* Postranní padding jako u ostatních prvků */
     box-sizing: border-box; /* Zajistí, že padding je zahrnut */
     /* Odsazení od obsahu nad a patičky pod */
