@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <style>
+        #startButton {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 30px;
+            font-size: 18px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <button id="startButton">Spustit AR</button>
+
+<a href="/assets/kyjov/kyjov.html" style="position: absolute; top: 10px; left: 10px; z-index: 1001; padding: 8px 15px; background-color: rgba(0,0,0,0.5); color: white; text-decoration: none; border-radius: 3px; font-size: 14px;">
+    Zpět do Menu
+</a>
+
+<!-- Váš stávající kód <a-scene> ... </a-scene> atd. -->
+
+    <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/terce_3-4.mind; 
+        uiLoading: yes; uiError: yes; 
+        renderer: {colorManagement: true}; 
+        physicallyCorrectLights: true; 
+        vr-mode-ui: {enabled: false}; 
+        device-orientation-permission-ui: {enabled: false}">
+
+        <a-assets>
+            <video id="video1" src="/assets/kyjov/mp4/terc_2.mp4" preload="auto" loop playsinline></video>
+            <video id="video2" src="/assets/kyjov/mp4/terc_3.mp4" preload="auto" loop playsinline></video>
+            <audio id="audio1" src="/assets/kyjov/mp3/terc_2.mp3" preload="auto"></audio>
+            <audio id="audio2" src="/assets/kyjov/mp3/terc_3.mp3" preload="auto"></audio>
+        </a-assets>
+
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-video id="videoEntity1" src="#video1" position="0 0 0" scale="1 1 1" autoplay="false"></a-video>
+        </a-entity>
+
+        <a-entity mindar-image-target="targetIndex: 1">
+            <a-video id="videoEntity2" src="#video2" position="0 0 0" scale="1 1 1" autoplay="false"></a-video>
+        </a-entity>
+    </a-scene>
+
+    <script>
+        let audioContext;
+        let audioBuffer1;
+        let audioBuffer2;
+
+        // Funkce pro dekódování audio dat
+        async function loadAudio(url) {
+            const response = await fetch(url);
+            const arrayBuffer = await response.arrayBuffer();
+            return await audioContext.decodeAudioData(arrayBuffer);
+        }
+
+        document.getElementById('startButton').addEventListener('click', async function() {
+            const video1 = document.getElementById('video1');
+            const video2 = document.getElementById('video2');
+
+            video1.muted = false;
+            video2.muted = false;
+
+            video1.play();
+            video2.play();
+
+            this.style.display = 'none';
+
+            // Inicializace AudioContext po kliknutí na tlačítko
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            try {
+                audioBuffer1 = await loadAudio(document.getElementById('audio1').src);
+                audioBuffer2 = await loadAudio(document.getElementById('audio2').src);
+            } catch (error) {
+                console.error('Error loading audio:', error);
+            }
+        });
+
+        const target1 = document.querySelector('[mindar-image-target="targetIndex: 0"]');
+        const target2 = document.querySelector('[mindar-image-target="targetIndex: 1"]');
+        const videoEntity1 = document.getElementById('videoEntity1');
+        const videoEntity2 = document.getElementById('videoEntity2');
+
+        function playSound(buffer) {
+            if (buffer) {
+                const source = audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.connect(audioContext.destination);
+                source.start();
+                return source;
+            }
+            return null;
+        }
+
+        let audioSource1 = null;
+        let audioSource2 = null;
+
+        target1.addEventListener('targetFound', () => {
+            console.log("targetFound 1 se spustil!");
+            videoEntity1.components.material.material.map.image.play();
+             if (audioBuffer1 && !audioSource1) {
+                audioSource1 = playSound(audioBuffer1);
+            }
+        });
+
+        target1.addEventListener('targetLost', () => {
+            console.log("targetLost 1 se spustil!");
+            videoEntity1.components.material.material.map.image.pause();
+            if (audioSource1) {
+                audioSource1.stop();
+                audioSource1 = null; // Reset audioSource1
+            }
+        });
+
+        target2.addEventListener('targetFound', () => {
+            console.log("targetFound 2 se spustil!");
+            videoEntity2.components.material.material.map.image.play();
+            if (audioBuffer2 && !audioSource2) {
+                audioSource2 = playSound(audioBuffer2);
+            }
+        });
+
+        target2.addEventListener('targetLost', () => {
+            console.log("targetLost 2 se spustil!");
+            videoEntity2.components.material.material.map.image.pause();
+             if (audioSource2) {
+                audioSource2.stop();
+                audioSource2 = null; // Reset audioSource2
+            }
+        });
+    </script>
+</body>
+</html>
