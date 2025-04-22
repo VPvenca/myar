@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="img/favicon.png" />
+    <title>AR Aplikace</title> <!-- Mírně upravený titulek -->
+    <link rel="stylesheet" href="css/style.css"> 
+    <!-- Pokud chcete použít Google Font (viz níže), přidejte sem link -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/img/apple_touch_icon_192x192.png">
+</head>
+<body>
+
+    <div class="page-wrapper"> <!-- Obalovač pro flexbox layout s patičkou dole -->
+
+        <header class="app-header">
+            <!-- Sem umístěte logo -->
+            <img src="img/augview.png" alt="Logo AR Aplikace" id="app-logo">
+            
+        </header>
+        
+       <main class="menu-content">
+
+            <!-- Nový textový blok -->
+            <div class="text-content-block">
+                <h2>Licence třetích stran</h2> <!-- Příklad nadpisu -->
+                <p>
+                   Tato aplikace vám přináší unikátní zážitky pomocí rozšířené reality (AR).
+               <p>
+                   Určitě jste si někdy představili, jaké by to bylo, kdyby na vás v muzeu promluvila postava z obrazu.
+                   Co kdyby se ilustrace v knize začala hýbat, nebo se z informační cedule vynořil trojrozměrný model?
+                   Prohlédněte si naše interaktivní scény a objevte svět kolem sebe novým způsobem.
+                </p>
+                <p>
+                    <ul> 
+                    <li>Kdykoli budete potřebovat poradit klikněte na ikonu otazníku vpravo dole. <br></li>
+                        <img src="/img/napoveda_b_45x45.png" alt="napoveda" class="inline-icon">
+                   </ul>
+                </p>
+                <h2>Nyní klikněte na ikonu otazníku na této stránce.</h2>
+                <p>
+                
+                 </p>              
+                    Pokud máte jakékoli dotazy nebo si přejete navázat spolupráci, neváhejte nás kontaktovat. Můžete nám
+                    <!-- Zde je samotný odkaz -->
+                    <a href="mailto:v.pencik@email.cz" class="email-link">napsat e-mail</a>.
+                   <!-- Konec odkazu -->
+                    Rádi vám pomůžeme!
+               
+            </div>
+            <!-- Konec textového bloku -->
+
+            
+                       <!-- === TLAČÍTKO ZPĚT === -->
+            <a href="index.html" class="menu-button back-button">Zpět na hlavní menu</a>
+            <!-- ===================== -->
+ 
+        </main>
+ 
+        <!-- ========================= -->
+
+        <footer class="app-footer">
+            <p>© 2025 Vytvořil Václav Pěnčík</p>
+        </footer>
+
+       </div> <!-- Konec page-wrapper -->
+    </div>
+    <!-- ==================================== -->
+
+    <!-- Připojení JavaScriptu na konec body -->
+    <script src="script.js"></script>
+
+</body>
+</html>
