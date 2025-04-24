@@ -15,7 +15,6 @@ const urlsToCache = [
   '/css/style.css',
   '/css/text-block.css',
   '/script.js',
-  '/sw.js',
   '/img/augview.png', // Přidejte vaše logo
   // Přidejte další klíčové soubory, které tvoří základní UI
   // Např. soubory podmenu, pokud jsou důležité pro offline start:
