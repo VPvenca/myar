@@ -166,6 +166,14 @@ h1 {
 .back-button:hover {
     background-color: #5a6268;
 }
+
+.back-button-container {
+    display: flex;
+    justify-content: center; /* Horizontální centrování */
+    align-items: center;    /* Vertikální centrování (pokud má kontejner výšku) */
+    padding: 15px 0;        /* Přidání odsazení */
+    width: 100%;            /* Aby zabral šířku a mohl centrovat */
+}
 /* --- Odkaz na Licence --- */
 .license-link-container {
     /* Kontejner pro snadné centrování a odsazení */
