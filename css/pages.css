@@ -1,0 +1,65 @@
+/* ==========================================================================
+   4. Specifické Styly pro Stránky (např. Domovská stránka)
+   ========================================================================== */
+
+/* --- SPECIFICKÉ STYLY PRO DOMOVSKOU STRÁNKU --- */
+/* Tyto styly se aplikují POUZE pokud má <body> tag třídu "home-page" */
+/* Přepisují nebo doplňují obecná pravidla pro prvky na domovské stránce */
+
+/* Úprava kontejneru obsahu na domovské stránce pro zobrazení ikon vedle sebe */
+.home-page .menu-content {
+    /* Přepisujeme výchozí flex-direction a align-items */
+    flex-direction: row;    /* Hlavní osa je řádek (tlačítka budou vedle sebe) */
+    flex-wrap: wrap;        /* Povolí zalamování tlačítek na další řádek, pokud se nevejdou */
+    justify-content: center;/* Centruje řádky tlačítek horizontálně v kontejneru */
+    align-items: center;    /* Zarovnává tlačítka vertikálně V RÁMCI jednoho řádku */
+                            /* Pokud mají tlačítka různou výšku, budou vertikálně centrována */
+    /* === Zarovnání celého bloku řádků === */
+    align-content: flex-start; /* Zarovná všechny řádky (jako celek) nahoru v kontejneru */
+                               /* Pokud je jen jeden řádek, nemá efekt */
+                               /* Další možnosti: center, space-between, space-around */
+    gap: 10px 16px;         /* Mezery mezi tlačítky (10px vertikálně, 16px horizontálně) */
+                            /* Nahrazuje potřebu margin na tlačítkách v tomto kontextu */
+    /* Ostatní vlastnosti jako flex-grow, padding, overflow-y jsou zděděny z obecného .menu-content */
+    /* Specificky odstraníme margin z tlačítek, protože používáme gap */
+    & > .menu-button { /* Cílíme přímo na .menu-button uvnitř .home-page .menu-content */
+      margin: 0; /* Odstraníme margin, spoléháme na gap */
+    }
+}
+
+/* Specifické styly pro tlačítka s ikonou na domovské stránce */
+.home-page .menu-button.icon-button {
+    /* Přepisuje některé obecné .menu-button styly + přidává nové */
+    display: flex;          /* Použije flex pro vnitřní layout (ikona, text) */
+    flex-direction: column; /* Ikona bude nad textem */
+    align-items: center;    /* Centruje ikonu a text horizontálně uvnitř tlačítka */
+    justify-content: center;/* Centruje obsah vertikálně (užitečné pro konzistentní vzhled) */
+    width: 150px;           /* Výrazně menší šířka pro ikonová tlačítka */
+    min-height: 120px;      /* Minimální výška pro vizuální konzistenci tlačítek */
+    padding: 15px 10px;     /* Upravený padding (více vertikální, méně horizontální) */
+    background-color: #f8f9fa; /* Světlejší pozadí pro odlišení */
+    color: #343a40;         /* Tmavší barva textu pro kontrast se světlým pozadím */
+    border: 1px solid #dee2e6; /* Jemný šedý rámeček */
+    /* Margin je odstraněn pravidlem výše (.home-page .menu-content > .menu-button) */
+    /* Ostatní vlastnosti jako font-weight(700), border-radius(8px), cursor(pointer), */
+    /* transition, box-shadow(0 4px...) jsou zděděny z .menu-button */
+    /* Pokud je nechcete (např. stín), musíte je zde přepsat (např. box-shadow: none;) */
+}
+
+/* Styly pro samotnou ikonu (<img>) uvnitř tlačítka .icon-button */
+.home-page .icon-button .button-icon {
+    width: 48px;            /* Pevná šířka ikony */
+    height: 48px;           /* Pevná výška ikony */
+    margin-bottom: 8px;     /* Mezera pod ikonou (nad textem) */
+    object-fit: contain;    /* Zajistí, že se celá ikona vejde do rozměrů 48x48 a zachová poměr stran */
+}
+
+/* Styly pro text (např. <span>) uvnitř tlačítka .icon-button */
+.home-page .icon-button .button-text {
+    font-size: 14px;        /* Menší velikost písma než u běžných tlačítek */
+    font-weight: 500;       /* Střední tloušťka písma (mírně tenčí než bold) */
+    color: inherit;         /* Zdědí barvu textu (#343a40) z nadřazeného .icon-button */
+    text-align: center;     /* Zajistí centrování textu, i kdyby byl delší */
+    display: block;         /* Zajistí, že text zabere dostupnou šířku pro správné centrování */
+    line-height: 1.2;       /* Mírně upravená výška řádku pro krátký text */
+}
