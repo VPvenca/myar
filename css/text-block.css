@@ -1,0 +1,46 @@
+/* --- Styly pro obecný textový blok (např. na podstránkách) --- */
+.text-content-block {
+    background-color: rgba(255, 255, 255, 0.7); /* Lehce průhledné bílé pozadí pro kontrast s gradientem stránky */
+    padding: 20px 25px;         /* Vnitřní odsazení textu od okrajů bloku */
+    border-radius: 8px;         /* Zaoblené rohy bloku */
+    margin-bottom: 20px;        /* Odsazení pod textovým blokem (např. před tlačítkem Zpět) */
+    width: 90%;                 /* Šířka bloku (procentuální pro responzivitu na menších zařízeních) */
+    max-width: 700px;           /* Maximální šířka pro lepší čitelnost na velkých monitorech */
+    text-align: left;           /* Zarovnání textu doleva (standard pro čtení delšího textu) */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Jemný stín pro oddělení od pozadí */
+    /* Centrování tohoto bloku je zajištěno flexboxem rodiče (.menu-content { align-items: center; }) */
+    /* display: block; - Není nutné, div je výchozí blokový element */
+    /* margin-left: auto; margin-right: auto; - Není nutné kvůli flex centrování rodiče */
+}
+
+/* Nadpisy (např. H2) uvnitř textového bloku */
+.text-content-block h2 {
+    color: #2c3e50;             /* Barva nadpisu */
+    margin-top: 0;              /* Odstranit horní okraj prvního nadpisu v bloku */
+    margin-bottom: 15px;        /* Okraj pod nadpisem pro oddělení od textu */
+    text-align: center;         /* Nadpis můžeme vycentrovat pro lepší strukturu */
+    font-size: 1.4em;           /* Velikost nadpisu relativní k okolnímu textu (1.4 * 16px = ~22px) */
+}
+
+/* Odstavce a položky seznamu uvnitř textového bloku */
+.text-content-block p,
+.text-content-block li {
+    color: #333;                /* Barva běžného textu */
+    font-size: 16px;            /* Základní velikost písma pro dobrou čitelnost */
+    /* Můžete použít i 1em nebo 1.1em */
+    line-height: 1.6;           /* Výška řádku pro lepší čitelnost odstavců */
+    margin-bottom: 12px;        /* Mezera mezi odstavci/položkami seznamu */
+}
+
+/* Nečíslované seznamy (ul) uvnitř textového bloku */
+.text-content-block ul {
+    padding-left: 25px;         /* Odsazení seznamu zleva, aby bylo místo pro odrážky */
+    margin-top: 5px;            /* Menší mezera nad seznamem */
+    list-style-position: outside; /* Odrážky budou vně textového bloku položky */
+}
+
+/* Styling odrážek (volitelné) */
+.text-content-block li::marker {
+    color: #3498db;             /* Barva odrážek (např. modrá jako tlačítka) */
+    /* Můžete zde změnit i typ odrážky, např. content: '✓ '; */
+}
