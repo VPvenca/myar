@@ -6,7 +6,14 @@ const CACHE_NAME = 'ar-app-cache-v25'; // Název cache (změňte 'v1' při aktua
 const urlsToCache = [
   '/', // Často alias pro index.html
   '/index.html',
+  '/css/base.css',
+  '/css/buttons.css',
+  '/css/layout.css',
+  '/css/links.css',
+  '/css/modal.css',
+  '/css/pages.css',
   '/css/style.css',
+  '/css/text-block.css',
   '/script.js',
   '/sw.js',
   '/img/augview.png', // Přidejte vaše logo
