@@ -33,33 +33,38 @@
     display: flex;          /* Použije flex pro vnitřní layout (ikona, text) */
     flex-direction: column; /* Ikona bude nad textem */
     align-items: center;    /* Centruje ikonu a text horizontálně uvnitř tlačítka */
-    justify-content: center;/* Centruje obsah vertikálně (užitečné pro konzistentní vzhled) */
-    width: 150px;           /* Výrazně menší šířka pro ikonová tlačítka */
-    min-height: 120px;      /* Minimální výška pro vizuální konzistenci tlačítek */
-    padding: 15px 10px;     /* Upravený padding (více vertikální, méně horizontální) */
-    background-color: #f8f9fa; /* Světlejší pozadí pro odlišení */
-    color: #343a40;         /* Tmavší barva textu pro kontrast se světlým pozadím */
-    border: 1px solid #dee2e6; /* Jemný šedý rámeček */
-    /* Margin je odstraněn pravidlem výše (.home-page .menu-content > .menu-button) */
-    /* Ostatní vlastnosti jako font-weight(700), border-radius(8px), cursor(pointer), */
-    /* transition, box-shadow(0 4px...) jsou zděděny z .menu-button */
-    /* Pokud je nechcete (např. stín), musíte je zde přepsat (např. box-shadow: none;) */
+    /* justify-content: center; <= PŮVODNÍ HODNOTA */
+    justify-content: space-between; /* <<< ZMĚNA: Umístí ikonu nahoru, text dolů */
+    width: 150px;           /* Šířka tlačítka ZŮSTÁVÁ */
+    min-height: 120px;      /* Minimální výška ZŮSTÁVÁ */
+    /* padding: 15px 10px; <= PŮVODNÍ HODNOTA */
+    padding: 10px 10px;     /* <<< ZMĚNA: Snížený horní/dolní padding pro přiblížení k okrajům */
+                            /* Můžete experimentovat s hodnotou (např. 5px nebo 15px, pokud chcete více místa) */
+    background-color: #f8f9fa;
+    color: #343a40;
+    border: 1px solid #dee2e6;
+    /* Ostatní vlastnosti zůstávají zděděné nebo stejné */
 }
 
 /* Styly pro samotnou ikonu (<img>) uvnitř tlačítka .icon-button */
 .home-page .icon-button .button-icon {
-    width: 48px;            /* Pevná šířka ikony */
-    height: 48px;           /* Pevná výška ikony */
-    margin-bottom: 8px;     /* Mezera pod ikonou (nad textem) */
-    object-fit: contain;    /* Zajistí, že se celá ikona vejde do rozměrů 48x48 a zachová poměr stran */
+    /* width: 48px; <= PŮVODNÍ HODNOTA */
+    /* height: 48px; <= PŮVODNÍ HODNOTA */
+    width: 64px;            /* <<< ZMĚNA: Větší šířka ikony */
+    height: 64px;           /* <<< ZMĚNA: Větší výška ikony */
+    /* margin-bottom: 8px; <= PŮVODNÍ HODNOTA */
+    margin-bottom: 5px;     /* <<< ZMĚNA (volitelná): Mírně snížíme mezeru, protože space-between už rozděluje prostor */
+                            /* Můžete nechat i 8px nebo upravit podle potřeby */
+    object-fit: contain;    /* Zachová poměr stran ikony */
 }
 
 /* Styly pro text (např. <span>) uvnitř tlačítka .icon-button */
 .home-page .icon-button .button-text {
-    font-size: 14px;        /* Menší velikost písma než u běžných tlačítek */
-    font-weight: 500;       /* Střední tloušťka písma (mírně tenčí než bold) */
-    color: inherit;         /* Zdědí barvu textu (#343a40) z nadřazeného .icon-button */
-    text-align: center;     /* Zajistí centrování textu, i kdyby byl delší */
-    display: block;         /* Zajistí, že text zabere dostupnou šířku pro správné centrování */
-    line-height: 1.2;       /* Mírně upravená výška řádku pro krátký text */
+    font-size: 14px;        /* Velikost písma zůstává */
+    font-weight: 500;       /* Tloušťka písma zůstává */
+    color: inherit;
+    text-align: center;     /* Horizontální centrování textu zůstává */
+    display: block;
+    line-height: 1.2;
+    /* Není potřeba měnit, text se automaticky posune dolů díky justify-content: space-between */
 }
