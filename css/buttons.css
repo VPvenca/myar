@@ -1,0 +1,66 @@
+/* ==========================================================================
+   3. Komponenty (Tlačítka)
+   ========================================================================== */
+
+/* --- Obecné styly pro Tlačítka (např. v menu) --- */
+/* Platí pro všechna tlačítka s třídou .menu-button, pokud nejsou přepsána specifičtějšími pravidly */
+.menu-button {
+    display: inline-block;  /* Chová se jako blok, ale umožňuje být vedle sebe (pokud layout dovolí) */
+                            /* a respektuje šířku a výšku */
+    width: 280px;           /* Standardní šířka tlačítka */
+    padding: 15px 20px;     /* Vnitřní odsazení textu v tlačítku (nahoře/dole 15px, strany 20px) */
+    margin: 10px;           /* Vnější okraj kolem tlačítka pro odsazení od ostatních prvků */
+    font-size: 18px;        /* Velikost písma */
+    font-weight: 700;       /* Tloušťka písma (tučné) */
+    color: white;           /* Barva textu */
+    background-color: #3498db; /* Modrá barva pozadí */
+    border: none;           /* Bez výchozího rámečku tlačítka */
+    border-radius: 8px;     /* Zaoblené rohy */
+    text-decoration: none;  /* Odstraní podtržení (pokud by šlo o <a> tag stylizovaný jako tlačítko) */
+    text-align: center;     /* Centrování textu uvnitř tlačítka */
+    cursor: pointer;        /* Změní kurzor na ukazovátko při najetí myší */
+    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease; /* Plynulé přechody pro efekty */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Jemný stín pod tlačítkem pro 3D efekt */
+    box-sizing: border-box; /* Zajišťuje, že padding a border jsou zahrnuty do šířky/výšky */
+}
+
+/* --- Efekty pro Obecná Tlačítka --- */
+.menu-button:hover { /* Styl při najetí myší */
+    background-color: #2980b9; /* Mírně tmavší modrá */
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Zvýraznění stínu */
+    transform: translateY(-2px); /* Posunutí tlačítka mírně nahoru */
+}
+
+.menu-button:active { /* Styl při kliknutí (držení) tlačítka */
+    background-color: #1f618d; /* Ještě tmavší modrá */
+    transform: translateY(0px); /* Vrátí tlačítko do původní vertikální polohy */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Menší stín při stisku */
+}
+
+/* --- Tlačítko zpět --- */
+/* Používá obecné styly .menu-button a přidává/mění specifika */
+.back-button {
+    background-color: #6c757d; /* Šedá barva pozadí */
+    margin-top: 5px;           /* Horní okraj - může být upraven níže v kontextu */
+}
+
+.back-button:hover {
+    background-color: #5a6268; /* Tmavší šedá při najetí */
+}
+
+/* Kontejner pro tlačítko zpět pro snadné centrování a odsazení */
+.back-button-container {
+    display: flex;
+    justify-content: center; /* Horizontální centrování tlačítka uvnitř kontejneru */
+    align-items: center;    /* Vertikální centrování (pro případ, že by kontejner měl výšku) */
+    padding: 15px 0;        /* Horní/dolní odsazení kontejneru */
+    width: 100%;            /* Kontejner zabere celou šířku pro správné centrování tlačítka */
+    flex-shrink: 0;         /* Zabrání zmenšování tohoto kontejneru */
+}
+
+/* Kontextové odsazení tlačítka zpět, pokud je přímo v .menu-content */
+.menu-content > .back-button-container > .back-button, /* Pokud je v kontejneru */
+.menu-content > .back-button { /* Pokud je přímo v menu-content */
+     margin-top: 10px; /* Upravený horní okraj, aby bylo odsazeno od obsahu nad ním */
+                      /* (např. textového bloku, který má vlastní margin-bottom) */
+}
