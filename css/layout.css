@@ -1,0 +1,68 @@
+/* ==========================================================================
+   2. Layout Stránky (Wrapper, Hlavička, Hlavní Obsah, Patička)
+   ========================================================================== */
+
+/* --- Obalovač celé stránky --- */
+.page-wrapper {
+    display: flex;          /* Používá flexbox pro vnitřní uspořádání (hlavička, obsah, patička) */
+    flex-direction: column; /* Obsah bude uspořádán vertikálně pod sebou */
+    min-height: 100vh;      /* Zajišťuje, že obalovač zabere alespoň celou výšku okna */
+    width: 100%;            /* Zabere celou dostupnou šířku */
+}
+
+/* --- Hlavička --- */
+.app-header {
+    text-align: center;     /* Centrování obsahu hlavičky (logo, nadpis) */
+    padding: 20px 15px;     /* Vnitřní odsazení (nahoře/dole 20px, vlevo/vpravo 15px) */
+    padding-bottom: 10px;   /* Specificky zmenšený spodní padding */
+    flex-shrink: 0;         /* Zabrání zmenšování hlavičky, pokud by obsah tlačil */
+}
+
+/* --- Logo v hlavičce --- */
+#app-logo {
+    max-width: 250px;       /* Maximální šířka loga, aby nebylo příliš velké */
+    height: auto;           /* Výška se automaticky přizpůsobí šířce pro zachování poměru stran */
+    margin-bottom: 15px;    /* Vnější okraj pod logem pro odsazení od nadpisu */
+    display: block;         /* Zajistí, že se logo chová jako blokový element (pro margin auto) */
+    margin-left: auto;      /* Automatický levý okraj pro centrování */
+    margin-right: auto;     /* Automatický pravý okraj pro centrování */
+}
+
+/* --- Hlavní nadpis stránky (H1) --- */
+h1 {
+    color: #2c3e50;         /* Barva textu nadpisu */
+    margin-top: 0;          /* Nulový horní okraj (už řeší padding hlavičky) */
+    margin-bottom: 15px;    /* Spodní okraj pod nadpisem */
+    font-weight: 400;       /* Tloušťka písma (400 je normální) */
+    font-size: 24px;        /* Velikost písma nadpisu */
+}
+
+/* --- Hlavní obsah (kontejner pro menu nebo text) --- */
+.menu-content {
+    flex-grow: 1;           /* Tento kontejner zabere veškerý dostupný vertikální prostor */
+                            /* mezi hlavičkou a patičkou, čímž patičku "tlačí" dolů */
+    display: flex;          /* Použijeme flexbox pro vnitřní uspořádání obsahu */
+    flex-direction: column; /* Výchozí směr je sloupec (např. pro textové bloky, běžná menu) */
+    align-items: center;    /* Centruje položky horizontálně (pokud je směr sloupec) */
+    padding: 15px;          /* Vnitřní odsazení kontejneru */
+    /* === KLÍČOVÁ ÚPRAVA PRO PŘETÉKÁNÍ === */
+    overflow-y: auto;       /* Povolí vertikální rolování POUZE POKUD je obsah vyšší než kontejner */
+                            /* Zabrání přetékání obsahu přes patičku a umožní rolovat jen obsah */
+}
+
+/* --- Patička --- */
+.app-footer {
+    text-align: center;     /* Centrování textu v patičce */
+    padding: 10px 15px;     /* Vnitřní odsazení (nahoře/dole 10px, strany 15px) */
+    margin-top: auto;       /* Automatický horní okraj - klíčové pro "přilepení" patičky dolů */
+                            /* Funguje díky flex layoutu na .page-wrapper a flex-grow: 1 na .menu-content */
+    background-color: #dee2e6; /* Barva pozadí patičky */
+    color: #495057;         /* Barva textu v patičce */
+    font-size: 12px;        /* Menší velikost písma */
+    flex-shrink: 0;         /* Zabrání zmenšování patičky, pokud by obsah tlačil */
+    border-top: 1px solid #adb5bd; /* Jemná horní linka pro vizuální oddělení od obsahu */
+}
+
+.app-footer p {
+    margin: 0; /* Odstraní výchozí okraj odstavce uvnitř patičky */
+}
