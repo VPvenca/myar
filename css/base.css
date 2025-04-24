@@ -1,0 +1,30 @@
+/* ==========================================================================
+   1. Základní preset, Globální styly a Nastavení Těla Stránky
+   ========================================================================== */
+
+/* --- Základní preset a výchozí nastavení --- */
+* { /* Hvězdička jako selektor pro všechny elementy */
+    box-sizing: border-box; /* Zahrne padding a border do celkové šířky/výšky elementu, zjednodušuje layout */
+    margin: 0;              /* Vynulování výchozích vnějších okrajů */
+    padding: 0;             /* Vynulování výchozích vnitřních okrajů */
+}
+
+html {
+    height: 100%; /* HTML element zabere celou výšku okna prohlížeče */
+    /* Aplikujeme gradientní pozadí na celou stránku */
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) no-repeat;
+    /* Fixujeme pozadí, aby se nerolovalo s obsahem stránky */
+    background-attachment: fixed;
+}
+
+body {
+    font-family: 'Roboto', sans-serif; /* Výchozí písmo pro celou stránku */
+    min-height: 100vh; /* Minimální výška těla je 100% výšky viewportu (okna prohlížeče) */
+    display: flex; /* Použijeme flexbox pro hlavní layout stránky */
+    flex-direction: column; /* Uspořádá přímé potomky (wrapper) pod sebe */
+    /* Tímto dosáhneme toho, že patička bude vždy dole, i když je málo obsahu */
+    /* Původní komentáře k barvě pozadí (nyní řešeno v HTML): */
+    /* background-color: #e9eef2; */
+    /* background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); */
+}
+
