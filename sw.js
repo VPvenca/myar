@@ -4,7 +4,7 @@ console.log('Service Worker soubor načten.');
 
 const CACHE_NAME = 'ar-app-cache-v27'; // Název cache (změňte 'v1' při aktualizaci cache)
 const urlsToCache = [
-  '/', // Často alias pro index.html
+  
   '/index.html',
   '/css/base.css',
   '/css/buttons.css',
