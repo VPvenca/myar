@@ -1,0 +1,46 @@
+/* --- Odkaz na Licence --- */
+/* Kontejner pro snadné centrování a odsazení odkazu licence */
+.license-link-container {
+    width: 100%;            /* Zabere celou šířku */
+    display: flex;          /* Použije flexbox pro centrování obsahu */
+    justify-content: center;/* Vycentruje odkaz horizontálně */
+    padding: 0 15px;        /* Postranní padding jako u ostatních prvků */
+    box-sizing: border-box; /* Zajistí, že padding je zahrnut do šířky */
+    margin-top: 15px;       /* Mezera nad kontejnerem (odsazení od obsahu) */
+    margin-bottom: 10px;    /* Mezera pod kontejnerem (odsazení od patičky) */
+    flex-shrink: 0;         /* Zabrání zmenšování kontejneru */
+}
+
+/* Samotný odkaz na licence - stylizovaný jako běžný textový odkaz, ne jako tlačítko */
+a.license-link {
+    font-size: 12px;        /* Malá velikost písma */
+    color: #6c757d;         /* Nenápadná šedá barva */
+    text-decoration: none;  /* Odstraní výchozí podtržení odkazu */
+    /* Reset stylů, které by mohl zdědit nebo mít z jiných pravidel pro <a> */
+    background-color: transparent;
+    border: none;
+    padding: 2px 5px;       /* Minimální padding pro klikatelnost */
+    border-radius: 0;
+    box-shadow: none;
+    display: inline;        /* Chová se jako běžný textový odkaz */
+    width: auto;            /* Šířka se přizpůsobí textu */
+    margin: 0;              /* Okraje řeší kontejner */
+    cursor: pointer;        /* Kurzor ukazovátko */
+    font-weight: normal;    /* Normální tloušťka písma */
+    transition: color 0.2s ease; /* Plynulý přechod barvy při najetí */
+}
+
+a.license-link:hover { /* Efekt při najetí myší */
+    color: #343a40;           /* Ztmavíme barvu textu */
+    text-decoration: underline; /* Zobrazíme podtržení pro lepší indikaci odkazu */
+    /* Explicitně potvrdíme, že se nemění jiné vlastnosti */
+    background-color: transparent;
+    box-shadow: none;
+    transform: none;
+}
+
+a.license-link:active { /* Efekt při kliknutí */
+    color: #343a40; /* Může zůstat stejná jako hover */
+    transform: none; /* Žádný posun */
+    box-shadow: none; /* Žádný stín */
+}
