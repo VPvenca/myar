@@ -64,3 +64,80 @@
      margin-top: 10px; /* Upravený horní okraj, aby bylo odsazeno od obsahu nad ním */
                       /* (např. textového bloku, který má vlastní margin-bottom) */
 }
+
+/* ---- Základní styl pro celou sekci odkazu na mapu a adresu ---- */
+.map-section {
+    /* Centrování obsahu pomocí Flexbox */
+    display: flex;
+    flex-direction: column; /* Položky pod sebou */
+    align-items: center;    /* Centrování položek horizontálně */
+
+    /* Volitelné: Centrování samotné sekce na stránce */
+    max-width: 600px;       /* Maximální šířka sekce */
+    margin: 2em auto;       /* Horní/dolní okraj 2em, automatický levý/pravý = centruje blok */
+
+    /* Vnitřní odsazení */
+    padding: 20px;
+
+    /* Volitelné: Vizuální oddělení sekce */
+    /* background-color: #f8f9fa; /* Lehký šedý podklad */
+    /* border: 1px solid #dee2e6; /* Tenký rámeček */
+    /* border-radius: 8px;         /* Zakulacené rohy sekce */
+    /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Jemný stín */
+}
+
+/* ---- Styl pro nadpis ---- */
+.map-section h1 {
+    color: #333; /* Tmavší barva textu */
+    margin-bottom: 0.5em; /* Mezera pod nadpisem */
+    font-size: 1.8em; /* Větší velikost písma */
+    text-align: center; /* Zajistí centrování textu (i když flex to už dělá pro blok) */
+}
+
+/* ---- Styl pro adresu ---- */
+.map-section .address {
+    color: #555; /* Trochu světlejší text */
+    margin-bottom: 1.5em; /* Větší mezera před tlačítky */
+    text-align: center; /* Centrování textu adresy */
+    line-height: 1.6; /* Lepší čitelnost delší adresy */
+}
+
+/* ---- Styl pro obalovač odkazu (paragraf) ---- */
+.map-section .map-link-wrapper {
+    margin-bottom: 1em; /* Mezera mezi tlačítky */
+    width: 100%; /* Zajistí, že flexbox centruje tlačítko správně */
+    text-align: center; /* Důležité pro centrování inline-block tlačítka uvnitř */
+}
+
+/* ---- Styl pro samotné odkazy (vzhled tlačítek) ---- */
+.map-section .map-button {
+    display: inline-block; /* Aby bylo možné nastavit padding a chovalo se to jako blok */
+    padding: 12px 25px; /* Vnitřní odsazení tlačítka (vertikální, horizontální) */
+    background-color: #007bff; /* Modrá barva pozadí (Bootstrap primary) */
+    color: white; /* Bílý text */
+    text-decoration: none; /* Odstranění podtržení odkazu */
+    border-radius: 5px; /* Zakulacené rohy */
+    font-weight: bold; /* Tučné písmo */
+    text-align: center; /* Centrování textu uvnitř tlačítka */
+    min-width: 200px; /* Minimální šířka, aby tlačítka vypadala konzistentně */
+    cursor: pointer; /* Změna kurzoru na "ručičku" */
+
+    /* Přechod pro plynulejší efekt při najetí myší */
+    transition: background-color 0.3s ease, transform 0.1s ease;
+
+     /* Jemný stín pro 3D efekt */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* ---- Efekt při najetí myší na tlačítko ---- */
+.map-section .map-button:hover {
+    background-color: #0056b3; /* Tmavší modrá při najetí */
+    text-decoration: none; /* Zajistit, že se neobjeví podtržení */
+}
+
+/* ---- Efekt při kliknutí na tlačítko ---- */
+.map-section .map-button:active {
+    background-color: #004085; /* Ještě tmavší modrá při kliknutí */
+    transform: scale(0.98); /* Lehké zmenšení tlačítka */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2); /* Vnitřní stín při kliknutí */
+}
