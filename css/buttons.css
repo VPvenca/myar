@@ -66,78 +66,74 @@
 }
 
 /* ---- Základní styl pro celou sekci odkazu na mapu a adresu ---- */
-.map-section {
-    /* Centrování obsahu pomocí Flexbox */
+/* ---- Kontejner pro minimalistickou verzi ---- */
+.map-section-minimal {
     display: flex;
-    flex-direction: column; /* Položky pod sebou */
-    align-items: center;    /* Centrování položek horizontálně */
-
-    /* Volitelné: Centrování samotné sekce na stránce */
-    max-width: 600px;       /* Maximální šířka sekce */
-    margin: 2em auto;       /* Horní/dolní okraj 2em, automatický levý/pravý = centruje blok */
-
-    /* Vnitřní odsazení */
-    padding: 20px;
-
-    /* Volitelné: Vizuální oddělení sekce */
-    /* background-color: #f8f9fa; /* Lehký šedý podklad */
-    /* border: 1px solid #dee2e6; /* Tenký rámeček */
-    /* border-radius: 8px;         /* Zakulacené rohy sekce */
-    /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Jemný stín */
+    flex-direction: column; /* Nebo row, pokud chcete vedle sebe */
+    align-items: center;    /* Centruje tlačítka */
+    padding: 15px;          /* Menší vnitřní odsazení */
+    margin: 1.5em auto;     /* Centruje kontejner a dává okraj */
+    max-width: 400px;       /* Můžete upravit šířku kontejneru */
 }
 
-/* ---- Styl pro nadpis ---- */
-.map-section h1 {
-    color: #333; /* Tmavší barva textu */
-    margin-bottom: 0.5em; /* Mezera pod nadpisem */
-    font-size: 1.8em; /* Větší velikost písma */
-    text-align: center; /* Zajistí centrování textu (i když flex to už dělá pro blok) */
+/* ---- Obalovač odkazu (paragraf) ---- */
+.map-section-minimal .map-link-wrapper-minimal {
+    margin-bottom: 0.8em; /* Menší mezera mezi tlačítky */
+    width: 100%;          /* Potřebné pro správné centrování tlačítka uvnitř */
+    text-align: center;   /* Centruje inline-block tlačítko */
+}
+/* Poslednímu obalovači můžeme odebrat spodní margin */
+.map-section-minimal .map-link-wrapper-minimal:last-child {
+    margin-bottom: 0;
 }
 
-/* ---- Styl pro adresu ---- */
-.map-section .address {
-    color: #555; /* Trochu světlejší text */
-    margin-bottom: 1.5em; /* Větší mezera před tlačítky */
-    text-align: center; /* Centrování textu adresy */
-    line-height: 1.6; /* Lepší čitelnost delší adresy */
+
+/* ---- Styl pro samotné odkazy (menší, šedá tlačítka) ---- */
+.map-section-minimal .map-button-minimal {
+    display: inline-block;
+    padding: 8px 18px;       /* Menší padding pro menší tlačítko */
+    background-color: #f0f0f0; /* Světle šedá barva pozadí */
+    color: #333;             /* Tmavě šedý text pro kontrast */
+    text-decoration: none;
+    border-radius: 4px;      /* Mírně zakulacené rohy */
+    font-size: 0.95em;       /* Trochu menší písmo */
+    border: 1px solid #dcdcdc; /* Jemný okraj pro lepší definici */
+    text-align: center;
+    min-width: 160px;        /* Menší minimální šířka */
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+    /* Bez stínu pro jemnější vzhled, nebo můžete přidat velmi jemný */
+    /* box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); */
 }
 
-/* ---- Styl pro obalovač odkazu (paragraf) ---- */
-.map-section .map-link-wrapper {
-    margin-bottom: 1em; /* Mezera mezi tlačítky */
-    width: 100%; /* Zajistí, že flexbox centruje tlačítko správně */
-    text-align: center; /* Důležité pro centrování inline-block tlačítka uvnitř */
+/* ---- Efekt při najetí myší ---- */
+.map-section-minimal .map-button-minimal:hover {
+    background-color: #e0e0e0; /* Trochu tmavší šedá */
+    border-color: #c0c0c0;
+    color: #000;             /* Může ztmavnout i text */
+    text-decoration: none;
 }
 
-/* ---- Styl pro samotné odkazy (vzhled tlačítek) ---- */
-.map-section .map-button {
-    display: inline-block; /* Aby bylo možné nastavit padding a chovalo se to jako blok */
-    padding: 12px 25px; /* Vnitřní odsazení tlačítka (vertikální, horizontální) */
-    background-color: #007bff; /* Modrá barva pozadí (Bootstrap primary) */
-    color: white; /* Bílý text */
-    text-decoration: none; /* Odstranění podtržení odkazu */
-    border-radius: 5px; /* Zakulacené rohy */
-    font-weight: bold; /* Tučné písmo */
-    text-align: center; /* Centrování textu uvnitř tlačítka */
-    min-width: 200px; /* Minimální šířka, aby tlačítka vypadala konzistentně */
-    cursor: pointer; /* Změna kurzoru na "ručičku" */
-
-    /* Přechod pro plynulejší efekt při najetí myší */
-    transition: background-color 0.3s ease, transform 0.1s ease;
-
-     /* Jemný stín pro 3D efekt */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+/* ---- Efekt při kliknutí (aktivní stav) ---- */
+.map-section-minimal .map-button-minimal:active {
+    background-color: #6c757d; /* Tmavě šedá (např. Bootstrap secondary) */
+    color: white;             /* Bílý text na tmavém pozadí */
+    border-color: #5a6268;
+    transform: scale(0.98);   /* Lehké zmenšení */
 }
 
-/* ---- Efekt při najetí myší na tlačítko ---- */
-.map-section .map-button:hover {
-    background-color: #0056b3; /* Tmavší modrá při najetí */
-    text-decoration: none; /* Zajistit, že se neobjeví podtržení */
+/* ---- Pokud chcete tlačítka vedle sebe (responzivně) ---- */
+/* Odkomentujte nebo přidejte toto, pokud chcete tlačítka vedle sebe na širších obrazovkách */
+
+@media (min-width: 480px) { // Např. pro obrazovky širší než 480px
+    .map-section-minimal {
+        flex-direction: row; // Tlačítka vedle sebe
+        justify-content: center; // Centrování tlačítek vedle sebe
+        gap: 15px; // Mezera mezi tlačítky vedle sebe
+    }
+    .map-section-minimal .map-link-wrapper-minimal {
+        margin-bottom: 0; // Resetovat spodní margin
+        width: auto; // Šířka se přizpůsobí tlačítku
+    }
 }
 
-/* ---- Efekt při kliknutí na tlačítko ---- */
-.map-section .map-button:active {
-    background-color: #004085; /* Ještě tmavší modrá při kliknutí */
-    transform: scale(0.98); /* Lehké zmenšení tlačítka */
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2); /* Vnitřní stín při kliknutí */
-}
