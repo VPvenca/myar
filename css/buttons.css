@@ -125,7 +125,7 @@
 /* ---- Pokud chcete tlačítka vedle sebe (responzivně) ---- */
 /* Odkomentujte nebo přidejte toto, pokud chcete tlačítka vedle sebe na širších obrazovkách */
 
-@media (min-width: 480px) { // Např. pro obrazovky širší než 480px
+/*@media (min-width: 480px) { // Např. pro obrazovky širší než 480px
     .map-section-minimal {
         flex-direction: row; // Tlačítka vedle sebe
         justify-content: center; // Centrování tlačítek vedle sebe
@@ -136,4 +136,4 @@
         width: auto; // Šířka se přizpůsobí tlačítku
     }
 }
-
+*/
