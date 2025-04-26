@@ -4,7 +4,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="/img/favicon.png" />
+    <link rel="icon" type="image/png" href="img/favicon.png" />
     <title>AR Aplikace</title> <!-- Mírně upravený titulek -->
     <!-- Základní styly a preset -->
     <link rel="stylesheet" href="/css/base.css">
@@ -27,30 +27,40 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/img/apple_touch_icon_192x192.png">
+   
 </head>
-<body>
+<body class="home-page">
 
     <div class="page-wrapper"> <!-- Obalovač pro flexbox layout s patičkou dole -->
-
         <header class="app-header">
             <!-- Sem umístěte logo -->
-            <img src="/img/augview.png" alt="Logo AR Aplikace" id="app-logo">
-            <h1>Vyberte AR Kolekci</h1>
+            <img src="img/augview.png" alt="Logo AR Aplikace" id="app-logo">
+            <h1>Vyberte AR kolekci</h1>
         </header>
-
-        <main class="menu-content">
-            <!-- Tlačítko/Odkaz na vaši první scénu -->
-            <a href="/assets/kyjov/scena_3.html" class="menu-button">AR 3D</a>
+        
+          <main class="menu-content">
+            <!-- Tlačítka s ikonami (HTML struktura zůstává stejná) -->
+           <a href="/assets/stezka_bohuslavice/bohuslavice.html" class="menu-button icon-button">
+                <img src="img/obce_thumb.png" alt="" class="button-icon">
+                <span class="button-text">Bohuslavice u Kyjova</span>
+            </a>
             
-
-            <!-- Sem můžete přidat tlačítka pro další scény -->
-            
-                       <!-- === TLAČÍTKO ZPĚT === -->
-            <a href="/index.html" class="menu-button back-button">Zpět na hlavní menu</a>
-            <!-- ===================== -->
- 
         </main>
- <!-- === TLAČÍTKO NÁPOVĚDY === -->
+        <!-- === TLAČÍTKO ZPĚT === -->
+<div class="back-button-container">
+    <a href="/index.html" class="menu-button back-button">
+        Zpět
+    </a>
+</div>
+      
+          
+            
+        </main>
+
+    
+   
+    
+<!-- === TLAČÍTKO NÁPOVĚDY === -->
         <button id="help-button" class="help-icon-button" title="Nápověda">
             ?
             <!-- Nebo pokud použijete Font Awesome: -->
@@ -68,19 +78,20 @@
         <div class="modal-content">
             <h2>Nápověda</h2>
             <p>
-                Vyberte si jednu z dostupných kolekcí scén pomocí tlačítek v nabídce.
-               
+                Vyberte si jednu z dostupných kolekcí scén pomocí tlačítek v hlavní nabídce.
+                <li>PŘÍKLAD: Pokud se nacházíte v Bohuslavicích, zvolíte právě tuto kolekci.</li>
+                
             </p>
-          
+           
             <!-- Tlačítko pro zavření modálního okna -->
             <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
             <!-- Poznámka: Nepoužíváme <a> tag, protože nechceme znovu načíst stránku, jen skrýt okno -->
         </div>
     </div>
-    <!-- ==================================== -->
 
     <!-- Připojení JavaScriptu na konec body -->
-    <script src="/script.js"></script>
+    <script src="script.js"></script>
+    
 
 </body>
 </html>
