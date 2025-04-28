@@ -12,7 +12,6 @@ const urlsToCache = [
   '/css/links.css',
   '/css/modal.css',
   '/css/pages.css',
-  '/css/style.css',
   '/css/text-block.css',
   '/script.js',
   '/img/augview.png', // Přidejte vaše logo
