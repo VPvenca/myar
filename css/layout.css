@@ -66,3 +66,51 @@ h1 {
 .app-footer p {
     margin: 0; /* Odstraní výchozí okraj odstavce uvnitř patičky */
 }
+
+/* --- Styly pro ikonu s textem do nápovědy--- */
+.help-menu-list {
+    list-style: none; /* Odstraní odrážky seznamu */
+    padding: 0;
+    margin: 1em 0; /* Přidá trochu vertikálního prostoru */
+}
+
+.help-menu-list li {
+    display: flex; /* Použije Flexbox pro zarovnání ikony a textu */
+    align-items: center; /* Vertikálně vycentruje ikonu a text */
+    margin-bottom: 1em; /* Odsazení mezi položkami seznamu */
+}
+
+.help-icon {
+    width: 45px; /* Zachová vaši velikost */
+    height: 45px;
+    margin-right: 10px; /* Mezera mezi ikonou a textem */
+    flex-shrink: 0; /* Zajistí, že se ikona nezmenší, pokud je text dlouhý */
+}
+
+/* Styly pro ikony v iOS instrukcích */
+.inline-icon.ios-icon {
+    vertical-align: middle; /* Lepší zarovnání s textem */
+    height: 1.2em; /* Upravte velikost podle potřeby */
+    width: auto;
+    margin: 0 0.2em; /* Malá mezera kolem ikony */
+}
+
+/* Styly pro sekce Přidat na plochu */
+.add-to-home-section {
+    margin-bottom: 1.5em;
+    padding-left: 10px; /* Lehké odsazení */
+    border-left: 3px solid #eee; /* Vizuální oddělení */
+}
+
+.add-to-home-section h3 {
+    margin-top: 0;
+    margin-bottom: 0.5em;
+}
+
+.add-to-home-section ol {
+    padding-left: 20px; /* Standardní odsazení pro číslovaný seznam */
+}
+
+.add-to-home-section ol li {
+    margin-bottom: 0.5em; /* Mezera mezi kroky */
+}
