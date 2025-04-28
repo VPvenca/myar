@@ -77,7 +77,7 @@ h1 {
 .help-menu-list li {
     display: flex; /* Použije Flexbox pro zarovnání ikony a textu */
     align-items: center; /* Vertikálně vycentruje ikonu a text */
-    margin-bottom: 1em; /* Odsazení mezi položkami seznamu */
+    margin-bottom: 2em; /* Odsazení mezi položkami seznamu */
 }
 
 .help-icon {
