@@ -114,3 +114,22 @@ h1 {
 .add-to-home-section ol li {
     margin-bottom: 0.5em; /* Mezera mezi kroky */
 }
+
+/* === Styly pro video === */
+.modal-video-container {
+    margin: 1em 0; /* Vertikální odsazení kontejneru videa */
+    background-color: #f0f0f0; /* Jemné pozadí pro odlišení */
+    padding: 10px; /* Malý vnitřní okraj */
+    border-radius: 8px; /* Stejné zaoblení jako u videa */
+    text-align: center; /* Vycentruje video, pokud by bylo užší než kontejner */
+}
+
+.modal-video-container video {
+    display: block; /* Odstraní případné mezery pod videem */
+    max-width: 100%; /* Zajistí responzivitu - nepřeteče */
+    height: auto;      /* Zachová poměr stran */
+    border-radius: 4px; /* Zaoblené rohy pro video (přesunuto z inline stylu) */
+    border: 1px solid #ccc; /* Jemný okraj kolem videa */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Jemný stín */
+    margin: 0 auto; /* Vycentruje video v kontejneru */
+}
