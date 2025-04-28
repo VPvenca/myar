@@ -133,3 +133,12 @@ h1 {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Jemný stín */
     margin: 0 auto; /* Vycentruje video v kontejneru */
 }
+hr {
+    border: none;                /* Odstraní výchozí rámeček/efekty */
+    border-top: 1px solid #ccc;  /* Vytvoří tenkou horní linku (1px) s šedou barvou (#ccc) */
+    height: 0;                   /* Zajistí, že element nemá žádnou výšku navíc */
+    margin: 1.5em 0;             /* Přidá vertikální odsazení (nahoře a dole) - upravte podle potřeby */
+    color: #ccc;                 /* Barva pro starší prohlížeče (někdy se používá) */
+    background-color: #ccc;      /* Barva pro některé jiné případy */
+    overflow: visible;           /* Standardní hodnota, někdy potřeba pro reset */
+}
