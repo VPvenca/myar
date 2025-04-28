@@ -114,58 +114,64 @@
     
    
     
-<!-- === MODÁLNÍ OKNO NÁPOVĚDY (skryté) === -->
-    <div id="help-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h2>Nápověda</h2>
-            <p>
-                Vítejte v AR aplikaci! Díky technologii rozšířené reality se 
-                vám na obrazovce mobilního telefonu otevře nový svět zážitků.
-                Objevujte fascinující informace zábavnou a poutavou formou jako nikdy předtím.
-            </p>
-                <h2>Menu-panel</h2> 
-               <ul> 
-                 <img src="/img/muzea_45x45.png" alt="muzea" class="inline-icon"> <li> Zde naleznete doprovodné AR prohlídky v Muzeích a Galeriích. <br></li>
-                </ul>
-              <p> 
-              <ul> 
-                 <img src="/img/mista_45x45.png" alt="mista" class="inline-icon"> <li> Zde naleznete doprovodné AR na turistických stezkách a místech. <br></li>
-                </ul>
-             <p>  
-                 <ul> 
-                 <img src="/img/kniha_45x45.png" alt="kniha" class="inline-icon"> <li> Zde naleznete doprovodné AR ke knihám a brožurám. <br></li>
-                </ul>
-            <p>
-                 <ul> 
-                 <img src="/img/otaznik_45x45.png" alt="otaznik" class="inline-icon"> <li> Zde naleznete podrobnější informace o aplikaci AugView.  <br></li>
-                </ul>
-            <p>
-                <h2>Přidat na plochu</h2> 
-          </p>
-                 Pro nejlepší zážitek si přidejte aplikaci na plochu:
-           </p>
-           <p>
-               <ul> 
-                    <li>Andoid (Chrome)</li>
-                </ul>
-           <p>    
-             Klepněte na tři tečky vpravo nahoře (chrome) poté klepněte na "Přidat na plochu" nebo "Instalovat aplikaci"
-             <p>  
-             <ul> 
-                    <li>IOS</li>
-                </ul>
-             <p>
-             1. Klepněte na ikonu Sdílet <img src="/img/ios_share_icon.png" alt="Share icon" class="inline-icon"> <br>
-             2. Sjeďte dolů a vyberte "Přidat na plochu" <img src="/img/ios_add_icon.png" alt="Add to Home Screen icon" class="inline-icon">
-              <p>
-                Aplikace využívá:
-            <p>   
-                Mind AR / A frame
-            <!-- Tlačítko pro zavření modálního okna -->
-            <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
-            <!-- Poznámka: Nepoužíváme <a> tag, protože nechceme znovu načíst stránku, jen skrýt okno -->
-        </div>
+<!-- === MODÁLNÍ OKNO NÁPOVĚDY (vylepšená struktura) === -->
+<div id="help-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2>Nápověda</h2>
+        <p>
+            Vítejte v AR aplikaci! Díky technologii rozšířené reality se
+            vám na obrazovce mobilního telefonu otevře nový svět zážitků.
+            Objevujte fascinující informace zábavnou a poutavou formou jako nikdy předtím.
+        </p>
+
+        <!-- ... (začátek modálního okna stejný) ... -->
+
+<h2>Menu Panel</h2>
+<div class="help-items-container">
+    <div class="help-item">
+        <img src="/img/muzea_45x45.png" alt="Ikona Muzea a Galerie" class="help-icon">
+        <p>Zde naleznete doprovodné AR prohlídky v Muzeích a Galeriích.</p>
     </div>
+    <div class="help-item">
+        <img src="/img/mista_45x45.png" alt="Ikona Turistická místa" class="help-icon">
+        <p>Zde naleznete doprovodné AR na turistických stezkách a místech.</p>
+    </div>
+    <div class="help-item">
+        <img src="/img/kniha_45x45.png" alt="Ikona Knihy a brožury" class="help-icon">
+        <p>Zde naleznete doprovodné AR ke knihám a brožurám.</p>
+    </div>
+    <div class="help-item">
+        <img src="/img/otaznik_45x45.png" alt="Ikona O aplikaci" class="help-icon">
+        <p>Zde naleznete podrobnější informace o aplikaci AugView.</p>
+    </div>
+</div>
+
+
+        <h2>Přidat na plochu</h2>
+        <p>Pro nejlepší zážitek si přidejte aplikaci na plochu:</p>
+
+        <div class="add-to-home-section">
+            <h3>Android (Chrome)</h3>
+            <p>
+                Klepněte na ikonu tří teček (⋮) vpravo nahoře v prohlížeči Chrome, poté zvolte "Přidat na plochu" nebo "Instalovat aplikaci".
+            </p>
+        </div>
+
+        <div class="add-to-home-section">
+            <h3>iOS (Safari)</h3>
+            <ol>
+                <li>Klepněte na ikonu Sdílet <img src="/img/ios_share_icon.png" alt="Ikona Sdílet na iOS" class="inline-icon ios-icon">.</li>
+                <li>Sjeďte dolů a vyberte "Přidat na plochu" <img src="/img/ios_add_icon.png" alt="Ikona Přidat na plochu na iOS" class="inline-icon ios-icon">.</li>
+            </ol>
+        </div>
+
+        <h2>Technologie</h2>
+        <p>Aplikace využívá technologie MindAR a A-Frame.</p>
+
+        <!-- Tlačítko pro zavření modálního okna -->
+        <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
+    </div>
+</div>
     <!-- ==================================== -->
 
     <!-- Připojení JavaScriptu na konec body -->
