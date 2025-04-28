@@ -88,55 +88,66 @@
         </footer>
 
     </div> <!-- Konec page-wrapper -->
-<!-- === MODÁLNÍ OKNO NÁPOVĚDY (skryté) === -->
-    <div id="help-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h2>Nápověda</h2>
-            
-              Pro nejlepší zážitek si přidejte aplikaci na plochu:
-           </p>
-           <p>
-               <ul> 
-                    <li>Andoid (Chrome)</li>
-                </ul>
-           <p>    
-             Klepněte na tři tečky vpravo nahoře (chrome) poté klepněte na "Přidat na plochu" nebo "Instalovat aplikaci"
-             <p>  
-             <ul> 
-                    <li>IOS</li>
-                </ul>
-             <p>
-             1. Klepněte na ikonu Sdílet <img src="/img/ios_share_icon.png" alt="Share icon" class="inline-icon"> <br>
-             2. Sjeďte dolů a vyberte "Přidat na plochu" <img src="/img/ios_add_icon.png" alt="Add to Home Screen icon" class="inline-icon">
-              <p>
-              <li>Pokud jste si přidali aplikaci na plochu, doporučujeme toto okno zavřít a pokračovat spuštěním aplikace.</li>  
-                  <p>
-              <li>Pro funkci aplikace je zapotřebí internetové připojení.</li>   
-             
-             <p>
-             <!-- === SEM VLOŽTE VIDEO === -->
-             <p>
-                Pusťte si ukázku.
-            </p>
-            <div class="modal-video-container"> <!-- Přidán obal pro styling -->
-                <video controls preload="metadata" playsinline style="max-width: 100%; height: auto; border-radius: 4px;">
+<!-- === MODÁLNÍ OKNO NÁPOVĚDY - Přidat na plochu & Video (vylepšená struktura) === -->
+<div id="help-modal-add-to-home" class="modal-overlay"> <!-- Doporučuji unikátní ID, pokud máte více modálů -->
+    <div class="modal-content">
+        <h2>Nápověda a první kroky</h2> <!-- Můžete upravit název dle potřeby -->
+
+        <!-- Sekce Přidat na plochu -->
+        <section class="help-section">
+            <h3>Přidat na plochu</h3>
+            <p>Pro nejlepší zážitek doporučujeme přidat si aplikaci na plochu vašeho zařízení:</p>
+
+            <div class="add-to-home-platform">
+                <h4>Android (Chrome)</h4>
+                <p>
+                    Klepněte na ikonu tří teček (⋮) vpravo nahoře v prohlížeči Chrome, poté zvolte "Přidat na plochu" nebo "Instalovat aplikaci".
+                </p>
+            </div>
+
+            <div class="add-to-home-platform">
+                <h4>iOS (Safari)</h4>
+                <ol>
+                    <li>Klepněte na ikonu Sdílet <img src="/img/ios_share_icon.png" alt="Ikona Sdílet na iOS" class="inline-icon ios-icon">.</li>
+                    <li>Sjeďte dolů a vyberte "Přidat na plochu" <img src="/img/ios_add_icon.png" alt="Ikona Přidat na plochu na iOS" class="inline-icon ios-icon">.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Sekce Důležité tipy -->
+        <section class="help-section">
+            <h3>Důležité tipy</h3>
+             <ul>
+                <li>Pokud jste si přidali aplikaci na plochu, doporučujeme toto okno zavřít a pokračovat spuštěním přidané aplikace z plochy.</li>
+                <li>Pro správnou funkci aplikace je nutné aktivní internetové připojení.</li>
+             </ul>
+        </section>
+
+        <!-- Sekce Video Ukázka -->
+        <section class="help-section">
+            <h3>Ukázka použití</h3>
+            <p>Podívejte se na krátké video, jak aplikace funguje:</p>
+            <div class="modal-video-container">
+                <video controls preload="metadata" playsinline poster="/img/video_poster_nahled.jpg"> <!-- Přidán atribut poster pro náhledový obrázek -->
                     <source src="video/nahled_ar.mp4" type="video/mp4">
-                    <!-- Fallback pro starší prohlížeče nebo pokud video nelze načíst -->
-                    Váš prohlížeč nepodporuje přehrávání HTML5 videa.
+                    <!-- Vylepšený fallback -->
+                    Váš prohlížeč nepodporuje přehrávání HTML5 videa. Video si můžete <a href="video/nahled_ar.mp4" download>stáhnout zde</a>.
                 </video>
             </div>
-            </p>
-                Pokračovat můžete z hlavního menu výběrem kategorie scén.
-          
-            <p>
-                Aplikace využívá:
-             <p>
-                Mind AR / A frame
-            <!-- Tlačítko pro zavření modálního okna -->
-            <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
-            <!-- Poznámka: Nepoužíváme <a> tag, protože nechceme znovu načíst stránku, jen skrýt okno -->
-        </div>
+             <p>Pokračovat můžete z hlavního menu výběrem kategorie scén.</p> <!-- Text přesunut sem pro lepší logiku -->
+        </section>
+
+         <!-- Sekce Technologie -->
+         <section class="help-section">
+             <h3>Technologie</h3>
+             <p>Aplikace využívá technologie MindAR a A-Frame.</p>
+         </section>
+
+        <!-- Tlačítko pro zavření modálního okna -->
+        <!-- Použijte unikátní ID, pokud je třeba -->
+        <button id="close-help-add-to-home-button" class="menu-button modal-close-button">Zavřít nápovědu</button>
     </div>
+</div>
     <!-- ==================================== -->
 
     <!-- Připojení JavaScriptu na konec body -->
