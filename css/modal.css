@@ -18,36 +18,64 @@
     display: flex;          /* Použijeme flex pro snadné centrování obsahu uvnitř */
     justify-content: center;/* Centrování obsahu horizontálně */
     align-items: center;    /* Centrování obsahu vertikálně */
-    transition: background-color 0.3s ease, transform 0.2s ease; /* Plynulé přechody pro hover efekt */
-    /* Animace pro upoutání pozornosti po načtení stránky */
-    animation-name: blink-attention; /* Název keyframes animace */
-    animation-duration: 1.2s;       /* Délka jednoho cyklu animace */
-    animation-timing-function: ease-in-out; /* Průběh animace */
-    animation-iteration-count: 3; /* Počet opakování animace */
-    animation-delay: 0.5s;        /* Zpoždění před začátkem animace */
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Plynulé přechody pro hover + animaci */
+
+    /* Výchozí animace pro upoutání pozornosti (3x blikne) */
+    /* Tato animace se spustí na všech stránkách kromě info.html (kde ji přepíšeme) */
+    /* nebo na info.html poté, co se odstraní třída .needs-attention (pokud ji neodstraníme úplně) */
+    animation-name: blink-attention;
+    animation-duration: 1.2s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: 3; /* <<< Standardně jen 3x */
+    animation-delay: 0.5s;
+    animation-fill-mode: forwards; /* Zůstane v konečném stavu animace (pokud je potřeba) */
 }
+
+/* ----- Nová třída pro nepřetržitou animaci na info.html ----- */
+.help-icon-button.needs-attention {
+    /* Přepisujeme/doplňujeme vlastnosti animace */
+    animation-name: blink-attention; /* Můžeme použít stejnou nebo vytvořit novou */
+    animation-duration: 1s; /* Můžeme zrychlit */
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite; /* <<< Klíčová změna: Nekonečné opakování */
+    animation-delay: 0.2s; /* Můžeme začít dříve */
+    /* Můžeme přidat i další animaci, např. jemný puls nebo bounce */
+    /* animation: blink-attention 1s infinite ease-in-out, subtle-bounce 1.5s infinite ease-in-out; */
+}
+
 
 .help-icon-button:hover {
     background-color: #31b0d5; /* Tmavší modrá při najetí */
     transform: scale(1.1);    /* Mírné zvětšení při najetí */
-    animation-name: none;     /* Zastaví animaci blikání při najetí myší */
+    /* Zastaví běžící animaci POUZE pokud se jmenuje blink-attention */
+    /* Pokud by .needs-attention používalo jiný název animace, museli bychom to zde také zohlednit */
+    /* nebo nechat animaci běžet i při hoveru, pokud to nevadí */
+    animation-name: none;
 }
 
-/* Definice animace blikání pro tlačítko nápovědy */
+/* Definice animace blikání pro tlačítko nápovědy (zůstává stejná) */
 @keyframes blink-attention {
-    0%, 100% { /* Začátek a konec animace - výchozí stav */
+    0%, 100% {
         transform: scale(1);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        background-color: #5bc0de;
+        background-color: #5bc0de; /* Vrací se na původní modrou */
         opacity: 1;
     }
-    50% { /* Polovina animace - zvýrazněný stav */
-        transform: scale(1.1); /* Zvětšení */
-        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4); /* Výraznější červený stín */
-        background-color: #e74c3c; /* Změna barvy na červenou pro upoutání */
+    50% {
+        transform: scale(1.15); /* Trochu větší zvětšení pro důraz */
+        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6); /* Výraznější červený stín */
+        background-color: #e74c3c; /* Červená pro upoutání */
         opacity: 1;
     }
 }
+
+/* Volitelně: definice druhé animace (pokud byste chtěli kombinovat) */
+/*
+@keyframes subtle-bounce {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-4px) scale(1.05); }
+}
+*/
 
 /* --- Styly pro Modální Okno (Nápověda) --- */
 
