@@ -214,8 +214,9 @@
         // Skryjeme banner (i když hned přesměrováváme, pro jistotu)
         banner.style.display = 'none';
 
-        // Přesměrujeme na hlavní stránku
-        console.log('Redirecting to index.html after consent action.'); // Log pro kontrolu
+        // Zústává na stránce info.html
+        console.log('Consent already recorded. Banner remains hidden. User stays on info.html.');  
+        /*console.log('Redirecting to index.html after consent action.'); // Log pro kontrolu*/
         window.location.href = 'index.html';
       }
 
