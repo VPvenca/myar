@@ -220,8 +220,34 @@
       denyButton.addEventListener('click', function() {
         handleConsent(false);
       });
-    });
-    </script>
+       </script>
+    
+ <!-- === NOVÝ JavaScript pro animaci tlačítka nápovědy === -->
+    <script>
+      // Počkáme, až bude celý HTML dokument načtený a zpracovaný
+      document.addEventListener('DOMContentLoaded', (event) => {
+        // Najdeme tlačítko nápovědy podle jeho třídy (nebo ID, pokud ho má)
+        // Máte <button id="help-button" class="help-icon-button" ...>, použijeme ID pro jistotu
+        const helpButton = document.getElementById('help-button'); // Použijeme ID
 
+        // Zkontrolujeme, zda tlačítko na stránce existuje
+        if (helpButton) {
+          // Přidáme třídu pro spuštění nekonečné animace
+          helpButton.classList.add('needs-attention');
+          console.log('Added .needs-attention class to help button.'); // Log pro kontrolu
+
+          // Přidáme posluchače na kliknutí
+          helpButton.addEventListener('click', () => {
+            console.log('Help button clicked, removing attention class.'); // Pro ladění
+            // Jakmile uživatel klikne, odstraníme třídu .needs-attention
+            helpButton.classList.remove('needs-attention');
+            // Tím se zastaví nekonečná animace definovaná pro .needs-attention
+          }, { once: true }); // { once: true } zajistí, že se posluchač spustí jen jednou
+        } else {
+          console.warn('Help button (#help-button) not found on info.html');
+        }
+      });
+    </script>
+    <!-- ==================================================== -->
 </body>
 </html>
