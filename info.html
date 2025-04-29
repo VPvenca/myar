@@ -62,55 +62,7 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/img/apple_touch_icon_192x192.png">
 
-    <!-- Styly pro Consent Banner (můžete přesunout do vašeho CSS) -->
-    <style>
-        #consent-banner {
-            display: none; /* Skrytý, dokud JS nerozhodne jinak */
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: rgba(0, 0, 0, 0.9); /* Tmavší pozadí pro lepší viditelnost */
-            color: #fff; /* Bílý text */
-            padding: 15px 20px;
-            box-shadow: 0 -3px 6px rgba(0,0,0,0.2);
-            text-align: center;
-            z-index: 2000; /* Vyšší Z-index než nápověda */
-            border-top: 1px solid #444;
-            box-sizing: border-box;
-            font-size: 0.9em; /* Trochu menší text */
-        }
-        #consent-banner p {
-            margin: 0 0 12px 0;
-            line-height: 1.4;
-        }
-        #consent-banner button {
-            /* Použije styly z buttons.css, pokud existují, zde jen základ */
-            padding: 8px 18px;
-            border: none;
-            cursor: pointer;
-            margin: 5px 8px;
-            font-weight: bold;
-            border-radius: 4px;
-            color: white; /* Výchozí barva textu tlačítek */
-        }
-        #consent-accept {
-             /* Použijte vaši třídu pro potvrzovací tlačítko nebo tyto styly */
-            background-color: #4CAF50; /* Zelená */
-        }
-        #consent-deny {
-            /* Použijte vaši třídu pro zamítací tlačítko nebo tyto styly */
-            background-color: #f44336; /* Červená */
-        }
-         #consent-banner a {
-            color: #a0cfff; /* Světle modrá pro odkaz */
-            text-decoration: underline;
-        }
-        #consent-banner a:hover {
-             color: #fff;
-         }
-    </style>
-
+   
 </head>
 <body>
 
