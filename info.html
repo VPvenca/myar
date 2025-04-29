@@ -165,7 +165,7 @@
     <!-- Váš stávající script.js pro nápovědu atd. -->
     <script src="script.js"></script>
 
-    <!-- Nový JavaScript pro Consent Banner -->
+    <!-- JavaScript pro Consent Banner - UPRAVENO -->
     <script>
     document.addEventListener('DOMContentLoaded', function() {
       const banner = document.getElementById('consent-banner');
@@ -177,57 +177,48 @@
 
       if (!currentConsent) {
           // Pokud souhlas není uložen, zobrazíme banner
-          console.log('Consent banner displayed.'); // Log pro kontrolu
+          console.log('Consent banner displayed.');
           banner.style.display = 'block';
       } else {
-          // Pokud souhlas již existuje, banner nezobrazujeme a můžeme rovnou přesměrovat
-          console.log('Consent already recorded, redirecting to index.html'); // Log pro kontrolu
-          // Poznámka: Přesměrování může způsobit "bliknutí" info stránky.
-          // Alternativně můžete nechat uživatele na info stránce bez banneru.
-          // Rozhodněte se podle preferované uživatelské zkušenosti.
-          window.location.href = 'index.html';
-          return; // Ukončíme skript, pokud přesměrováváme
+          // Pokud souhlas již existuje, banner NEZOBRAZÍME, ale zůstaneme na stránce info.html
+          console.log('Consent already recorded. Banner remains hidden. User stays on info.html.');
+          // ŘÁDEK PRO PŘESMĚROVÁNÍ JE ODSTRANĚN/ZAKOMENTOVÁN:
+          // window.location.href = 'index.html';
+          // return; // return také není potřeba, pokud nepřesměrováváme
       }
 
-      // Funkce pro zpracování souhlasu
+      // Funkce pro zpracování souhlasu (zůstává stejná jako v předchozí úpravě - bez přesměrování)
       function handleConsent(consentGranted) {
         const consentState = {
           'analytics_storage': consentGranted ? 'granted' : 'denied',
-          // Volitelně aktualizujte i další, pokud je používáte
           'ad_storage': consentGranted ? 'granted' : 'denied',
           'ad_user_data': consentGranted ? 'granted' : 'denied',
           'ad_personalization': consentGranted ? 'granted' : 'denied',
         };
 
-        // Aktualizujeme Consent Mode (gtag funkce by měla být dostupná)
         if (typeof gtag === 'function') {
            gtag('consent', 'update', consentState);
-           console.log('Consent updated via info.html:', consentState); // Log pro kontrolu
+           console.log('Consent updated via info.html:', consentState);
         } else {
            console.error('gtag function not defined when trying to update consent from info.html!');
         }
 
-        // Uložíme volbu do localStorage
         localStorage.setItem('ga_consent_status', JSON.stringify(consentState));
-        console.log('Consent saved to localStorage.'); // Log pro kontrolu
+        console.log('Consent saved to localStorage.');
 
-        // Skryjeme banner (i když hned přesměrováváme, pro jistotu)
         banner.style.display = 'none';
-
-        // Zústává na stránce info.html
-        console.log('Consent already recorded. Banner remains hidden. User stays on info.html.');  
-        /*console.log('Redirecting to index.html after consent action.'); // Log pro kontrolu*/
-        /*window.location.href = 'index.html';*/
-          
+        console.log('Consent banner hidden. User stays on info.html.');
+        // Přesměrování zde také není:
+        // window.location.href = 'index.html';
       }
 
-      // Event Listeners pro tlačítka
+      // Event Listeners pro tlačítka (zůstávají stejné)
       acceptButton.addEventListener('click', function() {
-        handleConsent(true); // Souhlas udělen
+        handleConsent(true);
       });
 
       denyButton.addEventListener('click', function() {
-        handleConsent(false); // Souhlas zamítnut
+        handleConsent(false);
       });
     });
     </script>
