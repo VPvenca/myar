@@ -1,114 +1,141 @@
 <!DOCTYPE html>
 <html lang="cs">
-<script>
-  // Define dataLayer and the gtag function.
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-
-  // Set default consent to 'denied' before loading gtag.js
-  // Adjust this based on your specific needs and legal requirements
-  gtag('consent', 'default', {
-    'ad_storage': 'denied', // Můžete přidat i další typy souhlasu dle potřeby
-    'ad_user_data': 'denied',
-    'ad_personalization': 'denied',
-    'analytics_storage': 'denied' // Klíčové pro Google Analytics
-  });
-
-  // Zkuste načíst uložený souhlas z localStorage
-  const savedConsent = localStorage.getItem('ga_consent_status');
-  if (savedConsent) {
-    try {
-      const consentState = JSON.parse(savedConsent);
-      gtag('consent', 'update', consentState); // Aktualizuje stav, pokud byl již udělen/zamítnut
-    } catch (e) {
-      console.error('Error parsing saved consent:', e);
-      localStorage.removeItem('ga_consent_status'); // Odstraňte neplatná data
-    }
-  }
-</script>
-  
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-NRST1685GR"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-NRST1685GR');
-</script>    
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="img/favicon.png" />
-    <title>AR Aplikace</title> <!-- Mírně upravený titulek -->
-    <!-- Základní styly a preset -->
+    <title>AR Aplikace</title>
+
+    <!-- === SKRIPT PRO KONTROLU PRVNÍ NÁVŠTĚVY (MUSÍ BÝT HNED NA ZAČÁTKU HEAD) === -->
+    <script>
+      (function() {
+        const visitedInfoFlagKey = 'arAppVisitedInfo_v1';
+        const consentStatusKey = 'ga_consent_status'; // Klíč pro stav souhlasu
+
+        try {
+          const hasVisited = localStorage.getItem(visitedInfoFlagKey);
+          const consentStatus = localStorage.getItem(consentStatusKey);
+
+          // Pokud uživatel ještě nenavštívil info stránku NEBO nemá uložený stav souhlasu
+          // (pojistka, pokud by flag 'arAppVisitedInfo_v1' existoval, ale souhlas ne)
+          // přesměrujeme na info.html
+          if (hasVisited !== 'true' || !consentStatus) {
+            console.log('První návštěva nebo chybějící souhlas detekován. Přesměrovávám na info.html');
+
+            // Nastavíme flag návštěvy (pokud ještě není)
+            if (hasVisited !== 'true') {
+                localStorage.setItem(visitedInfoFlagKey, 'true');
+            }
+            // Poznámka: Stav souhlasu se nastaví až na info.html
+
+            // Přesměrujeme
+            window.location.replace('info.html');
+            // Důležité: Po replace se zbytek <head> v tomto cyklu nezpracuje,
+            // což je v pořádku, protože uživatel jde na info.html
+          } else {
+            console.log('Opakovaná návštěva a souhlas nalezen. Načítám index.html normálně.');
+          }
+        } catch (e) {
+          console.error('Nepodařilo se pracovat s localStorage při kontrole první návštěvy:', e);
+          // V případě chyby necháme pokračovat, Consent Mode nastaví default 'denied'
+        }
+      })();
+    </script>
+    <!-- === KONEC SKRIPTU PRVNÍ NÁVŠTĚVY === -->
+
+
+    <!-- Google Analytics Consent Mode - Výchozí nastavení (PŘED gtag.js) -->
+    <script>
+        // Define dataLayer and the gtag function.
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        // Nastaví výchozí stav souhlasu na ZAMÍTNUTO před načtením gtag.js
+        console.log('Setting default consent state to denied (index.html).');
+        gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'analytics_storage': 'denied' // Klíčové pro Google Analytics
+        });
+
+        // Pokusí se načíst uložený souhlas z localStorage
+        // Tento kód se spustí, jen pokud skript výše NEpřesměroval na info.html
+        const savedConsent = localStorage.getItem('ga_consent_status');
+        if (savedConsent) {
+            try {
+                const consentState = JSON.parse(savedConsent);
+                console.log('Found saved consent state on index.html:', consentState);
+                gtag('consent', 'update', consentState); // Aktualizuje stav podle uložené volby
+            } catch (e) {
+                console.error('Error parsing saved consent on index.html:', e);
+                localStorage.removeItem('ga_consent_status'); // Odstraní neplatná data
+            }
+        } else {
+             // Toto by nemělo nastat, pokud kontrola první návštěvy funguje správně,
+             // ale pro jistotu logujeme.
+             console.log('No saved consent found on index.html, default denied remains.');
+        }
+    </script>
+
+    <!-- Google tag (gtag.js) - Načtení knihovny -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NRST1685GR"></script>
+    <script>
+        // Inicializace gtag funkce a volání 'config'
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        // TATO ŘÁDKA JE ZDE NUTNÁ - inicializuje měření pro GA4
+        // Bude respektovat stav souhlasu nastavený výše.
+        gtag('config', 'G-NRST1685GR');
+        console.log('gtag.js loaded and config command executed on index.html for G-NRST1685GR');
+    </script>
+
+    <!-- Vaše stávající CSS a další head tagy -->
     <link rel="stylesheet" href="/css/base.css">
-
-    <!-- Styly pro layout stránky -->
     <link rel="stylesheet" href="/css/layout.css">
-
-    <!-- Styly pro komponenty -->
     <link rel="stylesheet" href="/css/buttons.css">
     <link rel="stylesheet" href="/css/modal.css">
     <link rel="stylesheet" href="/css/text-block.css">
     <link rel="stylesheet" href="/css/links.css">
-
-    <!-- Styly specifické pro stránky (musí být poslední, aby mohly přepsat obecné) -->
     <link rel="stylesheet" href="/css/pages.css">
-
-    <!-- Pokud chcete použít Google Font (viz níže), přidejte sem link -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/img/apple_touch_icon_192x192.png">
-    
-   <!-- === SKRIPT PRO KONTROLU PRVNÍ NÁVŠTĚVY === -->
-    <script>
-      (function() { // Použití IIFE pro izolaci scope
-        const visitedInfoFlagKey = 'arAppVisitedInfo_v1'; // Unikátní klíč pro localStorage
 
-        try {
-          // Zkusíme získat hodnotu z localStorage
-          const hasVisited = localStorage.getItem(visitedInfoFlagKey);
-
-          // Pokud hodnota neexistuje nebo není 'true' -> první návštěva
-          if (hasVisited !== 'true') {
-            console.log('První návštěva detekována. Přesměrovávám na info.html');
-
-            // Nastavíme flag, že uživatel stránku navštívil
-            localStorage.setItem(visitedInfoFlagKey, 'true');
-
-            // Přesměrujeme na info.html
-            // window.location.replace() je lepší než .href, protože nenahraje index.html do historie
-            // a uživatel se tlačítkem zpět nevrátí nechtěně na index.html před info.html
-            window.location.replace('info.html');
-          } else {
-            // Pokud flag existuje a je 'true' -> opakovaná návštěva
-            console.log('Opakovaná návštěva. Načítám index.html normálně.');
-            // Neděláme nic, stránka pokračuje v načítání
-          }
-        } catch (e) {
-          // Chyba při práci s localStorage (např. zakázané cookies/storage, plné úložiště)
-          console.error('Nepodařilo se pracovat s localStorage:', e);
-          // V případě chyby raději necháme načíst index.html, než abychom zablokovali aplikaci
+    <!-- Přidáme jednoduché styly pro tlačítko změny souhlasu, můžete je dát do CSS -->
+    <style>
+        .change-consent-button {
+            background: none;
+            border: none;
+            color: #555; /* Nebo barva odkazu z vašeho designu */
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.8em;
+            padding: 5px;
+            display: block; /* Aby bylo na samostatném řádku v patičce */
+            margin: 5px auto 0 auto; /* Malý horní okraj a centrování (pokud je v divu) */
+            text-align: center; /* Centrování textu */
         }
-      })(); // Okamžité spuštění funkce
-    </script>
-    <!-- === KONEC SKRIPTU === -->
+        .change-consent-button:hover {
+            color: #000; /* Nebo jiná barva pro hover */
+        }
+    </style>
+
 </head>
 <body class="home-page">
 
-    <div class="page-wrapper"> <!-- Obalovač pro flexbox layout s patičkou dole -->
+    <div class="page-wrapper">
         <header class="app-header">
-            <!-- Sem umístěte logo -->
             <img src="img/augview.png" alt="Logo AR Aplikace" id="app-logo">
             <h1>Vyberte kategorii scén</h1>
         </header>
-        
-          <main class="menu-content">
-            <!-- Tlačítka s ikonami (HTML struktura zůstává stejná) -->
+
+        <main class="menu-content">
+            <!-- Vaše stávající tlačítka -->
             <a href="/muzea_galerie.html" class="menu-button icon-button">
                 <img src="img/muzea.png" alt="" class="button-icon">
                 <span class="button-text">MUZEA GALERIE</span>
@@ -126,97 +153,68 @@
                 <span class="button-text">O AUGVIEW</span>
             </a>
         </main>
-            <!-- Sem můžete přidat tlačítka pro další scény -->
-            
-        </main>
- <!-- === TLAČÍTKO NÁPOVĚDY === -->
-        <button id="help-button" class="help-icon-button" title="Nápověda">
-            ?
-            <!-- Nebo pokud použijete Font Awesome: -->
-            <!-- <i class="fas fa-question"></i> -->
-        </button>
-        <!-- ========================= -->
-        <!-- === SEM PŘIDEJTE ODKAZ NA LICENCE === -->
+
+        <button id="help-button" class="help-icon-button" title="Nápověda">?</button>
+
         <div class="license-link-container">
              <a href="licence.html" class="license-link">Licence třetích stran</a>
         </div>
-        <!-- ==================================== -->
 
         <footer class="app-footer">
             <p>© 2025 Vytvořil Václav Pěnčík</p>
+            <!-- Tlačítko pro změnu souhlasu -->
+            <button id="change-consent-button" class="change-consent-button">Změnit nastavení soukromí</button>
+            <!-- Konec tlačítka -->
         </footer>
 
     </div> <!-- Konec page-wrapper -->
-    
-   
-    
-<!-- === MODÁLNÍ OKNO NÁPOVĚDY (vylepšená struktura) === -->
-<div id="help-modal" class="modal-overlay">
-    <div class="modal-content">
-        <h2>Nápověda</h2>
-        <p>
-            Vítejte v AR aplikaci! Díky technologii rozšířené reality se
-            vám na obrazovce mobilního telefonu otevře nový svět zážitků.
-            Objevujte fascinující informace zábavnou a poutavou formou jako nikdy předtím.
-        </p>
 
-        <!-- ... (začátek modálního okna stejný) ... -->
-
-<h2>Menu Panel</h2>
-<div class="help-items-container">
-    <div class="help-item">
-        <img src="/img/muzea_45x45.png" alt="Ikona Muzea a Galerie" class="help-icon">
-        <p>Zde naleznete doprovodné AR prohlídky v Muzeích a Galeriích.</p>
-    </div>
-    <hr>
-    <div class="help-item">
-        <img src="/img/mista_45x45.png" alt="Ikona Turistická místa" class="help-icon">
-        <p>Zde naleznete doprovodné AR na turistických stezkách a místech.</p>
-    </div>
-    <hr>
-    <div class="help-item">
-        <img src="/img/kniha_45x45.png" alt="Ikona Knihy a brožury" class="help-icon">
-        <p>Zde naleznete doprovodné AR ke knihám a brožurám.</p>
-    </div>
-    <hr>
-    <div class="help-item">
-        <img src="/img/otaznik_45x45.png" alt="Ikona O aplikaci" class="help-icon">
-        <p>Zde naleznete podrobnější informace o aplikaci AugView.</p>
-    </div>
-    <hr>
-</div>
-
-
-        <h2>Přidat na plochu</h2>
-        <p>Pro nejlepší zážitek si přidejte aplikaci na plochu:</p>
-
-        <div class="add-to-home-section">
-            <h3>Android (Chrome)</h3>
-            <p>
-                Klepněte na ikonu tří teček (⋮) vpravo nahoře v prohlížeči Chrome, poté zvolte "Přidat na plochu" nebo "Instalovat aplikaci".
-            </p>
+    <!-- Modální okno nápovědy (Váš stávající kód) -->
+    <div id="help-modal" class="modal-overlay">
+       <!-- Obsah vašeho modálního okna nápovědy -->
+        <div class="modal-content">
+            <h2>Nápověda</h2>
+            <p>Vítejte v AR aplikaci!...</p>
+            <!-- ... zbytek obsahu nápovědy ... -->
+            <h2>Menu Panel</h2>
+            <div class="help-items-container">...</div>
+            <h2>Přidat na plochu</h2>
+            <div class="add-to-home-section">...</div>
+            <div class="add-to-home-section">...</div>
+            <h2>Technologie</h2>
+            <p>Aplikace využívá technologie MindAR a A-Frame.</p>
+            <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
         </div>
-
-        <div class="add-to-home-section">
-            <h3>iOS (Safari)</h3>
-            <ol>
-                <li>Klepněte na ikonu Sdílet <img src="/img/ios_share_icon.png" alt="Ikona Sdílet na iOS" class="inline-icon ios-icon">.</li>
-                <li>Sjeďte dolů a vyberte "Přidat na plochu" <img src="/img/ios_add_icon.png" alt="Ikona Přidat na plochu na iOS" class="inline-icon ios-icon">.</li>
-            </ol>
-        </div>
-
-        <h2>Technologie</h2>
-        <p>Aplikace využívá technologie MindAR a A-Frame.</p>
-
-        <!-- Tlačítko pro zavření modálního okna -->
-        <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
+       <!-- Konec obsahu modálního okna nápovědy -->
     </div>
-</div>
-    <!-- ==================================== -->
 
     <!-- Připojení JavaScriptu na konec body -->
+    <!-- Váš stávající script.js pro nápovědu atd. -->
     <script src="script.js"></script>
+    <!-- Váš stávající browser_check.js -->
     <script src="browser_check.js"></script>
+
+    <!-- JavaScript pro tlačítko změny souhlasu -->
+    <script>
+        const changeConsentBtn = document.getElementById('change-consent-button');
+        if (changeConsentBtn) {
+            changeConsentBtn.addEventListener('click', function() {
+                console.log('Change consent button clicked.');
+                // Jednoduchá metoda: smažeme souhlas a pošleme uživatele zpět na info stránku
+                try {
+                    localStorage.removeItem('ga_consent_status');
+                    // Volitelně můžeme smazat i flag první návštěvy, aby se info zobrazilo jistě
+                    // localStorage.removeItem('arAppVisitedInfo_v1');
+                    console.log('Consent status removed from localStorage.');
+                    alert('Vaše nastavení soukromí bylo resetováno. Budete přesměrováni pro novou volbu.');
+                    window.location.href = 'info.html'; // Přesměrujeme pro novou volbu
+                } catch (e) {
+                    console.error('Nepodařilo se smazat consent status z localStorage:', e);
+                    alert('Nastala chyba při resetování vašeho nastavení. Zkuste prosím vymazat data stránek v prohlížeči.');
+                }
+            });
+        }
+    </script>
 
 </body>
 </html>
