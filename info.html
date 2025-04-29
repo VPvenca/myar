@@ -1,5 +1,42 @@
 <!DOCTYPE html>
 <html lang="cs">
+<script>
+  // Define dataLayer and the gtag function.
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+
+  // Set default consent to 'denied' before loading gtag.js
+  // Adjust this based on your specific needs and legal requirements
+  gtag('consent', 'default', {
+    'ad_storage': 'denied', // Můžete přidat i další typy souhlasu dle potřeby
+    'ad_user_data': 'denied',
+    'ad_personalization': 'denied',
+    'analytics_storage': 'denied' // Klíčové pro Google Analytics
+  });
+
+  // Zkuste načíst uložený souhlas z localStorage
+  const savedConsent = localStorage.getItem('ga_consent_status');
+  if (savedConsent) {
+    try {
+      const consentState = JSON.parse(savedConsent);
+      gtag('consent', 'update', consentState); // Aktualizuje stav, pokud byl již udělen/zamítnut
+    } catch (e) {
+      console.error('Error parsing saved consent:', e);
+      localStorage.removeItem('ga_consent_status'); // Odstraňte neplatná data
+    }
+  }
+</script>
+  
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NRST1685GR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NRST1685GR');
+</script> 
+    
 <head>
 
     <meta charset="UTF-8">
