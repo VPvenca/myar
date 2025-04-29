@@ -169,24 +169,68 @@
 
     </div> <!-- Konec page-wrapper -->
 
-    <!-- Modální okno nápovědy (Váš stávající kód) -->
-    <div id="help-modal" class="modal-overlay">
-       <!-- Obsah vašeho modálního okna nápovědy -->
-        <div class="modal-content">
-            <h2>Nápověda</h2>
-            <p>Vítejte v AR aplikaci!...</p>
-            <!-- ... zbytek obsahu nápovědy ... -->
-            <h2>Menu Panel</h2>
-            <div class="help-items-container">...</div>
-            <h2>Přidat na plochu</h2>
-            <div class="add-to-home-section">...</div>
-            <div class="add-to-home-section">...</div>
-            <h2>Technologie</h2>
-            <p>Aplikace využívá technologie MindAR a A-Frame.</p>
-            <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
-        </div>
-       <!-- Konec obsahu modálního okna nápovědy -->
+   <div id="help-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2>Nápověda</h2>
+        <p>
+            Vítejte v AR aplikaci! Díky technologii rozšířené reality se
+            vám na obrazovce mobilního telefonu otevře nový svět zážitků.
+            Objevujte fascinující informace zábavnou a poutavou formou jako nikdy předtím.
+        </p>
+
+        <!-- ... (začátek modálního okna stejný) ... -->
+
+<h2>Menu Panel</h2>
+<div class="help-items-container">
+    <div class="help-item">
+        <img src="/img/muzea_45x45.png" alt="Ikona Muzea a Galerie" class="help-icon">
+        <p>Zde naleznete doprovodné AR prohlídky v Muzeích a Galeriích.</p>
     </div>
+    <hr>
+    <div class="help-item">
+        <img src="/img/mista_45x45.png" alt="Ikona Turistická místa" class="help-icon">
+        <p>Zde naleznete doprovodné AR na turistických stezkách a místech.</p>
+    </div>
+    <hr>
+    <div class="help-item">
+        <img src="/img/kniha_45x45.png" alt="Ikona Knihy a brožury" class="help-icon">
+        <p>Zde naleznete doprovodné AR ke knihám a brožurám.</p>
+    </div>
+    <hr>
+    <div class="help-item">
+        <img src="/img/otaznik_45x45.png" alt="Ikona O aplikaci" class="help-icon">
+        <p>Zde naleznete podrobnější informace o aplikaci AugView.</p>
+    </div>
+    <hr>
+</div>
+
+
+        <h2>Přidat na plochu</h2>
+        <p>Pro nejlepší zážitek si přidejte aplikaci na plochu:</p>
+
+        <div class="add-to-home-section">
+            <h3>Android (Chrome)</h3>
+            <p>
+                Klepněte na ikonu tří teček (⋮) vpravo nahoře v prohlížeči Chrome, poté zvolte "Přidat na plochu" nebo "Instalovat aplikaci".
+            </p>
+        </div>
+
+        <div class="add-to-home-section">
+            <h3>iOS (Safari)</h3>
+            <ol>
+                <li>Klepněte na ikonu Sdílet <img src="/img/ios_share_icon.png" alt="Ikona Sdílet na iOS" class="inline-icon ios-icon">.</li>
+                <li>Sjeďte dolů a vyberte "Přidat na plochu" <img src="/img/ios_add_icon.png" alt="Ikona Přidat na plochu na iOS" class="inline-icon ios-icon">.</li>
+            </ol>
+        </div>
+
+        <h2>Technologie</h2>
+        <p>Aplikace využívá technologie MindAR a A-Frame.</p>
+
+        <!-- Tlačítko pro zavření modálního okna -->
+        <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
+    </div>
+</div>
+    <!-- ==================================== -->
 
     <!-- Připojení JavaScriptu na konec body -->
     <!-- Váš stávající script.js pro nápovědu atd. -->
