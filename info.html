@@ -1,189 +1,282 @@
 <!DOCTYPE html>
 <html lang="cs">
-<script>
-  // Define dataLayer and the gtag function.
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-
-  // Set default consent to 'denied' before loading gtag.js
-  // Adjust this based on your specific needs and legal requirements
-  gtag('consent', 'default', {
-    'ad_storage': 'denied', // Můžete přidat i další typy souhlasu dle potřeby
-    'ad_user_data': 'denied',
-    'ad_personalization': 'denied',
-    'analytics_storage': 'denied' // Klíčové pro Google Analytics
-  });
-
-  // Zkuste načíst uložený souhlas z localStorage
-  const savedConsent = localStorage.getItem('ga_consent_status');
-  if (savedConsent) {
-    try {
-      const consentState = JSON.parse(savedConsent);
-      gtag('consent', 'update', consentState); // Aktualizuje stav, pokud byl již udělen/zamítnut
-    } catch (e) {
-      console.error('Error parsing saved consent:', e);
-      localStorage.removeItem('ga_consent_status'); // Odstraňte neplatná data
-    }
-  }
-</script>
-  
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-NRST1685GR"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-NRST1685GR');
-</script> 
-    
-<head>
-
+<head> <!-- Všechny meta, link a script tagy patří SEM -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="img/favicon.png" />
-    <title>AR Aplikace</title> <!-- Mírně upravený titulek -->
-    <!-- Základní styly a preset -->
+    <title>Vítejte - AR Aplikace</title> <!-- Mírně upravený titulek -->
+
+    <!-- Google Analytics Consent Mode - Výchozí nastavení (MUSÍ BÝT PŘED gtag.js) -->
+    <script>
+        // Define dataLayer and the gtag function.
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+
+        // Nastaví výchozí stav souhlasu na ZAMÍTNUTO před načtením gtag.js
+        console.log('Setting default consent state to denied.'); // Log pro kontrolu
+        gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'analytics_storage': 'denied' // Klíčové pro Google Analytics
+        });
+
+        // Pokusí se načíst uložený souhlas z localStorage (pro případ, že se uživatel vrátí)
+        const savedConsent = localStorage.getItem('ga_consent_status');
+        if (savedConsent) {
+            try {
+                const consentState = JSON.parse(savedConsent);
+                 console.log('Found saved consent state:', consentState); // Log pro kontrolu
+                gtag('consent', 'update', consentState); // Aktualizuje stav, pokud byl již udělen/zamítnut
+            } catch (e) {
+                console.error('Error parsing saved consent:', e);
+                localStorage.removeItem('ga_consent_status'); // Odstraní neplatná data
+            }
+        } else {
+             console.log('No saved consent found.'); // Log pro kontrolu
+        }
+    </script>
+
+    <!-- Google tag (gtag.js) - Načtení knihovny -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NRST1685GR"></script>
+    <script>
+        // Tento blok pouze inicializuje funkci gtag, pokud ještě neexistuje, a registruje čas načtení JS.
+        // NENÍ ZDE gtag('config', ...) - to je klíčové pro info.html!
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        console.log('gtag.js loaded, config command SKIPPED on info.html'); // Log pro kontrolu
+    </script>
+
+    <!-- Vaše stávající CSS linky -->
     <link rel="stylesheet" href="/css/base.css">
-
-    <!-- Styly pro layout stránky -->
     <link rel="stylesheet" href="/css/layout.css">
-
-    <!-- Styly pro komponenty -->
     <link rel="stylesheet" href="/css/buttons.css">
     <link rel="stylesheet" href="/css/modal.css">
     <link rel="stylesheet" href="/css/text-block.css">
     <link rel="stylesheet" href="/css/links.css">
-
-    <!-- Styly specifické pro stránky (musí být poslední, aby mohly přepsat obecné) -->
     <link rel="stylesheet" href="/css/pages.css">
- 
-    <!-- Pokud chcete použít Google Font (viz níže), přidejte sem link -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/img/apple_touch_icon_192x192.png">
+
+    <!-- Styly pro Consent Banner (můžete přesunout do vašeho CSS) -->
+    <style>
+        #consent-banner {
+            display: none; /* Skrytý, dokud JS nerozhodne jinak */
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.9); /* Tmavší pozadí pro lepší viditelnost */
+            color: #fff; /* Bílý text */
+            padding: 15px 20px;
+            box-shadow: 0 -3px 6px rgba(0,0,0,0.2);
+            text-align: center;
+            z-index: 2000; /* Vyšší Z-index než nápověda */
+            border-top: 1px solid #444;
+            box-sizing: border-box;
+            font-size: 0.9em; /* Trochu menší text */
+        }
+        #consent-banner p {
+            margin: 0 0 12px 0;
+            line-height: 1.4;
+        }
+        #consent-banner button {
+            /* Použije styly z buttons.css, pokud existují, zde jen základ */
+            padding: 8px 18px;
+            border: none;
+            cursor: pointer;
+            margin: 5px 8px;
+            font-weight: bold;
+            border-radius: 4px;
+            color: white; /* Výchozí barva textu tlačítek */
+        }
+        #consent-accept {
+             /* Použijte vaši třídu pro potvrzovací tlačítko nebo tyto styly */
+            background-color: #4CAF50; /* Zelená */
+        }
+        #consent-deny {
+            /* Použijte vaši třídu pro zamítací tlačítko nebo tyto styly */
+            background-color: #f44336; /* Červená */
+        }
+         #consent-banner a {
+            color: #a0cfff; /* Světle modrá pro odkaz */
+            text-decoration: underline;
+        }
+        #consent-banner a:hover {
+             color: #fff;
+         }
+    </style>
+
 </head>
 <body>
 
     <div class="page-wrapper"> <!-- Obalovač pro flexbox layout s patičkou dole -->
 
         <header class="app-header">
-            <!-- Sem umístěte logo -->
             <img src="img/augview.png" alt="Logo AR Aplikace" id="app-logo">
-            
         </header>
-        
-       <main class="menu-content">
 
-            <!-- Nový textový blok -->
+       <main class="menu-content">
+            <!-- Váš stávající obsah main -->
             <div class="text-content-block">
-                <h2>Vítejte v aplikaci AugView!</h2> <!-- Příklad nadpisu -->
+                <h2>Vítejte v aplikaci AugView!</h2>
                 <p>
                    Tato aplikace vám přináší unikátní zážitky pomocí rozšířené reality (AR).
+               </p>
                <p>
                    Určitě jste si někdy představili, jaké by to bylo, kdyby na vás v muzeu promluvila postava z obrazu.
                    Co kdyby se ilustrace v knize začala hýbat, nebo se z informační cedule vynořil trojrozměrný model?
                    Prohlédněte si naše interaktivní scény a objevte svět kolem sebe novým způsobem.
                 </p>
                 <p>
-                    <ul> 
+                    <ul>
                     <li>Kdykoli budete potřebovat poradit klikněte na ikonu otazníku vpravo dole. </li>
-                        
                    </ul>
                 </p>
                 <h2>Nyní klikněte na ikonu otazníku na této stránce.</h2>
                 <p>
-                
-                 </p>              
                     Pokud máte jakékoli dotazy nebo si přejete navázat spolupráci, neváhejte nás kontaktovat. Můžete nám
-                    <!-- Zde je samotný odkaz -->
                     <a href="mailto:v.pencik@email.cz" class="email-link">napsat e-mail</a>.
-                   <!-- Konec odkazu -->
                     Rádi vám pomůžeme!
-               
+               </p>
             </div>
             <!-- Konec textového bloku -->
 
-            
-                       <!-- === TLAČÍTKO ZPĚT === -->
             <a href="index.html" class="menu-button back-button">Zpět na hlavní menu</a>
-            <!-- ===================== -->
- 
+
         </main>
- <!-- === TLAČÍTKO NÁPOVĚDY === -->
-        <button id="help-button" class="help-icon-button" title="Nápověda">
-            ?
-            <!-- Nebo pokud použijete Font Awesome: -->
-            <!-- <i class="fas fa-question"></i> -->
-        </button>
-        <!-- ========================= -->
+
+        <button id="help-button" class="help-icon-button" title="Nápověda">?</button>
 
         <footer class="app-footer">
             <p>© 2025 Vytvořil Václav Pěnčík</p>
         </footer>
 
     </div> <!-- Konec page-wrapper -->
-<!-- === MODÁLNÍ OKNO NÁPOVĚDY - Přidat na plochu & Video (vylepšená struktura) === -->
-<div id="help-modal" class="modal-overlay">
-    <div class="modal-content">
-        <h2>Nápověda a první kroky</h2> <!-- Můžete upravit název dle potřeby -->
 
-        
-    
-        <p>Pro nejlepší zážitek si přidejte aplikaci na plochu:</p>
-
-        <div class="add-to-home-section">
-            <h3>Android (Chrome)</h3>
-            <p>
-                Klepněte na ikonu tří teček (⋮) vpravo nahoře v prohlížeči Chrome, poté zvolte "Přidat na plochu" nebo "Instalovat aplikaci".
-            </p>
-        </div>
-
-        <div class="add-to-home-section">
-            <h3>iOS (Safari)</h3>
-            <ol>
-                <li>Klepněte na ikonu Sdílet <img src="/img/ios_share_icon.png" alt="Ikona Sdílet na iOS" class="inline-icon ios-icon">.</li>
-                <li>Sjeďte dolů a vyberte "Přidat na plochu" <img src="/img/ios_add_icon.png" alt="Ikona Přidat na plochu na iOS" class="inline-icon ios-icon">.</li>
-            </ol>
-        </div>
-         <!-- Sekce Důležité tipy -->
-        <section class="help-section">
-            <h3>Důležité tipy</h3>
-             <ul>
-                <li>Pokud jste si přidali aplikaci na plochu, doporučujeme toto okno zavřít a pokračovat spuštěním přidané aplikace z plochy.</li>
-                 <p>
-                <li>Pro správnou funkci aplikace je nutné aktivní internetové připojení.</li>
-             </ul>
-        </section>
-        <p>
-
-          <!-- Sekce Video Ukázka -->
-        <section class="help-section">
-            <h3>Ukázka použití</h3>
-            <p>Podívejte se na krátké video, jak aplikace funguje:</p>
-            <div class="modal-video-container">
-                <video controls preload="metadata" playsinline poster="/img/video_poster_nahled.jpg"> <!-- Přidán atribut poster pro náhledový obrázek -->
-                    <source src="video/nahled_ar.mp4" type="video/mp4">
-                    <!-- Vylepšený fallback -->
-                    Váš prohlížeč nepodporuje přehrávání HTML5 videa. Video si můžete <a href="video/nahled_ar.mp4" download>stáhnout zde</a>.
-                </video>
+    <!-- Modální okno nápovědy (Váš stávající kód) -->
+    <div id="help-modal" class="modal-overlay">
+        <!-- Obsah vašeho modálního okna nápovědy ... -->
+        <div class="modal-content">
+            <h2>Nápověda a první kroky</h2>
+            <p>Pro nejlepší zážitek si přidejte aplikaci na plochu:</p>
+             <div class="add-to-home-section">
+                <h3>Android (Chrome)</h3>
+                <p>Klepněte na ikonu tří teček (⋮) vpravo nahoře v prohlížeči Chrome, poté zvolte "Přidat na plochu" nebo "Instalovat aplikaci".</p>
             </div>
-             <p>Pokračovat můžete z hlavního menu výběrem kategorie scén.</p> <!-- Text přesunut sem pro lepší logiku -->
-        </section>
-
-          <h2>Technologie</h2>
-        <p>Aplikace využívá technologie MindAR a A-Frame.</p>
-
-        <!-- Tlačítko pro zavření modálního okna -->
-        <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
+             <div class="add-to-home-section">
+                <h3>iOS (Safari)</h3>
+                <ol>
+                    <li>Klepněte na ikonu Sdílet <img src="/img/ios_share_icon.png" alt="Ikona Sdílet na iOS" class="inline-icon ios-icon">.</li>
+                    <li>Sjeďte dolů a vyberte "Přidat na plochu" <img src="/img/ios_add_icon.png" alt="Ikona Přidat na plochu na iOS" class="inline-icon ios-icon">.</li>
+                </ol>
+            </div>
+             <section class="help-section">
+                <h3>Důležité tipy</h3>
+                 <ul>
+                    <li>Pokud jste si přidali aplikaci na plochu, doporučujeme toto okno zavřít a pokračovat spuštěním přidané aplikace z plochy.</li>
+                    <li>Pro správnou funkci aplikace je nutné aktivní internetové připojení.</li>
+                 </ul>
+            </section>
+             <section class="help-section">
+                <h3>Ukázka použití</h3>
+                <p>Podívejte se na krátké video, jak aplikace funguje:</p>
+                <div class="modal-video-container">
+                    <video controls preload="metadata" playsinline poster="/img/video_poster_nahled.jpg">
+                        <source src="video/nahled_ar.mp4" type="video/mp4">
+                        Váš prohlížeč nepodporuje přehrávání HTML5 videa. Video si můžete <a href="video/nahled_ar.mp4" download>stáhnout zde</a>.
+                    </video>
+                </div>
+                 <p>Pokračovat můžete z hlavního menu výběrem kategorie scén.</p>
+            </section>
+            <h2>Technologie</h2>
+            <p>Aplikace využívá technologie MindAR a A-Frame.</p>
+            <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
+        </div>
+        <!-- Konec obsahu modálního okna nápovědy -->
     </div>
-</div>
-    <!-- ==================================== -->
+
+    <!-- === Consent Banner HTML === -->
+    <div id="consent-banner">
+      <p>Pro analýzu návštěvnosti a vylepšování aplikace používáme Google Analytics. Pomozte nám sběrem anonymních dat. Vaše soukromí je pro nás důležité. <a href="/privacy-policy.html" target="_blank">Více informací</a></p>
+      <button id="consent-accept">Souhlasím</button> <!-- Můžete použít vaši CSS třídu -->
+      <button id="consent-deny">Odmítám</button>   <!-- Můžete použít vaši CSS třídu -->
+    </div>
+    <!-- ========================== -->
+
 
     <!-- Připojení JavaScriptu na konec body -->
+    <!-- Váš stávající script.js pro nápovědu atd. -->
     <script src="script.js"></script>
+
+    <!-- Nový JavaScript pro Consent Banner -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const banner = document.getElementById('consent-banner');
+      const acceptButton = document.getElementById('consent-accept');
+      const denyButton = document.getElementById('consent-deny');
+
+      // Zkontrolujeme, zda uživatel již dříve volbu provedl
+      const currentConsent = localStorage.getItem('ga_consent_status');
+
+      if (!currentConsent) {
+          // Pokud souhlas není uložen, zobrazíme banner
+          console.log('Consent banner displayed.'); // Log pro kontrolu
+          banner.style.display = 'block';
+      } else {
+          // Pokud souhlas již existuje, banner nezobrazujeme a můžeme rovnou přesměrovat
+          console.log('Consent already recorded, redirecting to index.html'); // Log pro kontrolu
+          // Poznámka: Přesměrování může způsobit "bliknutí" info stránky.
+          // Alternativně můžete nechat uživatele na info stránce bez banneru.
+          // Rozhodněte se podle preferované uživatelské zkušenosti.
+          window.location.href = 'index.html';
+          return; // Ukončíme skript, pokud přesměrováváme
+      }
+
+      // Funkce pro zpracování souhlasu
+      function handleConsent(consentGranted) {
+        const consentState = {
+          'analytics_storage': consentGranted ? 'granted' : 'denied',
+          // Volitelně aktualizujte i další, pokud je používáte
+          'ad_storage': consentGranted ? 'granted' : 'denied',
+          'ad_user_data': consentGranted ? 'granted' : 'denied',
+          'ad_personalization': consentGranted ? 'granted' : 'denied',
+        };
+
+        // Aktualizujeme Consent Mode (gtag funkce by měla být dostupná)
+        if (typeof gtag === 'function') {
+           gtag('consent', 'update', consentState);
+           console.log('Consent updated via info.html:', consentState); // Log pro kontrolu
+        } else {
+           console.error('gtag function not defined when trying to update consent from info.html!');
+        }
+
+        // Uložíme volbu do localStorage
+        localStorage.setItem('ga_consent_status', JSON.stringify(consentState));
+        console.log('Consent saved to localStorage.'); // Log pro kontrolu
+
+        // Skryjeme banner (i když hned přesměrováváme, pro jistotu)
+        banner.style.display = 'none';
+
+        // Přesměrujeme na hlavní stránku
+        console.log('Redirecting to index.html after consent action.'); // Log pro kontrolu
+        window.location.href = 'index.html';
+      }
+
+      // Event Listeners pro tlačítka
+      acceptButton.addEventListener('click', function() {
+        handleConsent(true); // Souhlas udělen
+      });
+
+      denyButton.addEventListener('click', function() {
+        handleConsent(false); // Souhlas zamítnut
+      });
+    });
+    </script>
 
 </body>
 </html>
