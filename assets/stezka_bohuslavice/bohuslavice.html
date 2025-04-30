@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/img/favicon.png" />
@@ -20,7 +19,7 @@
 
     <!-- Styly specifické pro stránky (musí být poslední, aby mohly přepsat obecné) -->
     <link rel="stylesheet" href="/css/pages.css">
-    
+
     <!-- Pokud chcete použít Google Font (viz níže), přidejte sem link -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -37,46 +36,46 @@
             <img src="/img/augview.png" alt="Logo AR Aplikace" id="app-logo">
             <h1>Vyberte AR Scénu</h1>
         </header>
-                <main class="menu-content">
-            <!-- Tlačítka s ikonami (HTML struktura zůstává stejná) -->
-           <a href="/assets/stezka_bohuslavice/vcela.html" class="menu-button icon-button">
+
+        <main class="menu-content">
+            <!-- Tlačítka s ikonami -->
+            <a href="/assets/stezka_bohuslavice/vcela.html" class="menu-button icon-button">
                 <img src="/assets/stezka_bohuslavice/thumb/vcela_thumb.png" alt="" class="button-icon">
                 <span class="button-text">včelařská stezka Bohuslavice</span>
             </a>
 
-                      
-        <!-- Odkaz pro ZOBRAZENÍ místa na mapě -->
-    <div class="map-section-minimal">
-        <p class="map-link-wrapper-minimal">
-    <a href="https://www.google.com/maps/search/?api=1&query=49.049466,17.122789" target="_blank" rel="noopener noreferrer" class="map-button-minimal">
-        Zobrazit na mapě
-    </a>
-</p>
-        <!-- === TLAČÍTKO ZPĚT === -->
+            <!-- Odkaz pro ZOBRAZENÍ místa na mapě -->
+            <div class="map-section-minimal">
+                <p class="map-link-wrapper-minimal">
+                    <a href="https://www.google.com/maps/search/?api=1&query=49.049466,17.122789" target="_blank" rel="noopener noreferrer" class="map-button-minimal">
+                        Zobrazit na mapě
+                    </a>
+                </p>
+            </div> <!-- Konec map-section-minimal -->
 
-        <div class="back-button-container">
-    <a href="/mista_stezky.html" class="menu-button back-button">
-        Zpět 
-    </a>
-</div>
+            <!-- === TLAČÍTKO ZPĚT === -->
+            <div class="back-button-container">
+                <a href="/mista_stezky.html" class="menu-button back-button">
+                    Zpět
+                </a>
+            </div> <!-- Konec back-button-container -->
 
- 
+            <!-- === TLAČÍTKO NÁPOVĚDY === -->
+            <button id="help-button" class="help-icon-button" title="Nápověda">
+                ?
+                <!-- Nebo pokud použijete Font Awesome: -->
+                <!-- <i class="fas fa-question"></i> -->
+            </button>
+            <!-- ========================= -->
 
- <!-- === TLAČÍTKO NÁPOVĚDY === -->
-        <button id="help-button" class="help-icon-button" title="Nápověda">
-            ?
-            <!-- Nebo pokud použijete Font Awesome: -->
-            <!-- <i class="fas fa-question"></i> -->
-        </button>
-
-        </main>
-        <!-- ========================= -->
+        </main> <!-- Konec JEDINÉHO main elementu -->
 
         <footer class="app-footer">
             <p>© 2025 Vytvořil Václav Pěnčík</p>
         </footer>
 
     </div> <!-- Konec page-wrapper -->
+
     <!-- === MODÁLNÍ OKNO NÁPOVĚDY (skryté) === -->
     <div id="help-modal" class="modal-overlay">
         <div class="modal-content">
@@ -84,26 +83,22 @@
             <p>
                 Vyberte si jednu z dostupných scén pomocí tlačítek v hlavní nabídce.
                 Po spuštění scény postupujte podle instrukcí na obrazovce pro zobrazení
-                rozšířené reality. 
+                rozšířené reality.
             </p>
             <p>POZOR! Je nutné povolit přístup ke kameře zařízení!</p>
             <h2>Menu Panel</h2>
-<div class="help-items-container">
-    <div class="help-item">
-        <img src="/assets/stezka_bohuslavice/thumb/vcela_thumb.png" alt="vcela" class="inline-icon">
-        <p>Včelařská stezka v Bohuslaviciích se připravuje.</p>
-    </div>
-    <hr>
+            <div class="help-items-container">
+                <div class="help-item">
+                    <img src="/assets/stezka_bohuslavice/thumb/vcela_thumb.png" alt="vcela" class="inline-icon">
+                    <p>Včelařská stezka v Bohuslaviciích se připravuje.</p>
+                </div>
+                <hr>
+            </div> <!-- Konec help-items-container -->
 
-                      
-        
-               <p>Ujistěte se, že máte dostatek světla a sledujte okolí.<p> 
-            
-            <p>
-            </p>
-                Aplikace využívá Mind AR / A frame.
-        
-        <!-- Tlačítko pro zavření modálního okna -->
+            <p>Ujistěte se, že máte dostatek světla a sledujte okolí.</p>
+            <p>Aplikace využívá Mind AR / A frame.</p>
+
+            <!-- Tlačítko pro zavření modálního okna -->
             <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
             <!-- Poznámka: Nepoužíváme <a> tag, protože nechceme znovu načíst stránku, jen skrýt okno -->
         </div>
