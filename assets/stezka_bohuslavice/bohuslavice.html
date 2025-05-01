@@ -74,10 +74,37 @@
 
 </div> <!-- Konec page-wrapper -->
 
-<!-- ... modální okno a script ... -->
-<div id="help-modal" class="modal-overlay">
-   <!-- ... obsah modálu ... -->
+<!-- === MODÁLNÍ OKNO NÁPOVĚDY (skryté) === -->
+    <div id="help-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Nápověda</h2>
+            <p>
+                Vyberte si jednu z dostupných scén pomocí tlačítek v hlavní nabídce.
+            Po spuštění scény postupujte podle instrukcí na obrazovce pro zobrazení
+            rozšířené reality.
+                
+            </p>
+            <p>POZOR! Je nutné povolit přístup ke kameře zařízení!</p>
+        <h2>Menu Panel</h2>
+            <div class="help-items-container">
+    <div class="help-item">
+        <img src="/assets/stezka_bohuslavice/thumb/vcela_thumb.png" alt="vcela" class="inline-icon">
+        <p>Včelařská stezka v Bohuslaviciích se připravuje.</p>
+    </div>
+    <hr>
+<p>Ujistěte se, že máte dostatek světla a sledujte okolí.</p>
+        
+        <p>
+        </p>
+            Aplikace využívá Mind AR / A frame.
+    
+    <!-- Tlačítko pro zavření modálního okna -->
+        <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
+        <!-- Poznámka: Nepoužíváme <a> tag, protože nechceme znovu načíst stránku, jen skrýt okno -->
+    </div>
 </div>
+<!-- ==================================== -->
+
 <script src="/script.js"></script>
 
 </body>
