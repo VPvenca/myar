@@ -39,8 +39,7 @@ h1 {
 
 /* --- Hlavní obsah (kontejner pro menu nebo text) --- */
 .menu-content {
-    flex-grow: 1;           /* Tento kontejner zabere veškerý dostupný vertikální prostor */
-                            /* mezi hlavičkou a patičkou, čímž patičku "tlačí" dolů */
+  
     display: flex;          /* Použijeme flexbox pro vnitřní uspořádání obsahu */
     flex-direction: column; /* Výchozí směr je sloupec (např. pro textové bloky, běžná menu) */
     align-items: center;    /* Centruje položky horizontálně (pokud je směr sloupec) */
@@ -145,6 +144,10 @@ hr {
 main {
   flex-grow: 1; /* KLÍČOVÉ: Main vyplní veškeré volné místo a odtlačí patičku */
   /* Nepotřebujete zde nutně display: flex, pokud nechcete speciálně zarovnávat .menu-content a .centered-controls mezi sebou */
+    display: flex;
+  flex-direction: column;
+  /* ============================ */
+
 }
 
 
@@ -157,15 +160,14 @@ main {
   flex-direction: column; /* Seřadí své potomky POD sebe */
   align-items: center;   /* Zarovná potomky horizontálně NA STŘED */
   padding: 1rem 0;       /* Odsazení nahoře/dole */
-  margin-top: 1.5rem;    /* Mezera nad tímto blokem (oddělí od .menu-content) */
   gap: 15px;             /* Mezera MEZI mapou, tlačítkem zpět a nápovědou */
+  margin-top: auto; 
 }
 
 /* Můžete přidat specifické styly pro prvky uvnitř .centered-controls, pokud je potřeba */
 /* Např. zajistit minimální/maximální šířku */
 .centered-controls .map-section-minimal,
-.centered-controls .back-button-container,
-.centered-controls #help-button {
+.centered-controls .back-button-container,{
    width: 90%; /* Nebo jiná šířka */
    max-width: 400px; /* Maximální šířka pro lepší vzhled na velkých obrazovkách */
 }
