@@ -1,30 +1,26 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/img/favicon.png" />
     <title>AR Aplikace</title> <!-- Mírně upravený titulek -->
     <!-- Základní styly a preset -->
     <link rel="stylesheet" href="/css/base.css">
-
     <!-- Styly pro layout stránky -->
     <link rel="stylesheet" href="/css/layout.css">
-
     <!-- Styly pro komponenty -->
     <link rel="stylesheet" href="/css/buttons.css">
     <link rel="stylesheet" href="/css/modal.css">
     <link rel="stylesheet" href="/css/text-block.css">
     <link rel="stylesheet" href="/css/links.css">
-
     <!-- Styly specifické pro stránky (musí být poslední, aby mohly přepsat obecné) -->
     <link rel="stylesheet" href="/css/pages.css">
-    
-    <!-- Pokud chcete použít Google Font (viz níže), přidejte sem link -->
+    <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Manifest a ikony -->
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/img/apple_touch_icon_192x192.png">
 </head>
@@ -33,131 +29,116 @@
     <div class="page-wrapper"> <!-- Obalovač pro flexbox layout s patičkou dole -->
 
         <header class="app-header">
-            <!-- Sem umístěte logo -->
             <img src="/img/augview.png" alt="Logo AR Aplikace" id="app-logo">
             <h1>Vyberte AR Scénu</h1>
         </header>
 
+        <!-- === ZAČÁTEK JEDINÉHO MAIN ELEMENTU === -->
+        <main>
+            <!-- Kontejner pro tlačítka menu -->
+            <div class="menu-content">
+                <a href="/assets/kyjov/terce.html" class="menu-button icon-button">
+                    <img src="/assets/kyjov/thumb/terce_thumb.png" alt="" class="button-icon">
+                    <span class="button-text">střelecké terče</span>
+                </a>
+                <a href="/assets/kyjov/florian.html" class="menu-button icon-button">
+                    <img src="/assets/kyjov/thumb/florian_thumb.png" alt="" class="button-icon">
+                    <span class="button-text">obraz sv.Floriána</span>
+                </a>
+                <a href="/assets/kyjov/scena_1.html" class="menu-button icon-button">
+                    <img src="/assets/kyjov/thumb/obrazy_thumb.png" alt="" class="button-icon">
+                    <span class="button-text">obrazy v mezipatře</span>
+                </a>
+                <a href="/assets/kyjov/scena_3.html" class="menu-button icon-button">
+                    <img src="/assets/kyjov/thumb/vedro_thumb.png" alt="" class="button-icon">
+                    <span class="button-text">3D vědro</span>
+                </a>
+                <a href="/assets/kyjov/scena_2.html" class="menu-button icon-button">
+                    <img src="/assets/kyjov/thumb/hadanky_thumb.png" alt="" class="button-icon">
+                    <span class="button-text">Hádanky</span>
+                </a>
+            </div> <!-- Konec .menu-content -->
 
-                <main class="menu-content">
-            <!-- Tlačítka s ikonami (HTML struktura zůstává stejná) -->
-                 
-           <a href="/assets/kyjov/terce.html" class="menu-button icon-button">
-                <img src="/assets/kyjov/thumb/terce_thumb.png" alt="" class="button-icon">
-                <span class="button-text">střelecké terče</span>
-            </a>
-                   
-               
-                 <a href="/assets/kyjov/florian.html" class="menu-button icon-button">
-                <img src="/assets/kyjov/thumb/florian_thumb.png" alt="" class="button-icon">
-                <span class="button-text">obraz sv.Floriána</span>
-            </a>
+            <!-- Kontejner pro mapu a tlačítko Zpět -->
+            <div class="centered-controls">
+                <!-- Odkaz pro ZOBRAZENÍ místa na mapě -->
+                <div class="map-section-minimal">
+                    <p class="map-link-wrapper-minimal">
+                        <a href="https://www.google.com/maps/search/?api=1&query=t%C5%99.+Palack%C3%A9ho+1373%2F13a%2C+697+01+Kyjov+1" target="_blank" rel="noopener noreferrer" class="map-button-minimal">
+                            Zobrazit na mapě
+                        </a>
+                    </p>
+                </div>
 
-            <a href="/assets/kyjov/scena_1.html" class="menu-button icon-button">
-                <img src="/assets/kyjov/thumb/obrazy_thumb.png" alt="" class="button-icon">
-                <span class="button-text">obrazy v mezipatře</span>
-            </a>  
+                <!-- Tlačítko Zpět -->
+                <div class="back-button-container">
+                    <a href="/muzea_galerie.html" class="menu-button back-button">
+                        Zpět
+                    </a>
+                </div>
+            </div> <!-- Konec .centered-controls -->
 
-            <a href="/assets/kyjov/scena_3.html" class="menu-button icon-button">
-                <img src="/assets/kyjov/thumb/vedro_thumb.png" alt="" class="button-icon">
-                <span class="button-text">3D vědro</span>
-            </a> 
+        </main> <!-- === KONEC JEDINÉHO MAIN ELEMENTU === -->
+        <!-- Nevalidní </main> tag odstraněn -->
 
-             <a href="/assets/kyjov/scena_2.html" class="menu-button icon-button">
-                <img src="/assets/kyjov/thumb/hadanky_thumb.png" alt="" class="button-icon">
-                <span class="button-text">Hádanky</span>
-            </a>           
+        <!-- Tlačítko Nápovědy (mimo main pro nezávislé pozicování) -->
+        <button id="help-button" class="help-icon-button" title="Nápověda">?</button>
 
-        </main>
-<!-- Odkaz pro ZOBRAZENÍ místa na mapě -->
-    <div class="map-section-minimal">
-    
-    <p class="map-link-wrapper-minimal">
-        <a href="https://www.google.com/maps/search/?api=1&query=t%C5%99.+Palack%C3%A9ho+1373%2F13a%2C+697+01+Kyjov+1" target="_blank" rel="noopener noreferrer" class="map-button-minimal">
-            Zobrazit na mapě
-        </a>
-    </p>
-
-    </div>
-        
-        <!-- === TLAČÍTKO ZPĚT === -->
-
-        <div class="back-button-container">
-    <a href="/muzea_galerie.html" class="menu-button back-button">
-        Zpět 
-    </a>
-</div>
-
- 
-        </main>
- <!-- === TLAČÍTKO NÁPOVĚDY === -->
-        <button id="help-button" class="help-icon-button" title="Nápověda">
-            ?
-            <!-- Nebo pokud použijete Font Awesome: -->
-            <!-- <i class="fas fa-question"></i> -->
-        </button>
-        <!-- ========================= -->
-
+        <!-- Patička -->
         <footer class="app-footer">
             <p>© 2025 Vytvořil Václav Pěnčík</p>
         </footer>
 
     </div> <!-- Konec page-wrapper -->
-<!-- === MODÁLNÍ OKNO NÁPOVĚDY (skryté) === -->
+
+    <!-- Modální okno Nápovědy -->
     <div id="help-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>Nápověda</h2>
             <p>
                 Vyberte si jednu z dostupných scén pomocí tlačítek v hlavní nabídce.
                 Po spuštění scény postupujte podle instrukcí na obrazovce pro zobrazení
-                rozšířené reality. 
+                rozšířené reality.
             </p>
             <p>POZOR! Je nutné povolit přístup ke kameře zařízení!</p>
             <h2>Menu Panel</h2>
-<div class="help-items-container">
-    <div class="help-item">
-        <img src="/assets/kyjov/thumb/terce_thumb.png" alt="terce" class="inline-icon">
-        <p>Střelecké terče se nacházejí v přízemí (expozice Historie).</p>
-    </div>
-        <hr>
-    <div class="help-item">
-        <img src="/assets/kyjov/thumb/florian_thumb.png" alt="florian" class="inline-icon">
-        <p>Obraz sv.Floriána se nacházejí v přízemí (expozice Historie / Hasiči).</p>
-    </div>
-        <hr>
-    <div class="help-item">
-        <img src="/assets/kyjov/thumb/obrazy_thumb.png" alt="obrazy" class="inline-icon">
-        <p>Portrét MUDr.Joklíka a obraz třetihor se nachází na schodišti v mezipatře.</p>
-    </div>
-        <hr>
-    <div class="help-item">
-        <img src="/assets/kyjov/thumb/vedro_thumb.png" alt="vedro" class="inline-icon">
-        <p>3D vizualizace vědra. Položte na stůl pohlednici a zamiřte na ni. Objeví se 3d objekt, který si můžete prohlédnout ze všech stran.</p>
-    </div>
-        <hr>
-    <div class="help-item">
-        <img src="/assets/kyjov/thumb/hadanky_thumb.png" alt="hadanky" class="inline-icon">
-        <p>Jedná se o demoverzi hádanek k představení projektu AugView.</p>
-    </div>
-        <hr>
-</div>
+            <div class="help-items-container">
+                <div class="help-item">
+                    <img src="/assets/kyjov/thumb/terce_thumb.png" alt="terce" class="inline-icon">
+                    <p>Střelecké terče se nacházejí v přízemí (expozice Historie).</p>
+                </div>
+                <hr>
+                <div class="help-item">
+                    <img src="/assets/kyjov/thumb/florian_thumb.png" alt="florian" class="inline-icon">
+                    <p>Obraz sv.Floriána se nacházejí v přízemí (expozice Historie / Hasiči).</p>
+                </div>
+                <hr>
+                <div class="help-item">
+                    <img src="/assets/kyjov/thumb/obrazy_thumb.png" alt="obrazy" class="inline-icon">
+                    <p>Portrét MUDr.Joklíka a obraz třetihor se nachází na schodišti v mezipatře.</p>
+                </div>
+                <hr>
+                <div class="help-item">
+                    <img src="/assets/kyjov/thumb/vedro_thumb.png" alt="vedro" class="inline-icon">
+                    <p>3D vizualizace vědra. Položte na stůl pohlednici a zamiřte na ni. Objeví se 3d objekt, který si můžete prohlédnout ze všech stran.</p>
+                </div>
+                <hr>
+                <div class="help-item">
+                    <img src="/assets/kyjov/thumb/hadanky_thumb.png" alt="hadanky" class="inline-icon">
+                    <p>Jedná se o demoverzi hádanek k představení projektu AugView.</p>
+                </div>
+                <hr>
+            </div> <!-- Konec help-items-container -->
 
+            <p>Ujistěte se, že máte dostatek světla a sledujte okolí.</p>
+            <!-- Prázdný <p> tag odstraněn -->
+            <p>Aplikace využívá Mind AR / A frame.</p>
 
-        <p>Ujistěte se, že máte dostatek světla a sledujte okolí.</p>
-            
-               
-            
-            <p>
-            </p>
-                Aplikace využívá Mind AR / A frame.
-            <!-- Tlačítko pro zavření modálního okna -->
             <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
-            <!-- Poznámka: Nepoužíváme <a> tag, protože nechceme znovu načíst stránku, jen skrýt okno -->
         </div>
-    </div>
-    <!-- ==================================== -->
+    </div> <!-- Konec modal-overlay -->
 
-    <!-- Připojení JavaScriptu na konec body -->
+    <!-- Připojení JavaScriptu -->
     <script src="/script.js"></script>
 
 </body>
