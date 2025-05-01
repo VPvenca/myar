@@ -142,36 +142,3 @@ hr {
     background-color: #ccc;      /* Barva pro některé jiné případy */
     overflow: visible;           /* Standardní hodnota, někdy potřeba pro reset */
 }
-main {
-  flex-grow: 1; /* Klíčové pro odtlačení patičky dolů */
-  /* Můžete přidat padding, pokud potřebujete mezeru mezi obsahem a patičkou */
-  /* padding-bottom: 2rem; */
-
-  /* Pokud chcete .menu-content a .centered-controls také flexibilně uspořádat */
-  /* display: flex; */
-  /* flex-direction: column; */
-}
-
-/* === Styly pro nový kontejner === */
-.centered-controls {
-  display: flex;          /* Použijeme flexbox pro snadné zarovnání */
-  flex-direction: column; /* Seřadí prvky (mapa, zpět, ?) pod sebe */
-  align-items: center;   /* Zarovná prvky horizontálně na střed */
-  gap: 15px;             /* Vytvoří mezeru mezi mapou, tlačítkem zpět a nápovědou */
-  margin-top: 2rem;      /* Přidá mezeru nad touto sekcí (oddělí od menu) */
-  margin-bottom: 2rem;   /* Přidá mezeru pod touto sekcí (oddělí od patičky) */
-                         /* Můžete upravit hodnoty mezer podle potřeby */
-}
-
-/* Volitelné: Pokud chcete, aby tlačítka Zpět a Nápověda měla stejnou šířku jako tlačítko mapy */
-/* .centered-controls .back-button-container,
-.centered-controls #help-button {
-  width: 100%; /* Nebo nastavte max-width */
-/*  max-width: 250px; /* Např. maximální šířka mapového tlačítka */
-/* } */
-
-/* Volitelné: Pokud chcete text v tlačítku zpět také centrovat */
-/* .centered-controls .back-button {
-  text-align: center;
-  justify-content: center; /* Pokud je back-button flex kontejner */
-/* } */
