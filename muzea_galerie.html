@@ -1,98 +1,80 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="img/favicon.png" />
-    <title>AR Aplikace</title> <!-- Mírně upravený titulek -->
-    <!-- Základní styly a preset -->
+    <!-- Cesty opraveny pro konzistenci -->
+    <link rel="icon" type="image/png" href="/img/favicon.png" />
+    <title>AR Aplikace</title>
     <link rel="stylesheet" href="/css/base.css">
-
-    <!-- Styly pro layout stránky -->
     <link rel="stylesheet" href="/css/layout.css">
-
-    <!-- Styly pro komponenty -->
     <link rel="stylesheet" href="/css/buttons.css">
     <link rel="stylesheet" href="/css/modal.css">
     <link rel="stylesheet" href="/css/text-block.css">
     <link rel="stylesheet" href="/css/links.css">
-
-    <!-- Styly specifické pro stránky (musí být poslední, aby mohly přepsat obecné) -->
-    <link rel="stylesheet" href="/css/pages.css"> 
-    
-    <!-- Pokud chcete použít Google Font (viz níže), přidejte sem link -->
+    <link rel="stylesheet" href="/css/pages.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/img/apple_touch_icon_192x192.png">
-   
 </head>
 <body class="home-page">
 
-    <div class="page-wrapper"> <!-- Obalovač pro flexbox layout s patičkou dole -->
-        <header class="app-header">
-            <!-- Sem umístěte logo -->
-            <img src="img/augview.png" alt="Logo AR Aplikace" id="app-logo">
-            <h1>Vyberte AR kolekci</h1>
-        </header>
-        <main>
-          <div class="menu-content">
-            <!-- Tlačítka s ikonami (HTML struktura zůstává stejná) -->
-           <a href="/assets/kyjov/kyjov.html" class="menu-button icon-button">
-                <img src="assets/kyjov/thumb/muz_kyjov_thumb.png" alt="" class="button-icon">
+<div class="page-wrapper">
+    <header class="app-header">
+         <!-- Cesty opraveny pro konzistenci -->
+        <img src="/img/augview.png" alt="Logo AR Aplikace" id="app-logo">
+        <h1>Vyberte AR kolekci</h1>
+    </header>
+
+    <!-- === SPRÁVNÝ ZAČÁTEK MAIN === -->
+    <main>
+        <div class="menu-content">
+            <a href="/assets/kyjov/kyjov.html" class="menu-button icon-button">
+                 <!-- Cesty opraveny pro konzistenci -->
+                <img src="/assets/kyjov/thumb/muz_kyjov_thumb.png" alt="" class="button-icon">
                 <span class="button-text">vlastivědné muzeum Kyjov</span>
             </a>
-            
-        </main>
-        <!-- === TLAČÍTKO ZPĚT === -->
+            <!-- Váš kód měl </main> zde - to bylo špatně -->
+        </div> <!-- Konec .menu-content -->
+
         <div class="centered-controls">
-<div class="back-button-container">
-    <a href="/index.html" class="menu-button back-button">
-        Zpět
-    </a>
-</div>
-      
-          
-            
-        </main>
+            <div class="back-button-container">
+                <a href="/index.html" class="menu-button back-button">
+                    Zpět
+                </a>
+            </div>
+            <!-- Váš kód měl druhý </main> zde - to bylo špatně -->
+        </div> <!-- Konec .centered-controls -->
 
-    
-   
-    
-<!-- === TLAČÍTKO NÁPOVĚDY === -->
-        <button id="help-button" class="help-icon-button" title="Nápověda">
-            ?
-            <!-- Nebo pokud použijete Font Awesome: -->
-            <!-- <i class="fas fa-question"></i> -->
-        </button>
-        <!-- ========================= -->
+    </main> <!-- === SPRÁVNÝ KONEC MAIN === -->
 
-        <footer class="app-footer">
-            <p>© 2025 Vytvořil Václav Pěnčík</p>
-        </footer>
 
-    </div> <!-- Konec page-wrapper -->
-<!-- === MODÁLNÍ OKNO NÁPOVĚDY (skryté) === -->
-    <div id="help-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h2>Nápověda</h2>
-            <p>
-                Vyberte si jednu z dostupných kolekcí scén pomocí tlačítek v hlavní nabídce.
-                <li>PŘÍKLAD: Pokud se nacházíte ve vlastivědném muzeu Kjov, zvolíte právě tuto kolekci.</li>
-                
-            </p>
-           
-            <!-- Tlačítko pro zavření modálního okna -->
-            <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
-            <!-- Poznámka: Nepoužíváme <a> tag, protože nechceme znovu načíst stránku, jen skrýt okno -->
-        </div>
+    <button id="help-button" class="help-icon-button" title="Nápověda">
+        ?
+    </button>
+
+    <footer class="app-footer">
+        <p>© 2025 Vytvořil Václav Pěnčík</p>
+    </footer>
+
+</div> <!-- Konec page-wrapper -->
+
+<div id="help-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2>Nápověda</h2>
+         <!-- Opraveno: <li> mimo <p> -->
+        <p>
+            Vyberte si jednu z dostupných kolekcí scén pomocí tlačítek v hlavní nabídce.<br>
+            PŘÍKLAD: Pokud se nacházíte ve vlastivědném muzeu Kyjov, zvolíte právě tuto kolekci.
+        </p>
+        <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
     </div>
+</div>
 
-    <!-- Připojení JavaScriptu na konec body -->
-    <script src="script.js"></script>
-    
+ <!-- Cesty opraveny pro konzistenci -->
+<script src="/script.js"></script>
 
 </body>
 </html>
