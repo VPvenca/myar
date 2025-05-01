@@ -174,7 +174,6 @@ main {
 
 .centered-controls .map-button-minimal,
 .centered-controls .back-button {
-   display: block; /* Aby odkaz/tlačítko zabralo celou šířku kontejneru */
-   width: 100%;
+   display: block; /* Aby odkaz/tlačítko zabralo celou šířku kontejneru */   
    text-align: center; /* Vycentrování textu v tlačítku */
 }
