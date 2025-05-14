@@ -149,8 +149,12 @@ main {
   /* ============================ */
 
 }
-
-
+/* === centrování nadpisu- vyberte AR scénu === */
+.centered-heading {
+    text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+}
 
 
 /* === NOVÉ STYLY pro druhý kontejner === */
