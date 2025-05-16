@@ -1,77 +1,66 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="/image/png" href="/img/favicon.png" />
-    <title>AR Aplikace</title> <!-- Mírně upravený titulek -->
-    <!-- Základní styly a preset -->
-    <link rel="stylesheet" href="/css/base.css">
-
-    <!-- Styly pro layout stránky -->
-    <link rel="stylesheet" href="/css/layout.css">
-
-    <!-- Styly pro komponenty -->
-    <link rel="stylesheet" href="/css/buttons.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <link rel="stylesheet" href="/css/text-block.css">
-    <link rel="stylesheet" href="/css/links.css">
-
-    <!-- Styly specifické pro stránky (musí být poslední, aby mohly přepsat obecné) -->
-    <link rel="stylesheet" href="/css/pages.css">
-    
-    <!-- Pokud chcete použít Google Font (viz níže), přidejte sem link -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/img/apple_touch_icon_192x192.png">
+    <!-- A-Frame a MindAR knihovny -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 </head>
 <body>
+    <a href="/assets/stezka_bohuslavice/bohuslavice.html" style="position: absolute; top: 10px; left: 10px; z-index: 1001; padding: 8px 15px; background-color: rgba(0,0,0,0.5); color: white; text-decoration: none; border-radius: 3px; font-size: 14px;">
+    Zpět do Menu
+</a>
+    <a-scene mindar-image="imageTargetSrc:/assets/stezka_bohuslavice/mind/vcela.mind; 
+        uiLoading: yes; uiError: yes; 
+        renderer: {colorManagement: true}; 
+        physicallyCorrectLights: true; 
+        vr-mode-ui: {enabled: false}; 
+        device-orientation-permission-ui: {enabled: false}">
 
-    <div class="page-wrapper"> <!-- Obalovač pro flexbox layout s patičkou dole -->
+        <a-assets>
+            <a-asset-item id="model1" src="/assets/stezka_bohuslavice/3d/vcela.glb"></a-asset-item>
+           
+        </a-assets>
 
-        <header class="app-header">
-            <!-- Sem umístěte logo -->
-            <img src="/img/augview.png" alt="Logo AR Aplikace" id="app-logo">
-            
-        </header>
-        
-       <main class="menu-content">
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-            <!-- Nový textový blok -->
-            <div class="text-content-block">
-                <h2>Ve výstavbě!</h2> <!-- Příklad nadpisu -->
-                <p>
-                   Na projektu se právě pracuje.
-               <p>
-            </p>
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-gltf-model 
+    src="#model1" 
+    position="0 0 0.1" 
+    scale="1.5 1.5 1.5"  
+    rotation="0 -90 0"> 
+</a-gltf-model>
+<!-- Nebo třeba scale="0.1 0.1 0.1" -->
+        </a-entity>
 
+    </a-scene>
 
-                    
-            </div>
-            <!-- Konec textového bloku -->
+    <script>
+    function enableCamera() {
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
+                .then(function(stream) {
+                    console.log("✅ Přístup k zadní kameře povolen!");
+                })
+                .catch(function(error) {
+                    console.error("❌ Chyba přístupu k zadní kameře: ", error);
+                });
+        } else {
+            console.error("❌ Tento prohlížeč nepodporuje přístup k médiím.");
+        }
+    }
 
-            
-                       <!-- === TLAČÍTKO ZPĚT === -->
-            <a href="/assets/stezka_bohuslavice/bohuslavice.html" class="menu-button back-button">Zpět</a>
-            <!-- ===================== -->
- 
-        </main>
- 
-        <!-- ========================= -->
+    window.onload = function() {
+        enableCamera(); 
 
-        <footer class="app-footer">
-            <p>© 2025 Vytvořil Václav Pěnčík</p>
-        </footer>
-
-       </div> <!-- Konec page-wrapper -->
-    </div>
-    <!-- ==================================== -->
-
-    <!-- Připojení JavaScriptu na konec body -->
-    
-
+        // Spustí MindAR po načtení scény
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+            document.querySelector('[mindar-image]').components['mindar-image-system'].start();
+        });
+    };
+    </script>
 </body>
 </html>
