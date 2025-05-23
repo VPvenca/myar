@@ -7,6 +7,8 @@
     <!-- A-Frame a MindAR knihovny -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="/gamification-config.js"></script>
+    <script src="/gamification.js"></script>
 </head>
 <body>
     <a href="/assets/kyjov/kyjov.html" style="position: absolute; top: 10px; left: 10px; z-index: 1001; padding: 8px 15px; background-color: rgba(0,0,0,0.5); color: white; text-decoration: none; border-radius: 3px; font-size: 14px;">
@@ -32,17 +34,17 @@
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <a-entity mindar-image-target="targetIndex: 0">
+        <a-entity mindar-image-target="targetIndex: 0" data-marker-id="hadanka_masaryk">
             <a-plane src="#marker1" position="0 -0.6 0" scale="1.1 0.4 1" material="transparent: true;"></a-plane>
             
         </a-entity>
 
-        <a-entity mindar-image-target="targetIndex: 1">
+        <a-entity mindar-image-target="targetIndex: 1" data-marker-id="hadanka_benes">
             <a-plane src="#marker2" position="0 -0.1 0" scale="1.1 1.4 1.1" material="transparent: true;"></a-plane>
             
         </a-entity>
 
-        <a-entity mindar-image-target="targetIndex: 2">
+        <a-entity mindar-image-target="targetIndex: 2" data-marker-id="hadanka_adrianka">
             <a-plane src="#marker3" position="0 0 0" scale="2 2.3 2" material="transparent: true;"></a-plane>
             
         </a-entity>
@@ -73,6 +75,66 @@
             document.querySelector('[mindar-image]').components['mindar-image-system'].start();
         });
     };
+         // KROK 3: Integrace gamifikační logiky
+        document.addEventListener('DOMContentLoaded', () => {
+            // Pokud máte tlačítko startButton, jeho listener by byl zde:
+            /*
+            const startButton = document.getElementById('startButton');
+            if (startButton) {
+                startButton.addEventListener('click', () => {
+                    // Kód pro spuštění AR, skrytí tlačítka atd.
+                    // Například: document.querySelector('a-scene').components['mindar-image-system'].start();
+                    // startButton.style.display = 'none';
+                });
+            }
+            */
+
+            const currentSceneId = getCurrentSceneId();
+            let sceneConfigValid = false;
+
+            if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
+                console.error("GAMIFICATION ERROR: Scene config not found for this page:", currentSceneId, ". Make sure gamification-config.js is loaded and the path is correct in SCENE_CONFIG.");
+            } else {
+                sceneConfigValid = true;
+                console.log("Gamification config loaded successfully for scene:", currentSceneId, SCENE_CONFIG[currentSceneId]);
+            }
+
+            // Získání všech targetů
+            const targetEntities = [
+                document.querySelector('[mindar-image-target="targetIndex: 0"]'),
+                document.querySelector('[mindar-image-target="targetIndex: 1"]'),
+                document.querySelector('[mindar-image-target="targetIndex: 2"]')
+            ];
+
+            targetEntities.forEach((targetEntity, index) => {
+                if (targetEntity) {
+                    const markerId = targetEntity.dataset.markerId;
+                    if (!markerId) {
+                        console.warn(`Gamification: Target ${index + 1} is missing 'data-marker-id'.`);
+                        return; // Přeskočit tento target, pokud nemá ID
+                    }
+
+                    targetEntity.addEventListener('targetFound', () => {
+                        console.log(`Target ${index + 1} (ID: ${markerId}) found!`);
+                        // Zde není žádné video ani audio k přehrání pro tento typ scény
+
+                        // Gamifikace
+                        if (sceneConfigValid) { // markerId už je zkontrolováno
+                            console.log("Recording activation for marker:", markerId);
+                            recordMarkerActivation(currentSceneId, markerId);
+                        }
+                    });
+
+                    targetEntity.addEventListener('targetLost', () => {
+                        console.log(`Target ${index + 1} (ID: ${markerId}) lost!`);
+                        // Zde není žádné video ani audio k zastavení
+                    });
+
+                } else {
+                    console.warn(`Target ${index + 1} (targetIndex: ${index}) not found in DOM.`);
+                }
+            });
+        });
     </script>
 </body>
 </html>
