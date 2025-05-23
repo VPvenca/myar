@@ -7,6 +7,8 @@
     <!-- A-Frame a MindAR knihovny -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="/gamification-config.js"></script>
+    <script src="/gamification.js"></script>
 </head>
 <body>
     <a href="/assets/kyjov/kyjov.html" style="position: absolute; top: 10px; left: 10px; z-index: 1001; padding: 8px 15px; background-color: rgba(0,0,0,0.5); color: white; text-decoration: none; border-radius: 3px; font-size: 14px;">
@@ -26,7 +28,7 @@
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <a-entity mindar-image-target="targetIndex: 0">
+        <a-entity mindar-image-target="targetIndex: 0" data-marker-id="vedro_model_kyjov">
             <a-gltf-model 
     src="#model1" 
     position="0 0 0.1" 
@@ -61,6 +63,57 @@
             document.querySelector('[mindar-image]').components['mindar-image-system'].start();
         });
     };
+     // KROK 3: Integrace gamifikační logiky
+        document.addEventListener('DOMContentLoaded', () => {
+            // Listener pro startButton, pokud byste ho použili
+            /*
+            const startButton = document.getElementById('startButton');
+            if (startButton) {
+                startButton.addEventListener('click', () => {
+                    // ...
+                    // startButton.style.display = 'none';
+                });
+            }
+            */
+
+            const currentSceneId = getCurrentSceneId();
+            let sceneConfigValid = false;
+
+            if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
+                console.error("GAMIFICATION ERROR: Scene config not found for this page:", currentSceneId, ". Make sure gamification-config.js is loaded and the path is correct in SCENE_CONFIG.");
+            } else {
+                sceneConfigValid = true;
+                console.log("Gamification config loaded successfully for scene:", currentSceneId, SCENE_CONFIG[currentSceneId]);
+            }
+
+            // Získání targetu (protože je jen jeden)
+            const targetEntity = document.querySelector('[mindar-image-target="targetIndex: 0"]');
+
+            if (targetEntity) {
+                const markerId = targetEntity.dataset.markerId;
+                if (!markerId) {
+                    console.warn("Gamification: Target 1 is missing 'data-marker-id'.");
+                } else {
+                    targetEntity.addEventListener('targetFound', () => {
+                        console.log(`Target 1 (ID: ${markerId}) found!`);
+                        // Pro GLTF model se nic automaticky nepřehrává, je jen viditelný
+
+                        // Gamifikace
+                        if (sceneConfigValid) { // markerId je již zkontrolováno výše
+                            console.log("Recording activation for marker:", markerId);
+                            recordMarkerActivation(currentSceneId, markerId);
+                        }
+                    });
+
+                    targetEntity.addEventListener('targetLost', () => {
+                        console.log(`Target 1 (ID: ${markerId}) lost!`);
+                        // Nic k zastavení
+                    });
+                }
+            } else {
+                console.warn("Target 1 (targetIndex: 0) not found in DOM.");
+            }
+        });
     </script>
 </body>
 </html>
