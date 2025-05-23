@@ -1,7 +1,7 @@
 const SCENE_CONFIG = {
     "/assets/kyjov/terce.html": {
         name: "Střelecké terče",
-        totalMarkers: 2, // POČET MARKERŮ V TÉTO SCÉNĚ (např. 2)
+        totalMarkers: 4, // POČET MARKERŮ V TÉTO SCÉNĚ (např. 2)
         markers: ["terc_selim", "terc_kyjov_1", "terc_kyjov_2", "terc_kyjov_3"] // UNIKÁTNÍ ID MARKERŮ (např. ["id_markeru1", "id_markeru2"])
     },
     "/assets/kyjov/florian.html": {
