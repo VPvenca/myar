@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <!-- KROK 1: Načtení gamifikačních skriptů -->
+    <script src="/gamification-config.js"></script>
+    <script src="/gamification.js"></script>
     <style>
         #startButton {
             position: absolute;
@@ -29,13 +32,11 @@
     Zpět do Menu
 </a>
 
-<!-- Váš stávající kód <a-scene> ... </a-scene> atd. -->
-
-    <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/terce.mind; 
-        uiLoading: yes; uiError: yes; 
-        renderer: {colorManagement: true}; 
-        physicallyCorrectLights: true; 
-        vr-mode-ui: {enabled: false}; 
+    <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/terce.mind;
+        uiLoading: yes; uiError: yes;
+        renderer: {colorManagement: true};
+        physicallyCorrectLights: true;
+        vr-mode-ui: {enabled: false};
         device-orientation-permission-ui: {enabled: false}">
 
         <a-assets>
@@ -52,31 +53,28 @@
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <a-entity mindar-image-target="targetIndex: 0">
+        <!-- KROK 2: Přidání data-marker-id -->
+        <a-entity mindar-image-target="targetIndex: 0" data-marker-id="terc_selim">
             <a-video id="videoEntity1" src="#video1" position="0 0 0" scale="1 1 1" autoplay="false"></a-video>
         </a-entity>
 
-        <a-entity mindar-image-target="targetIndex: 1">
+        <a-entity mindar-image-target="targetIndex: 1" data-marker-id="terc_kyjov_1">
             <a-video id="videoEntity2" src="#video2" position="0 0 0" scale="1 1 1" autoplay="false"></a-video>
         </a-entity>
 
-        <a-entity mindar-image-target="targetIndex: 2">
+        <a-entity mindar-image-target="targetIndex: 2" data-marker-id="terc_kyjov_2">
             <a-video id="videoEntity3" src="#video3" position="0 0 0" scale="1 1 1" autoplay="false"></a-video>
         </a-entity>
 
-        <a-entity mindar-image-target="targetIndex: 3">
+        <a-entity mindar-image-target="targetIndex: 3" data-marker-id="terc_kyjov_3">
             <a-video id="videoEntity4" src="#video4" position="0 0 0" scale="1 1 1" autoplay="false"></a-video>
         </a-entity>
     </a-scene>
 
     <script>
         let audioContext;
-        let audioBuffer1;
-        let audioBuffer2;
-        let audioBuffer3;
-        let audioBuffer4;
+        let audioBuffer1, audioBuffer2, audioBuffer3, audioBuffer4; // Zkrácená deklarace
 
-        // Funkce pro dekódování audio dat
         async function loadAudio(url) {
             const response = await fetch(url);
             const arrayBuffer = await response.arrayBuffer();
@@ -89,26 +87,23 @@
             const video3 = document.getElementById('video3');
             const video4 = document.getElementById('video4');
 
-            video1.muted = false;
-            video2.muted = false;
-            video3.muted = false;
-            video4.muted = false;
+            video1.muted = false; video2.muted = false; video3.muted = false; video4.muted = false;
 
-            video1.play();
-            video2.play();
-            video3.play();
-            video4.play();
+            video1.play().catch(e => console.warn("Video 1 play failed:", e));
+            video2.play().catch(e => console.warn("Video 2 play failed:", e));
+            video3.play().catch(e => console.warn("Video 3 play failed:", e));
+            video4.play().catch(e => console.warn("Video 4 play failed:", e));
 
             this.style.display = 'none';
-
-            // Inicializace AudioContext po kliknutí na tlačítko
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
             try {
-                audioBuffer1 = await loadAudio(document.getElementById('audio1').src);
-                audioBuffer2 = await loadAudio(document.getElementById('audio2').src);
-                audioBuffer3 = await loadAudio(document.getElementById('audio3').src);
-                audioBuffer4 = await loadAudio(document.getElementById('audio4').src);
+                [audioBuffer1, audioBuffer2, audioBuffer3, audioBuffer4] = await Promise.all([
+                    loadAudio(document.getElementById('audio1').src),
+                    loadAudio(document.getElementById('audio2').src),
+                    loadAudio(document.getElementById('audio3').src),
+                    loadAudio(document.getElementById('audio4').src)
+                ]);
             } catch (error) {
                 console.error('Error loading audio:', error);
             }
@@ -124,7 +119,7 @@
         const videoEntity4 = document.getElementById('videoEntity4');
 
         function playSound(buffer) {
-            if (buffer) {
+            if (audioContext && buffer) { // Kontrola audioContext
                 const source = audioContext.createBufferSource();
                 source.buffer = buffer;
                 source.connect(audioContext.destination);
@@ -134,78 +129,71 @@
             return null;
         }
 
-        let audioSource1 = null;
-        let audioSource2 = null;
-        let audioSource3 = null;
-        let audioSource4 = null;
+        let audioSource1 = null, audioSource2 = null, audioSource3 = null, audioSource4 = null;
 
-        target1.addEventListener('targetFound', () => {
-            console.log("targetFound 1 se spustil!");
-            videoEntity1.components.material.material.map.image.play();
-             if (audioBuffer1 && !audioSource1) {
-                audioSource1 = playSound(audioBuffer1);
+        // KROK 3: Integrace gamifikační logiky
+        const currentSceneId = getCurrentSceneId();
+        let sceneConfigValid = false;
+
+        if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
+            console.error("GAMIFICATION ERROR: Scene config not found for this page:", currentSceneId, ". Make sure gamification-config.js is loaded and the path is correct in SCENE_CONFIG.");
+        } else {
+            sceneConfigValid = true;
+        }
+
+        // Helper funkce pro nastavení listenerů (DRY - Don't Repeat Yourself)
+        function setupTargetListeners(targetEntity, videoEntity, audioBuffer, audioSourceRef, markerIdNum) {
+            if (targetEntity) {
+                const markerId = targetEntity.dataset.markerId;
+                if (!markerId) {
+                    console.warn(`Gamification: Target ${markerIdNum} is missing 'data-marker-id'.`);
+                }
+
+                targetEntity.addEventListener('targetFound', () => {
+                    console.log(`Target ${markerIdNum} found!`);
+                    if (videoEntity.components.material?.material.map?.image) {
+                        videoEntity.components.material.material.map.image.play().catch(e => console.warn(`VideoEntity${markerIdNum} play failed`, e));
+                    }
+                    if (audioContext && audioBuffer && !audioSourceRef.source) { // audioSourceRef je nyní objekt
+                        audioSourceRef.source = playSound(audioBuffer);
+                    }
+
+                    if (sceneConfigValid && markerId) {
+                        console.log("Recording activation for marker:", markerId);
+                        recordMarkerActivation(currentSceneId, markerId);
+                    }
+                });
+
+                targetEntity.addEventListener('targetLost', () => {
+                    console.log(`Target ${markerIdNum} lost!`);
+                    if (videoEntity.components.material?.material.map?.image) {
+                        videoEntity.components.material.material.map.image.pause();
+                    }
+                    if (audioSourceRef.source) {
+                        audioSourceRef.source.stop();
+                        audioSourceRef.source = null;
+                    }
+                });
+            } else {
+                console.warn(`Target ${markerIdNum} (targetIndex: ${markerIdNum - 1}) not found in DOM.`);
             }
-        });
+        }
 
-        target1.addEventListener('targetLost', () => {
-            console.log("targetLost 1 se spustil!");
-            videoEntity1.components.material.material.map.image.pause();
-            if (audioSource1) {
-                audioSource1.stop();
-                audioSource1 = null; // Reset audioSource1
-            }
-        });
+        // Použití helper funkce pro každý target
+        // Abychom mohli modifikovat audioSourceX uvnitř funkce, předáme je jako objekt (reference)
+        let audioSourceRef1 = { source: audioSource1 };
+        let audioSourceRef2 = { source: audioSource2 };
+        let audioSourceRef3 = { source: audioSource3 };
+        let audioSourceRef4 = { source: audioSource4 };
 
-        target2.addEventListener('targetFound', () => {
-            console.log("targetFound 2 se spustil!");
-            videoEntity2.components.material.material.map.image.play();
-            if (audioBuffer2 && !audioSource2) {
-                audioSource2 = playSound(audioBuffer2);
-            }
-        });
+        setupTargetListeners(target1, videoEntity1, audioBuffer1, audioSourceRef1, 1);
+        setupTargetListeners(target2, videoEntity2, audioBuffer2, audioSourceRef2, 2);
+        setupTargetListeners(target3, videoEntity3, audioBuffer3, audioSourceRef3, 3);
+        setupTargetListeners(target4, videoEntity4, audioBuffer4, audioSourceRef4, 4);
 
-        target2.addEventListener('targetLost', () => {
-            console.log("targetLost 2 se spustil!");
-            videoEntity2.components.material.material.map.image.pause();
-             if (audioSource2) {
-                audioSource2.stop();
-                audioSource2 = null; // Reset audioSource2
-            }
-        });
+        // Po volání setupTargetListeners, pokud chcete mít přístup k aktuálním audioSourceX:
+        // audioSource1 = audioSourceRef1.source; // atd. pokud je to potřeba jinde
 
-target3.addEventListener('targetFound', () => {
-    console.log("targetFound 3 se spustil!");
-    videoEntity3.components.material.material.map.image.play();
-    if (audioBuffer3 && !audioSource3) {
-        audioSource3 = playSound(audioBuffer3);
-    }
-});
-
-target3.addEventListener('targetLost', () => {
-    console.log("targetLost 3 se spustil!");
-    videoEntity3.components.material.material.map.image.pause();
-    if (audioSource3) {
-        audioSource3.stop();
-        audioSource3 = null;
-    }
-});
-
-target4.addEventListener('targetFound', () => {
-    console.log("targetFound 4 se spustil!");
-    videoEntity4.components.material.material.map.image.play();
-    if (audioBuffer4 && !audioSource4) {
-        audioSource4 = playSound(audioBuffer4);
-    }
-});
-
-target4.addEventListener('targetLost', () => {
-    console.log("targetLost 4 se spustil!");
-    videoEntity4.components.material.material.map.image.pause();
-    if (audioSource4) {
-        audioSource4.stop();
-        audioSource4 = null;
-    }
-});
     </script>
 </body>
 </html>
