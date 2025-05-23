@@ -7,7 +7,7 @@ const SCENE_CONFIG = {
     "/assets/kyjov/florian.html": {
         name: "Obraz sv. Floriána",
         totalMarkers: 1,
-        markers: ["florian_kyjov_obraz"]
+        markers: ["florian"]
     },
     "/assets/kyjov/scena_1.html": {
         name: "Obrazy v mezipatře",
