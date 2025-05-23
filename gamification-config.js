@@ -17,7 +17,7 @@ const SCENE_CONFIG = {
     "/assets/kyjov/scena_3.html": {
         name: "3D Vědro",
         totalMarkers: 1,
-        markers: ["vedro_kyjov_model"]
+        markers: ["vedro_model_kyjov"]
     },
     "/assets/kyjov/scena_2.html": {
         name: "Hádanky",
