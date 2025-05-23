@@ -148,5 +148,23 @@
     <!-- Připojení JavaScriptu -->
     <script src="/script.js"></script>
 
+    <!-- Skript pro zobrazení hvězd na této stránce -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const starDisplayElements = document.querySelectorAll('.star-display[data-scene-id]');
+
+            starDisplayElements.forEach(starElement => {
+                const sceneId = starElement.dataset.sceneId;
+
+                if (SCENE_CONFIG && SCENE_CONFIG[sceneId]) { // Zkontrolujte i existenci SCENE_CONFIG
+                    const level = getSceneStarLevel(sceneId);
+                    displayStars(starElement, level);
+                } else {
+                    console.warn(`Config for scene ID "${sceneId}" not found in SCENE_CONFIG. Cannot display stars. Make sure gamification-config.js is loaded and sceneId is correct.`);
+                }
+            });
+        });
+    </script>
+
 </body>
 </html>
