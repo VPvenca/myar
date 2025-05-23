@@ -56,13 +56,13 @@ function displayStars(starElement, level) {
     let starsHtml = '';
     switch (level) {
         case 'bronze':
-            starsHtml = '🥉'; // Nebo <img src="/img/bronze-star.png" alt="Bronzová hvězda">
+            starsHtml = '<img src="/img/bronze_star.png" alt="Bronzová hvězda" class="star-image">';
             break;
         case 'silver':
-            starsHtml = '🥈'; // Nebo <img src="/img/silver-star.png" alt="Stříbrná hvězda">
+            starsHtml = '<img src="/img/silver_star.png" alt="Stříbrná hvězda" class="star-image">'; 
             break;
         case 'gold':
-            starsHtml = '🥇'; // Nebo <img src="/img/gold-star.png" alt="Zlatá hvězda">
+            starsHtml = '<img src="/img/gold_star.png" alt="Zlatá hvězda" class="star-image">';
             break;
         default:
             starsHtml = '';
