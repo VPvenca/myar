@@ -22,7 +22,37 @@
     transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease; /* Plynulé přechody pro efekty */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Jemný stín pod tlačítkem pro 3D efekt */
     box-sizing: border-box; /* Zajišťuje, že padding a border jsou zahrnuty do šířky/výšky */
+    /* DŮLEŽITÉ: Přidáno pro pozicování hvězdy */
+    position: relative;
+    /* overflow: hidden; */ /* Volitelné: Pokud by hvězda příliš přesahovala a chtěli byste ji oříznout k tlačítku. */
+                           /* Pro překrytí ale nechceme 'hidden'. */
 }
+/* --- Styly pro hvězdu --- */
+.menu-button .star-display { /* Specifičtější selektor, aby se aplikovalo jen na hvězdy uvnitř menu-button */
+    position: absolute;
+    top: -5px;       /* Posun od horního okraje tlačítka (záporná hodnota pro překrytí) */
+    right: -5px;     /* Posun od pravého okraje tlačítka (záporná hodnota pro překrytí) */
+    font-size: 1.5em; /* Velikost hvězdy - upravte podle potřeby */
+    line-height: 1;   /* Aby emoji nemělo zbytečnou výšku navíc */
+    z-index: 1;       /* Aby byla hvězda nad obsahem tlačítka, pokud by se překrývaly */
+    /* Pokud používáte obrázky místo emoji: */
+    /* width: 24px;  */ /* Příklad velikosti obrázku */
+    /* height: 24px; */ /* Příklad velikosti obrázku */
+}
+
+/* Pokud používáte .icon-button a prvky jsou v něm flex,
+   a hvězda je také flex item, toto nemusí být nutné, pokud je star-display poslední.
+   Ale pokud by se hvězda chovala divně, můžete zkusit:
+*/
+.menu-button.icon-button {
+    /* Pokud .icon-button již používá display: flex, ujistěte se, že je to v pořádku.
+       Náš .star-display s position: absolute je vyjmut z normálního toku,
+       takže by to nemělo vadit. */
+    /* Pokud by text nebo ikona překrývaly hvězdu, můžete přidat padding napravo tlačítku,
+       aby tam bylo více místa, ale position: absolute by to měla řešit. */
+    /* padding-right: 30px; */ /* Příklad - pokud byste potřebovali místo pro hvězdu, která není absolutní */
+}
+
 
 /* --- Efekty pro Obecná Tlačítka --- */
 .menu-button:hover { /* Styl při najetí myší */
