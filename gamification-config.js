@@ -22,7 +22,7 @@ const SCENE_CONFIG = {
     "/assets/kyjov/scena_2.html": {
         name: "Hádanky",
         totalMarkers: 3, // Příklad, upravte dle reality
-        markers: ["hadanka_kyjov_1", "hadanka_kyjov_2", "hadanka_kyjov_3"]
+        markers: ["hadanka_masaryk", "hadanka_benes", "hadanka_adrianka"]
     }
     // Přidejte další scény, pokud je máte
 };
