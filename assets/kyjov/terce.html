@@ -73,7 +73,7 @@
 
     <script>
         let audioContext;
-        let audioBuffer1, audioBuffer2, audioBuffer3, audioBuffer4; // Zkrácená deklarace
+        let audioBuffer1, audioBuffer2, audioBuffer3, audioBuffer4;
 
         async function loadAudio(url) {
             const response = await fetch(url);
@@ -89,6 +89,7 @@
 
             video1.muted = false; video2.muted = false; video3.muted = false; video4.muted = false;
 
+            // Přidáno .catch() pro ošetření chyb při přehrávání
             video1.play().catch(e => console.warn("Video 1 play failed:", e));
             video2.play().catch(e => console.warn("Video 2 play failed:", e));
             video3.play().catch(e => console.warn("Video 3 play failed:", e));
@@ -98,12 +99,11 @@
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
             try {
-                [audioBuffer1, audioBuffer2, audioBuffer3, audioBuffer4] = await Promise.all([
-                    loadAudio(document.getElementById('audio1').src),
-                    loadAudio(document.getElementById('audio2').src),
-                    loadAudio(document.getElementById('audio3').src),
-                    loadAudio(document.getElementById('audio4').src)
-                ]);
+                // Načítání audia postupně, jak to bylo ve vašem původním funkčním kódu
+                audioBuffer1 = await loadAudio(document.getElementById('audio1').src);
+                audioBuffer2 = await loadAudio(document.getElementById('audio2').src);
+                audioBuffer3 = await loadAudio(document.getElementById('audio3').src);
+                audioBuffer4 = await loadAudio(document.getElementById('audio4').src);
             } catch (error) {
                 console.error('Error loading audio:', error);
             }
@@ -119,7 +119,7 @@
         const videoEntity4 = document.getElementById('videoEntity4');
 
         function playSound(buffer) {
-            if (audioContext && buffer) { // Kontrola audioContext
+            if (audioContext && buffer) { // Přidána kontrola existence audioContext
                 const source = audioContext.createBufferSource();
                 source.buffer = buffer;
                 source.connect(audioContext.destination);
@@ -131,7 +131,7 @@
 
         let audioSource1 = null, audioSource2 = null, audioSource3 = null, audioSource4 = null;
 
-        // KROK 3: Integrace gamifikační logiky
+        // KROK 3: Integrace gamifikační logiky (stejně jako v prvním funkčním kódu)
         const currentSceneId = getCurrentSceneId();
         let sceneConfigValid = false;
 
@@ -141,58 +141,149 @@
             sceneConfigValid = true;
         }
 
-        // Helper funkce pro nastavení listenerů (DRY - Don't Repeat Yourself)
-        function setupTargetListeners(targetEntity, videoEntity, audioBuffer, audioSourceRef, markerIdNum) {
-            if (targetEntity) {
-                const markerId = targetEntity.dataset.markerId;
-                if (!markerId) {
-                    console.warn(`Gamification: Target ${markerIdNum} is missing 'data-marker-id'.`);
-                }
-
-                targetEntity.addEventListener('targetFound', () => {
-                    console.log(`Target ${markerIdNum} found!`);
-                    if (videoEntity.components.material?.material.map?.image) {
-                        videoEntity.components.material.material.map.image.play().catch(e => console.warn(`VideoEntity${markerIdNum} play failed`, e));
-                    }
-                    if (audioContext && audioBuffer && !audioSourceRef.source) { // audioSourceRef je nyní objekt
-                        audioSourceRef.source = playSound(audioBuffer);
-                    }
-
-                    if (sceneConfigValid && markerId) {
-                        console.log("Recording activation for marker:", markerId);
-                        recordMarkerActivation(currentSceneId, markerId);
-                    }
-                });
-
-                targetEntity.addEventListener('targetLost', () => {
-                    console.log(`Target ${markerIdNum} lost!`);
-                    if (videoEntity.components.material?.material.map?.image) {
-                        videoEntity.components.material.material.map.image.pause();
-                    }
-                    if (audioSourceRef.source) {
-                        audioSourceRef.source.stop();
-                        audioSourceRef.source = null;
-                    }
-                });
-            } else {
-                console.warn(`Target ${markerIdNum} (targetIndex: ${markerIdNum - 1}) not found in DOM.`);
+        // === Listenery pro Target 1 ===
+        if (target1) {
+            const marker1Id = target1.dataset.markerId;
+            if (!marker1Id) {
+                console.warn("Gamification: Target 1 is missing 'data-marker-id'.");
             }
+
+            target1.addEventListener('targetFound', () => {
+                console.log("Target 1 found!");
+                if (videoEntity1.components.material?.material.map?.image) {
+                    videoEntity1.components.material.material.map.image.play().catch(e => console.warn("VideoEntity1 play failed", e));
+                }
+                if (audioContext && audioBuffer1 && !audioSource1) { // Kontrola audioContext
+                    audioSource1 = playSound(audioBuffer1);
+                }
+                // Gamifikace
+                if (sceneConfigValid && marker1Id) {
+                    console.log("Recording activation for marker:", marker1Id);
+                    recordMarkerActivation(currentSceneId, marker1Id);
+                }
+            });
+
+            target1.addEventListener('targetLost', () => {
+                console.log("Target 1 lost!");
+                if (videoEntity1.components.material?.material.map?.image) {
+                    videoEntity1.components.material.material.map.image.pause();
+                }
+                if (audioSource1) {
+                    audioSource1.stop();
+                    audioSource1 = null;
+                }
+            });
+        } else {
+            console.warn("Target 1 (targetIndex: 0) not found in DOM.");
         }
 
-        // Použití helper funkce pro každý target
-        // Abychom mohli modifikovat audioSourceX uvnitř funkce, předáme je jako objekt (reference)
-        let audioSourceRef1 = { source: audioSource1 };
-        let audioSourceRef2 = { source: audioSource2 };
-        let audioSourceRef3 = { source: audioSource3 };
-        let audioSourceRef4 = { source: audioSource4 };
+        // === Listenery pro Target 2 ===
+        if (target2) {
+            const marker2Id = target2.dataset.markerId;
+            if (!marker2Id) {
+                console.warn("Gamification: Target 2 is missing 'data-marker-id'.");
+            }
 
-        setupTargetListeners(target1, videoEntity1, audioBuffer1, audioSourceRef1, 1);
-        setupTargetListeners(target2, videoEntity2, audioBuffer2, audioSourceRef2, 2);
-        setupTargetListeners(target3, videoEntity3, audioBuffer3, audioSourceRef3, 3);
-        setupTargetListeners(target4, videoEntity4, audioBuffer4, audioSourceRef4, 4);
+            target2.addEventListener('targetFound', () => {
+                console.log("Target 2 found!");
+                if (videoEntity2.components.material?.material.map?.image) {
+                    videoEntity2.components.material.material.map.image.play().catch(e => console.warn("VideoEntity2 play failed", e));
+                }
+                if (audioContext && audioBuffer2 && !audioSource2) { // Kontrola audioContext
+                    audioSource2 = playSound(audioBuffer2);
+                }
+                // Gamifikace
+                if (sceneConfigValid && marker2Id) {
+                    console.log("Recording activation for marker:", marker2Id);
+                    recordMarkerActivation(currentSceneId, marker2Id);
+                }
+            });
 
-        // Po volání setupTargetListeners, pokud chcete mít přístup k aktuálním audioSourceX:
-        // audioSource1 = audioSourceRef1.source; // atd. pokud je to potřeba jinde
+            target2.addEventListener('targetLost', () => {
+                console.log("Target 2 lost!");
+                if (videoEntity2.components.material?.material.map?.image) {
+                    videoEntity2.components.material.material.map.image.pause();
+                }
+                if (audioSource2) {
+                    audioSource2.stop();
+                    audioSource2 = null;
+                }
+            });
+        } else {
+            console.warn("Target 2 (targetIndex: 1) not found in DOM.");
+        }
+
+        // === Listenery pro Target 3 ===
+        if (target3) {
+            const marker3Id = target3.dataset.markerId;
+            if (!marker3Id) {
+                console.warn("Gamification: Target 3 is missing 'data-marker-id'.");
+            }
+
+            target3.addEventListener('targetFound', () => {
+                console.log("Target 3 found!");
+                if (videoEntity3.components.material?.material.map?.image) {
+                    videoEntity3.components.material.material.map.image.play().catch(e => console.warn("VideoEntity3 play failed", e));
+                }
+                if (audioContext && audioBuffer3 && !audioSource3) { // Kontrola audioContext
+                    audioSource3 = playSound(audioBuffer3);
+                }
+                // Gamifikace
+                if (sceneConfigValid && marker3Id) {
+                    console.log("Recording activation for marker:", marker3Id);
+                    recordMarkerActivation(currentSceneId, marker3Id);
+                }
+            });
+
+            target3.addEventListener('targetLost', () => {
+                console.log("Target 3 lost!");
+                if (videoEntity3.components.material?.material.map?.image) {
+                    videoEntity3.components.material.material.map.image.pause();
+                }
+                if (audioSource3) {
+                    audioSource3.stop();
+                    audioSource3 = null;
+                }
+            });
+        } else {
+            console.warn("Target 3 (targetIndex: 2) not found in DOM.");
+        }
+
+        // === Listenery pro Target 4 ===
+        if (target4) {
+            const marker4Id = target4.dataset.markerId;
+            if (!marker4Id) {
+                console.warn("Gamification: Target 4 is missing 'data-marker-id'.");
+            }
+
+            target4.addEventListener('targetFound', () => {
+                console.log("Target 4 found!");
+                if (videoEntity4.components.material?.material.map?.image) {
+                    videoEntity4.components.material.material.map.image.play().catch(e => console.warn("VideoEntity4 play failed", e));
+                }
+                if (audioContext && audioBuffer4 && !audioSource4) { // Kontrola audioContext
+                    audioSource4 = playSound(audioBuffer4);
+                }
+                // Gamifikace
+                if (sceneConfigValid && marker4Id) {
+                    console.log("Recording activation for marker:", marker4Id);
+                    recordMarkerActivation(currentSceneId, marker4Id);
+                }
+            });
+
+            target4.addEventListener('targetLost', () => {
+                console.log("Target 4 lost!");
+                if (videoEntity4.components.material?.material.map?.image) {
+                    videoEntity4.components.material.material.map.image.pause();
+                }
+                if (audioSource4) {
+                    audioSource4.stop();
+                    audioSource4 = null;
+                }
+            });
+        } else {
+            console.warn("Target 4 (targetIndex: 3) not found in DOM.");
+        }
 
     </script>
 </body>
