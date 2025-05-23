@@ -12,7 +12,7 @@ const SCENE_CONFIG = {
     "/assets/kyjov/scena_1.html": {
         name: "Obrazy v mezipatře",
         totalMarkers: 2, // Např. Joklík a třetihory
-        markers: ["joklik_portret_kyjov", "tretihory_obraz_kyjov"]
+        markers: ["joklik_video", "dinosauri_video"]
     },
     "/assets/kyjov/scena_3.html": {
         name: "3D Vědro",
