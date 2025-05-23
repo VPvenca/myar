@@ -27,6 +27,11 @@
     /* overflow: hidden; */ /* Volitelné: Pokud by hvězda příliš přesahovala a chtěli byste ji oříznout k tlačítku. */
                            /* Pro překrytí ale nechceme 'hidden'. */
 }
+.star-image {
+    width: 24px;  /* Nebo jakákoliv jiná velikost */
+    height: 24px; /* Nebo jakákoliv jiná velikost */
+    /*vertical-align: middle; /* Pro lepší zarovnání s textem, pokud je vedle něj */
+}
 /* --- Styly pro hvězdu --- */
 .menu-button .star-display { /* Specifičtější selektor, aby se aplikovalo jen na hvězdy uvnitř menu-button */
     position: absolute;
