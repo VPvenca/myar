@@ -28,8 +28,8 @@
                            /* Pro překrytí ale nechceme 'hidden'. */
 }
 .star-image {
-    width: 24px;  /* Nebo jakákoliv jiná velikost */
-    height: 24px; /* Nebo jakákoliv jiná velikost */
+    width: 40px;  /* Nebo jakákoliv jiná velikost */
+    height: 40px; /* Nebo jakákoliv jiná velikost */
     /*vertical-align: middle; /* Pro lepší zarovnání s textem, pokud je vedle něj */
 }
 /* --- Styly pro hvězdu --- */
