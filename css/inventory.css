@@ -1,0 +1,47 @@
+/* V tvém hlavním CSS nebo <style> tagu v inventory.html */
+.medals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Responzivní grid */
+    gap: 20px;
+    padding: 20px;
+}
+
+.museum-medal-card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    background-color: #f9f9f9;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+}
+
+.medal-image-container img {
+    max-width: 100px; /* Uprav velikost podle potřeby */
+    height: auto;
+    margin-bottom: 10px;
+}
+.medal-placeholder { /* Pro případ, že obrázek chybí */
+    width: 100px; height: 100px; background-color: #e0e0e0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3em; color: #aaa; margin: 0 auto 10px auto; border-radius: 50%;
+}
+
+.museum-medal-info h3 {
+    margin-top: 0;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.museum-medal-info p {
+    font-size: 0.9em;
+    color: #666;
+    margin: 5px 0;
+}
+
+/* Styly pro hvězdy v detailním rozpisu scén (pokud ho použiješ) */
+.all-scenes-details { margin-top: 30px; padding: 15px; border-top: 1px solid #eee; }
+.all-scenes-details h2 { text-align: center; margin-bottom: 15px; }
+.all-scenes-details h3 { margin-top: 20px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+.all-scenes-details ul { list-style: none; padding-left: 0; }
+.all-scenes-details li { padding: 5px 0; font-size: 0.9em; }
+.star-icon img { width: 20px; height: 20px; vertical-align: middle; margin-left: 5px; }
