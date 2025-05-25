@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Můj inventář - AR Kyjov</title>
+    <!-- Odkaz na tvůj hlavní CSS soubor -->
+    <link rel="stylesheet" href="/css/style.css"> <!-- Uprav cestu podle potřeby -->
+    <style>
+        /* Můžeš přidat specifické styly pro inventář zde nebo do hlavního CSS */
+        #inventory-display { padding: 15px; }
+        .overall-status, .scene-list { margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; border-radius: 5px; }
+        .overall-status h2, .scene-list h2 { margin-top: 0; }
+        .scene-list ul { list-style: none; padding: 0; }
+        .scene-list li { padding: 8px 0; border-bottom: 1px solid #eee; }
+        .scene-list li:last-child { border-bottom: none; }
+        .medal-icon img, .star-icon img {
+            width: 24px; /* Nebo velikost tvých obrázků */
+            height: 24px;
+            vertical-align: middle;
+            margin-left: 8px;
+        }
+        /* Můžeš přidat třídy pro barvy textu nebo pozadí pro none, bronze, silver, gold */
+        .medal-none, .star-none { /* color: #aaa; */ }
+        .medal-bronze, .star-bronze { /* color: #cd7f32; */ }
+        /* atd. */
+    </style>
+</head>
+<body>
+    <header>
+        <!-- Tvoje obvyklá hlavička, např. s názvem aplikace a odkazem zpět -->
+        <h1>Inventář úspěchů</h1>
+        <nav>
+            <a href="/">Zpět na hlavní stránku</a> <!-- Uprav odkaz podle potřeby -->
+        </nav>
+    </header>
+
+    <main>
+        <div id="inventory-display">
+            <p>Načítání statistik...</p> <!-- Zpráva během načítání -->
+        </div>
+    </main>
+
+    <footer>
+        <!-- Tvoje patička -->
+    </footer>
+
+    <!-- Důležité: gamification-config.js musí být načten jako první! -->
+    <script src="/path/to/your/gamification-config.js"></script> <!-- Uprav cestu! -->
+    <script src="/path/to/your/inventory.js"></script> <!-- Uprav cestu! -->
+</body>
+</html>
