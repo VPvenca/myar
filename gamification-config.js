@@ -123,3 +123,5 @@ function getCurrentSceneConfigForMuseum() {
     // console.warn(`Konfigurace pro scénu "${scenePath}" v muzeu "${CURRENT_MUSEUM_ID || 'undefined'}" nenalezena.`);
     return null;
 }
+console.log('CONFIG - APP_STORAGE_KEY:', typeof APP_STORAGE_KEY);
+console.log('CONFIG - MUSEUM_CONFIGS:', typeof MUSEUM_CONFIGS);
