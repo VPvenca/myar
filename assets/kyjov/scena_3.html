@@ -41,13 +41,13 @@
         <!-- Hvězda bude vložena pomocí gamification.js -->
     </div>
 
-    <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/vedro.mind; 
-        uiLoading: yes; uiError: yes; 
-        renderer: {colorManagement: true}; 
-        physicallyCorrectLights: true; 
-        vr-mode-ui: {enabled: false}; 
-        device-orientation-permission-ui: {enabled: false}">
-
+    <a-scene
+    mindar-image="imageTargetSrc: /assets/kyjov/mind/vedro.mind; uiLoading: yes; uiError: yes; autoStart: false;"
+    renderer="colorManagement: true; physicallyCorrectLights: true;"
+    vr-mode-ui="enabled: false;"
+    device-orientation-permission-ui="enabled: false;"
+    color-space="sRGB" <!-- Doporučeno pro colorManagement: true -->
+    >
         <a-assets>
             <a-asset-item id="model1" src="/assets/kyjov/3d/vedro.glb"></a-asset-item>
         </a-assets>
