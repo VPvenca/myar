@@ -158,32 +158,47 @@
     <script src="/script.js"></script>
 
     <!-- OPRAVENÝ Skript pro zobrazení hvězd na této přehledové stránce -->
+    <!-- ... (všechno předchozí HTML a skripty) ... -->
+
+    <!-- OPRAVENÝ Skript pro zobrazení hvězd na této přehledové stránce -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Ujistěte se, že MUSEUM_CONFIGS a APP_STORAGE_KEY jsou dostupné (z gamification-config.js)
+            console.log("KYJOV.HTML: DOMContentLoaded - Začátek skriptu pro hvězdy.");
+
             if (typeof MUSEUM_CONFIGS === 'undefined' || typeof APP_STORAGE_KEY === 'undefined') {
-                console.error("KYJOV.HTML Chyba: MUSEUM_CONFIGS nebo APP_STORAGE_KEY nejsou definovány. Ujistěte se, že /gamification-config.js je načten správně PŘED tímto skriptem.");
+                console.error("KYJOV.HTML Chyba: MUSEUM_CONFIGS nebo APP_STORAGE_KEY nejsou definovány.");
                 return;
             }
+            console.log("KYJOV.HTML: Konfigurace (MUSEUM_CONFIGS, APP_STORAGE_KEY) dostupná.");
 
-            // Funkce pro načtení dat z localStorage (může být sdílená utilita, pokud se opakuje)
-            function getStoredAppData_KyjovPage() { // Přejmenováno pro odlišení, pokud by existovala globální
-                const data = localStorage.getItem(APP_STORAGE_KEY); // APP_STORAGE_KEY z gamification-config.js
-                return data ? JSON.parse(data) : {};
+            function getStoredAppData_KyjovPage() {
+                const rawData = localStorage.getItem(APP_STORAGE_KEY);
+                console.log("KYJOV.HTML - getStoredAppData: Surová data z localStorage:", rawData);
+                const parsedData = rawData ? JSON.parse(rawData) : {};
+                console.log("KYJOV.HTML - getStoredAppData: Parsovaná data:", JSON.parse(JSON.stringify(parsedData))); // Hluboká kopie pro logování
+                return parsedData;
             }
 
-            // Funkce pro výpočet hvězdy pro danou scénu (logika zkopírovaná/upravená z gamification.js)
             function calculateStarLevelForScene_KyjovPage(sceneProgressData, sceneConfig) {
+                console.log("KYJOV.HTML - calculateStarLevel: Vstupní sceneProgressData:", sceneProgressData, "Vstupní sceneConfig:", sceneConfig);
                 if (!sceneConfig || typeof sceneConfig.totalMarkers !== 'number' || !Array.isArray(sceneConfig.markers)) {
-                    console.warn("calculateStarLevelForScene_KyjovPage: Neplatná konfigurace scény:", sceneConfig);
+                    console.warn("KYJOV.HTML - calculateStarLevel: Neplatná konfigurace scény:", sceneConfig);
                     return 'none';
                 }
 
                 const activatedMarkersCount = sceneConfig.markers.filter(markerId => sceneProgressData && sceneProgressData[markerId] === true).length;
                 const totalMarkersInScene = sceneConfig.totalMarkers;
+                console.log("KYJOV.HTML - calculateStarLevel: Pro scénu '" + sceneConfig.name + "': Aktivováno:", activatedMarkersCount, "Celkem:", totalMarkersInScene);
 
-                if (totalMarkersInScene === 0) return 'none';
-                if (activatedMarkersCount === 0) return 'none';
+
+                if (totalMarkersInScene === 0) {
+                    console.log("KYJOV.HTML - calculateStarLevel: Úroveň 'none' (totalMarkersInScene je 0)");
+                    return 'none';
+                }
+                if (activatedMarkersCount === 0) {
+                    console.log("KYJOV.HTML - calculateStarLevel: Úroveň 'none' (activatedMarkersCount je 0)");
+                    return 'none';
+                }
                 
                 let level = 'none';
                 if (totalMarkersInScene === 1) {
@@ -200,43 +215,55 @@
                     else if (activatedMarkersCount >= Math.ceil(totalMarkersInScene / 2)) level = 'silver';
                     else if (activatedMarkersCount > 0) level = 'bronze';
                 }
+                console.log("KYJOV.HTML - calculateStarLevel: Vypočtená úroveň pro '" + sceneConfig.name + "':", level);
                 return level;
             }
             
-            // Funkce pro zobrazení hvězd (logika zkopírovaná/upravená z gamification.js)
             function displayStarsOnOverview_KyjovPage(starElement, level) {
-                if (!starElement) return;
+                console.log("KYJOV.HTML - displayStars: Element:", starElement, "Úroveň:", level);
+                if (!starElement) {
+                    console.warn("KYJOV.HTML - displayStars: starElement je null!");
+                    return;
+                }
                 let starsHtml = '';
-                // Cesty k obrázkům - ujistěte se, že jsou správné
                 switch (level) {
                     case 'bronze': starsHtml = '<img src="/img/bronze_star.png" alt="Bronzová hvězda" class="star-image">'; break;
                     case 'silver': starsHtml = '<img src="/img/silver_star.png" alt="Stříbrná hvězda" class="star-image">'; break;
                     case 'gold': starsHtml = '<img src="/img/gold_star.png" alt="Zlatá hvězda" class="star-image">'; break;
                 }
                 starElement.innerHTML = starsHtml;
+                console.log("KYJOV.HTML - displayStars: Nastaveno innerHTML na:", starsHtml, "pro element:", starElement);
+                if (starsHtml === '' && level !== 'none') {
+                    console.warn("KYJOV.HTML - displayStars: starsHtml je prázdný, i když úroveň není 'none'. Zkontrolujte cesty k obrázkům nebo logiku switche.");
+                }
+                 if (starsHtml !== '' && starElement.querySelector('img')) {
+                    const img = starElement.querySelector('img');
+                    img.onload = () => console.log("KYJOV.HTML - displayStars: Obrázek hvězdy načten:", img.src);
+                    img.onerror = () => console.error("KYJOV.HTML - displayStars: CHYBA při načítání obrázku hvězdy:", img.src);
+                }
             }
 
             const storedAppData = getStoredAppData_KyjovPage();
-            // Využijeme CURRENT_MUSEUM_ID_OVERVIEW definované na začátku tohoto HTML
             const pageMuseumId = (typeof CURRENT_MUSEUM_ID_OVERVIEW !== 'undefined') ? CURRENT_MUSEUM_ID_OVERVIEW : null;
 
             if (!pageMuseumId) {
-                console.warn("KYJOV.HTML: CURRENT_MUSEUM_ID_OVERVIEW není definováno. Nelze určit muzeum pro zobrazení hvězd.");
-                // Alternativně, pokud by odkazy mohly být z různých muzeí, museli bychom se spolehnout jen na data-museum-id
+                console.warn("KYJOV.HTML: CURRENT_MUSEUM_ID_OVERVIEW není definováno.");
             }
             
             const starDisplayElements = document.querySelectorAll('.star-display[data-scene-id]');
+            console.log("KYJOV.HTML: Nalezeno prvků pro hvězdy:", starDisplayElements.length, starDisplayElements);
 
-            starDisplayElements.forEach(starElement => {
+            starDisplayElements.forEach((starElement, index) => {
+                console.log(`KYJOV.HTML: Zpracovávám starElement ${index + 1}:`, starElement);
                 const scenePath = starElement.dataset.sceneId;
-                // Pokud má element i data-museum-id, dáme mu přednost. Jinak použijeme pageMuseumId.
-                const
-            elementMuseumId = starElement.dataset.museumId || pageMuseumId;
+                const elementMuseumId = starElement.dataset.museumId || pageMuseumId;
+                console.log(`KYJOV.HTML: Element ${index + 1} - scenePath:`, scenePath, "elementMuseumId:", elementMuseumId);
+
 
                 if (!elementMuseumId || !scenePath) {
-                    console.warn("KYJOV.HTML: Chybí data-scene-id nebo nelze určit museum-id pro element:", starElement);
+                    console.warn(`KYJOV.HTML: Element ${index + 1} - Chybí data-scene-id nebo nelze určit museum-id.`);
                     displayStarsOnOverview_KyjovPage(starElement, 'none');
-                    return;
+                    return; // Pokračuj na další element
                 }
 
                 let sceneConfig = null;
@@ -244,22 +271,21 @@
                     MUSEUM_CONFIGS[elementMuseumId].sceneConfig && 
                     MUSEUM_CONFIGS[elementMuseumId].sceneConfig[scenePath]) {
                     sceneConfig = MUSEUM_CONFIGS[elementMuseumId].sceneConfig[scenePath];
+                    console.log(`KYJOV.HTML: Element ${index + 1} - Nalezena konfigurace scény:`, sceneConfig);
                 }
 
                 if (sceneConfig) {
                     const museumProgress = storedAppData[elementMuseumId] || { scenes: {} };
                     const sceneProgress = museumProgress.scenes[scenePath] || {};
+                    console.log(`KYJOV.HTML: Element ${index + 1} - museumProgress:`, JSON.parse(JSON.stringify(museumProgress)), "sceneProgress:", JSON.parse(JSON.stringify(sceneProgress)));
                     
                     const level = calculateStarLevelForScene_KyjovPage(sceneProgress, sceneConfig);
                     displayStarsOnOverview_KyjovPage(starElement, level);
                 } else {
-                    console.warn(`KYJOV.HTML: Konfigurace pro scénu "${scenePath}" v muzeu "${elementMuseumId}" nenalezena. Hvězdy se nezobrazí.`);
+                    console.warn(`KYJOV.HTML: Element ${index + 1} - Konfigurace pro scénu "${scenePath}" v muzeu "${elementMuseumId}" nenalezena.`);
                     displayStarsOnOverview_KyjovPage(starElement, 'none');
                 }
             });
             console.log("KYJOV.HTML: Zobrazení hvězd dokončeno.");
         });
     </script>
-
-</body>
-</html>
