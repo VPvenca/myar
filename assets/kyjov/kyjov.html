@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/img/favicon.png" />
-    <title>AR Aplikace - Kyjov</title> <!-- Upřesněný titulek -->
+    <title>AR Aplikace</title> <!-- Mírně upravený titulek -->
     <!-- Základní styly a preset -->
     <link rel="stylesheet" href="/css/base.css">
     <!-- Styly pro layout stránky -->
@@ -23,53 +23,50 @@
     <!-- Manifest a ikony -->
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/img/apple_touch_icon_192x192.png">
-
-    <!-- DŮLEŽITÉ: Definice CURRENT_MUSEUM_ID pro tuto stránku, pokud všechny odkazy patří do jednoho muzea -->
-    <!-- Pokud by odkazy vedly do různých muzeí, toto by zde nebylo a spoléhali bychom se jen na data-museum-id u odkazů -->
-    <script>
-        const CURRENT_MUSEUM_ID_OVERVIEW = "muzeumKyjov"; // Specifické pro tuto přehledovou stránku
-    </script>
 </head>
 <body class="home-page">
 
-    <div class="page-wrapper">
+    <div class="page-wrapper"> <!-- Obalovač pro flexbox layout s patičkou dole -->
 
         <header class="app-header">
             <img src="/img/augview.png" alt="Logo AR Aplikace" id="app-logo">
-            <h1>Vlastivědné muzeum Kyjov</h1> <!-- Název muzea -->
+            <h1>Vyberte AR Scénu</h1>
         </header>
 
+        <!-- === ZAČÁTEK JEDINÉHO MAIN ELEMENTU === -->
         <main>
+            <!-- Kontejner pro tlačítka menu -->
             <div class="menu-content">
-                <!-- Odkazy nyní obsahují data-museum-id -->
                 <a href="/assets/kyjov/terce.html" class="menu-button icon-button">
                     <img src="/assets/kyjov/thumb/terce_thumb.png" alt="" class="button-icon">
                     <span class="button-text">střelecké terče</span>
-                    <span class="star-display" data-museum-id="muzeumKyjov" data-scene-id="/assets/kyjov/terce.html"></span>
+                    <span class="star-display" data-scene-id="/assets/kyjov/terce.html"></span>
                 </a>
                 <a href="/assets/kyjov/florian.html" class="menu-button icon-button">
                     <img src="/assets/kyjov/thumb/florian_thumb.png" alt="" class="button-icon">
                     <span class="button-text">obraz sv.Floriána</span>
-                    <span class="star-display" data-museum-id="muzeumKyjov" data-scene-id="/assets/kyjov/florian.html"></span>
+                    <span class="star-display" data-scene-id="/assets/kyjov/florian.html"></span>
                 </a>
                 <a href="/assets/kyjov/scena_1.html" class="menu-button icon-button">
                     <img src="/assets/kyjov/thumb/obrazy_thumb.png" alt="" class="button-icon">
                     <span class="button-text">obrazy v mezipatře</span>
-                    <span class="star-display" data-museum-id="muzeumKyjov" data-scene-id="/assets/kyjov/scena_1.html"></span>
+                    <span class="star-display" data-scene-id="/assets/kyjov/scena_1.html"></span>
                 </a>
                 <a href="/assets/kyjov/scena_3.html" class="menu-button icon-button">
                     <img src="/assets/kyjov/thumb/vedro_thumb.png" alt="" class="button-icon">
                     <span class="button-text">3D vědro</span>
-                    <span class="star-display" data-museum-id="muzeumKyjov" data-scene-id="/assets/kyjov/scena_3.html"></span>
+                    <span class="star-display" data-scene-id="/assets/kyjov/scena_3.html"></span>
                 </a>
                 <a href="/assets/kyjov/scena_2.html" class="menu-button icon-button">
                     <img src="/assets/kyjov/thumb/hadanky_thumb.png" alt="" class="button-icon">
                     <span class="button-text">Hádanky</span>
-                    <span class="star-display" data-museum-id="muzeumKyjov" data-scene-id="/assets/kyjov/scena_2.html"></span>
+                    <span class="star-display" data-scene-id="/assets/kyjov/scena_2.html"></span>
                 </a>
-            </div>
+            </div> <!-- Konec .menu-content -->
 
+            <!-- Kontejner pro mapu a tlačítko Zpět -->
             <div class="centered-controls">
+                <!-- Odkaz pro ZOBRAZENÍ místa na mapě -->
                 <div class="map-section-minimal">
                     <p class="map-link-wrapper-minimal">
                         <a href="https://www.google.com/maps/search/?api=1&query=t%C5%99.+Palack%C3%A9ho+1373%2F13a%2C+697+01+Kyjov+1" target="_blank" rel="noopener noreferrer" class="map-button-minimal">
@@ -77,21 +74,29 @@
                         </a>
                     </p>
                 </div>
+
+                <!-- Tlačítko Zpět -->
                 <div class="back-button-container">
                     <a href="/muzea_galerie.html" class="menu-button back-button">
                         Zpět
                     </a>
                 </div>
-            </div>
-        </main>
+            </div> <!-- Konec .centered-controls -->
 
+        </main> <!-- === KONEC JEDINÉHO MAIN ELEMENTU === -->
+        <!-- Nevalidní </main> tag odstraněn -->
+
+        <!-- Tlačítko Nápovědy (mimo main pro nezávislé pozicování) -->
         <button id="help-button" class="help-icon-button" title="Nápověda">?</button>
 
+        <!-- Patička -->
         <footer class="app-footer">
             <p>© 2025 Vytvořil Václav Pěnčík</p>
         </footer>
-    </div>
 
+    </div> <!-- Konec page-wrapper -->
+
+    <!-- Modální okno Nápovědy -->
     <div id="help-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>Nápověda</h2>
@@ -101,6 +106,9 @@
                 rozšířené reality.
             </p>
             <p>POZOR! Je nutné povolit přístup ke kameře zařízení!</p>
+            
+            
+            
             <h2>Menu Panel</h2>
             <div class="help-items-container">
                 <div class="help-item">
@@ -128,164 +136,51 @@
                     <p>Jedná se o demoverzi hádanek k představení projektu AugView.</p>
                 </div>
                 <hr>
-            </div>
+            <!-- Konec help-items-container -->
              <h2>Sbírejte hvězdy!</h2>
-            <div class="help-items-container">
-               <div class="help-item">
-                    <img src="/img/stars.png" alt="stars" class="inline-icon">
-                    <p>Hvězdy ukazují, jak moc jste zvídaví. Objevují se u tlačítek se scénami.
-                       Za zhlédnutí všech scén v jedné kategorii získáte zlatou hvězdu.
-                       Pokud si přehrajete alespoň polovinu, dostanete stříbrnou hvězdu.
-                       A bronzovou získáte už jen za krátké nahlédnutí.</p>
-                     <p>
-                      Cílem je nasbírat všechny zlaté hvězdy – to je ta pravá výzva!
-                      A když se vám to podaří, čeká vás odměna na recepci.</p>
-                </div>
-            </div>
+                 <div class="help-items-container">
+               <div class="help-item"> 
+            
+            <img src="/img/stars.png" alt="stars" class="inline-icon">
+            <p>Hvězdy ukazují, jak moc jste zvídaví. Objevují se u tlačítek se scénami.
+               Za zhlédnutí všech scén v jedné kategorii získáte zlatou hvězdu.
+               Pokud si přehrajete alespoň polovinu, dostanete stříbrnou hvězdu.
+               A bronzovou získáte už jen za krátké nahlédnutí.</p>
+             <p>
+              Cílem je nasbírat všechny zlaté hvězdy – to je ta pravá výzva!
+              A když se vám to podaří, čeká vás odměna na recepci.</p>
+            </div>  
+                     
             <p>Ujistěte se, že máte dostatek světla a sledujte okolí.</p>
+            <!-- Prázdný <p> tag odstraněn -->
             <p>Aplikace využívá Mind AR / A frame.</p>
+
             <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
         </div>
-    </div>
+    </div> <!-- Konec modal-overlay -->
 
-    <!-- Načtení gamifikační konfigurace JAKO PRVNÍ z gamifikačních skriptů -->
-    <script src="/gamification-config.js"></script>
-    <!-- gamification.js zde není nutně potřeba, pokud ho nevyužívá script.js nebo jiná logika na této stránce. -->
-    <!-- Skript pro hvězdy níže má vlastní logiku. Pokud ho potřebujete, odkomentujte: -->
-    <!-- <script src="/gamification.js"></script> -->
-
-    <!-- Připojení tvého hlavního aplikačního JavaScriptu -->
+     <script src="/gamification-config.js"></script>
+    <script src="/gamification.js"></script>
+    <!-- Připojení JavaScriptu -->
     <script src="/script.js"></script>
 
-    <!-- OPRAVENÝ Skript pro zobrazení hvězd na této přehledové stránce -->
-    <!-- ... (všechno předchozí HTML a skripty) ... -->
-
-    <!-- OPRAVENÝ Skript pro zobrazení hvězd na této přehledové stránce -->
+    <!-- Skript pro zobrazení hvězd na této stránce -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("KYJOV.HTML: DOMContentLoaded - Začátek skriptu pro hvězdy.");
-
-            if (typeof MUSEUM_CONFIGS === 'undefined' || typeof APP_STORAGE_KEY === 'undefined') {
-                console.error("KYJOV.HTML Chyba: MUSEUM_CONFIGS nebo APP_STORAGE_KEY nejsou definovány.");
-                return;
-            }
-            console.log("KYJOV.HTML: Konfigurace (MUSEUM_CONFIGS, APP_STORAGE_KEY) dostupná.");
-
-            function getStoredAppData_KyjovPage() {
-                const rawData = localStorage.getItem(APP_STORAGE_KEY);
-                console.log("KYJOV.HTML - getStoredAppData: Surová data z localStorage:", rawData);
-                const parsedData = rawData ? JSON.parse(rawData) : {};
-                console.log("KYJOV.HTML - getStoredAppData: Parsovaná data:", JSON.parse(JSON.stringify(parsedData))); // Hluboká kopie pro logování
-                return parsedData;
-            }
-
-            function calculateStarLevelForScene_KyjovPage(sceneProgressData, sceneConfig) {
-                console.log("KYJOV.HTML - calculateStarLevel: Vstupní sceneProgressData:", sceneProgressData, "Vstupní sceneConfig:", sceneConfig);
-                if (!sceneConfig || typeof sceneConfig.totalMarkers !== 'number' || !Array.isArray(sceneConfig.markers)) {
-                    console.warn("KYJOV.HTML - calculateStarLevel: Neplatná konfigurace scény:", sceneConfig);
-                    return 'none';
-                }
-
-                const activatedMarkersCount = sceneConfig.markers.filter(markerId => sceneProgressData && sceneProgressData[markerId] === true).length;
-                const totalMarkersInScene = sceneConfig.totalMarkers;
-                console.log("KYJOV.HTML - calculateStarLevel: Pro scénu '" + sceneConfig.name + "': Aktivováno:", activatedMarkersCount, "Celkem:", totalMarkersInScene);
-
-
-                if (totalMarkersInScene === 0) {
-                    console.log("KYJOV.HTML - calculateStarLevel: Úroveň 'none' (totalMarkersInScene je 0)");
-                    return 'none';
-                }
-                if (activatedMarkersCount === 0) {
-                    console.log("KYJOV.HTML - calculateStarLevel: Úroveň 'none' (activatedMarkersCount je 0)");
-                    return 'none';
-                }
-                
-                let level = 'none';
-                if (totalMarkersInScene === 1) {
-                    if (activatedMarkersCount === 1) level = 'gold';
-                } else if (totalMarkersInScene === 2) {
-                    if (activatedMarkersCount === 2) level = 'gold';
-                    else if (activatedMarkersCount === 1) level = 'silver';
-                } else if (totalMarkersInScene === 3) {
-                    if (activatedMarkersCount === 3) level = 'gold';
-                    else if (activatedMarkersCount === 2) level = 'silver';
-                    else if (activatedMarkersCount === 1) level = 'bronze';
-                } else { // 4 a více
-                    if (activatedMarkersCount >= totalMarkersInScene) level = 'gold';
-                    else if (activatedMarkersCount >= Math.ceil(totalMarkersInScene / 2)) level = 'silver';
-                    else if (activatedMarkersCount > 0) level = 'bronze';
-                }
-                console.log("KYJOV.HTML - calculateStarLevel: Vypočtená úroveň pro '" + sceneConfig.name + "':", level);
-                return level;
-            }
-            
-            function displayStarsOnOverview_KyjovPage(starElement, level) {
-                console.log("KYJOV.HTML - displayStars: Element:", starElement, "Úroveň:", level);
-                if (!starElement) {
-                    console.warn("KYJOV.HTML - displayStars: starElement je null!");
-                    return;
-                }
-                let starsHtml = '';
-                switch (level) {
-                    case 'bronze': starsHtml = '<img src="/img/bronze_star.png" alt="Bronzová hvězda" class="star-image">'; break;
-                    case 'silver': starsHtml = '<img src="/img/silver_star.png" alt="Stříbrná hvězda" class="star-image">'; break;
-                    case 'gold': starsHtml = '<img src="/img/gold_star.png" alt="Zlatá hvězda" class="star-image">'; break;
-                }
-                starElement.innerHTML = starsHtml;
-                console.log("KYJOV.HTML - displayStars: Nastaveno innerHTML na:", starsHtml, "pro element:", starElement);
-                if (starsHtml === '' && level !== 'none') {
-                    console.warn("KYJOV.HTML - displayStars: starsHtml je prázdný, i když úroveň není 'none'. Zkontrolujte cesty k obrázkům nebo logiku switche.");
-                }
-                 if (starsHtml !== '' && starElement.querySelector('img')) {
-                    const img = starElement.querySelector('img');
-                    img.onload = () => console.log("KYJOV.HTML - displayStars: Obrázek hvězdy načten:", img.src);
-                    img.onerror = () => console.error("KYJOV.HTML - displayStars: CHYBA při načítání obrázku hvězdy:", img.src);
-                }
-            }
-
-            const storedAppData = getStoredAppData_KyjovPage();
-            const pageMuseumId = (typeof CURRENT_MUSEUM_ID_OVERVIEW !== 'undefined') ? CURRENT_MUSEUM_ID_OVERVIEW : null;
-
-            if (!pageMuseumId) {
-                console.warn("KYJOV.HTML: CURRENT_MUSEUM_ID_OVERVIEW není definováno.");
-            }
-            
             const starDisplayElements = document.querySelectorAll('.star-display[data-scene-id]');
-            console.log("KYJOV.HTML: Nalezeno prvků pro hvězdy:", starDisplayElements.length, starDisplayElements);
 
-            starDisplayElements.forEach((starElement, index) => {
-                console.log(`KYJOV.HTML: Zpracovávám starElement ${index + 1}:`, starElement);
-                const scenePath = starElement.dataset.sceneId;
-                const elementMuseumId = starElement.dataset.museumId || pageMuseumId;
-                console.log(`KYJOV.HTML: Element ${index + 1} - scenePath:`, scenePath, "elementMuseumId:", elementMuseumId);
+            starDisplayElements.forEach(starElement => {
+                const sceneId = starElement.dataset.sceneId;
 
-
-                if (!elementMuseumId || !scenePath) {
-                    console.warn(`KYJOV.HTML: Element ${index + 1} - Chybí data-scene-id nebo nelze určit museum-id.`);
-                    displayStarsOnOverview_KyjovPage(starElement, 'none');
-                    return; // Pokračuj na další element
-                }
-
-                let sceneConfig = null;
-                if (MUSEUM_CONFIGS[elementMuseumId] && 
-                    MUSEUM_CONFIGS[elementMuseumId].sceneConfig && 
-                    MUSEUM_CONFIGS[elementMuseumId].sceneConfig[scenePath]) {
-                    sceneConfig = MUSEUM_CONFIGS[elementMuseumId].sceneConfig[scenePath];
-                    console.log(`KYJOV.HTML: Element ${index + 1} - Nalezena konfigurace scény:`, sceneConfig);
-                }
-
-                if (sceneConfig) {
-                    const museumProgress = storedAppData[elementMuseumId] || { scenes: {} };
-                    const sceneProgress = museumProgress.scenes[scenePath] || {};
-                    console.log(`KYJOV.HTML: Element ${index + 1} - museumProgress:`, JSON.parse(JSON.stringify(museumProgress)), "sceneProgress:", JSON.parse(JSON.stringify(sceneProgress)));
-                    
-                    const level = calculateStarLevelForScene_KyjovPage(sceneProgress, sceneConfig);
-                    displayStarsOnOverview_KyjovPage(starElement, level);
+                if (SCENE_CONFIG && SCENE_CONFIG[sceneId]) { // Zkontrolujte i existenci SCENE_CONFIG
+                    const level = getSceneStarLevel(sceneId);
+                    displayStars(starElement, level);
                 } else {
-                    console.warn(`KYJOV.HTML: Element ${index + 1} - Konfigurace pro scénu "${scenePath}" v muzeu "${elementMuseumId}" nenalezena.`);
-                    displayStarsOnOverview_KyjovPage(starElement, 'none');
+                    console.warn(`Config for scene ID "${sceneId}" not found in SCENE_CONFIG. Cannot display stars. Make sure gamification-config.js is loaded and sceneId is correct.`);
                 }
             });
-            console.log("KYJOV.HTML: Zobrazení hvězd dokončeno.");
         });
     </script>
+
+</body>
+</html>

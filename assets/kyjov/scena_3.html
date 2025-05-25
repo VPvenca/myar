@@ -7,179 +7,113 @@
     <!-- A-Frame a MindAR knihovny -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    
-    <!-- NOVÁ Gamifikační skripty - DŮLEŽITÉ POŘADÍ -->
-    <script> const CURRENT_MUSEUM_ID = "muzeumKyjov"; </script>
     <script src="/gamification-config.js"></script>
-    <script src="/gamification.js"></script> 
-    <!-- gamification.js by měl obsahovat logy pro ladění -->
-
-    <style>
-        /* Můžeš přidat CSS pro .main-scene-star-display, pokud ho chceš zobrazit */
-        .main-scene-star-display {
-            position: absolute;
-            top: 10px;
-            right: 10px; /* Nebo kamkoliv chceš */
-            z-index: 1001;
-            background-color: rgba(0,0,0,0.5);
-            padding: 5px;
-            border-radius: 3px;
-        }
-        .main-scene-star-display img {
-            width: 24px;
-            height: 24px;
-        }
-    </style>
+    <script src="/gamification.js"></script>
 </head>
 <body>
     <a href="/assets/kyjov/kyjov.html" style="position: absolute; top: 10px; left: 10px; z-index: 1001; padding: 8px 15px; background-color: rgba(0,0,0,0.5); color: white; text-decoration: none; border-radius: 3px; font-size: 14px;">
-        Zpět do Menu Kyjov
-    </a>
-    <!-- Element pro zobrazení hvězdy této konkrétní AR scény -->
-    <div class="main-scene-star-display">
-        <!-- Hvězda bude vložena pomocí gamification.js -->
-    </div>
+    Zpět do Menu
+</a>
+    <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/vedro.mind; 
+        uiLoading: yes; uiError: yes; 
+        renderer: {colorManagement: true}; 
+        physicallyCorrectLights: true; 
+        vr-mode-ui: {enabled: false}; 
+        device-orientation-permission-ui: {enabled: false}">
 
-    <!-- OPRAVENÉ ATRIBUTY na a-scene -->
-    <a-scene 
-        mindar-image="imageTargetSrc:/assets/kyjov/mind/vedro.mind; uiLoading: yes; uiError: yes; autoStart: true;"
-        renderer="colorManagement: true; physicallyCorrectLights: true;" 
-        color-space="sRGB" 
-        vr-mode-ui="enabled: false;" 
-        device-orientation-permission-ui="enabled: false;"
-    >
         <a-assets>
             <a-asset-item id="model1" src="/assets/kyjov/3d/vedro.glb"></a-asset-item>
+           
         </a-assets>
 
-        <a-camera position="0 0 0" look-controls="enabled: false" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- data-marker-id musí odpovídat ID v gamification-config.js -->
         <a-entity mindar-image-target="targetIndex: 0" data-marker-id="vedro_model_kyjov">
             <a-gltf-model 
-                src="#model1" 
-                position="0 0 0.1" 
-                scale="1.5 1.5 1.5"  
-                rotation="90 0 0"> 
-            </a-gltf-model>
+    src="#model1" 
+    position="0 0 0.1" 
+    scale="1.5 1.5 1.5"  
+    rotation="90 0 0"> 
+</a-gltf-model>
+<!-- Nebo třeba scale="0.1 0.1 0.1" -->
         </a-entity>
+
     </a-scene>
 
     <script>
-    // Původní logika pro povolení kamery a start MindAR
     function enableCamera() {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
                 .then(function(stream) {
-                    console.log("SCENA_3.HTML (starý skript): ✅ Přístup k zadní kameře povolen!");
+                    console.log("✅ Přístup k zadní kameře povolen!");
                 })
                 .catch(function(error) {
-                    console.error("SCENA_3.HTML (starý skript): ❌ Chyba přístupu k zadní kameře: ", error);
+                    console.error("❌ Chyba přístupu k zadní kameře: ", error);
                 });
         } else {
-            console.error("SCENA_3.HTML (starý skript): ❌ Tento prohlížeč nepodporuje přístup k médiím.");
+            console.error("❌ Tento prohlížeč nepodporuje přístup k médiím.");
         }
     }
 
     window.onload = function() {
         enableCamera(); 
-        console.log("SCENA_3.HTML (starý skript): window.onload - kamera povolena.");
 
-        // Původní způsob startu MindAR, pokud máš autoStart: true, toto není striktně nutné,
-        // ale pro jistotu to tu necháme, pokud by autoStart selhal nebo byl false.
-        // Pokud autoStart: true funguje spolehlivě, tento listener a start lze odstranit.
-        const sceneEl = document.querySelector('a-scene');
-        if (sceneEl) {
-            sceneEl.addEventListener('loaded', () => {
-                console.log("SCENA_3.HTML (starý skript): a-scene načtena.");
-                const mindARSystem = sceneEl.components['mindar-image-system'];
-                if (mindARSystem) {
-                    // Pokud je autoStart: true, systém už může běžet.
-                    // Startujeme jen pokud ještě neběží.
-                    if (mindARSystem.controller === null || !mindARSystem.controller.processing) { // Heurstická kontrola, zda systém běží
-                        try {
-                            mindARSystem.start();
-                            console.log("SCENA_3.HTML (starý skript): MindAR systém manuálně spuštěn.");
-                        } catch (e) {
-                            console.error("SCENA_3.HTML (starý skript): Chyba při manuálním startu MindAR:", e);
-                        }
-                    } else {
-                        console.log("SCENA_3.HTML (starý skript): MindAR systém by měl již běžet (autoStart nebo byl spuštěn dříve).");
-                    }
-                } else {
-                     console.error("SCENA_3.HTML (starý skript): MindAR systém nenalezen na a-scene po 'loaded'.");
-                }
-            });
-        }
+        // Spustí MindAR po načtení scény
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+            document.querySelector('[mindar-image]').components['mindar-image-system'].start();
+        });
     };
+     // KROK 3: Integrace gamifikační logiky
+        document.addEventListener('DOMContentLoaded', () => {
+            // Listener pro startButton, pokud byste ho použili
+            /*
+            const startButton = document.getElementById('startButton');
+            if (startButton) {
+                startButton.addEventListener('click', () => {
+                    // ...
+                    // startButton.style.display = 'none';
+                });
+            }
+            */
 
-    // Integrace gamifikační logiky (minimálně upraveno z tvého původního kódu)
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log("SCENA_3.HTML (starý skript): DOMContentLoaded - Nastavování gamifikace.");
+            const currentSceneId = getCurrentSceneId();
+            let sceneConfigValid = false;
 
-        // Ověření dostupnosti NOVÝCH gamifikačních funkcí a proměnných
-        if (typeof CURRENT_MUSEUM_ID === 'undefined' ||
-            typeof MUSEUM_CONFIGS === 'undefined' || // Z gamification-config.js
-            typeof recordMarkerActivation !== 'function' || // Z gamification.js
-            typeof getCurrentScenePath !== 'function' || // Z gamification-config.js
-            typeof getCurrentSceneConfigForMuseum !== 'function' // Z gamification-config.js
-           ) {
-            console.error("SCENA_3.HTML (starý skript) - GAMIFIKACE CHYBA: Klíčové NOVÉ gamifikační proměnné/funkce nejsou dostupné. Zkontrolujte načtení a obsah /gamification-config.js a /gamification.js.");
-            return;
-        }
-        
-        // Získání konfigurace pro aktuální scénu pomocí NOVÉ funkce
-        const sceneConfig = getCurrentSceneConfigForMuseum();
-        let sceneConfigValid = false;
-
-        if (!sceneConfig) {
-            // getCurrentScenePath() je funkce z nového gamification-config.js
-            console.warn(`SCENA_3.HTML (starý skript) - GAMIFIKACE VAROVÁNÍ: Konfigurace pro scénu (${getCurrentScenePath()}) v muzeu "${CURRENT_MUSEUM_ID}" nebyla nalezena v MUSEUM_CONFIGS. Gamifikace nebude fungovat.`);
-        } else {
-            sceneConfigValid = true;
-            console.log(`SCENA_3.HTML (starý skript) - Gamifikace: Konfigurace pro scénu "${sceneConfig.name}" načtena.`);
-        }
-
-        // Získání targetu (zůstává z tvého původního kódu)
-        // Tento selektor by měl fungovat, pokud je entita v DOMu.
-        const targetEntity = document.querySelector('a-entity[mindar-image-target][targetIndex="0"]');
-
-        if (targetEntity) {
-            console.log("SCENA_3.HTML (starý skript): Target entita NALEZENA v DOMu:", targetEntity);
-            const markerIdFromHTML = targetEntity.getAttribute('data-marker-id'); // Používáme data-marker-id
-
-            if (!markerIdFromHTML) {
-                console.warn("SCENA_3.HTML (starý skript) - Gamifikace: Target entita nemá atribut 'data-marker-id'.");
+            if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
+                console.error("GAMIFICATION ERROR: Scene config not found for this page:", currentSceneId, ". Make sure gamification-config.js is loaded and the path is correct in SCENE_CONFIG.");
             } else {
-                 // Ověření, zda je marker nakonfigurován (podobně jako v předchozím návrhu)
-                let isMarkerConfigured = false;
-                if (sceneConfig && sceneConfig.markers && sceneConfig.markers.includes(markerIdFromHTML)) {
-                    isMarkerConfigured = true;
-                } else {
-                    console.warn(`SCENA_3.HTML (starý skript) - Gamifikace: Marker s ID "${markerIdFromHTML}" z HTML NENÍ definován v konfiguraci scény (${getCurrentScenePath()}). Nebude zaznamenán.`);
-                }
+                sceneConfigValid = true;
+                console.log("Gamification config loaded successfully for scene:", currentSceneId, SCENE_CONFIG[currentSceneId]);
+            }
 
-                if (isMarkerConfigured) { // Pouze pokud je marker nakonfigurován
+            // Získání targetu (protože je jen jeden)
+            const targetEntity = document.querySelector('[mindar-image-target="targetIndex: 0"]');
+
+            if (targetEntity) {
+                const markerId = targetEntity.dataset.markerId;
+                if (!markerId) {
+                    console.warn("Gamification: Target 1 is missing 'data-marker-id'.");
+                } else {
                     targetEntity.addEventListener('targetFound', () => {
-                        console.log(`SCENA_3.HTML (starý skript) - MindAR Event: Target (ID z HTML: ${markerIdFromHTML}) NALEZEN!`);
-                        
-                        // Gamifikace - volání NOVÉ funkce recordMarkerActivation
-                        // Předpokládáme, že sceneConfigValid je true, pokud je isMarkerConfigured true
-                        console.log(`SCENA_3.HTML (starý skript) - Gamifikace: Volám recordMarkerActivation("${markerIdFromHTML}")`);
-                        recordMarkerActivation(markerIdFromHTML); // Pouze markerId
+                        console.log(`Target 1 (ID: ${markerId}) found!`);
+                        // Pro GLTF model se nic automaticky nepřehrává, je jen viditelný
+
+                        // Gamifikace
+                        if (sceneConfigValid) { // markerId je již zkontrolováno výše
+                            console.log("Recording activation for marker:", markerId);
+                            recordMarkerActivation(currentSceneId, markerId);
+                        }
                     });
 
                     targetEntity.addEventListener('targetLost', () => {
-                        console.log(`SCENA_3.HTML (starý skript) - MindAR Event: Target (ID z HTML: ${markerIdFromHTML}) ZTRACEN!`);
+                        console.log(`Target 1 (ID: ${markerId}) lost!`);
+                        // Nic k zastavení
                     });
-                    console.log(`SCENA_3.HTML (starý skript): Listenery 'targetFound' a 'targetLost' nastaveny pro "${markerIdFromHTML}".`);
                 }
+            } else {
+                console.warn("Target 1 (targetIndex: 0) not found in DOM.");
             }
-        } else {
-            // Toto varování jsi viděl v předchozím logu, pokud se DOMContentLoaded spustí příliš brzy.
-            console.warn("SCENA_3.HTML (starý skript) - MindAR: Target entita (a-entity[mindar-image-target][targetIndex=\"0\"]) NENALEZENA v DOMu při DOMContentLoaded. Listener pro 'targetFound' nebude nastaven.");
-        }
-    });
+        });
     </script>
 </body>
 </html>
