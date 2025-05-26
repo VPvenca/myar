@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventář Trofejí</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <!-- Další vaše CSS soubory -->
+    <link rel="stylesheet" href="css/inventory.css">
+</head>
+<body class="inventory-page"> <!-- DŮLEŽITÉ: třída pro aktivaci stylů -->
+
+    <div class="page-wrapper">
+        <header class="app-header">
+            <img src="path/to/your/logo.png" alt="Logo Aplikace" id="app-logo">
+            <h1>Inventář Trofejí</h1>
+        </header>
+
+        <main>
+            <!-- Kontejner pro menu/obsah, nyní s doplňkovou třídou trophy-grid -->
+            <div class="menu-content trophy-grid">
+
+                <!-- Příklad získané trofeje -->
+                <div class="trophy-item" data-trophy-large-image="path/to/large_trophy1.png" data-trophy-name="První Objevitel">
+                    <img src="path/to/small_trophy1_icon.png" alt="Ikona První Objevitel" class="trophy-image-small">
+                    <span class="trophy-name">První Objevitel</span>
+                    <!-- Můžete přidat i krátký popis, pokud chcete, ale trophy-name je na 3 řádky -->
+                </div>
+
+                <!-- Příklad získané trofeje s delším názvem -->
+                <div class="trophy-item" data-trophy-large-image="path/to/large_trophy2.png" data-trophy-name="Mistr Průzkumník Skrytých Míst a Tajemství">
+                    <img src="path/to/small_trophy2_icon.png" alt="Ikona Mistr Průzkumník" class="trophy-image-small">
+                    <span class="trophy-name">Mistr Průzkumník Skrytých Míst a Tajemství</span>
+                </div>
+
+                <!-- Příklad zamčené/nezískané trofeje -->
+                <div class="trophy-item locked">
+                    <img src="path/to/locked_trophy_icon.png" alt="Nezískaná trofej" class="trophy-image-small">
+                    <span class="trophy-name">???</span>
+                </div>
+
+                <!-- Další trofeje ... -->
+
+            </div>
+
+            <!-- Můžete zde mít tlačítko zpět, pokud je potřeba -->
+            <div class="back-button-container">
+                <a href="index.html" class="menu-button back-button">Zpět na Menu</a>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>© 2023 Vaše Aplikace. Všechna práva vyhrazena.</p>
+        </footer>
+    </div>
+
+    <!-- Modální okno pro zobrazení obrázku trofeje (mimo page-wrapper, pro správné překrytí) -->
+    <div id="trophyImageModal" class="trophy-image-modal-overlay">
+        <div class="trophy-image-modal-content">
+            <span id="trophyModalCloseBtn" class="trophy-modal-close-button">×</span>
+            <img src="" alt="Zobrazená trofej" id="modalTrophyImageLarge">
+        </div>
+    </div>
+
+    <script>
+        // Jednoduchý JavaScript pro ovládání modálního okna
+        document.addEventListener('DOMContentLoaded', () => {
+            const trophyItems = document.querySelectorAll('.trophy-item:not(.locked)');
+            const modalOverlay = document.getElementById('trophyImageModal');
+            const modalImage = document.getElementById('modalTrophyImageLarge');
+            const closeModalBtn = document.getElementById('trophyModalCloseBtn');
+
+            trophyItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const largeImageSrc = item.dataset.trophyLargeImage;
+                    const trophyName = item.dataset.trophyName || "Trofej"; // Fallback název
+                    if (largeImageSrc) {
+                        modalImage.src = largeImageSrc;
+                        modalImage.alt = `Trofej: ${trophyName}`;
+                        modalOverlay.classList.add('visible');
+                    }
+                });
+            });
+
+            function closeModal() {
+                modalOverlay.classList.remove('visible');
+                modalImage.src = ""; // Vyčistit src pro příští otevření
+            }
+
+            closeModalBtn.addEventListener('click', closeModal);
+            modalOverlay.addEventListener('click', (event) => {
+                // Zavřít, pokud se klikne na overlay, ale ne na obsah (obrázek)
+                if (event.target === modalOverlay) {
+                    closeModal();
+                }
+            });
+
+            // Volitelně zavřít modal klávesou Escape
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && modalOverlay.classList.contains('visible')) {
+                    closeModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
