@@ -8,7 +8,7 @@
     margin-right: auto;
     width: 90%;                 /* Šířka bloku (procentuální pro responzivitu na menších zařízeních) */
     max-width: 700px;           /* Maximální šířka pro lepší čitelnost na velkých monitorech */
-    text-align: center;           /* Zarovnání textu doleva (standard pro čtení delšího textu) */
+    text-align: left;           /* Zarovnání textu doleva (standard pro čtení delšího textu) */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Jemný stín pro oddělení od pozadí */
     /* Centrování tohoto bloku je zajištěno flexboxem rodiče (.menu-content { align-items: center; }) */
     /* display: block; - Není nutné, div je výchozí blokový element */
