@@ -1,4 +1,4 @@
---- START OF FILE gamification-config.js ---
+
 // gamification-config.js
 
 // Konfigurace scén - ZŮSTÁVÁ STEJNÁ.
