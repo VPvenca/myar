@@ -125,10 +125,10 @@
                         console.log(`Target 1 (ID: ${markerId}) found!`);
                         // Pro GLTF model se nic automaticky nepřehrává, je jen viditelný
 
-                        // Gamifikace - *** ZDE JE OPRAVA ***
+                        // Gamifikace - *** OPRAVENO ZDE ***
                         if (sceneConfigValid) { // sceneConfigValid už zahrnuje kontrolu markerId a expositionId
                             console.log("Recording activation for marker:", markerId);
-                            // !!! DŮLEŽITÉ: Musí předávat 3 argumenty: expositionId, sceneId, markerId
+                            // PŘEDÁVÁME currentExpositionId, currentSceneId A markerId
                             recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
                         }
                     });
