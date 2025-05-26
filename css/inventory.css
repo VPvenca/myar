@@ -1,0 +1,166 @@
+/* ==========================================================================
+   5. Styly pro Inventář Trofejí
+   ========================================================================== */
+
+/* --- Základní nastavení pro stránku inventáře --- */
+/* Podobně jako .home-page, použijeme specifickou třídu na body */
+/* Např. <body class="inventory-page"> */
+
+/* --- Kontejner pro mřížku trofejí --- */
+/* Můžeme využít a mírně upravit styly z .home-page .menu-content */
+.inventory-page .menu-content.trophy-grid {
+    flex-direction: row;    /* Trofeje vedle sebe */
+    flex-wrap: wrap;        /* Zalamování na další řádek */
+    justify-content: center;/* Centrování řádků trofejí */
+    align-items: flex-start;/* Zarovnání položek na začátek jejich flex kontejneru (řádku) */
+                            /* Pokud mají trofeje různou výšku textu, budou zarovnány nahoře */
+    align-content: flex-start; /* Zarovná všechny řádky nahoru */
+    gap: 20px 20px;         /* Mezery mezi trofejemi (vertikálně i horizontálně) */
+    padding-top: 20px;      /* Trochu více místa nahoře */
+    padding-bottom: 20px;   /* Trochu více místa dole */
+}
+
+/* --- Jednotlivá položka trofeje --- */
+.trophy-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Obsah zarovnán nahoru, aby text nebyl tlačen dolů */
+    width: 150px;           /* Šířka trofeje (podobně jako icon-button) */
+    min-height: 180px;      /* Minimální výška, aby se vešel obrázek i delší text */
+    padding: 15px 10px;
+    background-color: rgba(255, 255, 255, 0.85); /* Lehce průhledné bílé, aby vynikl gradient pozadí */
+    color: #343a40;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box; /* Již globálně, ale pro jistotu */
+    position: relative; /* Pro případné budoucí odznáčky/notifikace na trofeji */
+}
+
+.trophy-item:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* --- Obrázek trofeje v kartě --- */
+.trophy-item .trophy-image-small {
+    width: 80px;
+    height: 80px;
+    object-fit: contain; /* Zachová poměr stran, vejde se do boxu */
+    margin-bottom: 10px;
+    border-radius: 4px; /* Lehké zaoblení, pokud je to čtvercový náhled */
+    background-color: rgba(0,0,0,0.03); /* Jemné pozadí pro transparentní PNG */
+    padding: 5px; /* Malý vnitřní okraj, pokud obrázek nemá vlastní */
+    box-sizing: border-box;
+}
+
+/* --- Název/popis trofeje --- */
+.trophy-item .trophy-name {
+    font-size: 14px;
+    font-weight: 600; /* Trochu výraznější než běžný text */
+    color: #2c3e50;
+    line-height: 1.3;
+    /* Zajistí, že text se zalomí, ale omezí na max 3 řádky s "..." */
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Maximálně 3 řádky textu */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: calc(1.3em * 1); /* Místo pro alespoň jeden řádek */
+    max-height: calc(1.3em * 3); /* Místo pro maximálně tři řádky */
+}
+
+/* --- Styl pro zamčenou/nezískanou trofej --- */
+.trophy-item.locked {
+    background-color: rgba(220, 220, 220, 0.7); /* Šedivější pozadí */
+    cursor: default; /* Neukazuje možnost kliknutí */
+    opacity: 0.7;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.trophy-item.locked:hover {
+    transform: none; /* Bez hover efektu */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.trophy-item.locked .trophy-image-small {
+    filter: grayscale(100%) opacity(60%); /* Černobílý a lehce průhledný obrázek */
+}
+
+.trophy-item.locked .trophy-name {
+    color: #6c757d; /* Šedivější text */
+}
+
+/* ==========================================================================
+   Modální okno pro zobrazení obrázku trofeje
+   ========================================================================== */
+
+.trophy-image-modal-overlay {
+    display: none; /* Výchozí stav - skryté */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Tmavší overlay pro lepší kontrast obrázku */
+    z-index: 1050; /* Vyšší než běžný modal, ale nižší než consent banner (pokud je to relevantní) */
+    justify-content: center;
+    align-items: center;
+    padding: 20px; /* Odsazení od okrajů okna pro menší obrazovky */
+    box-sizing: border-box;
+    cursor: zoom-out; /* Indikace, že kliknutím se zavře */
+}
+
+.trophy-image-modal-overlay.visible {
+    display: flex; /* Zobrazí overlay a použije flex pro centrování */
+}
+
+/* Kontejner pro samotný obrázek v modalu (aby se dal lépe stylovat a pozicovat close button) */
+.trophy-image-modal-content {
+    position: relative; /* Pro absolutní pozicování zavíracího tlačítka */
+    display: flex; /* Pro případ, že byste chtěli něco přidat vedle obrázku (nepravděpodobné zde) */
+    justify-content: center;
+    align-items: center;
+    max-width: 90vw;  /* Maximální šířka obrázku je 90% šířky viewportu */
+    max-height: 90vh; /* Maximální výška obrázku je 90% výšky viewportu */
+}
+
+.trophy-image-modal-content img {
+    display: block;
+    max-width: 100%;  /* Obrázek se zmenší, aby se vešel do .trophy-image-modal-content */
+    max-height: 100%; /* Obrázek se zmenší, aby se vešel do .trophy-image-modal-content */
+    object-fit: contain;
+    border-radius: 4px; /* Malé zaoblení i pro velký obrázek */
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); /* Výraznější stín */
+    cursor: default; /* Zruší zoom-out kurzor přímo nad obrázkem, pokud overlay má zavírat */
+}
+
+/* Zavírací tlačítko pro modální okno obrázku */
+.trophy-modal-close-button {
+    position: absolute;
+    top: -15px; /* Umístění mírně nad obrázkem (nebo do rohu) */
+    right: -15px;
+    width: 35px;
+    height: 35px;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 33px; /* Vertikální centrování křížku */
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    z-index: 1051; /* Nad obrázkem */
+}
+
+.trophy-modal-close-button:hover {
+    background-color: #fff;
+    transform: scale(1.1);
+}
