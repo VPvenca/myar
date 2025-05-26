@@ -1,3 +1,4 @@
+--- START OF FILE scena_1.html ---
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -5,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <!-- Důležité: gamification-config.js musí být načten před gamification.js -->
     <script src="/gamification-config.js"></script>
-    <script src="/gamification.js"></script>
+    <script src="/gamification.js"></script> 
     <style>
         #startButton {
             position: absolute;
@@ -22,16 +24,28 @@
             cursor: pointer;
             z-index: 1000;
         }
+         /* Styly pro tlačítko Zpět v AR scéně - doporučuji přesunout do CSS souboru */
+        .back-button-ar {
+             position: absolute; 
+             top: 10px; 
+             left: 10px; 
+             z-index: 1001; 
+             padding: 8px 15px; 
+             background-color: rgba(0,0,0,0.5); 
+             color: white; 
+             text-decoration: none; 
+             border-radius: 3px; 
+             font-size: 14px;
+        }
     </style>
 </head>
 <body>
     <button id="startButton">Spustit AR</button>
 
-<a href="/assets/kyjov/kyjov.html" style="position: absolute; top: 10px; left: 10px; z-index: 1001; padding: 8px 15px; background-color: rgba(0,0,0,0.5); color: white; text-decoration: none; border-radius: 3px; font-size: 14px;">
+<!-- Doporučuji přidat class pro snazší stylování -->
+<a href="/assets/kyjov/kyjov.html" class="back-button-ar">
     Zpět do Menu
 </a>
-
-<!-- Váš stávající kód <a-scene> ... </a-scene> atd. -->
 
     <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/targets.mind; 
         uiLoading: yes; uiError: yes; 
@@ -63,7 +77,6 @@
         let audioBuffer1;
         let audioBuffer2;
 
-        // Funkce pro dekódování audio dat
         async function loadAudio(url) {
             const response = await fetch(url);
             const arrayBuffer = await response.arrayBuffer();
@@ -82,7 +95,6 @@
 
             this.style.display = 'none';
 
-            // Inicializace AudioContext po kliknutí na tlačítko
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
             try {
@@ -112,8 +124,11 @@
         let audioSource1 = null;
         let audioSource2 = null;
 
- // === ZÍSKÁNÍ INFORMACÍ PRO GAMIFIKACI (JEDNOU) ===
+        // === ZÍSKÁNÍ INFORMACÍ PRO GAMIFIKACI (JEDNOU NA ZAČÁTKU) ===
         const currentSceneId = getCurrentSceneId(); // Funkce z gamification-config.js
+        // *** NOVINKA: Získání ID aktuální expozice ***
+        const currentExpositionId = getCurrentExpositionId(); 
+        
         let sceneConfigValid = false;
 
         if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
@@ -121,6 +136,13 @@
         } else {
             sceneConfigValid = true;
         }
+        
+        // *** Kontrola platnosti ID expozice ***
+         if (!currentExpositionId || currentExpositionId === 'unknown') {
+             console.error("GAMIFICATION ERROR: Cannot determine current exposition ID. Marker activations will not be recorded correctly.");
+             sceneConfigValid = false; // Deaktivujeme gamifikaci, pokud nevíme expozici
+         }
+
 
         // === UPRAVENÉ LISTENERY S INTEGROVANOU GAMIFIKACÍ ===
         if (target1) {
@@ -131,17 +153,17 @@
 
             target1.addEventListener('targetFound', () => {
                 console.log("Target 1 found!");
-                if (videoEntity1.components.material?.material.map?.image) { // Optional chaining pro bezpečnost
+                if (videoEntity1.components.material?.material.map?.image) {
                     videoEntity1.components.material.material.map.image.play().catch(e => console.warn("VideoEntity1 play failed", e));
                 }
                 if (audioContext && audioBuffer1 && !audioSource1) {
                     audioSource1 = playSound(audioBuffer1);
                 }
 
-                // Gamifikace
+                // Gamifikace - *** UPRAVENO: Předání ID expozice funkci recordMarkerActivation ***
                 if (sceneConfigValid && marker1Id) {
                     console.log("Recording activation for marker:", marker1Id);
-                    recordMarkerActivation(currentSceneId, marker1Id);
+                    recordMarkerActivation(currentExpositionId, currentSceneId, marker1Id);
                 }
             });
 
@@ -159,7 +181,6 @@
             console.warn("Target 1 (targetIndex: 0) not found in DOM.");
         }
 
-
         if (target2) {
             const marker2Id = target2.dataset.markerId;
             if (!marker2Id) {
@@ -175,10 +196,10 @@
                     audioSource2 = playSound(audioBuffer2);
                 }
 
-                // Gamifikace
+                // Gamifikace - *** UPRAVENO: Předání ID expozice funkci recordMarkerActivation ***
                 if (sceneConfigValid && marker2Id) {
                     console.log("Recording activation for marker:", marker2Id);
-                    recordMarkerActivation(currentSceneId, marker2Id);
+                    recordMarkerActivation(currentExpositionId, currentSceneId, marker2Id);
                 }
             });
 
