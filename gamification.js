@@ -1,4 +1,4 @@
---- START OF FILE gamification.js ---
+
 // gamification.js
 
 // Základní klíč pro ukládání všech gamifikačních dat
