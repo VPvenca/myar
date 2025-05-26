@@ -7,11 +7,27 @@
     <!-- A-Frame a MindAR knihovny -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <!-- Důležité: gamification-config.js musí být načten před gamification.js -->
     <script src="/gamification-config.js"></script>
     <script src="/gamification.js"></script>
+    <style>
+         /* Styly pro tlačítko Zpět v AR scéně - doporučuji přesunout do CSS souboru */
+        .back-button-ar {
+             position: absolute; 
+             top: 10px; 
+             left: 10px; 
+             z-index: 1001; 
+             padding: 8px 15px; 
+             background-color: rgba(0,0,0,0.5); 
+             color: white; 
+             text-decoration: none; 
+             border-radius: 3px; 
+             font-size: 14px;
+        }
+    </style>
 </head>
 <body>
-    <a href="/assets/kyjov/kyjov.html" style="position: absolute; top: 10px; left: 10px; z-index: 1001; padding: 8px 15px; background-color: rgba(0,0,0,0.5); color: white; text-decoration: none; border-radius: 3px; font-size: 14px;">
+    <a href="/assets/kyjov/kyjov.html" class="back-button-ar">
     Zpět do Menu
 </a>
     <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/hadanky.mind; 
@@ -26,7 +42,8 @@
             <img id="marker2" src="/assets/kyjov/img/benes.png">
             <img id="marker3" src="/assets/kyjov/img/adrianka.png">
         
-            <a-asset-item id="model1" src="https://your_model_url1.gltf"></a-asset-item>
+            <!-- URLs k modelům jsou zástupné, nahraďte je skutečnými -->
+            <a-asset-item id="model1" src="https://your_model_url1.gltf"></a-asset-item> 
             <a-asset-item id="model2" src="https://your_model_url2.gltf"></a-asset-item>
             <a-asset-item id="model3" src="https://your_model_url3.gltf"></a-asset-item>
            
@@ -36,17 +53,17 @@
 
         <a-entity mindar-image-target="targetIndex: 0" data-marker-id="hadanka_masaryk">
             <a-plane src="#marker1" position="0 -0.6 0" scale="1.1 0.4 1" material="transparent: true;"></a-plane>
-            
+            <!-- Zde byste mohli přidat a-gltf-model odkazující na #model1 -->
         </a-entity>
 
         <a-entity mindar-image-target="targetIndex: 1" data-marker-id="hadanka_benes">
             <a-plane src="#marker2" position="0 -0.1 0" scale="1.1 1.4 1.1" material="transparent: true;"></a-plane>
-            
+             <!-- Zde byste mohli přidat a-gltf-model odkazující na #model2 -->
         </a-entity>
 
         <a-entity mindar-image-target="targetIndex: 2" data-marker-id="hadanka_adrianka">
             <a-plane src="#marker3" position="0 0 0" scale="2 2.3 2" material="transparent: true;"></a-plane>
-            
+             <!-- Zde byste mohli přidat a-gltf-model odkazující na #model3 -->
         </a-entity>
 
        
@@ -54,25 +71,38 @@
 
     <script>
     function enableCamera() {
+         // Zde můžete chtít přidat kontrolu, zda uživatel nekliknul "Spustit AR",
+        // pokud byste se rozhodli startButton použít i v této scéně.
+        // Prozatím to necháme, ale mějte na paměti pořadí volání.
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
                 .then(function(stream) {
                     console.log("✅ Přístup k zadní kameře povolen!");
+                     // Stream můžete uložit a zastavit později, pokud je potřeba
                 })
                 .catch(function(error) {
                     console.error("❌ Chyba přístupu k zadní kameře: ", error);
+                     // Můžete zobrazit zprávu uživateli, aby povolil kameru
                 });
         } else {
             console.error("❌ Tento prohlížeč nepodporuje přístup k médiím.");
+            // Můžete zobrazit zprávu uživateli
         }
     }
 
     window.onload = function() {
+        // Viz poznámka v scena_3.html ohledně automatického spuštění MindAR
         enableCamera(); 
 
-        // Spustí MindAR po načtení scény
         document.querySelector('a-scene').addEventListener('loaded', () => {
-            document.querySelector('[mindar-image]').components['mindar-image-system'].start();
+             console.log("A-Scene loaded, attempting to start MindAR...");
+             const mindarSystem = document.querySelector('[mindar-image]').components['mindar-image-system'];
+             if (mindarSystem && !mindarSystem.is // Placeholder
+                mindarSystem.start();
+                console.log("MindAR system started (or attempted to start).");
+             // else {
+             //    console.log("MindAR system appears to be already running.");
+             // }
         });
     };
          // KROK 3: Integrace gamifikační logiky
@@ -90,6 +120,9 @@
             */
 
             const currentSceneId = getCurrentSceneId();
+             // *** NOVINKA: Získání ID aktuální expozice ***
+            const currentExpositionId = getCurrentExpositionId();
+
             let sceneConfigValid = false;
 
             if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
@@ -98,6 +131,13 @@
                 sceneConfigValid = true;
                 console.log("Gamification config loaded successfully for scene:", currentSceneId, SCENE_CONFIG[currentSceneId]);
             }
+            
+            // *** NOVINKA: Kontrola platnosti ID expozice ***
+             if (!currentExpositionId || currentExpositionId === 'unknown') {
+                 console.error("GAMIFICATION ERROR: Cannot determine current exposition ID. Marker activations will not be recorded correctly.");
+                 sceneConfigValid = false; // Deaktivujeme gamifikaci, pokud nevíme expozici
+             }
+
 
             // Získání všech targetů
             const targetEntities = [
@@ -118,10 +158,10 @@
                         console.log(`Target ${index + 1} (ID: ${markerId}) found!`);
                         // Zde není žádné video ani audio k přehrání pro tento typ scény
 
-                        // Gamifikace
-                        if (sceneConfigValid) { // markerId už je zkontrolováno
+                        // Gamifikace - *** UPRAVENO: Předání ID expozice funkci recordMarkerActivation ***
+                        if (sceneConfigValid) { // sceneConfigValid už zahrnuje kontrolu markerId a expositionId
                             console.log("Recording activation for marker:", markerId);
-                            recordMarkerActivation(currentSceneId, markerId);
+                            recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
                         }
                     });
 
