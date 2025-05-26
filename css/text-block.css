@@ -32,6 +32,7 @@
     /* Můžete použít i 1em nebo 1.1em */
     line-height: 1.6;           /* Výška řádku pro lepší čitelnost odstavců */
     margin-bottom: 12px;        /* Mezera mezi odstavci/položkami seznamu */
+    text-align: left;
 }
 
 /* Nečíslované seznamy (ul) uvnitř textového bloku */
@@ -39,6 +40,7 @@
     padding-left: 25px;         /* Odsazení seznamu zleva, aby bylo místo pro odrážky */
     margin-top: 5px;            /* Menší mezera nad seznamem */
     list-style-position: outside; /* Odrážky budou vně textového bloku položky */
+    text-align: left;
 }
 
 /* Styling odrážek (volitelné) */
