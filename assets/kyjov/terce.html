@@ -25,15 +25,15 @@
         }
          /* Styly pro tlačítko Zpět v AR scéně - doporučuji přesunout do CSS souboru */
         .back-button-ar {
-             position: absolute; 
-             top: 10px; 
-             left: 10px; 
-             z-index: 1001; 
-             padding: 8px 15px; 
-             background-color: rgba(0,0,0,0.5); 
-             color: white; 
-             text-decoration: none; 
-             border-radius: 3px; 
+             position: absolute;
+             top: 10px;
+             left: 10px;
+             z-index: 1001;
+             padding: 8px 15px;
+             background-color: rgba(0,0,0,0.5);
+             color: white;
+             text-decoration: none;
+             border-radius: 3px;
              font-size: 14px;
         }
     </style>
@@ -112,7 +112,6 @@
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
             try {
-                // Načítání audia postupně, jak to bylo ve vašem původním funkčním kódu
                 audioBuffer1 = await loadAudio(document.getElementById('audio1').src);
                 audioBuffer2 = await loadAudio(document.getElementById('audio2').src);
                 audioBuffer3 = await loadAudio(document.getElementById('audio3').src);
@@ -144,10 +143,9 @@
 
         let audioSource1 = null, audioSource2 = null, audioSource3 = null, audioSource4 = null;
 
-        // KROK 3: Integrace gamifikační logiky (stejně jako v prvním funkčním kódu)
+        // KROK 3: Integrace gamifikační logiky
         const currentSceneId = getCurrentSceneId();
-        // *** NOVINKA: Získání ID aktuální expozice ***
-        const currentExpositionId = getCurrentExpositionId();
+        const currentExpositionId = getCurrentExpositionId(); // Funkce z gamification-config.js
 
         let sceneConfigValid = false;
 
@@ -156,8 +154,7 @@
         } else {
             sceneConfigValid = true;
         }
-        
-         // *** NOVINKA: Kontrola platnosti ID expozice ***
+
          if (!currentExpositionId || currentExpositionId === 'unknown') {
              console.error("GAMIFICATION ERROR: Cannot determine current exposition ID. Marker activations will not be recorded correctly.");
              sceneConfigValid = false; // Deaktivujeme gamifikaci, pokud nevíme expozici
@@ -179,9 +176,10 @@
                 if (audioContext && audioBuffer1 && !audioSource1) { // Kontrola audioContext
                     audioSource1 = playSound(audioBuffer1);
                 }
-                // Gamifikace - *** UPRAVENO: Předání ID expozice funkci recordMarkerActivation ***
+                // Gamifikace - *** ZDE JE OPRAVA ***
                 if (sceneConfigValid && marker1Id) {
                     console.log("Recording activation for marker:", marker1Id);
+                    // !!! DŮLEŽITÉ: Musí předávat 3 argumenty: expositionId, sceneId, markerId
                     recordMarkerActivation(currentExpositionId, currentSceneId, marker1Id);
                 }
             });
@@ -215,9 +213,10 @@
                 if (audioContext && audioBuffer2 && !audioSource2) { // Kontrola audioContext
                     audioSource2 = playSound(audioBuffer2);
                 }
-                // Gamifikace - *** UPRAVENO: Předání ID expozice funkci recordMarkerActivation ***
+                // Gamifikace - *** ZDE JE OPRAVA ***
                 if (sceneConfigValid && marker2Id) {
                     console.log("Recording activation for marker:", marker2Id);
+                    // !!! DŮLEŽITÉ: Musí předávat 3 argumenty: expositionId, sceneId, markerId
                     recordMarkerActivation(currentExpositionId, currentSceneId, marker2Id);
                 }
             });
@@ -251,9 +250,10 @@
                 if (audioContext && audioBuffer3 && !audioSource3) { // Kontrola audioContext
                     audioSource3 = playSound(audioBuffer3);
                 }
-                // Gamifikace - *** UPRAVENO: Předání ID expozice funkci recordMarkerActivation ***
+                // Gamifikace - *** ZDE JE OPRAVA ***
                 if (sceneConfigValid && marker3Id) {
                     console.log("Recording activation for marker:", marker3Id);
+                     // !!! DŮLEŽITÉ: Musí předávat 3 argumenty: expositionId, sceneId, markerId
                     recordMarkerActivation(currentExpositionId, currentSceneId, marker3Id);
                 }
             });
@@ -287,9 +287,10 @@
                 if (audioContext && audioBuffer4 && !audioSource4) { // Kontrola audioContext
                     audioSource4 = playSound(audioBuffer4);
                 }
-                // Gamifikace - *** UPRAVENO: Předání ID expozice funkci recordMarkerActivation ***
+                // Gamifikace - *** ZDE JE OPRAVA ***
                 if (sceneConfigValid && marker4Id) {
                     console.log("Recording activation for marker:", marker4Id);
+                    // !!! DŮLEŽITÉ: Musí předávat 3 argumenty: expositionId, sceneId, markerId
                     recordMarkerActivation(currentExpositionId, currentSceneId, marker4Id);
                 }
             });
