@@ -1,41 +1,34 @@
+--- START OF FILE kyjov.html ---
 <!DOCTYPE html>
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="/img/favicon.png" />
-    <title>AR Aplikace</title> <!-- Mírně upravený titulek -->
-    <!-- Základní styly a preset -->
+    <title>AR Aplikace</title>
     <link rel="stylesheet" href="/css/base.css">
-    <!-- Styly pro layout stránky -->
     <link rel="stylesheet" href="/css/layout.css">
-    <!-- Styly pro komponenty -->
     <link rel="stylesheet" href="/css/buttons.css">
     <link rel="stylesheet" href="/css/modal.css">
     <link rel="stylesheet" href="/css/text-block.css">
     <link rel="stylesheet" href="/css/links.css">
-    <!-- Styly specifické pro stránky (musí být poslední, aby mohly přepsat obecné) -->
     <link rel="stylesheet" href="/css/pages.css">
-    <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Manifest a ikony -->
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/img/apple_touch_icon_192x192.png">
 </head>
 <body class="home-page">
 
-    <div class="page-wrapper"> <!-- Obalovač pro flexbox layout s patičkou dole -->
+    <div class="page-wrapper">
 
         <header class="app-header">
             <img src="/img/augview.png" alt="Logo AR Aplikace" id="app-logo">
             <h1>Vyberte AR Scénu</h1>
         </header>
 
-        <!-- === ZAČÁTEK JEDINÉHO MAIN ELEMENTU === -->
         <main>
-            <!-- Kontejner pro tlačítka menu -->
             <div class="menu-content">
                 <a href="/assets/kyjov/terce.html" class="menu-button icon-button">
                     <img src="/assets/kyjov/thumb/terce_thumb.png" alt="" class="button-icon">
@@ -62,11 +55,9 @@
                     <span class="button-text">Hádanky</span>
                     <span class="star-display" data-scene-id="/assets/kyjov/scena_2.html"></span>
                 </a>
-            </div> <!-- Konec .menu-content -->
+            </div>
 
-            <!-- Kontejner pro mapu a tlačítko Zpět -->
             <div class="centered-controls">
-                <!-- Odkaz pro ZOBRAZENÍ místa na mapě -->
                 <div class="map-section-minimal">
                     <p class="map-link-wrapper-minimal">
                         <a href="https://www.google.com/maps/search/?api=1&query=t%C5%99.+Palack%C3%A9ho+1373%2F13a%2C+697+01+Kyjov+1" target="_blank" rel="noopener noreferrer" class="map-button-minimal">
@@ -75,28 +66,23 @@
                     </p>
                 </div>
 
-                <!-- Tlačítko Zpět -->
                 <div class="back-button-container">
                     <a href="/muzea_galerie.html" class="menu-button back-button">
                         Zpět
                     </a>
                 </div>
-            </div> <!-- Konec .centered-controls -->
+            </div>
 
-        </main> <!-- === KONEC JEDINÉHO MAIN ELEMENTU === -->
-        <!-- Nevalidní </main> tag odstraněn -->
+        </main>
 
-        <!-- Tlačítko Nápovědy (mimo main pro nezávislé pozicování) -->
         <button id="help-button" class="help-icon-button" title="Nápověda">?</button>
 
-        <!-- Patička -->
         <footer class="app-footer">
             <p>© 2025 Vytvořil Václav Pěnčík</p>
         </footer>
 
-    </div> <!-- Konec page-wrapper -->
+    </div>
 
-    <!-- Modální okno Nápovědy -->
     <div id="help-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>Nápověda</h2>
@@ -106,8 +92,6 @@
                 rozšířené reality.
             </p>
             <p>POZOR! Je nutné povolit přístup ke kameře zařízení!</p>
-            
-            
             
             <h2>Menu Panel</h2>
             <div class="help-items-container">
@@ -136,7 +120,6 @@
                     <p>Jedná se o demoverzi hádanek k představení projektu AugView.</p>
                 </div>
                 <hr>
-            <!-- Konec help-items-container -->
              <h2>Sbírejte hvězdy!</h2>
                  <div class="help-items-container">
                <div class="help-item"> 
@@ -152,31 +135,38 @@
             </div>  
                      
             <p>Ujistěte se, že máte dostatek světla a sledujte okolí.</p>
-            <!-- Prázdný <p> tag odstraněn -->
             <p>Aplikace využívá Mind AR / A frame.</p>
 
             <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
         </div>
-    </div> <!-- Konec modal-overlay -->
+    </div>
 
      <script src="/gamification-config.js"></script>
     <script src="/gamification.js"></script>
-    <!-- Připojení JavaScriptu -->
     <script src="/script.js"></script>
 
     <!-- Skript pro zobrazení hvězd na této stránce -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const starDisplayElements = document.querySelectorAll('.star-display[data-scene-id]');
+            // *** NOVINKA: Získání ID aktuální expozice jednou na začátku ***
+            const currentExpositionId = getCurrentExpositionId(); 
+            
+            if (!currentExpositionId || currentExpositionId === 'unknown') {
+                 console.error("Cannot determine current exposition ID. Stars may not display correctly.");
+                 // Možná zde zobrazit nějakou chybovou zprávu uživateli, pokud je to kritické
+            }
+
 
             starDisplayElements.forEach(starElement => {
                 const sceneId = starElement.dataset.sceneId;
 
-                if (SCENE_CONFIG && SCENE_CONFIG[sceneId]) { // Zkontrolujte i existenci SCENE_CONFIG
-                    const level = getSceneStarLevel(sceneId);
+                if (SCENE_CONFIG && SCENE_CONFIG[sceneId]) {
+                    // *** UPRAVENO: Předání ID expozice funkci getSceneStarLevel ***
+                    const level = getSceneStarLevel(currentExpositionId, sceneId); 
                     displayStars(starElement, level);
                 } else {
-                    console.warn(`Config for scene ID "${sceneId}" not found in SCENE_CONFIG. Cannot display stars. Make sure gamification-config.js is loaded and sceneId is correct.`);
+                    console.warn(`Config for scene ID "${sceneId}" not found in SCENE_CONFIG. Cannot display stars.`);
                 }
             });
         });
