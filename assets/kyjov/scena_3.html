@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
+
     <!-- A-Frame a MindAR knihovny -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
@@ -13,15 +13,15 @@
      <style>
          /* Styly pro tlačítko Zpět v AR scéně - doporučuji přesunout do CSS souboru */
         .back-button-ar {
-             position: absolute; 
-             top: 10px; 
-             left: 10px; 
-             z-index: 1001; 
-             padding: 8px 15px; 
-             background-color: rgba(0,0,0,0.5); 
-             color: white; 
-             text-decoration: none; 
-             border-radius: 3px; 
+             position: absolute;
+             top: 10px;
+             left: 10px;
+             z-index: 1001;
+             padding: 8px 15px;
+             background-color: rgba(0,0,0,0.5);
+             color: white;
+             text-decoration: none;
+             border-radius: 3px;
              font-size: 14px;
         }
     </style>
@@ -30,26 +30,26 @@
     <a href="/assets/kyjov/kyjov.html" class="back-button-ar">
     Zpět do Menu
 </a>
-    <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/vedro.mind; 
-        uiLoading: yes; uiError: yes; 
-        renderer: {colorManagement: true}; 
-        physicallyCorrectLights: true; 
-        vr-mode-ui: {enabled: false}; 
+    <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/vedro.mind;
+        uiLoading: yes; uiError: yes;
+        renderer: {colorManagement: true};
+        physicallyCorrectLights: true;
+        vr-mode-ui: {enabled: false};
         device-orientation-permission-ui: {enabled: false}">
 
         <a-assets>
             <a-asset-item id="model1" src="/assets/kyjov/3d/vedro.glb"></a-asset-item>
-           
+
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0" data-marker-id="vedro_model_kyjov">
-            <a-gltf-model 
-                src="#model1" 
-                position="0 0 0.1" 
-                scale="1.5 1.5 1.5"  
-                rotation="90 0 0"> 
+            <a-gltf-model
+                src="#model1"
+                position="0 0 0.1"
+                scale="1.5 1.5 1.5"
+                rotation="90 0 0">
             </a-gltf-model>
         </a-entity>
 
@@ -57,63 +57,46 @@
 
     <script>
     function enableCamera() {
-        // Zde můžete chtít přidat kontrolu, zda uživatel nekliknul "Spustit AR",
-        // pokud byste se rozhodli startButton použít i v této scéně.
-        // Prozatím to necháme, ale mějte na paměti pořadí volání.
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
                 .then(function(stream) {
                     console.log("✅ Přístup k zadní kameře povolen!");
-                    // Stream můžete uložit a zastavit později, pokud je potřeba
                 })
                 .catch(function(error) {
                     console.error("❌ Chyba přístupu k zadní kameře: ", error);
-                    // Můžete zobrazit zprávu uživateli, aby povolil kameru
                 });
         } else {
             console.error("❌ Tento prohlížeč nepodporuje přístup k médiím.");
-             // Můžete zobrazit zprávu uživateli
         }
     }
 
     window.onload = function() {
-        // Poznámka: Pokud AR scénu spouštíte automaticky po načtení stránky (jak naznačuje tento kód),
-        // pak startButton není nutný. Pokud máte startButton, AR by se mělo spouštět až po kliku.
-        // V této HTML se AR scéna spouští automaticky po načtení A-Frame/MindAR (`a-scene`).
-        
-        enableCamera(); 
+        enableCamera();
 
-        // Spustí MindAR po načtení scény - toto je pro případ, že by automaticky nestartoval,
-        // ale často MindAR s uiLoading: yes startuje sám. Může to způsobit dvojí start.
-        // Pokud AR funguje i bez tohoto listeneru, zvažte jeho odstranění.
+        // Spustí MindAR po načtení scény - zvažte odstranění, pokud AR startuje samo
         document.querySelector('a-scene').addEventListener('loaded', () => {
              console.log("A-Scene loaded, attempting to start MindAR...");
-             // Zde zkontrolujeme, zda už systém neběží, abychom zabránili vícenásobnému spuštění
              const mindarSystem = document.querySelector('[mindar-image]').components['mindar-image-system'];
-             if (mindarSystem && !mindarSystem.is // Nemám úplný seznam stavů MindAR, 'is' je placeholder
-                mindarSystem.start();
-                console.log("MindAR system started (or attempted to start).");
-             // else {
-             //    console.log("MindAR system appears to be already running.");
-             // }
+             // Pokud MindAR startuje automaticky, tento řádek může způsobit chybu nebo dvojí spuštění.
+             // Zkontrolujte konzoli a případně řádek níže odstraňte nebo zakomentujte.
+             // mindarSystem.start(); 
+             console.log("MindAR system start logic executed.");
         });
     };
      // KROK 3: Integrace gamifikační logiky
         document.addEventListener('DOMContentLoaded', () => {
-            // Listener pro startButton - v této konkrétní HTML není, takže je zakomentovaný/ignorovaný
+            // Listener pro startButton - v této konkrétní HTML není
             /*
             const startButton = document.getElementById('startButton');
             if (startButton) {
                 startButton.addEventListener('click', () => {
                     // ...
-                    // startButton.style.display = 'none';
                 });
             }
             */
 
             const currentSceneId = getCurrentSceneId();
-            // *** NOVINKA: Získání ID aktuální expozice ***
-            const currentExpositionId = getCurrentExpositionId(); 
+            const currentExpositionId = getCurrentExpositionId(); // Funkce z gamification-config.js
 
             let sceneConfigValid = false;
 
@@ -123,8 +106,7 @@
                 sceneConfigValid = true;
                 console.log("Gamification config loaded successfully for scene:", currentSceneId, SCENE_CONFIG[currentSceneId]);
             }
-            
-            // *** NOVINKA: Kontrola platnosti ID expozice ***
+
              if (!currentExpositionId || currentExpositionId === 'unknown') {
                  console.error("GAMIFICATION ERROR: Cannot determine current exposition ID. Marker activations will not be recorded correctly.");
                  sceneConfigValid = false; // Deaktivujeme gamifikaci, pokud nevíme expozici
@@ -143,10 +125,10 @@
                         console.log(`Target 1 (ID: ${markerId}) found!`);
                         // Pro GLTF model se nic automaticky nepřehrává, je jen viditelný
 
-                        // Gamifikace - *** UPRAVENO: Předání ID expozice funkci recordMarkerActivation ***
+                        // Gamifikace - *** OPRAVENO: Předání ID expozice funkci recordMarkerActivation ***
                         if (sceneConfigValid) { // sceneConfigValid už zahrnuje kontrolu markerId a expositionId
                             console.log("Recording activation for marker:", markerId);
-                            recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
+                            recordMarkerActivation(currentExpositionId, currentSceneId, markerId); // Teď má 3 argumenty
                         }
                     });
 
