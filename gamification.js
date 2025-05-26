@@ -1,38 +1,65 @@
+--- START OF FILE gamification.js ---
 // gamification.js
 
-const STORAGE_KEY = 'arGamificationDataKyjov'; // Doporučuji unikátní klíč pro vaši aplikaci
+// Základní klíč pro ukládání všech gamifikačních dat
+// Data budou vnořená pod klíči jednotlivých expozic (např. 'kyjov', 'brno')
+const BASE_STORAGE_KEY = 'arGamificationData'; 
 
-function getGamificationData() {
-    const data = localStorage.getItem(STORAGE_KEY);
-    return data ? JSON.parse(data) : {};
+// Funkce pro získání dat PRO KONKRÉTNÍ EXPOZICI
+function getGamificationData(expositionId) {
+    // Načte všechna data
+    const totalData = localStorage.getItem(BASE_STORAGE_KEY);
+    const parsedTotalData = totalData ? JSON.parse(totalData) : {};
+
+    // Vrátí data pro danou expozici, nebo prázdný objekt, pokud neexistují
+    return parsedTotalData[expositionId] || {};
 }
 
-function saveGamificationData(data) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+// Funkce pro uložení dat PRO KONKRÉTNÍ EXPOZICI
+function saveGamificationData(expositionId, expositionData) {
+    // Načte všechna data (abychom nepřepsali data z jiných expozic)
+    const totalData = localStorage.getItem(BASE_STORAGE_KEY);
+    const parsedTotalData = totalData ? JSON.parse(totalData) : {};
+
+    // Aktualizuje data pro danou expozici
+    parsedTotalData[expositionId] = expositionData;
+
+    // Uloží všechna data zpět
+    localStorage.setItem(BASE_STORAGE_KEY, JSON.stringify(parsedTotalData));
 }
 
-function recordMarkerActivation(sceneId, markerId) {
-    const data = getGamificationData();
-    if (!data[sceneId]) {
-        data[sceneId] = {};
+// Upravená funkce pro záznam aktivace markeru - teď potřebuje ID expozice
+function recordMarkerActivation(expositionId, sceneId, markerId) {
+    // Získáme data pouze pro aktuální expozici
+    const expoData = getGamificationData(expositionId);
+
+    if (!expoData[sceneId]) {
+        expoData[sceneId] = {};
     }
+
     // Zkontrolujeme, zda markerId existuje v konfiguraci pro danou scénu
+    // Konfigurace SCENE_CONFIG je globální, předpokládáme unikátní cesty k scénám
+    // nebo že SCENE_CONFIG obsahuje konfigurace pro VŠECHNY scény napříč expozicemi
     if (SCENE_CONFIG[sceneId] && SCENE_CONFIG[sceneId].markers && SCENE_CONFIG[sceneId].markers.includes(markerId)) {
-        data[sceneId][markerId] = true;
-        saveGamificationData(data);
-        console.log(`Marker ${markerId} activated in scene ${sceneId}`);
+        // Zaznamenáme aktivaci v datech pro aktuální expozici
+        expoData[sceneId][markerId] = true;
+        // Uložíme aktualizovaná data pro aktuální expozici
+        saveGamificationData(expositionId, expoData);
+        console.log(`Marker ${markerId} activated in scene ${sceneId} for exposition ${expositionId}`);
     } else {
-        console.warn(`Marker ID "${markerId}" (in scene "${sceneId}") not found in SCENE_CONFIG or SCENE_CONFIG.markers is undefined. Activation not recorded.`);
+        console.warn(`Marker ID "${markerId}" (in scene "${sceneId}", exposition "${expositionId}") not found in SCENE_CONFIG or SCENE_CONFIG.markers is undefined. Activation not recorded.`);
     }
 }
 
-function getSceneStarLevel(sceneId) {
-    const data = getGamificationData();
-    const sceneData = data[sceneId] || {}; // Data pro aktuální scénu
-    const config = SCENE_CONFIG[sceneId]; // Konfigurace pro aktuální scénu
+// Upravená funkce pro získání úrovně hvězd - teď potřebuje ID expozice
+function getSceneStarLevel(expositionId, sceneId) {
+    // Získáme data pouze pro aktuální expozici
+    const expoData = getGamificationData(expositionId);
+    const sceneData = expoData[sceneId] || {}; // Data pro aktuální scénu v rámci expozice
+    const config = SCENE_CONFIG[sceneId]; // Konfigurace pro aktuální scénu (předpokládáme globální SCENE_CONFIG)
 
     if (!config) {
-        console.warn(`Configuration for scene ${sceneId} not found.`);
+        console.warn(`Configuration for scene ${sceneId} not found in SCENE_CONFIG.`);
         return 'none'; // Nebo nějaká výchozí hodnota
     }
     // Zajištění, že totalMarkers je číslo a markers je pole
@@ -41,26 +68,24 @@ function getSceneStarLevel(sceneId) {
         return 'none';
     }
 
+    // Počet aktivovaných markerů počítáme pouze z dat pro aktuální expozici a scénu
     const activatedMarkersCount = Object.keys(sceneData).filter(markerId => sceneData[markerId] === true).length;
     const totalMarkersInScene = config.totalMarkers;
 
     if (totalMarkersInScene === 0 || activatedMarkersCount === 0) {
-        return 'none'; // Žádné markery ve scéně nebo žádný aktivovaný
+        return 'none'; // Žádné markery ve scéně nebo žádný aktivovaný v této expozici
     }
 
-    // Specifická logika podle počtu markerů ve scéně
+    // Specifická logika podle počtu markerů ve scéně - ZŮSTÁVÁ STEJNÁ
     if (totalMarkersInScene === 1) {
-        // Scéna s 1 markerem
         if (activatedMarkersCount === 1) return 'gold';
     } else if (totalMarkersInScene === 2) {
-        // Scéna se 2 markery
         if (activatedMarkersCount === 2) return 'gold';
         if (activatedMarkersCount === 1) return 'silver';
     } else if (totalMarkersInScene === 3) {
-        // Scéna se 3 markery
         if (activatedMarkersCount === 3) return 'gold';
-        if (activatedMarkersCount === 2) return 'silver'; // 2 je >= 3/2
-        if (activatedMarkersCount === 1) return 'bronze';
+        if (activatedMarkersCount >= 2) return 'silver'; // 2 je >= 3/2
+        if (activatedMarkersCount >= 1) return 'bronze';
     } else { // Scény se 4 a více markery
         if (activatedMarkersCount >= totalMarkersInScene) return 'gold'; // Všechny
         // Math.ceil zajistí, že pro 5 markerů bude polovina 3 (ceil(2.5)=3)
@@ -69,9 +94,10 @@ function getSceneStarLevel(sceneId) {
         if (activatedMarkersCount > 0) return 'bronze'; // Alespoň jeden (a méně než polovina)
     }
 
-    return 'none'; // Výchozí, pokud žádná podmínka nesedí (nemělo by nastat s kontrolou na začátku)
+    return 'none'; // Výchozí
 }
 
+// Funkce pro zobrazení hvězd - ZŮSTÁVÁ STEJNÁ
 function displayStars(starElement, level) {
     let starsHtml = '';
     switch (level) {
