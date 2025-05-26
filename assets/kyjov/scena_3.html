@@ -79,7 +79,7 @@
              const mindarSystem = document.querySelector('[mindar-image]').components['mindar-image-system'];
              // Pokud MindAR startuje automaticky, tento řádek může způsobit chybu nebo dvojí spuštění.
              // Zkontrolujte konzoli a případně řádek níže odstraňte nebo zakomentujte.
-             // mindarSystem.start(); 
+             // mindarSystem.start();
              console.log("MindAR system start logic executed.");
         });
     };
@@ -125,10 +125,11 @@
                         console.log(`Target 1 (ID: ${markerId}) found!`);
                         // Pro GLTF model se nic automaticky nepřehrává, je jen viditelný
 
-                        // Gamifikace - *** OPRAVENO: Předání ID expozice funkci recordMarkerActivation ***
+                        // Gamifikace - *** ZDE JE OPRAVA ***
                         if (sceneConfigValid) { // sceneConfigValid už zahrnuje kontrolu markerId a expositionId
                             console.log("Recording activation for marker:", markerId);
-                            recordMarkerActivation(currentExpositionId, currentSceneId, markerId); // Teď má 3 argumenty
+                            // !!! DŮLEŽITÉ: Musí předávat 3 argumenty: expositionId, sceneId, markerId
+                            recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
                         }
                     });
 
