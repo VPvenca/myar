@@ -76,6 +76,20 @@
             return await audioContext.decodeAudioData(arrayBuffer);
         }
 
+        // === GAMIFIKACE - INICIALIZACE TIME TRACKING ===
+        // Inicializujeme time tracking ihned po načtení stránky
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentSceneId = getCurrentSceneId();
+            const currentExpositionId = getCurrentExpositionId();
+            
+            if (currentSceneId && currentExpositionId && currentExpositionId !== 'unknown') {
+                console.log("Initializing time tracking for scene:", currentSceneId, "exposition:", currentExpositionId);
+                initializeTimeTracking(currentExpositionId, currentSceneId);
+            } else {
+                console.warn("Time tracking not initialized - missing scene or exposition ID");
+            }
+        });
+
         document.getElementById('startButton').addEventListener('click', async function() {
             const video1 = document.getElementById('video1');
 
@@ -166,6 +180,27 @@
         } else {
             console.warn("Target 1 (targetIndex: 0) not found in DOM.");
         }
+
+        // === GAMIFIKACE - UKONČENÍ TIME TRACKING PŘI ODCHODU ZE STRÁNKY ===
+        // Automaticky ukončíme sledování času při odchodu ze stránky
+        window.addEventListener('beforeunload', function() {
+            if (currentSceneId && currentExpositionId && currentExpositionId !== 'unknown') {
+                console.log("Finalizing time tracking for scene:", currentSceneId);
+                // Pokud máte funkci pro ukončení time tracking, zavolejte ji zde
+                // například: finalizeTimeTracking(currentExpositionId, currentSceneId);
+            }
+        });
+
+        // Alternativně můžete také sledovat, když uživatel opustí stránku pomocí Page Visibility API
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                console.log("Page hidden - pausing time tracking");
+                // Zde můžete pozastavit time tracking
+            } else {
+                console.log("Page visible - resuming time tracking");
+                // Zde můžete obnovit time tracking
+            }
+        });
 
     </script>
 </body>
