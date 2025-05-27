@@ -24,12 +24,60 @@
              border-radius: 3px;
              font-size: 14px;
         }
+
+        /* Indikátor času pozorování */
+        .time-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1001;
+            padding: 10px 20px;
+            background-color: rgba(0,0,0,0.7);
+            color: white;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            display: none;
+            text-align: center;
+        }
+
+        .time-indicator.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 4px;
+            background-color: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #28a745;
+            width: 0%;
+            transition: width 0.1s ease;
+            border-radius: 2px;
+        }
     </style>
 </head>
 <body>
     <a href="/assets/kyjov/kyjov.html" class="back-button-ar">
-    Zpět do Menu
-</a>
+        Zpět do Menu
+    </a>
+
+    <!-- Indikátor času pozorování -->
+    <div id="timeIndicator" class="time-indicator">
+        <div>Prozkoumávám 3D model...</div>
+        <div class="progress-bar">
+            <div id="progressFill" class="progress-fill"></div>
+        </div>
+        <div id="timeText">0s / 30s</div>
+    </div>
+
     <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/vedro.mind;
         uiLoading: yes; uiError: yes;
         renderer: {colorManagement: true};
@@ -39,7 +87,6 @@
 
         <a-assets>
             <a-asset-item id="model1" src="/assets/kyjov/3d/vedro.glb"></a-asset-item>
-
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -56,6 +103,12 @@
     </a-scene>
 
     <script>
+    // Proměnné pro měření času
+    let timeSpentWatching = 0;
+    let timeSpentInterval = null;
+    let isTargetVisible = false;
+    let achievementUnlocked = false;
+
     function enableCamera() {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
@@ -70,78 +123,143 @@
         }
     }
 
+    // Funkce pro spuštění měření času
+    function startTimeTracking() {
+        if (timeSpentInterval) return; // Už běží
+        
+        const timeIndicator = document.getElementById('timeIndicator');
+        const progressFill = document.getElementById('progressFill');
+        const timeText = document.getElementById('timeText');
+        
+        timeIndicator.classList.add('active');
+        
+        timeSpentInterval = setInterval(() => {
+            if (isTargetVisible) {
+                timeSpentWatching += 0.1; // Přidáváme 100ms
+                
+                // Aktualizace UI
+                const seconds = Math.floor(timeSpentWatching);
+                const progress = Math.min((timeSpentWatching / 30) * 100, 100);
+                
+                progressFill.style.width = `${progress}%`;
+                timeText.textContent = `${seconds}s / 30s`;
+                
+                // Kontrola splnění podmínky
+                if (timeSpentWatching >= 30 && !achievementUnlocked) {
+                    achievementUnlocked = true;
+                    unlockTimeBasedAchievement();
+                    
+                    // Změna stylu po dosažení cíle
+                    timeText.textContent = "🎉 Cíl splněn!";
+                    progressFill.style.backgroundColor = "#ffc107";
+                    
+                    setTimeout(() => {
+                        timeIndicator.classList.remove('active');
+                    }, 3000);
+                }
+            }
+        }, 100); // Každých 100ms
+    }
+
+    // Funkce pro zastavení měření času
+    function stopTimeTracking() {
+        if (timeSpentInterval) {
+            clearInterval(timeSpentInterval);
+            timeSpentInterval = null;
+        }
+        
+        const timeIndicator = document.getElementById('timeIndicator');
+        if (!achievementUnlocked) {
+            timeIndicator.classList.remove('active');
+        }
+    }
+
+    // Funkce pro odemknutí časového achievementu
+    function unlockTimeBasedAchievement() {
+        console.log("🎉 Achievement unlocked: 3D Objevitel - strávil jsi 30 sekund pozorováním 3D modelu!");
+        
+        // Zde můžete volat funkci z gamification.js pro záznam achievementu
+        // například: recordTimeBasedAchievement('kyjov_3d_explorer', timeSpentWatching);
+        
+        // Notifikace pro uživatele
+        if (typeof showAchievementNotification === 'function') {
+            showAchievementNotification({
+                name: "3D Objevitel",
+                description: "Prozkoumal jsi 3D model vědra ze všech stran",
+                icon: "🪣"
+            });
+        }
+    }
+
     window.onload = function() {
         enableCamera();
 
-        // Spustí MindAR po načtení scény - zvažte odstranění, pokud AR startuje samo
+        // Spustí MindAR po načtení scény
         document.querySelector('a-scene').addEventListener('loaded', () => {
              console.log("A-Scene loaded, attempting to start MindAR...");
              const mindarSystem = document.querySelector('[mindar-image]').components['mindar-image-system'];
-             // Pokud MindAR startuje automaticky, tento řádek může způsobit chybu nebo dvojí spuštění.
-             // Zkontrolujte konzoli a případně řádek níže odstraňte nebo zakomentujte.
-             // mindarSystem.start();
              console.log("MindAR system start logic executed.");
         });
     };
-     // KROK 3: Integrace gamifikační logiky
-        document.addEventListener('DOMContentLoaded', () => {
-            // Listener pro startButton - v této konkrétní HTML není
-            /*
-            const startButton = document.getElementById('startButton');
-            if (startButton) {
-                startButton.addEventListener('click', () => {
-                    // ...
+
+    // KROK 3: Integrace gamifikační logiky s měřením času
+    document.addEventListener('DOMContentLoaded', () => {
+        const currentSceneId = getCurrentSceneId();
+        const currentExpositionId = getCurrentExpositionId();
+
+        let sceneConfigValid = false;
+
+        if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
+            console.error("GAMIFICATION ERROR: Scene config not found for this page:", currentSceneId, ". Make sure gamification-config.js is loaded and the path is correct in SCENE_CONFIG.");
+        } else {
+            sceneConfigValid = true;
+            console.log("Gamification config loaded successfully for scene:", currentSceneId, SCENE_CONFIG[currentSceneId]);
+        }
+
+        if (!currentExpositionId || currentExpositionId === 'unknown') {
+            console.error("GAMIFICATION ERROR: Cannot determine current exposition ID. Marker activations will not be recorded correctly.");
+            sceneConfigValid = false;
+        }
+
+        // Získání targetu
+        const targetEntity = document.querySelector('[mindar-image-target="targetIndex: 0"]');
+
+        if (targetEntity) {
+            const markerId = targetEntity.dataset.markerId;
+            if (!markerId) {
+                console.warn("Gamification: Target 1 is missing 'data-marker-id'.");
+            } else {
+                targetEntity.addEventListener('targetFound', () => {
+                    console.log(`Target 1 (ID: ${markerId}) found!`);
+                    isTargetVisible = true;
+                    
+                    // Spuštění měření času
+                    startTimeTracking();
+
+                    // Gamifikace - záznam aktivace markeru
+                    if (sceneConfigValid) {
+                        console.log("Recording activation for marker:", markerId);
+                        recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
+                    }
+                });
+
+                targetEntity.addEventListener('targetLost', () => {
+                    console.log(`Target 1 (ID: ${markerId}) lost!`);
+                    isTargetVisible = false;
+                    
+                    // Zastavení měření času (ale nezrušení celkového počítadla)
+                    // Čas se bude počítat pouze když je target viditelný
                 });
             }
-            */
+        } else {
+            console.warn("Target 1 (targetIndex: 0) not found in DOM.");
+        }
 
-            const currentSceneId = getCurrentSceneId();
-            const currentExpositionId = getCurrentExpositionId(); // Funkce z gamification-config.js
-
-            let sceneConfigValid = false;
-
-            if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
-                console.error("GAMIFICATION ERROR: Scene config not found for this page:", currentSceneId, ". Make sure gamification-config.js is loaded and the path is correct in SCENE_CONFIG.");
-            } else {
-                sceneConfigValid = true;
-                console.log("Gamification config loaded successfully for scene:", currentSceneId, SCENE_CONFIG[currentSceneId]);
-            }
-
-             if (!currentExpositionId || currentExpositionId === 'unknown') {
-                 console.error("GAMIFICATION ERROR: Cannot determine current exposition ID. Marker activations will not be recorded correctly.");
-                 sceneConfigValid = false; // Deaktivujeme gamifikaci, pokud nevíme expozici
-             }
-
-
-            // Získání targetu (protože je jen jeden)
-            const targetEntity = document.querySelector('[mindar-image-target="targetIndex: 0"]');
-
-            if (targetEntity) {
-                const markerId = targetEntity.dataset.markerId;
-                if (!markerId) {
-                    console.warn("Gamification: Target 1 is missing 'data-marker-id'.");
-                } else {
-                    targetEntity.addEventListener('targetFound', () => {
-                        console.log(`Target 1 (ID: ${markerId}) found!`);
-                        // Pro GLTF model se nic automaticky nepřehrává, je jen viditelný
-
-                        // Gamifikace - *** OPRAVENO ZDE ***
-                        if (sceneConfigValid) { // sceneConfigValid už zahrnuje kontrolu markerId a expositionId
-                            console.log("Recording activation for marker:", markerId);
-                            // PŘEDÁVÁME currentExpositionId, currentSceneId A markerId
-                            recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
-                        }
-                    });
-
-                    targetEntity.addEventListener('targetLost', () => {
-                        console.log(`Target 1 (ID: ${markerId}) lost!`);
-                        // Nic k zastavení
-                    });
-                }
-            } else {
-                console.warn("Target 1 (targetIndex: 0) not found in DOM.");
-            }
+        // Cleanup při opuštění stránky
+        window.addEventListener('beforeunload', () => {
+            stopTimeTracking();
         });
+    });
     </script>
 </body>
 </html>
