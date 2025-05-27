@@ -103,20 +103,31 @@ const ACHIEVEMENTS_CONFIG = {
         image: "/img/achievements/archer_master.png"
     },
 
-   "kyjov_saint_devotee": {
-    name: "Ctitel sv. Floriána", 
-    description: "Strávil jsi alespoň 1 minutu pozorováním obrazu sv. Floriána",
-    icon: "🔥",
-    category: "kyjov",
-    rarity: "uncommon",
-    condition: "time_spent_30s",  // <-- Časová podmínka
-    sceneId: "/assets/kyjov/florian.html"
+    "kyjov_saint_devotee": {
+        name: "Ctitel sv. Floriána", 
+        description: "Strávil jsi alespoň 30 sekund pozorováním obrazu sv. Floriána",
+        icon: "🔥",
+        category: "kyjov",
+        rarity: "uncommon",
+        condition: "time_spent_30s",
+        sceneId: "/assets/kyjov/florian.html",
+        image: "/img/achievements/saint_devotee.png"
+    },
 
+    "kyjov_contemplative": {
+        name: "Kontemplativní návštěvník",
+        description: "Strávil jsi 2 minuty v hluboké kontemplaci u sv. Floriána",
+        icon: "🧘",
+        category: "kyjov", 
+        rarity: "rare",
+        condition: "time_spent_2min",
+        sceneId: "/assets/kyjov/florian.html",
+        image: "/img/achievements/contemplative.png"
     },
 
     "kyjov_art_lover": {
         name: "Milovník umění",
-        description: "Vychutnávej si obrazy v mezipatře",
+        description: "Vychutnej si obrazy v mezipatře",
         icon: "🖼️",
         category: "kyjov",
         rarity: "uncommon",
@@ -357,36 +368,5 @@ function isAchievementHidden(achievementId) {
     return achievement && achievement.hidden === true;
 }
 
-// Funkce pro kontrolu specifických achievementů pro scény
-function checkSceneSpecificAchievements(expositionId, sceneId) {
-    const starLevel = getSceneStarLevel(expositionId, sceneId);
-    
-    // Najdi všechny achievementy pro tuto konkrétní scénu
-    Object.keys(ACHIEVEMENTS_CONFIG).forEach(achievementId => {
-        const achievement = ACHIEVEMENTS_CONFIG[achievementId];
-        
-        // Pokud je achievement vázaný na konkrétní scénu
-        if (achievement.sceneId === sceneId) {
-            let shouldUnlock = false;
-            
-            switch (achievement.condition) {
-                case 'complete_scene':
-                    shouldUnlock = starLevel !== 'none';
-                    break;
-                case 'gold_star_in_scene':
-                    shouldUnlock = starLevel === 'gold';
-                    break;
-                case 'silver_star_in_scene':
-                    shouldUnlock = starLevel === 'silver' || starLevel === 'gold';
-                    break;
-                case 'bronze_star_in_scene':
-                    shouldUnlock = starLevel === 'bronze' || starLevel === 'silver' || starLevel === 'gold';
-                    break;
-            }
-            
-            if (shouldUnlock) {
-                unlockAchievement(achievementId);
-            }
-        }
-    });
-}
+// !!! DŮLEŽITÉ: ODSTRANĚNA DUPLICITNÍ FUNKCE checkSceneSpecificAchievements !!!
+// Tato funkce je nyní pouze v gamification.js a podporuje časové podmínky
