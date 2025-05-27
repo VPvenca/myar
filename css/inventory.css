@@ -2,165 +2,367 @@
    5. Styly pro Inventář Trofejí
    ========================================================================== */
 
-/* --- Základní nastavení pro stránku inventáře --- */
-/* Podobně jako .home-page, použijeme specifickou třídu na body */
-/* Např. <body class="inventory-page"> */
+        /* Complete CSS for Achievement Inventory */
+        
+        /* Progress Overview */
+        .progress-overview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
 
-/* --- Kontejner pro mřížku trofejí --- */
-/* Můžeme využít a mírně upravit styly z .home-page .menu-content */
-.inventory-page .menu-content.trophy-grid {
-    flex-direction: row;    /* Trofeje vedle sebe */
-    flex-wrap: wrap;        /* Zalamování na další řádek */
-    justify-content: center;/* Centrování řádků trofejí */
-    align-items: flex-start;/* Zarovnání položek na začátek jejich flex kontejneru (řádku) */
-                            /* Pokud mají trofeje různou výšku textu, budou zarovnány nahoře */
-    align-content: flex-start; /* Zarovná všechny řádky nahoru */
-    gap: 20px 20px;         /* Mezery mezi trofejemi (vertikálně i horizontálně) */
-    padding-top: 20px;      /* Trochu více místa nahoře */
-    padding-bottom: 20px;   /* Trochu více místa dole */
-}
+        .progress-stats {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
 
-/* --- Jednotlivá položka trofeje --- */
-.trophy-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start; /* Obsah zarovnán nahoru, aby text nebyl tlačen dolů */
-    width: 150px;           /* Šířka trofeje (podobně jako icon-button) */
-    min-height: 180px;      /* Minimální výška, aby se vešel obrázek i delší text */
-    padding: 15px 10px;
-    background-color: rgba(255, 255, 255, 0.85); /* Lehce průhledné bílé, aby vynikl gradient pozadí */
-    color: #343a40;
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-sizing: border-box; /* Již globálně, ale pro jistotu */
-    position: relative; /* Pro případné budoucí odznáčky/notifikace na trofeji */
-}
+        .stat-item {
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
 
-.trophy-item:hover {
-    transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
-}
+        .stat-number {
+            display: block;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
 
-/* --- Obrázek trofeje v kartě --- */
-.trophy-item .trophy-image-small {
-    width: 80px;
-    height: 80px;
-    object-fit: contain; /* Zachová poměr stran, vejde se do boxu */
-    margin-bottom: 10px;
-    border-radius: 4px; /* Lehké zaoblení, pokud je to čtvercový náhled */
-    background-color: rgba(0,0,0,0.03); /* Jemné pozadí pro transparentní PNG */
-    padding: 5px; /* Malý vnitřní okraj, pokud obrázek nemá vlastní */
-    box-sizing: border-box;
-}
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
 
-/* --- Název/popis trofeje --- */
-.trophy-item .trophy-name {
-    font-size: 14px;
-    font-weight: 600; /* Trochu výraznější než běžný text */
-    color: #2c3e50;
-    line-height: 1.3;
-    /* Zajistí, že text se zalomí, ale omezí na max 3 řádky s "..." */
-    display: -webkit-box;
-    -webkit-line-clamp: 3; /* Maximálně 3 řádky textu */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-height: calc(1.3em * 1); /* Místo pro alespoň jeden řádek */
-    max-height: calc(1.3em * 3); /* Místo pro maximálně tři řádky */
-}
+        /* Category Filter */
+        .category-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
-/* --- Styl pro zamčenou/nezískanou trofej --- */
-.trophy-item.locked {
-    background-color: rgba(220, 220, 220, 0.7); /* Šedivější pozadí */
-    cursor: default; /* Neukazuje možnost kliknutí */
-    opacity: 0.7;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
+        .filter-btn {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+            font-weight: 500;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-.trophy-item.locked:hover {
-    transform: none; /* Bez hover efektu */
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
+        .filter-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
 
-.trophy-item.locked .trophy-image-small {
-    filter: grayscale(100%) opacity(60%); /* Černobílý a lehce průhledný obrázek */
-}
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
 
-.trophy-item.locked .trophy-name {
-    color: #6c757d; /* Šedivější text */
-}
+        /* Achievements Grid */
+        .achievements-container {
+            margin-bottom: 30px;
+        }
 
-/* ==========================================================================
-   Modální okno pro zobrazení obrázku trofeje
-   ========================================================================== */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
 
-.trophy-image-modal-overlay {
-    display: none; /* Výchozí stav - skryté */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.85); /* Tmavší overlay pro lepší kontrast obrázku */
-    z-index: 1050; /* Vyšší než běžný modal, ale nižší než consent banner (pokud je to relevantní) */
-    justify-content: center;
-    align-items: center;
-    padding: 20px; /* Odsazení od okrajů okna pro menší obrazovky */
-    box-sizing: border-box;
-    cursor: zoom-out; /* Indikace, že kliknutím se zavře */
-}
+        .achievement-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
 
-.trophy-image-modal-overlay.visible {
-    display: flex; /* Zobrazí overlay a použije flex pro centrování */
-}
+        .achievement-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
 
-/* Kontejner pro samotný obrázek v modalu (aby se dal lépe stylovat a pozicovat close button) */
-.trophy-image-modal-content {
-    position: relative; /* Pro absolutní pozicování zavíracího tlačítka */
-    display: flex; /* Pro případ, že byste chtěli něco přidat vedle obrázku (nepravděpodobné zde) */
-    justify-content: center;
-    align-items: center;
-    max-width: 90vw;  /* Maximální šířka obrázku je 90% šířky viewportu */
-    max-height: 90vh; /* Maximální výška obrázku je 90% výšky viewportu */
-}
+        .achievement-item.unlocked::before {
+            opacity: 1;
+        }
 
-.trophy-image-modal-content img {
-    display: block;
-    max-width: 100%;  /* Obrázek se zmenší, aby se vešel do .trophy-image-modal-content */
-    max-height: 100%; /* Obrázek se zmenší, aby se vešel do .trophy-image-modal-content */
-    object-fit: contain;
-    border-radius: 4px; /* Malé zaoblení i pro velký obrázek */
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); /* Výraznější stín */
-    cursor: default; /* Zruší zoom-out kurzor přímo nad obrázkem, pokud overlay má zavírat */
-}
+        .achievement-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
 
-/* Zavírací tlačítko pro modální okno obrázku */
-.trophy-modal-close-button {
-    position: absolute;
-    top: -15px; /* Umístění mírně nad obrázkem (nebo do rohu) */
-    right: -15px;
-    width: 35px;
-    height: 35px;
-    background-color: rgba(255, 255, 255, 0.9);
-    color: #333;
-    border: 1px solid #ccc;
-    border-radius: 50%;
-    font-size: 24px;
-    font-weight: bold;
-    line-height: 33px; /* Vertikální centrování křížku */
-    text-align: center;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    transition: background-color 0.2s ease, transform 0.2s ease;
-    z-index: 1051; /* Nad obrázkem */
-}
+        .achievement-item.unlocked:hover {
+            border-color: #667eea;
+        }
 
-.trophy-modal-close-button:hover {
-    background-color: #fff;
-    transform: scale(1.1);
-}
+        .achievement-item.locked {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        .achievement-item.locked:hover {
+            transform: none;
+            border-color: transparent;
+        }
+
+        .achievement-icon {
+            font-size: 3em;
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .achievement-info {
+            flex: 1;
+        }
+
+        .achievement-name {
+            margin: 0 0 8px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .achievement-description {
+            margin: 0 0 12px 0;
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .achievement-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.8em;
+        }
+
+        .achievement-rarity {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .achievement-category {
+            color: #888;
+        }
+
+        /* Achievement Modal */
+        .achievement-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .achievement-modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .achievement-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .achievement-modal-overlay.visible .achievement-modal-content {
+            transform: scale(1);
+        }
+
+        .achievement-modal-close-button {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .achievement-modal-close-button:hover {
+            color: #333;
+        }
+
+        .achievement-detail {
+            text-align: center;
+        }
+
+        .achievement-icon-large {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .achievement-detail h2 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 1.8em;
+        }
+
+        .achievement-detail p {
+            margin: 0 0 20px 0;
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+
+        .achievement-detail .achievement-meta {
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .achievement-unlock-date {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #888;
+        }
+
+   
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .achievements-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .achievement-item {
+                padding: 15px;
+            }
+
+            .achievement-icon {
+                font-size: 2.5em;
+                width: 50px;
+                height: 50px;
+            }
+
+            .achievement-name {
+                font-size: 1.1em;
+            }
+
+            .achievement-description {
+                font-size: 0.85em;
+            }
+
+            .progress-stats {
+                gap: 15px;
+            }
+
+            .stat-number {
+                font-size: 2em;
+            }
+
+            .category-filter {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+
+            .filter-btn {
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .achievement-modal-content {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .achievement-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .achievement-info {
+                width: 100%;
+            }
+
+            .achievement-meta {
+                justify-content: center;
+                gap: 10px;
+            }
+        }
+
+        /* Loading State */
+        .achievements-grid:empty::after {
+            content: 'Načítání úspěchů...';
+            display: block;
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+
+        /* No achievements message */
+        .no-achievements {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+
+        .no-achievements::before {
+            content: '🏆';
+            display: block;
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+    
