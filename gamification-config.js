@@ -93,7 +93,7 @@ const ACHIEVEMENTS_CONFIG = {
     // === SPECIFICKÉ ACHIEVEMENTY PRO JEDNOTLIVÉ SCÉNY ===
     
     "kyjov_archer_master": {
-        name: "Mistr lukostřelby",
+        name: "Mistr střelby",
         description: "Prozkoumal jsi všechny střelecké terče do detailu",
         icon: "🏹",
         category: "kyjov",
@@ -131,7 +131,7 @@ const ACHIEVEMENTS_CONFIG = {
         icon: "🖼️",
         category: "kyjov",
         rarity: "uncommon",
-        condition: "time_spent_30s",
+        condition: "time_spent_2min",
         sceneId: "/assets/kyjov/scena_1.html",
         image: "/img/achievements/art_lover.png"
     },
@@ -153,7 +153,7 @@ const ACHIEVEMENTS_CONFIG = {
         icon: "🪣",
         category: "kyjov",
         rarity: "uncommon",
-        condition: "complete_scene",
+        condition: "time_spent_30s",
         sceneId: "/assets/kyjov/scena_3.html",
         image: "/img/achievements/3d_explorer.png"
     },
