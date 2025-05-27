@@ -174,20 +174,24 @@
         }
     }
 
-    // Funkce pro odemknutí časového achievementu
+    // OPRAVENÁ funkce pro odemknutí časového achievementu
     function unlockTimeBasedAchievement() {
-        console.log("🎉 Achievement unlocked: 3D Objevitel - strávil jsi 30 sekund pozorováním 3D modelu!");
+        console.log("🎉 Attempting to unlock 3D Explorer achievement...");
         
-        // Zde můžete volat funkci z gamification.js pro záznam achievementu
-        // například: recordTimeBasedAchievement('kyjov_3d_explorer', timeSpentWatching);
+        // Zkontroluj, zda jsou gamifikační funkce dostupné
+        if (typeof unlockAchievement !== 'function') {
+            console.error("❌ gamification.js není správně načten - unlockAchievement není dostupná");
+            return;
+        }
         
-        // Notifikace pro uživatele
-        if (typeof showAchievementNotification === 'function') {
-            showAchievementNotification({
-                name: "3D Objevitel",
-                description: "Prozkoumal jsi 3D model vědra ze všech stran",
-                icon: "🪣"
-            });
+        // Pokus o odemknutí achievementu pomocí správného ID
+        const achievementId = 'kyjov_3d_explorer';
+        const result = unlockAchievement(achievementId);
+        
+        if (result) {
+            console.log(`✅ Achievement ${achievementId} úspěšně odemčen!`);
+        } else {
+            console.log(`ℹ️ Achievement ${achievementId} již byl odemčen dříve`);
         }
     }
 
@@ -206,6 +210,11 @@
     document.addEventListener('DOMContentLoaded', () => {
         const currentSceneId = getCurrentSceneId();
         const currentExpositionId = getCurrentExpositionId();
+
+        console.log(`🎮 Gamification initialized for: ${currentExpositionId}/${currentSceneId}`);
+
+        // DŮLEŽITÉ: Inicializace time tracking systému pro tuto scénu
+        initializeTimeTracking(currentExpositionId, currentSceneId);
 
         let sceneConfigValid = false;
 
@@ -233,8 +242,9 @@
                     console.log(`Target 1 (ID: ${markerId}) found!`);
                     isTargetVisible = true;
                     
-                    // Spuštění měření času
+                    // Spuštění měření času - lokální i gamifikační systém
                     startTimeTracking();
+                    resumeTimeTracking(); // Obnovení gamifikačního time tracking
 
                     // Gamifikace - záznam aktivace markeru
                     if (sceneConfigValid) {
@@ -247,8 +257,8 @@
                     console.log(`Target 1 (ID: ${markerId}) lost!`);
                     isTargetVisible = false;
                     
-                    // Zastavení měření času (ale nezrušení celkového počítadla)
-                    // Čas se bude počítat pouze když je target viditelný
+                    // Pozastavení gamifikačního time tracking (ale ne lokálního)
+                    pauseTimeTracking();
                 });
             }
         } else {
@@ -257,7 +267,22 @@
 
         // Cleanup při opuštění stránky
         window.addEventListener('beforeunload', () => {
+            console.log("🏁 Page unloading, finalizing time tracking...");
             stopTimeTracking();
+            finalizeTimeTracking(currentExpositionId, currentSceneId);
+        });
+
+        // Také při skrytí stránky (např. při přepnutí tabů)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                console.log("📴 Page hidden, pausing time tracking...");
+                pauseTimeTracking();
+            } else {
+                console.log("👁️ Page visible, resuming time tracking...");
+                if (isTargetVisible) {
+                    resumeTimeTracking();
+                }
+            }
         });
     });
     </script>
