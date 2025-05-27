@@ -103,15 +103,15 @@ const ACHIEVEMENTS_CONFIG = {
         image: "/img/achievements/archer_master.png"
     },
 
-    "kyjov_saint_devotee": {
-        name: "Ctitel sv. Floriána",
-        description: "Důkladně sis prohlédl obraz sv. Floriána",
-        icon: "🔥",
-        category: "kyjov",
-        rarity: "uncommon",
-        condition: "complete_scene",
-        sceneId: "/assets/kyjov/florian.html",
-        image: "/img/achievements/saint_devotee.png"
+   "kyjov_saint_devotee": {
+    name: "Ctitel sv. Floriána", 
+    description: "Strávil jsi alespoň 1 minutu pozorováním obrazu sv. Floriána",
+    icon: "🔥",
+    category: "kyjov",
+    rarity: "uncommon",
+    condition: "time_spent_30s",  // <-- Časová podmínka
+    sceneId: "/assets/kyjov/florian.html"
+
     },
 
     "kyjov_art_lover": {
