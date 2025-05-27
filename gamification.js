@@ -1,10 +1,223 @@
-// gamification.js - Rozšířený o Achievement systém
+// gamification.js - Rozšířený o Achievement systém a Time Tracking
 
 // Základní klíč pro ukládání všech gamifikačních dat
 const BASE_STORAGE_KEY = 'arGamificationData'; 
 
 // Klíč pro ukládání dat o achievementech
 const ACHIEVEMENTS_STORAGE_KEY = 'arAchievements';
+
+// Klíč pro ukládání time tracking dat
+const TIME_TRACKING_STORAGE_KEY = 'arTimeTracking';
+
+// === TIME TRACKING SYSTÉM ===
+
+// Globální proměnné pro time tracking
+let timeTrackingData = {
+    expositionId: null,
+    sceneId: null,
+    startTime: null,
+    totalTime: 0,
+    isActive: false
+};
+
+// Funkce pro získání time tracking dat
+function getTimeTrackingData() {
+    const data = localStorage.getItem(TIME_TRACKING_STORAGE_KEY);
+    return data ? JSON.parse(data) : {};
+}
+
+// Funkce pro uložení time tracking dat
+function saveTimeTrackingData(data) {
+    localStorage.setItem(TIME_TRACKING_STORAGE_KEY, JSON.stringify(data));
+}
+
+// Funkce pro inicializaci time tracking
+function initializeTimeTracking(expositionId, sceneId) {
+    console.log(`🕐 Initializing time tracking for ${expositionId}/${sceneId}`);
+    
+    timeTrackingData = {
+        expositionId: expositionId,
+        sceneId: sceneId,
+        startTime: Date.now(),
+        totalTime: 0,
+        isActive: true
+    };
+    
+    // Načti předchozí čas strávený v této scéně
+    const savedData = getTimeTrackingData();
+    const sceneKey = `${expositionId}_${sceneId}`;
+    if (savedData[sceneKey]) {
+        timeTrackingData.totalTime = savedData[sceneKey].totalTime || 0;
+    }
+    
+    console.log(`Time tracking initialized. Previous time: ${timeTrackingData.totalTime}ms`);
+}
+
+// Funkce pro získání aktuálního času stráveného v scéně
+function getCurrentTimeSpent() {
+    if (!timeTrackingData.isActive || !timeTrackingData.startTime) {
+        return timeTrackingData.totalTime;
+    }
+    
+    const currentSession = Date.now() - timeTrackingData.startTime;
+    return timeTrackingData.totalTime + currentSession;
+}
+
+// Funkce pro uložení aktuálního času
+function saveCurrentTimeSpent() {
+    if (!timeTrackingData.isActive || !timeTrackingData.expositionId || !timeTrackingData.sceneId) {
+        return;
+    }
+    
+    const currentTime = getCurrentTimeSpent();
+    const savedData = getTimeTrackingData();
+    const sceneKey = `${timeTrackingData.expositionId}_${timeTrackingData.sceneId}`;
+    
+    if (!savedData[sceneKey]) {
+        savedData[sceneKey] = {};
+    }
+    
+    savedData[sceneKey].totalTime = currentTime;
+    savedData[sceneKey].lastUpdated = Date.now();
+    savedData[sceneKey].expositionId = timeTrackingData.expositionId;
+    savedData[sceneKey].sceneId = timeTrackingData.sceneId;
+    
+    saveTimeTrackingData(savedData);
+    
+    console.log(`💾 Time saved for ${sceneKey}: ${Math.round(currentTime/1000)}s`);
+}
+
+// Funkce pro finalizaci time tracking
+function finalizeTimeTracking(expositionId, sceneId) {
+    console.log(`🏁 Finalizing time tracking for ${expositionId}/${sceneId}`);
+    
+    if (timeTrackingData.isActive) {
+        saveCurrentTimeSpent();
+        timeTrackingData.isActive = false;
+        
+        // Zkontroluj časové achievementy
+        checkTimeBasedAchievements(expositionId, sceneId);
+    }
+}
+
+// Funkce pro pozastavení time tracking
+function pauseTimeTracking() {
+    if (timeTrackingData.isActive) {
+        console.log("⏸️ Pausing time tracking");
+        saveCurrentTimeSpent();
+        timeTrackingData.startTime = null;
+    }
+}
+
+// Funkce pro obnovení time tracking
+function resumeTimeTracking() {
+    if (timeTrackingData.isActive && !timeTrackingData.startTime) {
+        console.log("▶️ Resuming time tracking");
+        timeTrackingData.startTime = Date.now();
+    }
+}
+
+// Funkce pro získání času stráveného v konkrétní scéně
+function getTimeSpentInScene(expositionId, sceneId) {
+    const savedData = getTimeTrackingData();
+    const sceneKey = `${expositionId}_${sceneId}`;
+    
+    if (savedData[sceneKey]) {
+        return savedData[sceneKey].totalTime || 0;
+    }
+    
+    // Pokud je to aktuální aktivní scéna, vrať aktuální čas
+    if (timeTrackingData.expositionId === expositionId && 
+        timeTrackingData.sceneId === sceneId && 
+        timeTrackingData.isActive) {
+        return getCurrentTimeSpent();
+    }
+    
+    return 0;
+}
+
+// Funkce pro kontrolu časových achievementů
+function checkTimeBasedAchievements(expositionId, sceneId) {
+    const timeSpent = getTimeSpentInScene(expositionId, sceneId);
+    const timeSpentSeconds = Math.floor(timeSpent / 1000);
+    
+    console.log(`⏱️ Checking time achievements for ${sceneId}: ${timeSpentSeconds}s`);
+    
+    // Projdi všechny achievementy a zkontroluj časové podmínky
+    Object.keys(ACHIEVEMENTS_CONFIG).forEach(achievementId => {
+        const achievement = ACHIEVEMENTS_CONFIG[achievementId];
+        
+        // Pokud je achievement pro tuto scénu a má časovou podmínku
+        if (achievement.sceneId === sceneId && achievement.condition) {
+            let shouldUnlock = false;
+            
+            switch (achievement.condition) {
+                case 'time_spent_30s':
+                    shouldUnlock = timeSpentSeconds >= 30;
+                    break;
+                case 'time_spent_60s':
+                    shouldUnlock = timeSpentSeconds >= 60;
+                    break;
+                case 'time_spent_2min':
+                    shouldUnlock = timeSpentSeconds >= 120;
+                    break;
+                case 'time_spent_5min':
+                    shouldUnlock = timeSpentSeconds >= 300;
+                    break;
+                // Přidej další časové podmínky podle potřeby
+            }
+            
+            if (shouldUnlock) {
+                console.log(`🏆 Time achievement unlocked: ${achievementId} (${timeSpentSeconds}s)`);
+                unlockAchievement(achievementId);
+            }
+        }
+    });
+    
+    // Zkontroluj také globální časové achievementy
+    checkGlobalTimeAchievements();
+}
+
+// Funkce pro kontrolu globálních časových achievementů
+function checkGlobalTimeAchievements() {
+    const savedData = getTimeTrackingData();
+    let totalTime = 0;
+    
+    // Sečti všechny časy
+    Object.values(savedData).forEach(sceneData => {
+        if (sceneData.totalTime) {
+            totalTime += sceneData.totalTime;
+        }
+    });
+    
+    // Přidej aktuální session čas, pokud je aktivní
+    if (timeTrackingData.isActive) {
+        totalTime += getCurrentTimeSpent();
+    }
+    
+    const totalMinutes = Math.floor(totalTime / (1000 * 60));
+    
+    // Kontrola globálních časových achievementů
+    if (totalMinutes >= 30) {
+        unlockAchievement('marathon_visitor');
+    }
+    
+    console.log(`📊 Total time spent across all scenes: ${totalMinutes} minutes`);
+}
+
+// Automatické ukládání času každých 10 sekund
+setInterval(() => {
+    if (timeTrackingData.isActive) {
+        saveCurrentTimeSpent();
+        
+        // Zkontroluj časové achievementy každých 10 sekund pro aktivní scénu
+        if (timeTrackingData.expositionId && timeTrackingData.sceneId) {
+            checkTimeBasedAchievements(timeTrackingData.expositionId, timeTrackingData.sceneId);
+        }
+    }
+}, 10000);
+
+// === PŮVODNÍ GAMIFIKAČNÍ SYSTÉM ===
 
 // Funkce pro získání dat PRO KONKRÉTNÍ EXPOZICI
 function getGamificationData(expositionId) {
@@ -37,7 +250,7 @@ function saveAchievementData(achievementData) {
 // Funkce pro kontrolu, zda je achievement odemčený
 function isAchievementUnlocked(achievementId) {
     const achievementData = getAchievementData();
-    return achievementData[achievementId] || false;
+    return achievementData[achievementId] && achievementData[achievementId].unlocked;
 }
 
 // Funkce pro odemknutí achievementu
@@ -143,7 +356,6 @@ function checkExpositionAchievements(expositionId) {
     const expoData = getGamificationData(expositionId);
     const expositionConfig = Object.keys(SCENE_CONFIG).filter(sceneId => 
         sceneId.includes(`/${expositionId}/`)
-                                                        
     );
     
     if (expositionConfig.length === 0) return;
@@ -268,6 +480,7 @@ function recordMarkerActivation(expositionId, sceneId, markerId) {
         // Pokud je to první aktivace, spusť kontrolu achievementů
         if (isFirstActivation) {
             checkExpositionAchievements(expositionId);
+            checkSceneSpecificAchievements(expositionId, sceneId);
             
             // Speciální achievement pro první marker celkově
             checkFirstMarkerAchievement();
@@ -296,7 +509,42 @@ function checkFirstMarkerAchievement() {
     }
 }
 
-// Upravená funkce pro získání úrovně hvězd - ZŮSTÁVÁ STEJNÁ
+// Funkce pro kontrolu specifických achievementů pro scény (přesunutá z config)
+function checkSceneSpecificAchievements(expositionId, sceneId) {
+    const starLevel = getSceneStarLevel(expositionId, sceneId);
+    
+    // Najdi všechny achievementy pro tuto konkrétní scénu
+    Object.keys(ACHIEVEMENTS_CONFIG).forEach(achievementId => {
+        const achievement = ACHIEVEMENTS_CONFIG[achievementId];
+        
+        // Pokud je achievement vázaný na konkrétní scénu
+        if (achievement.sceneId === sceneId) {
+            let shouldUnlock = false;
+            
+            switch (achievement.condition) {
+                case 'complete_scene':
+                    shouldUnlock = starLevel !== 'none';
+                    break;
+                case 'gold_star_in_scene':
+                    shouldUnlock = starLevel === 'gold';
+                    break;
+                case 'silver_star_in_scene':
+                    shouldUnlock = starLevel === 'silver' || starLevel === 'gold';
+                    break;
+                case 'bronze_star_in_scene':
+                    shouldUnlock = starLevel === 'bronze' || starLevel === 'silver' || starLevel === 'gold';
+                    break;
+                // Časové podmínky jsou řešeny v checkTimeBasedAchievements
+            }
+            
+            if (shouldUnlock) {
+                unlockAchievement(achievementId);
+            }
+        }
+    });
+}
+
+// Funkce pro získání úrovně hvězd - ZŮSTÁVÁ STEJNÁ
 function getSceneStarLevel(expositionId, sceneId) {
     const expoData = getGamificationData(expositionId);
     const sceneData = expoData[sceneId] || {};
