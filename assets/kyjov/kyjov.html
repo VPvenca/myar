@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -58,13 +57,14 @@
             </div>
 
             <div class="centered-controls">
-                <div class="map-section-minimal">
+                <!-- Původní tlačítko mapy můžete odstranit nebo ponechat -->
+                <!-- <div class="map-section-minimal">
                     <p class="map-link-wrapper-minimal">
                         <a href="https://www.google.com/maps/search/?api=1&query=t%C5%99.+Palack%C3%A9ho+1373%2F13a%2C+697+01+Kyjov+1" target="_blank" rel="noopener noreferrer" class="map-button-minimal">
                             Zobrazit na mapě
                         </a>
                     </p>
-                </div>
+                </div> -->
 
                 <div class="back-button-container">
                     <a href="/muzea_galerie.html" class="menu-button back-button">
@@ -75,7 +75,22 @@
 
         </main>
 
-        <button id="help-button" class="help-icon-button" title="Nápověda">?</button>
+        <!-- PLOVOUCÍ TLAČÍTKA v pravém dolním rohu -->
+        <div class="floating-buttons">
+            <!-- Tlačítko mapy -->
+            <a href="https://www.google.com/maps/search/?api=1&query=t%C5%99.+Palack%C3%A9ho+1373%2F13a%2C+697+01+Kyjov+1" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               class="floating-button map-floating-button"
+               title="Zobrazit na mapě">
+                <svg class="map-icon" viewBox="0 0 24 24">
+                    <path d="M20.5,3L20.34,3.03L15,5.1L9,3L3.36,4.9C3.15,4.97 3,5.15 3,5.38V20.5A0.5,0.5 0 0,0 3.5,21L3.66,20.97L9,18.9L15,21L20.64,19.1C20.85,19.03 21,18.85 21,18.62V3.5A0.5,0.5 0 0,0 20.5,3M10,5.47L14,6.87V18.53L10,17.13V5.47M5,6.46L8,5.45V17.15L5,18.31V6.46M16,18.55L19,17.54V5.84L16,6.9V18.55Z"/>
+                </svg>
+            </a>
+            
+            <!-- Tlačítko nápovědy -->
+            <button id="help-button" class="floating-button help-icon-button" title="Nápověda">?</button>
+        </div>
 
         <footer class="app-footer">
             <p>© 2025 Vytvořil Václav Pěnčík</p>
@@ -120,19 +135,21 @@
                     <p>Jedná se o demoverzi hádanek k představení projektu AugView.</p>
                 </div>
                 <hr>
-             <h2>Sbírejte hvězdy!</h2>
-                 <div class="help-items-container">
-               <div class="help-item"> 
+            </div>
             
-            <img src="/img/stars.png" alt="stars" class="inline-icon">
-            <p>Hvězdy ukazují, jak moc jste zvídaví. Objevují se u tlačítek se scénami.
-               Za zhlédnutí všech scén v jedné kategorii získáte zlatou hvězdu.
-               Pokud si přehrajete alespoň polovinu, dostanete stříbrnou hvězdu.
-               A bronzovou získáte už jen za krátké nahlédnutí.</p>
-             <p>
-              Cílem je nasbírat všechny zlaté hvězdy – to je ta pravá výzva!
-              A když se vám to podaří, čeká vás odměna na recepci.</p>
-            </div>  
+            <h2>Sbírejte hvězdy!</h2>
+            <div class="help-items-container">
+                <div class="help-item"> 
+                    <img src="/img/stars.png" alt="stars" class="inline-icon">
+                    <p>Hvězdy ukazují, jak moc jste zvídaví. Objevují se u tlačítek se scénami.
+                       Za zhlédnutí všech scén v jedné kategorii získáte zlatou hvězdu.
+                       Pokud si přehrajete alespoň polovinu, dostanete stříbrnou hvězdu.
+                       A bronzovou získáte už jen za krátké nahlédnutí.</p>
+                    <p>
+                      Cílem je nasbírat všechny zlaté hvězdy – to je ta pravá výzva!
+                      A když se vám to podaří, čeká vás odměna na recepci.</p>
+                </div>  
+            </div>
                      
             <p>Ujistěte se, že máte dostatek světla a sledujte okolí.</p>
             <p>Aplikace využívá Mind AR / A frame.</p>
@@ -141,7 +158,7 @@
         </div>
     </div>
 
-     <script src="/gamification-config.js"></script>
+    <script src="/gamification-config.js"></script>
     <script src="/gamification.js"></script>
     <script src="/script.js"></script>
 
@@ -156,7 +173,6 @@
                  console.error("Cannot determine current exposition ID. Stars may not display correctly.");
                  // Možná zde zobrazit nějakou chybovou zprávu uživateli, pokud je to kritické
             }
-
 
             starDisplayElements.forEach(starElement => {
                 const sceneId = starElement.dataset.sceneId;
