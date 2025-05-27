@@ -126,8 +126,8 @@
         let audioSource1 = null;
 
         // === ZÍSKÁNÍ INFORMACÍ PRO GAMIFIKACI (JEDNOU) ===
-        const currentSceneId = getCurrentSceneId(); // Funkce z gamification-config.js
-        const currentExpositionId = getCurrentExpositionId(); // Funkce z gamification-config.js
+        const currentSceneId = getCurrentSceneId();
+        const currentExpositionId = getCurrentExpositionId();
 
         let sceneConfigValid = false;
 
@@ -139,9 +139,8 @@
 
          if (!currentExpositionId || currentExpositionId === 'unknown') {
              console.error("GAMIFICATION ERROR: Cannot determine current exposition ID. Marker activations will not be recorded correctly.");
-             sceneConfigValid = false; // Deaktivujeme gamifikaci, pokud nevíme expozici
+             sceneConfigValid = false;
          }
-
 
         // === UPRAVENÉ LISTENERY S INTEGROVANOU GAMIFIKACÍ ===
         if (target1) {
@@ -159,10 +158,9 @@
                     audioSource1 = playSound(audioBuffer1);
                 }
 
-                // Gamifikace - *** OPRAVENO: Předání ID expozice funkci recordMarkerActivation ***
+                // Gamifikace - zapisování aktivace markeru
                 if (sceneConfigValid && marker1Id) {
                     console.log("Recording activation for marker:", marker1Id);
-                    // !!! DŮLEŽITÉ: Musí předávat 3 argumenty: expositionId, sceneId, markerId
                     recordMarkerActivation(currentExpositionId, currentSceneId, marker1Id);
                 }
             });
@@ -181,24 +179,31 @@
             console.warn("Target 1 (targetIndex: 0) not found in DOM.");
         }
 
-        // === GAMIFIKACE - UKONČENÍ TIME TRACKING PŘI ODCHODU ZE STRÁNKY ===
-        // Automaticky ukončíme sledování času při odchodu ze stránky
+        // === GAMIFIKACE - FINALIZACE TIME TRACKING PŘI ODCHODU ===
+        // Ukončení time trackingu při odchodu ze stránky
         window.addEventListener('beforeunload', function() {
             if (currentSceneId && currentExpositionId && currentExpositionId !== 'unknown') {
-                console.log("Finalizing time tracking for scene:", currentSceneId);
-                // Pokud máte funkci pro ukončení time tracking, zavolejte ji zde
-                // například: finalizeTimeTracking(currentExpositionId, currentSceneId);
+                console.log("🏁 Finalizing time tracking before unload");
+                finalizeTimeTracking(currentExpositionId, currentSceneId);
             }
         });
 
-        // Alternativně můžete také sledovat, když uživatel opustí stránku pomocí Page Visibility API
+        // Pozastavení/obnovení při změně viditelnosti stránky
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
-                console.log("Page hidden - pausing time tracking");
-                // Zde můžete pozastavit time tracking
+                console.log("⏸️ Page hidden - pausing time tracking");
+                pauseTimeTracking();
             } else {
-                console.log("Page visible - resuming time tracking");
-                // Zde můžete obnovit time tracking
+                console.log("▶️ Page visible - resuming time tracking");
+                resumeTimeTracking();
+            }
+        });
+
+        // Finalizace při kliknutí na tlačítko "Zpět do Menu" 
+        document.querySelector('.back-button-ar').addEventListener('click', function() {
+            console.log("🏁 Finalizing time tracking - returning to menu");
+            if (currentSceneId && currentExpositionId && currentExpositionId !== 'unknown') {
+                finalizeTimeTracking(currentExpositionId, currentSceneId);
             }
         });
 
