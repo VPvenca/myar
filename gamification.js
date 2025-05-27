@@ -143,9 +143,7 @@ function checkExpositionAchievements(expositionId) {
     const expoData = getGamificationData(expositionId);
     const expositionConfig = Object.keys(SCENE_CONFIG).filter(sceneId => 
         sceneId.includes(`/${expositionId}/`)
-    checkSceneSpecificAchievements(expositionId, sceneId);
-    
-    checkFirstMarkerAchievement();                                                         
+                                                        
     );
     
     if (expositionConfig.length === 0) return;
