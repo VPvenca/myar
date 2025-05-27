@@ -127,11 +127,11 @@ const ACHIEVEMENTS_CONFIG = {
 
     "kyjov_art_lover": {
         name: "Milovník umění",
-        description: "Vychutnej si obrazy v mezipatře",
+        description: "Strávil jsi alespoň 30 sekund obdivováním obrazů v mezipatře",
         icon: "🖼️",
         category: "kyjov",
         rarity: "uncommon",
-        condition: "complete_scene",
+        condition: "time_spent_30s",
         sceneId: "/assets/kyjov/scena_1.html",
         image: "/img/achievements/art_lover.png"
     },
@@ -367,6 +367,3 @@ function isAchievementHidden(achievementId) {
     const achievement = ACHIEVEMENTS_CONFIG[achievementId];
     return achievement && achievement.hidden === true;
 }
-
-// !!! DŮLEŽITÉ: ODSTRANĚNA DUPLICITNÍ FUNKCE checkSceneSpecificAchievements !!!
-// Tato funkce je nyní pouze v gamification.js a podporuje časové podmínky
