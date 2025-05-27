@@ -1,5 +1,6 @@
 /* --- Styly pro Plovoucí Tlačítko Nápovědy --- */
-.help-icon-button {
+/* POUZE pro samostatné plovoucí tlačítko (NIKOLI uvnitř .floating-buttons kontejneru) */
+.help-icon-button:not(.floating-buttons .help-icon-button) {
     position: fixed;        /* Fixní pozice vůči oknu prohlížeče */
     bottom: 20px;           /* 20px od spodního okraje */
     right: 20px;            /* 20px od pravého okraje */
@@ -32,7 +33,8 @@
 }
 
 /* ----- Nová třída pro nepřetržitou animaci na info.html ----- */
-.help-icon-button.needs-attention {
+/* POUZE pro samostatné plovoucí tlačítko */
+.help-icon-button.needs-attention:not(.floating-buttons .help-icon-button) {
     /* Přepisujeme/doplňujeme vlastnosti animace */
     animation-name: blink-attention; /* Můžeme použít stejnou nebo vytvořit novou */
     animation-duration: 1s; /* Můžeme zrychlit */
@@ -43,13 +45,11 @@
     /* animation: blink-attention 1s infinite ease-in-out, subtle-bounce 1.5s infinite ease-in-out; */
 }
 
-
-.help-icon-button:hover {
+/* Hover efekty POUZE pro samostatné plovoucí tlačítko */
+.help-icon-button:not(.floating-buttons .help-icon-button):hover {
     background-color: #31b0d5; /* Tmavší modrá při najetí */
     transform: scale(1.1);    /* Mírné zvětšení při najetí */
     /* Zastaví běžící animaci POUZE pokud se jmenuje blink-attention */
-    /* Pokud by .needs-attention používalo jiný název animace, museli bychom to zde také zohlednit */
-    /* nebo nechat animaci běžet i při hoveru, pokud to nevadí */
     animation-name: none;
 }
 
@@ -212,4 +212,3 @@
         #consent-banner a:hover {
              color: #fff;
      }
-    
