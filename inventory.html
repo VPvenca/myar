@@ -3,49 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventář Trofejí</title>
+    <title>Inventář Úspěchů</title>
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/buttons.css">
-    <!-- Další vaše CSS soubory -->
     <link rel="stylesheet" href="css/inventory.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body class="inventory-page"> <!-- DŮLEŽITÉ: třída pro aktivaci stylů -->
+<body class="inventory-page">
 
     <div class="page-wrapper">
         <header class="app-header">
             <img src="img/augview.png" alt="Logo AR Aplikace" id="app-logo">
-            <h1>Inventář Trofejí</h1>
+            <h1>Inventář Úspěchů</h1>
         </header>
 
         <main>
-            <!-- Kontejner pro menu/obsah, nyní s doplňkovou třídou trophy-grid -->
-            <div class="menu-content trophy-grid">
-
-                <!-- Příklad získané trofeje -->
-                <div class="trophy-item" data-trophy-large-image="path/to/large_trophy1.png" data-trophy-name="První Objevitel">
-                    <img src="path/to/small_trophy1_icon.png" alt="Ikona První Objevitel" class="trophy-image-small">
-                    <span class="trophy-name">První Objevitel</span>
-                    <!-- Můžete přidat i krátký popis, pokud chcete, ale trophy-name je na 3 řádky -->
+            <!-- Progress Overview -->
+            <div class="progress-overview">
+                <div class="progress-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-achievements">0</span>
+                        <span class="stat-label">Celkem úspěchů</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="unlocked-achievements">0</span>
+                        <span class="stat-label">Odemčeno</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="completion-percentage">0%</span>
+                        <span class="stat-label">Dokončeno</span>
+                    </div>
                 </div>
-
-                <!-- Příklad získané trofeje s delším názvem -->
-                <div class="trophy-item" data-trophy-large-image="path/to/large_trophy2.png" data-trophy-name="Mistr Průzkumník Skrytých Míst a Tajemství">
-                    <img src="path/to/small_trophy2_icon.png" alt="Ikona Mistr Průzkumník" class="trophy-image-small">
-                    <span class="trophy-name">Mistr Průzkumník Skrytých Míst a Tajemství</span>
-                </div>
-
-                <!-- Příklad zamčené/nezískané trofeje -->
-                <div class="trophy-item locked">
-                    <img src="path/to/locked_trophy_icon.png" alt="Nezískaná trofej" class="trophy-image-small">
-                    <span class="trophy-name">???</span>
-                </div>
-
-                <!-- Další trofeje ... -->
-
             </div>
 
-            <!-- Můžete zde mít tlačítko zpět, pokud je potřeba -->
+            <!-- Category Filter -->
+            <div class="category-filter">
+                <button class="filter-btn active" data-category="all">Všechny</button>
+                <button class="filter-btn" data-category="global">🌍 Globální</button>
+                <button class="filter-btn" data-category="kyjov">🏛️ Kyjov</button>
+                <button class="filter-btn" data-category="secret">🔍 Skryté</button>
+            </div>
+
+            <!-- Achievements Grid -->
+            <div class="achievements-container">
+                <div id="achievements-grid" class="achievements-grid">
+                    <!-- Achievements will be dynamically loaded here -->
+                </div>
+            </div>
+
+            <!-- Back Button -->
             <div class="back-button-container">
                 <a href="index.html" class="menu-button back-button">Zpět na Menu</a>
             </div>
@@ -56,54 +65,607 @@
         </footer>
     </div>
 
-    <!-- Modální okno pro zobrazení obrázku trofeje (mimo page-wrapper, pro správné překrytí) -->
-    <div id="trophyImageModal" class="trophy-image-modal-overlay">
-        <div class="trophy-image-modal-content">
-            <span id="trophyModalCloseBtn" class="trophy-modal-close-button">×</span>
-            <img src="" alt="Zobrazená trofej" id="modalTrophyImageLarge">
+    <!-- Achievement Detail Modal -->
+    <div id="achievementModal" class="achievement-modal-overlay">
+        <div class="achievement-modal-content">
+            <span id="achievementModalCloseBtn" class="achievement-modal-close-button">×</span>
+            <div class="achievement-detail">
+                <div class="achievement-icon-large" id="modalAchievementIcon">🏆</div>
+                <h2 id="modalAchievementName">Název úspěchu</h2>
+                <p id="modalAchievementDescription">Popis úspěchu</p>
+                <div class="achievement-meta">
+                    <span class="achievement-rarity" id="modalAchievementRarity">Běžný</span>
+                    <span class="achievement-category" id="modalAchievementCategory">Kategorie</span>
+                </div>
+                <div class="achievement-unlock-date" id="modalUnlockDate" style="display: none;">
+                    <small>Odemčeno: <span id="modalUnlockDateText"></span></small>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Load scripts -->
+    <script src="gamification-config.js"></script>
+    <script src="gamification.js"></script>
+
     <script>
-        // Jednoduchý JavaScript pro ovládání modálního okna
+        // Main inventory script
         document.addEventListener('DOMContentLoaded', () => {
-            const trophyItems = document.querySelectorAll('.trophy-item:not(.locked)');
-            const modalOverlay = document.getElementById('trophyImageModal');
-            const modalImage = document.getElementById('modalTrophyImageLarge');
-            const closeModalBtn = document.getElementById('trophyModalCloseBtn');
+            initializeInventory();
+            setupFilterButtons();
+            setupModal();
+        });
 
-            trophyItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    const largeImageSrc = item.dataset.trophyLargeImage;
-                    const trophyName = item.dataset.trophyName || "Trofej"; // Fallback název
-                    if (largeImageSrc) {
-                        modalImage.src = largeImageSrc;
-                        modalImage.alt = `Trofej: ${trophyName}`;
-                        modalOverlay.classList.add('visible');
-                    }
-                });
-            });
+        function initializeInventory() {
+            loadAchievements();
+            updateProgressStats();
+        }
 
-            function closeModal() {
-                modalOverlay.classList.remove('visible');
-                modalImage.src = ""; // Vyčistit src pro příští otevření
+        function loadAchievements(filterCategory = 'all') {
+            const achievementsGrid = document.getElementById('achievements-grid');
+            achievementsGrid.innerHTML = '';
+
+            const unlockedAchievements = getUnlockedAchievements();
+            const unlockedIds = unlockedAchievements.map(a => a.id);
+
+            // Get all achievements based on filter
+            let achievementsToShow = [];
+            
+            if (filterCategory === 'all') {
+                achievementsToShow = Object.keys(ACHIEVEMENTS_CONFIG);
+            } else {
+                achievementsToShow = Object.keys(ACHIEVEMENTS_CONFIG).filter(id => 
+                    ACHIEVEMENTS_CONFIG[id].category === filterCategory
+                );
             }
 
-            closeModalBtn.addEventListener('click', closeModal);
-            modalOverlay.addEventListener('click', (event) => {
-                // Zavřít, pokud se klikne na overlay, ale ne na obsah (obrázek)
-                if (event.target === modalOverlay) {
+            // Sort achievements: unlocked first, then by rarity
+            achievementsToShow.sort((a, b) => {
+                const aUnlocked = unlockedIds.includes(a);
+                const bUnlocked = unlockedIds.includes(b);
+                
+                if (aUnlocked && !bUnlocked) return -1;
+                if (!aUnlocked && bUnlocked) return 1;
+                
+                // If both same unlock status, sort by rarity
+                const rarityOrder = { legendary: 0, rare: 1, uncommon: 2, common: 3 };
+                const aRarity = rarityOrder[ACHIEVEMENTS_CONFIG[a].rarity] || 4;
+                const bRarity = rarityOrder[ACHIEVEMENTS_CONFIG[b].rarity] || 4;
+                
+                return aRarity - bRarity;
+            });
+
+            achievementsToShow.forEach(achievementId => {
+                const achievement = ACHIEVEMENTS_CONFIG[achievementId];
+                const isUnlocked = unlockedIds.includes(achievementId);
+                const isHidden = achievement.hidden && !isUnlocked;
+
+                // Skip hidden achievements if not unlocked
+                if (isHidden) return;
+
+                const achievementElement = createAchievementElement(achievementId, achievement, isUnlocked);
+                achievementsGrid.appendChild(achievementElement);
+            });
+        }
+
+        function createAchievementElement(achievementId, achievement, isUnlocked) {
+            const achievementDiv = document.createElement('div');
+            achievementDiv.className = `achievement-item ${isUnlocked ? 'unlocked' : 'locked'}`;
+            achievementDiv.dataset.achievementId = achievementId;
+            achievementDiv.dataset.rarity = achievement.rarity;
+
+            const rarityConfig = RARITY_CONFIG[achievement.rarity] || RARITY_CONFIG.common;
+            
+            if (isUnlocked && rarityConfig.glow !== 'none') {
+                achievementDiv.style.boxShadow = rarityConfig.glow;
+            }
+
+            achievementDiv.innerHTML = `
+                <div class="achievement-icon" style="color: ${rarityConfig.color}">
+                    ${isUnlocked ? achievement.icon : '🔒'}
+                </div>
+                <div class="achievement-info">
+                    <h3 class="achievement-name">${isUnlocked ? achievement.name : '???'}</h3>
+                    <p class="achievement-description">${isUnlocked ? achievement.description : 'Skrytý úspěch'}</p>
+                    <div class="achievement-meta">
+                        <span class="achievement-rarity" style="color: ${rarityConfig.color}">
+                            ${rarityConfig.name}
+                        </span>
+                        <span class="achievement-category">
+                            ${ACHIEVEMENT_CATEGORIES[achievement.category]?.name || achievement.category}
+                        </span>
+                    </div>
+                </div>
+            `;
+
+            if (isUnlocked) {
+                achievementDiv.addEventListener('click', () => showAchievementDetail(achievementId));
+            }
+
+            return achievementDiv;
+        }
+
+        function updateProgressStats() {
+            const totalAchievements = Object.keys(ACHIEVEMENTS_CONFIG).length;
+            const unlockedAchievements = getUnlockedAchievements();
+            const completionPercentage = Math.round((unlockedAchievements.length / totalAchievements) * 100);
+
+            document.getElementById('total-achievements').textContent = totalAchievements;
+            document.getElementById('unlocked-achievements').textContent = unlockedAchievements.length;
+            document.getElementById('completion-percentage').textContent = `${completionPercentage}%`;
+        }
+
+        function setupFilterButtons() {
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    
+                    // Filter achievements
+                    const category = button.dataset.category;
+                    loadAchievements(category);
+                });
+            });
+        }
+
+        function setupModal() {
+            const modal = document.getElementById('achievementModal');
+            const closeBtn = document.getElementById('achievementModalCloseBtn');
+
+            closeBtn.addEventListener('click', closeModal);
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
                     closeModal();
                 }
             });
 
-            // Volitelně zavřít modal klávesou Escape
             document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape' && modalOverlay.classList.contains('visible')) {
+                if (event.key === 'Escape' && modal.classList.contains('visible')) {
                     closeModal();
                 }
             });
+        }
+
+        function showAchievementDetail(achievementId) {
+            const achievement = ACHIEVEMENTS_CONFIG[achievementId];
+            const achievementData = getAchievementData();
+            const unlockData = achievementData[achievementId];
+
+            if (!achievement || !unlockData) return;
+
+            const modal = document.getElementById('achievementModal');
+            const rarityConfig = RARITY_CONFIG[achievement.rarity] || RARITY_CONFIG.common;
+
+            document.getElementById('modalAchievementIcon').textContent = achievement.icon;
+            document.getElementById('modalAchievementIcon').style.color = rarityConfig.color;
+            document.getElementById('modalAchievementName').textContent = achievement.name;
+            document.getElementById('modalAchievementDescription').textContent = achievement.description;
+            document.getElementById('modalAchievementRarity').textContent = rarityConfig.name;
+            document.getElementById('modalAchievementRarity').style.color = rarityConfig.color;
+            document.getElementById('modalAchievementCategory').textContent = 
+                ACHIEVEMENT_CATEGORIES[achievement.category]?.name || achievement.category;
+
+            if (unlockData.unlockedAt) {
+                const unlockDate = new Date(unlockData.unlockedAt);
+                document.getElementById('modalUnlockDateText').textContent = 
+                    unlockDate.toLocaleDateString('cs-CZ') + ' ' + unlockDate.toLocaleTimeString('cs-CZ');
+                document.getElementById('modalUnlockDate').style.display = 'block';
+            } else {
+                document.getElementById('modalUnlockDate').style.display = 'none';
+            }
+
+            modal.classList.add('visible');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('achievementModal');
+            modal.classList.remove('visible');
+        }
+
+        // Listen for achievement unlocks (if user is on this page when achievement is unlocked)
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'arAchievements') {
+                updateProgressStats();
+                // Reload current filter
+                const activeFilter = document.querySelector('.filter-btn.active');
+                if (activeFilter) {
+                    loadAchievements(activeFilter.dataset.category);
+                }
+            }
         });
     </script>
+
+    <style>
+        /* Complete CSS for Achievement Inventory */
+        
+        /* Progress Overview */
+        .progress-overview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Category Filter */
+        .category-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+            font-weight: 500;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .filter-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Achievements Grid */
+        .achievements-container {
+            margin-bottom: 30px;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .achievement-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .achievement-item.unlocked::before {
+            opacity: 1;
+        }
+
+        .achievement-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .achievement-item.unlocked:hover {
+            border-color: #667eea;
+        }
+
+        .achievement-item.locked {
+            opacity: 0.6;
+            cursor: default;
+        }
+
+        .achievement-item.locked:hover {
+            transform: none;
+            border-color: transparent;
+        }
+
+        .achievement-icon {
+            font-size: 3em;
+            flex-shrink: 0;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .achievement-info {
+            flex: 1;
+        }
+
+        .achievement-name {
+            margin: 0 0 8px 0;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .achievement-description {
+            margin: 0 0 12px 0;
+            color: #666;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .achievement-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.8em;
+        }
+
+        .achievement-rarity {
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .achievement-category {
+            color: #888;
+        }
+
+        /* Achievement Modal */
+        .achievement-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .achievement-modal-overlay.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .achievement-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .achievement-modal-overlay.visible .achievement-modal-content {
+            transform: scale(1);
+        }
+
+        .achievement-modal-close-button {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .achievement-modal-close-button:hover {
+            color: #333;
+        }
+
+        .achievement-detail {
+            text-align: center;
+        }
+
+        .achievement-icon-large {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .achievement-detail h2 {
+            margin: 0 0 15px 0;
+            color: #333;
+            font-size: 1.8em;
+        }
+
+        .achievement-detail p {
+            margin: 0 0 20px 0;
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+
+        .achievement-detail .achievement-meta {
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .achievement-unlock-date {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            color: #888;
+        }
+
+        /* Back Button */
+        .back-button-container {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .back-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .achievements-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .achievement-item {
+                padding: 15px;
+            }
+
+            .achievement-icon {
+                font-size: 2.5em;
+                width: 50px;
+                height: 50px;
+            }
+
+            .achievement-name {
+                font-size: 1.1em;
+            }
+
+            .achievement-description {
+                font-size: 0.85em;
+            }
+
+            .progress-stats {
+                gap: 15px;
+            }
+
+            .stat-number {
+                font-size: 2em;
+            }
+
+            .category-filter {
+                justify-content: flex-start;
+                overflow-x: auto;
+                padding-bottom: 10px;
+            }
+
+            .filter-btn {
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .achievement-modal-content {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .achievement-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .achievement-info {
+                width: 100%;
+            }
+
+            .achievement-meta {
+                justify-content: center;
+                gap: 10px;
+            }
+        }
+
+        /* Loading State */
+        .achievements-grid:empty::after {
+            content: 'Načítání úspěchů...';
+            display: block;
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+
+        /* No achievements message */
+        .no-achievements {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-style: italic;
+        }
+
+        .no-achievements::before {
+            content: '🏆';
+            display: block;
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+    </style>
+
 </body>
 </html>
