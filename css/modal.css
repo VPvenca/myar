@@ -1,14 +1,15 @@
 /* --- KOMPLETNĚ OPRAVENÉ STYLY PRO PLOVOUCÍ TLAČÍTKO NÁPOVĚDY --- */
 
 /* POUZE pro samostatné plovoucí tlačítko (NIKOLI uvnitř .floating-buttons kontejneru) */
+/* POUZE pro samostatné plovoucí tlačítko */
 .help-icon-button:not(.floating-buttons .help-icon-button) {
     position: fixed;
     bottom: 20px;
     right: 20px;
     width: 50px;
     height: 50px;
-    /* DŮLEŽITÉ: Odstraňujeme background-color odsud - nechceme ho fixní */
-    /* background-color: #5bc0de; -- ODSTRAŇENO */
+    /* VÝCHOZÍ MODRÁ BARVA */
+    background-color: #5bc0de;
     color: white;
     border: none;
     border-radius: 50%;
@@ -17,17 +18,16 @@
     text-align: center;
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    z-index: 999;
+    z-index: 1001; /* VYŠŠÍ NEŽ MODAL (1000) */
     display: flex;
     justify-content: center;
     align-items: center;
     
-    /* KRITICKÉ: Odstraňujeme transition pro background-color - blokuje animaci! */
-    /* transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; -- ODSTRAŇENO */
-    transition: transform 0.2s ease, box-shadow 0.3s ease; /* Ponecháváme jen transform a box-shadow */
+    /* ŽÁDNÉ transition na background-color */
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
     
-    /* Animace - MUSÍ být definována PŘÍMO zde */
-    animation: help-button-blink 1.2s ease-in-out 3 0.5s forwards;
+    /* Animace se spustí automaticky */
+    animation: help-button-blink 1.2s ease-in-out 3 0.5s;
 }
 
 /* Třída pro nepřetržitou animaci na info.html */
