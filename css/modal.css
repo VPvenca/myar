@@ -1,91 +1,97 @@
-/* --- Styly pro Plovoucí Tlačítko Nápovědy --- */
+/* --- KOMPLETNĚ OPRAVENÉ STYLY PRO PLOVOUCÍ TLAČÍTKO NÁPOVĚDY --- */
+
 /* POUZE pro samostatné plovoucí tlačítko (NIKOLI uvnitř .floating-buttons kontejneru) */
 .help-icon-button:not(.floating-buttons .help-icon-button) {
-    position: fixed;        /* Fixní pozice vůči oknu prohlížeče */
-    bottom: 20px;           /* 20px od spodního okraje */
-    right: 20px;            /* 20px od pravého okraje */
-    width: 50px;            /* Šířka */
-    height: 50px;           /* Výška */
-    background-color: #5bc0de; /* Světle modrá barva pozadí */
-    color: white;           /* Barva ikony/textu (?) uvnitř */
-    border: none;           /* Bez rámečku */
-    border-radius: 50%;     /* Kruhový tvar */
-    font-size: 24px;        /* Velikost ikony/textu uvnitř */
-    font-weight: bold;      /* Tučné písmo */
-    text-align: center;     /* Centrování obsahu (pro jistotu) */
-    cursor: pointer;        /* Kurzor ukazovátko */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Stín */
-    z-index: 999;           /* Vysoký Z-index, aby bylo nad ostatním obsahem stránky */
-    display: flex;          /* Použijeme flex pro snadné centrování obsahu uvnitř */
-    justify-content: center;/* Centrování obsahu horizontálně */
-    align-items: center;    /* Centrování obsahu vertikálně */
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; /* Plynulé přechody pro hover + animaci */
-
-    /* Výchozí animace pro upoutání pozornosti (3x blikne) */
-    /* Tato animace se spustí na všech stránkách kromě info.html (kde ji přepíšeme) */
-    /* nebo na info.html poté, co se odstraní třída .needs-attention (pokud ji neodstraníme úplně) */
-    animation-name: blink-attention;
-    animation-duration: 1.2s;
-    animation-timing-function: ease-in-out;
-    animation-iteration-count: 3; /* <<< Standardně jen 3x */
-    animation-delay: 0.5s;
-    animation-fill-mode: forwards; /* Zůstane v konečném stavu animace (pokud je potřeba) */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    /* DŮLEŽITÉ: Odstraňujeme background-color odsud - nechceme ho fixní */
+    /* background-color: #5bc0de; -- ODSTRAŇENO */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    /* KRITICKÉ: Odstraňujeme transition pro background-color - blokuje animaci! */
+    /* transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease; -- ODSTRAŇENO */
+    transition: transform 0.2s ease, box-shadow 0.3s ease; /* Ponecháváme jen transform a box-shadow */
+    
+    /* Animace - MUSÍ být definována PŘÍMO zde */
+    animation: help-button-blink 1.2s ease-in-out 3 0.5s forwards;
 }
 
-/* ----- Nová třída pro nepřetržitou animaci na info.html ----- */
-/* POUZE pro samostatné plovoucí tlačítko */
+/* Třída pro nepřetržitou animaci na info.html */
 .help-icon-button.needs-attention:not(.floating-buttons .help-icon-button) {
-    /* Přepisujeme/doplňujeme vlastnosti animace */
-    animation-name: blink-attention; /* Můžeme použít stejnou nebo vytvořit novou */
-    animation-duration: 1s; /* Můžeme zrychlit */
-    animation-timing-function: ease-in-out;
-    animation-iteration-count: infinite; /* <<< Klíčová změna: Nekonečné opakování */
-    animation-delay: 0.2s; /* Můžeme začít dříve */
-    /* Můžeme přidat i další animaci, např. jemný puls nebo bounce */
-    /* animation: blink-attention 1s infinite ease-in-out, subtle-bounce 1.5s infinite ease-in-out; */
+    animation: help-button-blink 1s ease-in-out infinite 0.2s;
 }
 
-/* Hover efekty POUZE pro samostatné plovoucí tlačítko */
+/* DŮLEŽITÉ: Hover MUSÍ resetovat animaci a nastavit barvu */
 .help-icon-button:not(.floating-buttons .help-icon-button):hover {
-    background-color: #31b0d5; /* Tmavší modrá při najetí */
-    transform: scale(1.1);    /* Mírné zvětšení při najetí */
-    /* Zastaví běžící animaci POUZE pokud se jmenuje blink-attention */
-    animation-name: none;
+    background-color: #31b0d5 !important; /* !important pro přepsání animace */
+    transform: scale(1.1);
+    animation: none !important; /* Zastaví animaci */
 }
 
-
-/* Definice animace blikání pro tlačítko nápovědy - výrazná změna barvy */
-@keyframes blink-attention {
+/* NOVÁ KEYFRAMES - jednodušší a spolehlivější */
+@keyframes help-button-blink {
     0% {
+        background-color: #5bc0de; /* Původní modrá */
         transform: scale(1);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        background-color: #5bc0de; /* Původní světle modrá */
-        opacity: 1;
     }
-    25% {
-        transform: scale(1.1);
-        box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
-        background-color: #e74c3c; /* Červená */
-        opacity: 1;
-    }
+    
     50% {
+        background-color: #e74c3c; /* ČERVENÁ - toto se MUSÍ zobrazit */
         transform: scale(1.15);
-        box-shadow: 0 6px 15px rgba(231, 76, 60, 0.6);
-        background-color: #c0392b; /* Tmavší červená pro ještě větší kontrast */
-        opacity: 1;
+        box-shadow: 0 6px 15px rgba(231, 76, 60, 0.7);
     }
-    75% {
-        transform: scale(1.1);
-        box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
-        background-color: #e74c3c; /* Červená */
-        opacity: 1;
-    }
+    
     100% {
+        background-color: #5bc0de; /* Zpět na modrou */
         transform: scale(1);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        background-color: #5bc0de; /* Vrátí se na původní modrou */
-        opacity: 1;
     }
+}
+
+/* ALTERNATIVNÍ VERZE - pokud předchozí nefunguje, zkuste tuto */
+@keyframes help-button-blink-alternative {
+    0%, 100% {
+        background: #5bc0de; /* Používáme 'background' místo 'background-color' */
+    }
+    
+    50% {
+        background: #dc3545; /* Bootstrap červená */
+    }
+}
+
+/* Pro debug - dočasně přidejte tuto třídu k tlačítku pro test */
+.debug-red {
+    background-color: #ff0000 !important;
+    animation: none !important;
+}
+
+/* POKUD STÁLE NEFUNGUJE - použijte tuto nuclear option */
+.help-icon-button.force-animation:not(.floating-buttons .help-icon-button) {
+    background-color: #5bc0de !important;
+    animation: help-button-force-blink 1s infinite !important;
+}
+
+@keyframes help-button-force-blink {
+    0% { background: #5bc0de !important; }
+    25% { background: #e74c3c !important; }
+    50% { background: #dc3545 !important; }
+    75% { background: #e74c3c !important; }
+    100% { background: #5bc0de !important; }
 }
 /* Volitelně: definice druhé animace (pokud byste chtěli kombinovat) */
 /*
