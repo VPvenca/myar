@@ -53,18 +53,37 @@
     animation-name: none;
 }
 
-/* Definice animace blikání pro tlačítko nápovědy (zůstává stejná) */
+
+/* Definice animace blikání pro tlačítko nápovědy - výrazná změna barvy */
 @keyframes blink-attention {
-    0%, 100% {
+    0% {
         transform: scale(1);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-        background-color: #5bc0de; /* Vrací se na původní modrou */
+        background-color: #5bc0de; /* Původní světle modrá */
+        opacity: 1;
+    }
+    25% {
+        transform: scale(1.1);
+        box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
+        background-color: #e74c3c; /* Červená */
         opacity: 1;
     }
     50% {
-        transform: scale(1.15); /* Trochu větší zvětšení pro důraz */
-        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.6); /* Výraznější červený stín */
-        background-color: #e74c3c; /* Červená pro upoutání */
+        transform: scale(1.15);
+        box-shadow: 0 6px 15px rgba(231, 76, 60, 0.6);
+        background-color: #c0392b; /* Tmavší červená pro ještě větší kontrast */
+        opacity: 1;
+    }
+    75% {
+        transform: scale(1.1);
+        box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4);
+        background-color: #e74c3c; /* Červená */
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        background-color: #5bc0de; /* Vrátí se na původní modrou */
         opacity: 1;
     }
 }
