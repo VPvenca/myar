@@ -108,7 +108,7 @@
 }
 
 /* ==========================================================================
-   PLOVOUCÍ TLAČÍTKA (Floating Buttons)
+   PLOVOUCÍ TLAČÍTKA (Floating Buttons) - OPRAVENÁ VERZE
    ========================================================================== */
 
 /* Kontejner pro plovoucí tlačítka */
@@ -120,12 +120,13 @@
     flex-direction: column;
     gap: 10px;
     z-index: 1000;
+    align-items: center; /* PŘIDÁNO: Zajistí vycentrování tlačítek */
 }
 
-/* Základní styl pro plovoucí tlačítka */
+/* Základní styl pro plovoucí tlačítka - SJEDNOCENÁ VELIKOST */
 .floating-button {
-    width: 56px;
-    height: 56px;
+    width: 56px;  /* Stejná velikost pro všechna tlačítka */
+    height: 56px; /* Stejná velikost pro všechna tlačítka */
     border-radius: 50%;
     border: none;
     cursor: pointer;
@@ -137,19 +138,14 @@
     text-decoration: none;
     transition: all 0.3s ease;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0; /* Zabrání zmenšování */
 }
 
-
-
-.help-icon-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
-}
-
-/* Tlačítko mapy */
+/* Tlačítko mapy - ZACHOVÁNÍ PŮVODNÍCH STYLŮ */
 .map-floating-button {
     background: linear-gradient(135deg, #28a745, #20c997);
     color: white;
+    /* Velikost už je definována v .floating-button */
 }
 
 .map-floating-button:hover {
@@ -164,7 +160,7 @@
     fill: currentColor;
 }
 
-/* Responzivní úpravy pro plovoucí tlačítka */
+/* Responzivní úpravy pro plovoucí tlačítka - SJEDNOCENÉ PRO VŠECHNA TLAČÍTKA */
 @media (max-width: 768px) {
     .floating-buttons {
         bottom: 15px;
@@ -172,13 +168,25 @@
     }
     
     .floating-button {
-        width: 50px;
-        height: 50px;
+        width: 50px !important;
+        height: 50px !important;
     }
     
     .floating-button .map-icon {
         width: 20px;
         height: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .floating-button {
+        width: 45px !important;
+        height: 45px !important;
+    }
+    
+    .floating-button .map-icon {
+        width: 18px;
+        height: 18px;
     }
 }
 

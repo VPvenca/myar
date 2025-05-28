@@ -1,21 +1,23 @@
 /* ==========================================================================
-   PLOVOUCÍ TLAČÍTKO NÁPOVĚDY - OPRAVENÁ VERZE
+   PLOVOUCÍ TLAČÍTKO NÁPOVĚDY - OPRAVENÁ VERZE PRO SJEDNOCENÍ S OSTATNÍMI TLAČÍTKY
    ========================================================================== */
 
-/* Základní styl pro plovoucí tlačítko nápovědy */
+/* Základní styl pro plovoucí tlačítko nápovědy - SJEDNOCENÁ VELIKOST */
 .help-icon-button {
-    position: fixed; 
-    bottom: 20px;    
-    right: 20px; 
-    width: 50px;
-    height: 50px;
+    /* Základní pozicování pro samostatné použití */
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    /* OPRAVENO: Sjednocená velikost s ostatními plovoucími tlačítky */
+    width: 56px !important;
+    height: 56px !important;
     border: none;
     border-radius: 50%;
     font-size: 24px;
     font-weight: bold;
     text-align: center;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     z-index: 1001;
     display: flex;
     justify-content: center;
@@ -24,6 +26,7 @@
     background-color: #3498db;
     transition: none;
     animation: help-button-pulse 2s ease-in-out infinite;
+    flex-shrink: 0; /* Zabrání zmenšování */
 }
 
 /* Třída pro nepřetržitou animaci (např. na info.html) */
@@ -35,9 +38,9 @@
 .help-icon-button:hover {
     animation: none !important;
     background-color: #2980b9 !important;
-    transform: scale(1.1) !important;
+    transform: translateY(-2px) !important;
     transition: transform 0.2s ease !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    box-shadow: 0 6px 16px rgba(52, 152, 219, 0.3) !important;
 }
 
 /* Active stav při kliknutí */
@@ -46,50 +49,50 @@
     transition: transform 0.1s ease !important;
 }
 
-/* Speciální styl pro tlačítko uvnitř .floating-buttons kontejneru */
+/* OPRAVENO: Speciální styl pro tlačítko uvnitř .floating-buttons kontejneru */
 .floating-buttons .help-icon-button {
+    /* Resetování pozicování pro použití v kontejneru */
     position: relative;
     margin: 0;
     bottom: auto;
     right: auto;
-    /* PŘIDÁNO: Zachování původní velikosti */
+    /* OPRAVENO: Zajištění stejné velikosti jako ostatní plovoucí tlačítka */
     width: 56px;
     height: 56px;
     font-size: 24px;
-    /* ZMĚNĚNO: Zachování animace nebo použití jiné barvy */
-    background-color: #3498db; /* Místo gradientu */
-    animation: help-button-pulse 2s ease-in-out infinite; /* Zapnutí animace */
-    
-    /* NEBO pokud chcete gradient bez animace: */
-    /* background: linear-gradient(135deg, #667eea, #764ba2);
-       animation: none; */
+    background-color: #3498db;
+    animation: help-button-pulse 2s ease-in-out infinite;
 }
 
-/* Hover efekt zůstává stejný */
+/* Hover efekt pro tlačítko v kontejneru */
 .floating-buttons .help-icon-button:hover {
-    background-color: #2980b9 !important; /* Místo gradientu */
+    background-color: #2980b9 !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 6px 16px rgba(52, 152, 219, 0.3) !important;
     animation: none !important;
 }
-/* PŘIDÁNO: Zajištění stejné velikosti na všech zařízeních */
+
+/* PŘIDÁNO: Responzivní úpravy pro sjednocení velikosti */
 @media (max-width: 768px) {
     .help-icon-button,
     .floating-buttons .help-icon-button {
-        width: 45px;
-        height: 45px;
+        width: 50px !important;
+        height: 50px !important;
         font-size: 20px;
+        bottom: 15px;
+        right: 15px;
     }
 }
 
 @media (max-width: 480px) {
     .help-icon-button,
     .floating-buttons .help-icon-button {
-        width: 40px;
-        height: 40px;
+        width: 45px !important;
+        height: 45px !important;
         font-size: 18px;
     }
 }
+
 /* ==========================================================================
    KEYFRAME ANIMACE PRO TLAČÍTKO NÁPOVĚDY
    ========================================================================== */
@@ -99,19 +102,19 @@
     0% {
         background-color: #3498db; /* Modrá */
         transform: scale(1);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
     
     50% {
         background-color: #e74c3c; /* Červená */
         transform: scale(1.15);
-        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.5);
+        box-shadow: 0 6px 16px rgba(231, 76, 60, 0.5);
     }
     
     100% {
         background-color: #3498db; /* Zpět na modrou */
         transform: scale(1);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 }
 
@@ -348,15 +351,7 @@
    ========================================================================== */
 
 @media (max-width: 768px) {
-    /* Úpravy pro mobily */
-    .help-icon-button {
-        width: 45px;
-        height: 45px;
-        font-size: 20px;
-        bottom: 15px;
-        right: 15px;
-    }
-    
+    /* Úpravy pro modální okno */
     .modal-content {
         padding: 20px 25px;
         width: 95%;
@@ -382,12 +377,6 @@
 
 @media (max-width: 480px) {
     /* Úpravy pro velmi malé obrazovky */
-    .help-icon-button {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
-    }
-    
     .modal-content {
         padding: 15px 20px;
         width: 98%;
