@@ -2,13 +2,11 @@
    PLOVOUCÍ TLAČÍTKO NÁPOVĚDY - OPRAVENÁ VERZE PRO SJEDNOCENÍ S OSTATNÍMI TLAČÍTKY
    ========================================================================== */
 
-/* Základní styl pro plovoucí tlačítko nápovědy - SJEDNOCENÁ VELIKOST */
+/* OPRAVENO: Rozdělení stylů na samostatné tlačítko a tlačítko v kontejneru */
+
+/* Základní styl pro plovoucí tlačítko nápovědy - POUZE pro samostatné použití */
 .help-icon-button {
-    /* Základní pozicování pro samostatné použití */
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    /* OPRAVENO: Sjednocená velikost s ostatními plovoucími tlačítky */
+    /* Základní pozicování POUZE pro samostatné použití (když NENÍ v .floating-buttons) */
     width: 56px !important;
     height: 56px !important;
     border: none;
@@ -18,7 +16,6 @@
     text-align: center;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    z-index: 1001;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -27,6 +24,14 @@
     transition: none;
     animation: help-button-pulse 2s ease-in-out infinite;
     flex-shrink: 0; /* Zabrání zmenšování */
+}
+
+/* OPRAVENO: Samostatné tlačítko nápovědy (když NENÍ uvnitř .floating-buttons) */
+.help-icon-button:not(.floating-buttons .help-icon-button) {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1001;
 }
 
 /* Třída pro nepřetržitou animaci (např. na info.html) */
@@ -51,17 +56,21 @@
 
 /* OPRAVENO: Speciální styl pro tlačítko uvnitř .floating-buttons kontejneru */
 .floating-buttons .help-icon-button {
-    /* Resetování pozicování pro použití v kontejneru */
-    position: relative;
-    margin: 0;
-    bottom: auto;
-    right: auto;
-    /* OPRAVENO: Zajištění stejné velikosti jako ostatní plovoucí tlačítka */
-    width: 56px;
-    height: 56px;
+    /* DŮLEŽITÉ: Resetování všech pozicovacích vlastností pro použití v kontejneru */
+    position: relative !important;
+    margin: 0 !important;
+    bottom: auto !important;
+    right: auto !important;
+    top: auto !important;
+    left: auto !important;
+    
+    /* Zajištění stejné velikosti jako ostatní plovoucí tlačítka */
+    width: 56px !important;
+    height: 56px !important;
     font-size: 24px;
     background-color: #3498db;
     animation: help-button-pulse 2s ease-in-out infinite;
+    z-index: auto; /* Resetování z-index */
 }
 
 /* Hover efekt pro tlačítko v kontejneru */
@@ -72,20 +81,34 @@
     animation: none !important;
 }
 
-/* PŘIDÁNO: Responzivní úpravy pro sjednocení velikosti */
+/* OPRAVENO: Responzivní úpravy - rozdělené pro samostatné a kontejnerové tlačítko */
 @media (max-width: 768px) {
-    .help-icon-button,
-    .floating-buttons .help-icon-button {
+    /* Samostatné tlačítko */
+    .help-icon-button:not(.floating-buttons .help-icon-button) {
         width: 50px !important;
         height: 50px !important;
         font-size: 20px;
         bottom: 15px;
         right: 15px;
     }
+    
+    /* Tlačítko v kontejneru */
+    .floating-buttons .help-icon-button {
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 20px;
+    }
 }
 
 @media (max-width: 480px) {
-    .help-icon-button,
+    /* Samostatné tlačítko */
+    .help-icon-button:not(.floating-buttons .help-icon-button) {
+        width: 45px !important;
+        height: 45px !important;
+        font-size: 18px;
+    }
+    
+    /* Tlačítko v kontejneru */
     .floating-buttons .help-icon-button {
         width: 45px !important;
         height: 45px !important;
