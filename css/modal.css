@@ -1,102 +1,129 @@
-/* --- KOMPLETNĚ OPRAVENÉ STYLY PRO PLOVOUCÍ TLAČÍTKO NÁPOVĚDY --- */
+/* ==========================================================================
+   PLOVOUCÍ TLAČÍTKO NÁPOVĚDY - OPRAVENÁ VERZE
+   ========================================================================== */
 
-/* POUZE pro samostatné plovoucí tlačítko (NIKOLI uvnitř .floating-buttons kontejneru) */
-/* POUZE pro samostatné plovoucí tlačítko */
-.help-icon-button:not(.floating-buttons .help-icon-button) {
+/* Základní styl pro plovoucí tlačítko nápovědy */
+.help-icon-button {
     position: fixed;
     bottom: 20px;
     right: 20px;
     width: 50px;
     height: 50px;
-    /* VÝCHOZÍ MODRÁ BARVA */
-    background-color: #5bc0de;
-    color: white;
     border: none;
     border-radius: 50%;
     font-size: 24px;
     font-weight: bold;
     text-align: center;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    z-index: 1001; /* VYŠŠÍ NEŽ MODAL (1000) */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 1001; /* Vyšší než modal (1000) */
     display: flex;
     justify-content: center;
     align-items: center;
+    color: white;
     
-    /* ŽÁDNÉ transition na background-color */
-    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    /* Základní modrá barva */
+    background-color: #3498db;
     
-    /* Animace se spustí automaticky */
-    animation: help-button-blink 1.2s ease-in-out 3 0.5s;
-}
-
-/* Třída pro nepřetržitou animaci na info.html */
-.help-icon-button.needs-attention:not(.floating-buttons .help-icon-button) {
-    animation: help-button-blink 1s ease-in-out infinite 0.2s;
-}
-
-/* DŮLEŽITÉ: Hover MUSÍ resetovat animaci a nastavit barvu */
-.help-icon-button:not(.floating-buttons .help-icon-button):hover {
-    background-color: #31b0d5 !important; /* !important pro přepsání animace */
-    transform: scale(1.1);
-    animation: none !important; /* Zastaví animaci */
-}
-
-/* NOVÁ KEYFRAMES - jednodušší a spolehlivější */
-@keyframes help-button-blink {
-    0% {
-        background-color: #5bc0de !important;
-        transform: scale(1);
-    }
-    50% {
-        background-color: #e74c3c !important; /* Červená se nyní zobrazí */
-        transform: scale(1.15);
-    }
-    100% {
-        background-color: #5bc0de !important;
-        transform: scale(1);
-    }
-}
-
-/* ALTERNATIVNÍ VERZE - pokud předchozí nefunguje, zkuste tuto */
-@keyframes help-button-blink-alternative {
-    0%, 100% {
-        background: #5bc0de; /* Používáme 'background' místo 'background-color' */
-    }
+    /* Žádné transitions během animace */
+    transition: none;
     
-    50% {
-        background: #dc3545; /* Bootstrap červená */
-    }
+    /* Automatická animace pulzování */
+    animation: help-button-pulse 2s ease-in-out infinite;
 }
 
-/* Pro debug - dočasně přidejte tuto třídu k tlačítku pro test */
-.debug-red {
-    background-color: #ff0000 !important;
+/* Třída pro nepřetržitou animaci (např. na info.html) */
+.help-icon-button.needs-attention {
+    animation: help-button-pulse 1.5s ease-in-out infinite;
+}
+
+/* Hover efekt - zastaví animaci a změní barvu */
+.help-icon-button:hover {
     animation: none !important;
+    background-color: #2980b9 !important;
+    transform: scale(1.1) !important;
+    transition: transform 0.2s ease !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
 
-/* POKUD STÁLE NEFUNGUJE - použijte tuto nuclear option */
-.help-icon-button.force-animation:not(.floating-buttons .help-icon-button) {
-    background-color: #5bc0de !important;
-    animation: help-button-force-blink 1s infinite !important;
+/* Active stav při kliknutí */
+.help-icon-button:active {
+    transform: scale(0.95) !important;
+    transition: transform 0.1s ease !important;
 }
 
-@keyframes help-button-force-blink {
-    0% { background: #5bc0de !important; }
-    25% { background: #e74c3c !important; }
-    50% { background: #dc3545 !important; }
-    75% { background: #e74c3c !important; }
-    100% { background: #5bc0de !important; }
+/* Speciální styl pro tlačítko uvnitř .floating-buttons kontejneru */
+.floating-buttons .help-icon-button {
+    position: relative; /* Přepíše fixed positioning */
+    margin: 0;
+    bottom: auto;
+    right: auto;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    animation: none; /* Žádná animace uvnitř floating-buttons */
 }
-/* Volitelně: definice druhé animace (pokud byste chtěli kombinovat) */
-/*
-@keyframes subtle-bounce {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-4px) scale(1.05); }
-}
-*/
 
-/* --- Styly pro Modální Okno (Nápověda) --- */
+.floating-buttons .help-icon-button:hover {
+    background: linear-gradient(135deg, #5a67d8, #6b46c1) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3) !important;
+}
+
+/* ==========================================================================
+   KEYFRAME ANIMACE PRO TLAČÍTKO NÁPOVĚDY
+   ========================================================================== */
+
+/* Hlavní pulzující animace */
+@keyframes help-button-pulse {
+    0% {
+        background-color: #3498db; /* Modrá */
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    50% {
+        background-color: #e74c3c; /* Červená */
+        transform: scale(1.15);
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.5);
+    }
+    
+    100% {
+        background-color: #3498db; /* Zpět na modrou */
+        transform: scale(1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Alternativní rychlejší blikání */
+@keyframes help-button-blink {
+    0%, 80%, 100% {
+        background-color: #3498db;
+        transform: scale(1);
+    }
+    
+    40% {
+        background-color: #e74c3c;
+        transform: scale(1.2);
+    }
+}
+
+/* Jemné pulzování (pro méně rušivou variantu) */
+@keyframes help-button-subtle {
+    0%, 100% {
+        background-color: #3498db;
+        transform: scale(1);
+        opacity: 1;
+    }
+    
+    50% {
+        background-color: #e67e22; /* Oranžová místo červené */
+        transform: scale(1.08);
+        opacity: 0.9;
+    }
+}
+
+/* ==========================================================================
+   MODÁLNÍ OKNO (NÁPOVĚDA)
+   ========================================================================== */
 
 /* Překryvná vrstva pozadí modálního okna */
 .modal-overlay {
@@ -107,127 +134,290 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.6); /* Poloprůhledné černé pozadí */
-    z-index: 998; /* Ještě vyšší Z-index než tlačítko nápovědy, aby bylo navrchu */
-    /* Použijeme flexbox pro centrování obsahu modálního okna */
-    justify-content: center; /* Centruje obsah (modal-content) horizontálně */
-    align-items: center;     /* Centruje obsah (modal-content) vertikálně */
-    padding: 20px;           /* Odsazení od okrajů okna pro menší obrazovky */
+    z-index: 1000; /* Vysoký Z-index */
+    
+    /* Flexbox pro centrování obsahu */
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
     box-sizing: border-box;
+    
+    /* Animace pro plynulé objevení */
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-/* Třída pro zobrazení modálního okna (přidává se/odebírá pomocí JavaScriptu) */
+/* Třída pro zobrazení modálního okna */
 .modal-overlay.visible {
-    display: flex; /* Zobrazí overlay a použije flex pro centrování obsahu */
+    display: flex;
+    opacity: 1;
 }
 
-/* Samotný obsah/kontejner modálního okna */
+/* Samotný obsah modálního okna */
 .modal-content {
-    background-color: white; /* Bílé pozadí obsahu */
-    padding: 30px 40px;     /* Vnitřní odsazení obsahu */
-    border-radius: 8px;     /* Zaoblené rohy */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Výraznější stín než běžná tlačítka */
-    max-width: 600px;       /* Maximální šířka okna */
-    width: 90%;             /* Šířka na menších obrazovkách (responzivita) */
-    text-align: left;       /* Výchozí zarovnání textu doleva */
-    max-height: 80vh;       /* Maximální výška (80% výšky okna prohlížeče) */
-    overflow-y: auto;       /* Povolí vertikální rolování, POKUD je obsah delší než max-height */
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 90%;
+    text-align: left;
+    max-height: 80vh;
+    overflow-y: auto;
+    
+    /* Animace pro obsah */
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.visible .modal-content {
+    transform: translateY(0);
 }
 
 /* Nadpis uvnitř modálního okna */
 .modal-content h2 {
-    margin-top: 0;          /* Nulový horní okraj */
-    color: #333;            /* Barva textu nadpisu */
-    text-align: center;     /* Centrování nadpisu */
-    margin-bottom: 20px;    /* Spodní okraj pod nadpisem */
+    margin-top: 0;
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
 }
 
 /* Odstavce uvnitř modálního okna */
 .modal-content p {
-    color: #555;            /* Barva textu odstavců */
-    line-height: 1.6;       /* Výška řádku pro lepší čitelnost delšího textu */
-    margin-bottom: 15px;    /* Spodní okraj mezi odstavci */
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+/* Seznamy v modálním okně */
+.modal-content ul,
+.modal-content ol {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    padding-left: 20px;
+}
+
+.modal-content li {
+    margin-bottom: 8px;
+}
+
+/* Zvýraznění důležitého textu */
+.modal-content .highlight {
+    background-color: #fff3cd;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 600;
 }
 
 /* Zavírací tlačítko modálního okna */
 .modal-close-button {
-    /* Využívá některé styly z .menu-button, ale přepisuje/doplňuje je */
-    display: block;         /* Blokový element pro umožnění centrování pomocí margin: auto */
-    width: fit-content;     /* <<< Šířka se přizpůsobí obsahu (text + padding) */
-    /* Alternativně: width: auto; */
-    min-width: 120px;       /* Volitelná minimální šířka pro lepší vzhled */
-    margin: 25px auto 0 auto; /* Horní okraj 25px, Levý/pravý auto pro horizontální centrování */
-    padding: 10px 25px;     /* Vnitřní odsazení */
-    font-size: 16px;        /* Velikost písma */
-    /* Následující vlastnosti jsou pravděpodobně zděděny z .menu-button, ale pro jistotu je zde můžeme uvést */
+    display: block;
+    width: fit-content;
+    min-width: 120px;
+    margin: 25px auto 0 auto;
+    padding: 12px 25px;
+    font-size: 16px;
     font-weight: 700;
     color: white;
-    background-color: #6c757d; /* Stejná barva jako .back-button */
+    background-color: #6c757d;
     border: none;
     border-radius: 8px;
     text-decoration: none;
     text-align: center;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     box-sizing: border-box;
 }
 
-/* Efekty pro zavírací tlačítko (podobné jako .menu-button) */
+/* Efekty pro zavírací tlačítko */
 .modal-close-button:hover {
-     background-color: #5a6268; /* Tmavší šedá (jako .back-button:hover) */
-     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15); /* Zvýraznění stínu */
-     transform: translateY(-2px); /* Posunutí nahoru */
-}
-.modal-close-button:active {
-    background-color: #4e555b; /* Ještě tmavší šedá pro active stav */
-    transform: translateY(0px); /* Vrácení do původní polohy */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Menší stín */
+    background-color: #5a6268;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);
 }
 
-/*Styly pro Consent Banner (můžete přesunout do vašeho CSS) */
+.modal-close-button:active {
+    background-color: #4e555b;
+    transform: translateY(0px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ==========================================================================
+   CONSENT BANNER (SOUHLAS S COOKIES)
+   ========================================================================== */
+
+#consent-banner {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.95);
+    color: #fff;
+    padding: 20px;
+    box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    z-index: 2000;
+    border-top: 2px solid #3498db;
+    box-sizing: border-box;
+    font-size: 0.9em;
+}
+
+#consent-banner p {
+    margin: 0 0 15px 0;
+    line-height: 1.5;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#consent-banner button {
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    margin: 5px 10px;
+    font-weight: bold;
+    border-radius: 6px;
+    color: white;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+#consent-accept {
+    background-color: #27ae60;
+    box-shadow: 0 2px 5px rgba(39, 174, 96, 0.3);
+}
+
+#consent-accept:hover {
+    background-color: #229954;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.4);
+}
+
+#consent-deny {
+    background-color: #e74c3c;
+    box-shadow: 0 2px 5px rgba(231, 76, 60, 0.3);
+}
+
+#consent-deny:hover {
+    background-color: #c0392b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.4);
+}
+
+#consent-banner a {
+    color: #74b9ff;
+    text-decoration: underline;
+    transition: color 0.3s ease;
+}
+
+#consent-banner a:hover {
+    color: #0984e3;
+}
+
+/* ==========================================================================
+   RESPONZIVNÍ ÚPRAVY
+   ========================================================================== */
+
+@media (max-width: 768px) {
+    /* Úpravy pro mobily */
+    .help-icon-button {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+        bottom: 15px;
+        right: 15px;
+    }
     
-        #consent-banner {
-            display: none; /* Skrytý, dokud JS nerozhodne jinak */
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: rgba(0, 0, 0, 0.9); /* Tmavší pozadí pro lepší viditelnost */
-            color: #fff; /* Bílý text */
-            padding: 15px 20px;
-            box-shadow: 0 -3px 6px rgba(0,0,0,0.2);
-            text-align: center;
-            z-index: 2000; /* Vyšší Z-index než nápověda */
-            border-top: 1px solid #444;
-            box-sizing: border-box;
-            font-size: 0.9em; /* Trochu menší text */
-        }
-        #consent-banner p {
-            margin: 0 0 12px 0;
-            line-height: 1.4;
-        }
-        #consent-banner button {
-            /* Použije styly z buttons.css, pokud existují, zde jen základ */
-            padding: 8px 18px;
-            border: none;
-            cursor: pointer;
-            margin: 5px 8px;
-            font-weight: bold;
-            border-radius: 4px;
-            color: white; /* Výchozí barva textu tlačítek */
-        }
-        #consent-accept {
-             /* Použijte vaši třídu pro potvrzovací tlačítko nebo tyto styly */
-            background-color: #4CAF50; /* Zelená */
-        }
-        #consent-deny {
-            /* Použijte vaši třídu pro zamítací tlačítko nebo tyto styly */
-            background-color: #f44336; /* Červená */
-        }
-         #consent-banner a {
-            color: #a0cfff; /* Světle modrá pro odkaz */
-            text-decoration: underline;
-        }
-        #consent-banner a:hover {
-             color: #fff;
-     }
+    .modal-content {
+        padding: 20px 25px;
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .modal-content h2 {
+        font-size: 1.3em;
+    }
+    
+    #consent-banner {
+        padding: 15px;
+        font-size: 0.85em;
+    }
+    
+    #consent-banner button {
+        display: block;
+        width: 100%;
+        max-width: 200px;
+        margin: 8px auto;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Úpravy pro velmi malé obrazovky */
+    .help-icon-button {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+    
+    .modal-content {
+        padding: 15px 20px;
+        width: 98%;
+    }
+    
+    .modal-close-button {
+        padding: 10px 20px;
+        font-size: 14px;
+        min-width: 100px;
+    }
+}
+
+/* ==========================================================================
+   UTILITY TŘÍDY
+   ========================================================================== */
+
+/* Pro dočasné vypnutí animace */
+.help-icon-button.no-animation {
+    animation: none !important;
+    background-color: #3498db !important;
+}
+
+/* Pro pomalejší animaci */
+.help-icon-button.slow-pulse {
+    animation: help-button-pulse 3s ease-in-out infinite !important;
+}
+
+/* Pro rychlejší blikání */
+.help-icon-button.fast-blink {
+    animation: help-button-blink 0.8s ease-in-out infinite !important;
+}
+
+/* Pro jemnější animaci */
+.help-icon-button.subtle-pulse {
+    animation: help-button-subtle 2.5s ease-in-out infinite !important;
+}
+
+/* Debug třída pro testování */
+.debug-red {
+    background-color: #ff0000 !important;
+    animation: none !important;
+}
+
+/* Přístupnost - respektuje preference uživatele */
+@media (prefers-reduced-motion: reduce) {
+    .help-icon-button {
+        animation: none !important;
+    }
+    
+    .modal-overlay,
+    .modal-content,
+    .modal-close-button {
+        transition: none !important;
+    }
+}
