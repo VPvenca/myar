@@ -53,8 +53,8 @@
     bottom: auto;
     right: auto;
     /* PŘIDÁNO: Zachování původní velikosti */
-    width: 50px;
-    height: 50px;
+    width: 56px;
+    height: 56px;
     font-size: 24px;
     /* ZMĚNĚNO: Zachování animace nebo použití jiné barvy */
     background-color: #3498db; /* Místo gradientu */
