@@ -107,7 +107,7 @@
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.6); /* Poloprůhledné černé pozadí */
-    z-index: 1000; /* Ještě vyšší Z-index než tlačítko nápovědy, aby bylo navrchu */
+    z-index: 998; /* Ještě vyšší Z-index než tlačítko nápovědy, aby bylo navrchu */
     /* Použijeme flexbox pro centrování obsahu modálního okna */
     justify-content: center; /* Centruje obsah (modal-content) horizontálně */
     align-items: center;     /* Centruje obsah (modal-content) vertikálně */
