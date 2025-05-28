@@ -36,15 +36,10 @@
         <header class="app-header">
             <!-- Sem umístěte logo -->
             <img src="/img/augview.png" alt="Logo AR Aplikace" id="app-logo">
-
-  
+            <h1>Vyberte AR Scénu</h1>
         </header>
         
-<div class="centered-heading">
-    <h1>Vyberte AR scénu</h1>
-</div>
     <main>    
-       
         
           <div class="menu-content">
   
@@ -59,44 +54,42 @@
               
            
           </div>  
-        <div class="centered-controls">
-    <!-- Odkaz pro ZOBRAZENÍ místa na mapě -->
-    <div class="map-section-minimal">
-        <p class="map-link-wrapper-minimal">
+
+            <div class="centered-controls">
+                <!-- Původní tlačítko mapy můžete odstranit nebo ponechat -->
+                <!-- <div class="map-section-minimal">
+                    <p class="map-link-wrapper-minimal">
+                        <a href="https://www.google.com/maps/search/?api=1&query=49.049458,17.122834" target="_blank" rel="noopener noreferrer" class="map-button-minimal">
+                            Zobrazit na mapě
+                        </a>
+                    </p>
+                </div> -->
+
+                <div class="back-button-container">
+                    <a href="/mista_stezky.html" class="menu-button back-button">
+                        Zpět
+                    </a>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- PLOVOUCÍ TLAČÍTKA v pravém dolním rohu -->
+        <div class="floating-buttons">
+            <!-- Tlačítko mapy -->
             <a href="https://www.google.com/maps/search/?api=1&query=49.049458,17.122834" 
                target="_blank" 
                rel="noopener noreferrer" 
-               class="map-button-minimal">
-                Zobrazit na mapě
+               class="floating-button map-floating-button"
+               title="Zobrazit na mapě">
+                <svg class="map-icon" viewBox="0 0 24 24">
+                    <path d="M20.5,3L20.34,3.03L15,5.1L9,3L3.36,4.9C3.15,4.97 3,5.15 3,5.38V20.5A0.5,0.5 0 0,0 3.5,21L3.66,20.97L9,18.9L15,21L20.64,19.1C20.85,19.03 21,18.85 21,18.62V3.5A0.5,0.5 0 0,0 20.5,3M10,5.47L14,6.87V18.53L10,17.13V5.47M5,6.46L8,5.45V17.15L5,18.31V6.46M16,18.55L19,17.54V5.84L16,6.9V18.55Z"/>
+                </svg>
             </a>
-        </p>
-    </div>
-</div>
-
-                
-        <!-- === TLAČÍTKO ZPĚT === -->
-<div class="centered-controls">        
-<div class="back-button-container">
-    <a href="/mista_stezky.html" class="menu-button back-button">
-        Zpět
-    </a>
-</div>
-  </div> <!-- Konec .centered-controls -->    
-      
-          
             
-        </main>
-
-    
-   
-    
-<!-- === TLAČÍTKO NÁPOVĚDY === -->
-        <button id="help-button" class="help-icon-button" title="Nápověda">
-            ?
-            <!-- Nebo pokud použijete Font Awesome: -->
-            <!-- <i class="fas fa-question"></i> -->
-        </button>
-        <!-- ========================= -->
+            <!-- Tlačítko nápovědy -->
+            <button id="help-button" class="floating-button help-icon-button" title="Nápověda">?</button>
+        </div>
 
         <footer class="app-footer">
             <p>© 2025 Vytvořil Václav Pěnčík</p>
