@@ -16,19 +16,13 @@
     text-align: center;
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    z-index: 1001; /* Vyšší než modal (1000) */
+    z-index: 1001;
     display: flex;
     justify-content: center;
     align-items: center;
     color: white;
-    
-    /* Základní modrá barva */
     background-color: #3498db;
-    
-    /* Žádné transitions během animace */
     transition: none;
-    
-    /* Automatická animace pulzování */
     animation: help-button-pulse 2s ease-in-out infinite;
 }
 
@@ -54,20 +48,48 @@
 
 /* Speciální styl pro tlačítko uvnitř .floating-buttons kontejneru */
 .floating-buttons .help-icon-button {
-    position: relative; /* Přepíše fixed positioning */
+    position: relative;
     margin: 0;
     bottom: auto;
     right: auto;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    animation: none; /* Žádná animace uvnitř floating-buttons */
+    /* PŘIDÁNO: Zachování původní velikosti */
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    /* ZMĚNĚNO: Zachování animace nebo použití jiné barvy */
+    background-color: #3498db; /* Místo gradientu */
+    animation: help-button-pulse 2s ease-in-out infinite; /* Zapnutí animace */
+    
+    /* NEBO pokud chcete gradient bez animace: */
+    /* background: linear-gradient(135deg, #667eea, #764ba2);
+       animation: none; */
 }
 
+/* Hover efekt zůstává stejný */
 .floating-buttons .help-icon-button:hover {
-    background: linear-gradient(135deg, #5a67d8, #6b46c1) !important;
+    background-color: #2980b9 !important; /* Místo gradientu */
     transform: translateY(-2px) !important;
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3) !important;
+    box-shadow: 0 6px 16px rgba(52, 152, 219, 0.3) !important;
+    animation: none !important;
+}
+/* PŘIDÁNO: Zajištění stejné velikosti na všech zařízeních */
+@media (max-width: 768px) {
+    .help-icon-button,
+    .floating-buttons .help-icon-button {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+    }
 }
 
+@media (max-width: 480px) {
+    .help-icon-button,
+    .floating-buttons .help-icon-button {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+}
 /* ==========================================================================
    KEYFRAME ANIMACE PRO TLAČÍTKO NÁPOVĚDY
    ========================================================================== */
