@@ -45,21 +45,16 @@
 /* NOVÁ KEYFRAMES - jednodušší a spolehlivější */
 @keyframes help-button-blink {
     0% {
-        background-color: #5bc0de; /* Původní modrá */
+        background-color: #5bc0de !important;
         transform: scale(1);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
-    
     50% {
-        background-color: #e74c3c; /* ČERVENÁ - toto se MUSÍ zobrazit */
+        background-color: #e74c3c !important; /* Červená se nyní zobrazí */
         transform: scale(1.15);
-        box-shadow: 0 6px 15px rgba(231, 76, 60, 0.7);
     }
-    
     100% {
-        background-color: #5bc0de; /* Zpět na modrou */
+        background-color: #5bc0de !important;
         transform: scale(1);
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 }
 
