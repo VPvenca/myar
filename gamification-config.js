@@ -127,7 +127,7 @@ const ACHIEVEMENTS_CONFIG = {
 
     "kyjov_art_lover": {
         name: "Milovník umění",
-        description: "Strávil jsi alespoň 30 sekund obdivováním obrazů v mezipatře",
+        description: "Strávil jsi 2 minuty obdivováním obrazů v mezipatře",
         icon: "🖼️",
         category: "kyjov",
         rarity: "uncommon",
