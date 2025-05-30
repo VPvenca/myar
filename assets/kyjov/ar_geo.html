@@ -253,26 +253,14 @@
                 color="red"
                 material="opacity: 0.8">
             </a-box>
-            <!-- Hlavní PNG překryv Adriánky - správné proporce -->
+            <!-- Hlavní PNG překryv Adriánky - opravené proporce a otočení -->
             <a-plane 
                 src="#marker3" 
                 position="0 3 0" 
-                scale="3 4 1" 
-                rotation="0 0 0"
+                scale="4 4 1" 
+                rotation="0 180 0"
                 material="transparent: true; alphaTest: 0.1; side: double">
             </a-plane>
-            <!-- Text s informacemi pro debug - jednoduchý -->
-            <a-entity
-                position="0 5 0">
-                <a-text 
-                    value="ADRIANKA" 
-                    align="center" 
-                    color="white"
-                    scale="4 4 4"
-                    geometry="primitive: plane; width: 4; height: 1"
-                    material="color: black; opacity: 0.7">
-                </a-text>
-            </a-entity>
         </a-entity>
 
     </a-scene>
