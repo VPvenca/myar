@@ -128,12 +128,6 @@
             border-left-color: #ffaa00;
         }
         
-        .direction-arrow {
-            display: inline-block;
-            margin-right: 8px;
-            font-size: 16px;
-        }
-        
         .target-name {
             font-weight: bold;
             color: white;
@@ -227,7 +221,7 @@
                 position="0 2 0" 
                 scale="4 2 1" 
                 material="transparent: true; alphaTest: 0.1"
-                animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
+                look-at="#camera">
             </a-plane>
         </a-entity>
 
@@ -242,7 +236,7 @@
                 position="0 2 0" 
                 scale="4 5 1" 
                 material="transparent: true; alphaTest: 0.1"
-                animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
+                look-at="#camera">
             </a-plane>
         </a-entity>
 
@@ -252,13 +246,30 @@
             data-marker-id="hadanka_adrianka"
             class="ar-object"
             visible="false">
+            <!-- Debugovací kostka - vždy viditelná -->
+            <a-box 
+                position="0 1 0" 
+                scale="1 1 1" 
+                color="red"
+                material="opacity: 0.8">
+            </a-box>
+            <!-- PNG překryv -->
             <a-plane 
                 src="#marker3" 
                 position="0 2 3" 
                 scale="5 6 1" 
                 material="transparent: true; alphaTest: 0.1"
-                animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
+                look-at="#camera">
             </a-plane>
+            <!-- Text s informacemi pro debug -->
+            <a-text 
+                value="ADRIANKA DEBUG" 
+                position="0 3 0" 
+                align="center" 
+                color="yellow"
+                scale="2 2 2"
+                look-at="#camera">
+            </a-text>
         </a-entity>
 
     </a-scene>
@@ -296,27 +307,6 @@
             }
         ];
 
-        // Funkce pro výpočet směru (bearing) mezi dvěma GPS body
-        function calculateBearing(lat1, lon1, lat2, lon2) {
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const lat1Rad = lat1 * Math.PI / 180;
-            const lat2Rad = lat2 * Math.PI / 180;
-            
-            const y = Math.sin(dLon) * Math.cos(lat2Rad);
-            const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - 
-                     Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
-            
-            let bearing = Math.atan2(y, x) * 180 / Math.PI;
-            return (bearing + 360) % 360;
-        }
-        
-        // Funkce pro získání směrové šipky
-        function getDirectionArrow(bearing) {
-            const arrows = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
-            const index = Math.round(bearing / 45) % 8;
-            return arrows[index];
-        }
-        
         // Funkce pro formátování vzdálenosti
         function formatDistance(distance) {
             if (distance < 1000) {
@@ -382,14 +372,8 @@
             
             if (targetMarker) {
                 const distance = Math.round(targetMarker.distance);
-                const bearing = calculateBearing(
-                    userPosition.lat, userPosition.lng,
-                    targetMarker.lat, targetMarker.lng
-                );
-                const arrow = getDirectionArrow(bearing);
-                
                 const prefix = selectedTargetId ? '🎯' : '📍';
-                distanceInfo.innerHTML = `${prefix} ${arrow} ${targetMarker.name}<br><strong>${distance}m</strong><br><small>Směr: ${bearing.toFixed(0)}°</small>`;
+                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}<br><strong>${distance}m</strong>`;
                 
                 // Změna barvy podle vzdálenosti
                 if (distance <= AR_VISIBILITY_THRESHOLD) {
@@ -423,15 +407,10 @@
                     userPosition.lat, userPosition.lng,
                     marker.lat, marker.lng
                 );
-                const bearing = calculateBearing(
-                    userPosition.lat, userPosition.lng,
-                    marker.lat, marker.lng
-                );
-                return { ...marker, distance, bearing };
+                return { ...marker, distance };
             }).sort((a, b) => a.distance - b.distance);
             
             markersWithDistance.forEach((marker, index) => {
-                const arrow = getDirectionArrow(marker.bearing);
                 const isClosest = index === 0;
                 const isSelected = marker.id === selectedTargetId;
                 
@@ -442,12 +421,11 @@
                 html += `
                     <div class="${cssClass}" data-target-id="${marker.id}">
                         <div class="target-name">
-                            <span class="direction-arrow">${arrow}</span>
                             ${marker.name}
                             ${isSelected ? ' 🎯' : ''}
                         </div>
                         <div class="target-details">
-                            ${formatDistance(marker.distance)} | ${marker.bearing.toFixed(0)}°
+                            ${formatDistance(marker.distance)}
                         </div>
                     </div>
                 `;
@@ -531,13 +509,25 @@
                 
                 const arEntity = document.querySelector(`[data-marker-id="${marker.id}"]`);
                 if (arEntity) {
-                    // Zobrazení AR objektu pouze ve vzdálenosti 1m nebo méně
+                    // Zobrazení AR objektu pouze ve vzdálenosti 5m nebo méně
                     if (distance <= AR_VISIBILITY_THRESHOLD) {
                         arEntity.setAttribute('visible', 'true');
                         console.log(`AR object visible for ${marker.id} at distance ${distance.toFixed(2)}m`);
+                        
+                        // Extra debug log pro Adriánku
+                        if (marker.id === 'hadanka_adrianka') {
+                            console.log(`ADRIANKA DEBUG: Distance ${distance.toFixed(2)}m, AR entity:`, arEntity);
+                            console.log(`ADRIANKA DEBUG: Entity visible attribute:`, arEntity.getAttribute('visible'));
+                        }
+                        
                         arObjectsVisible = true;
                     } else {
                         arEntity.setAttribute('visible', 'false');
+                        
+                        // Debug log i při skrývání
+                        if (marker.id === 'hadanka_adrianka') {
+                            console.log(`ADRIANKA DEBUG: Too far (${distance.toFixed(2)}m), hiding AR object`);
+                        }
                     }
                 }
                 
