@@ -253,13 +253,13 @@
                 color="red"
                 material="opacity: 0.8">
             </a-box>
-            <!-- PNG překryv -->
+            <!-- PNG překryv bez look-at - jen fixní rotace -->
             <a-plane 
                 src="#marker3" 
-                position="0 2 3" 
+                position="0 2 0" 
                 scale="5 6 1" 
-                material="transparent: true; alphaTest: 0.1"
-                look-at="#camera">
+                rotation="0 0 0"
+                material="transparent: true; alphaTest: 0.1; side: double">
             </a-plane>
             <!-- Text s informacemi pro debug -->
             <a-text 
@@ -267,9 +267,17 @@
                 position="0 3 0" 
                 align="center" 
                 color="yellow"
-                scale="2 2 2"
-                look-at="#camera">
+                scale="3 3 3"
+                rotation="0 0 0">
             </a-text>
+            <!-- Další test PNG na jiné pozici -->
+            <a-plane 
+                src="#marker3" 
+                position="2 2 0" 
+                scale="2 3 1" 
+                rotation="0 180 0"
+                material="transparent: true; alphaTest: 0.1; side: double">
+            </a-plane>
         </a-entity>
 
     </a-scene>
@@ -278,7 +286,7 @@
         // GPS přesnost a debugging
         let userPosition = null;
         const PROXIMITY_THRESHOLD = 50; // metry - vzdálenost pro aktivaci gamifikace
-        const AR_VISIBILITY_THRESHOLD = 20; // metry - vzdálenost pro zobrazení AR objektu
+        const AR_VISIBILITY_THRESHOLD = 5; // metry - vzdálenost pro zobrazení AR objektu
         let arObjectsVisible = false;
         let selectedTargetId = null; // ID vybraného cíle
         
