@@ -149,42 +149,66 @@
         <a-entity 
             gps-entity-place="latitude: 49.0133; longitude: 17.1219"
             data-marker-id="hadanka_masaryk"
-            class="ar-object">
+            class="ar-object"
+            visible="true">
             <a-plane 
                 src="#marker1" 
-                position="0 0 0" 
-                scale="3 1.2 1" 
-                material="transparent: true"
-                look-at="[gps-camera]">
+                position="0 2 0" 
+                scale="4 2 1" 
+                material="transparent: true; alphaTest: 0.1"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
             </a-plane>
+            <!-- Debug box -->
+            <a-box 
+                position="0 0 0" 
+                scale="0.5 0.5 0.5" 
+                color="red" 
+                material="transparent: true; opacity: 0.7">
+            </a-box>
         </a-entity>
 
         <!-- Beneš monument -->
         <a-entity 
             gps-entity-place="latitude: 49.0140; longitude: 17.1225"
             data-marker-id="hadanka_benes"
-            class="ar-object">
+            class="ar-object"
+            visible="true">
             <a-plane 
                 src="#marker2" 
-                position="0 0 0" 
-                scale="3 3.8 1" 
-                material="transparent: true"
-                look-at="[gps-camera]">
+                position="0 2 0" 
+                scale="4 5 1" 
+                material="transparent: true; alphaTest: 0.1"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
             </a-plane>
+            <!-- Debug box -->
+            <a-box 
+                position="0 0 0" 
+                scale="0.5 0.5 0.5" 
+                color="green" 
+                material="transparent: true; opacity: 0.7">
+            </a-box>
         </a-entity>
 
         <!-- Adriánka - OPRAVENÉ souřadnice -->
         <a-entity 
             gps-entity-place="latitude: 49.0091667; longitude: 17.1286111"
             data-marker-id="hadanka_adrianka"
-            class="ar-object">
+            class="ar-object"
+            visible="true">
             <a-plane 
                 src="#marker3" 
-                position="0 0 0" 
-                scale="6 6.9 1" 
-                material="transparent: true"
-                look-at="[gps-camera]">
+                position="0 2 0" 
+                scale="6 7 1" 
+                material="transparent: true; alphaTest: 0.1"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
             </a-plane>
+            <!-- Debug box -->
+            <a-box 
+                position="0 0 0" 
+                scale="0.5 0.5 0.5" 
+                color="blue" 
+                material="transparent: true; opacity: 0.7">
+            </a-box>
         </a-entity>
 
     </a-scene>
@@ -193,6 +217,7 @@
         // GPS přesnost a debugging
         let userPosition = null;
         const PROXIMITY_THRESHOLD = 50; // metry - vzdálenost pro aktivaci
+        let arObjectsVisible = false;
         
         // Definice cílových bodů - OPRAVENÉ souřadnice pro Adriánku
         const markers = [
@@ -248,6 +273,33 @@
                 return `${(distance / 1000).toFixed(1)}km`;
             }
         }
+        
+        // Debug funkce pro zobrazení stavu AR objektů
+        function updateDebugInfo() {
+            const arObjects = document.querySelectorAll('.ar-object');
+            let visibleCount = 0;
+            
+            arObjects.forEach(obj => {
+                if (obj.getAttribute('visible') === 'true') {
+                    visibleCount++;
+                }
+            });
+            
+            console.log(`AR Objects visible: ${visibleCount}/${arObjects.length}`);
+        }
+        
+        // Vynucené zobrazení všech objektů pro debug (zavolej v konzoli)
+        function forceShowAllObjects() {
+            const arObjects = document.querySelectorAll('.ar-object');
+            arObjects.forEach(obj => {
+                obj.setAttribute('visible', 'true');
+                console.log('Forced visibility for object:', obj.getAttribute('data-marker-id'));
+            });
+            arObjectsVisible = true;
+        }
+        
+        // Debugging v konzoli - globální funkce
+        window.forceShowAllObjects = forceShowAllObjects;
         
         // Funkce pro výpočet vzdálenosti mezi dvěma GPS body
         function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -372,7 +424,8 @@
                         
                         document.getElementById('geoInfo').innerHTML = 
                             `Poloha: ${userPosition.lat.toFixed(6)}, ${userPosition.lng.toFixed(6)}<br>
-                             Přesnost: ${userPosition.accuracy.toFixed(0)}m`;
+                             Přesnost: ${userPosition.accuracy.toFixed(0)}m<br>
+                             AR objekty: ${arObjectsVisible ? 'Viditelné' : 'Skryté'}`;
                         
                         console.log("User position:", userPosition);
                         checkProximityToMarkers();
@@ -404,11 +457,24 @@
                 
                 console.log(`Distance to ${marker.id}: ${distance.toFixed(2)}m`);
                 
+                // Debug: Zkus vynucené zobrazení objektů v blízkosti
+                if (distance <= 200) { // Větší radius pro debug
+                    const arEntity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                    if (arEntity) {
+                        arEntity.setAttribute('visible', 'true');
+                        console.log(`Forcing visibility for ${marker.id} at distance ${distance}m`);
+                        arObjectsVisible = true;
+                    }
+                }
+                
                 // Aktivace při přiblížení
                 if (distance <= PROXIMITY_THRESHOLD) {
                     activateMarker(marker.id);
                 }
             });
+            
+            // Debug info
+            updateDebugInfo();
         }
 
         // Aktivace markeru (podobně jako targetFound)
@@ -438,7 +504,8 @@
                         
                         document.getElementById('geoInfo').innerHTML = 
                             `Poloha: ${userPosition.lat.toFixed(6)}, ${userPosition.lng.toFixed(6)}<br>
-                             Přesnost: ${userPosition.accuracy.toFixed(0)}m`;
+                             Přesnost: ${userPosition.accuracy.toFixed(0)}m<br>
+                             AR objekty: ${arObjectsVisible ? 'Viditelné' : 'Skryté'}`;
                         
                         checkProximityToMarkers();
                         updateNavigation();
@@ -479,6 +546,12 @@
         // A-Frame scéna je připravena
         document.querySelector('a-scene').addEventListener('loaded', () => {
             console.log("A-Frame scene loaded for geolocation AR");
+            
+            // Debug: Po 5 sekundách zkus zobrazit všechny objekty
+            setTimeout(() => {
+                console.log("Auto-showing AR objects for debug...");
+                forceShowAllObjects();
+            }, 5000);
         });
     </script>
 </body>
