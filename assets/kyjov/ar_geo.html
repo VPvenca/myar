@@ -61,93 +61,27 @@
             border: 2px solid #00ff00;
         }
         
-        .compass-container {
+        /* Navigační informace přesunuty na místo kompasu */
+        .navigation-info {
             position: fixed;
             top: 70px;
             right: 10px;
-            width: 120px;
-            height: 120px;
-            background-color: rgba(0,0,0,0.8);
-            border-radius: 50%;
-            border: 3px solid #fff;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .compass {
-            width: 100px;
-            height: 100px;
-            position: relative;
-            border-radius: 50%;
-            background: radial-gradient(circle, #333 0%, #111 100%);
-        }
-        
-        .compass-needle {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 4px;
-            height: 80px;
-            background: linear-gradient(to bottom, #ff4444 0%, #ff4444 50%, #ffffff 50%, #ffffff 100%);
-            border-radius: 2px;
-            transform-origin: 50% 90%;
-            transform: translate(-50%, -90%);
-            transition: transform 0.5s ease;
-        }
-        
-        .compass-center {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 8px;
-            height: 8px;
-            background: #fff;
-            border-radius: 50%;
-            z-index: 10;
-        }
-        
-        .compass-labels {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-        
-        .compass-label {
-            position: absolute;
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .compass-label.north { top: 5px; left: 50%; transform: translateX(-50%); }
-        .compass-label.east { right: 5px; top: 50%; transform: translateY(-50%); }
-        .compass-label.south { bottom: 5px; left: 50%; transform: translateX(-50%); }
-        .compass-label.west { left: 5px; top: 50%; transform: translateY(-50%); }
-        
-        .navigation-info {
-            position: fixed;
-            top: 200px;
-            right: 10px;
             background-color: rgba(0,0,0,0.8);
             color: white;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 12px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
             z-index: 1000;
-            min-width: 150px;
-            max-width: 200px;
+            min-width: 180px;
+            max-width: 220px;
+            border: 2px solid #fff;
         }
         
         .target-indicator {
-            margin: 5px 0;
-            padding: 5px;
+            margin: 8px 0;
+            padding: 8px;
             background-color: rgba(255,255,255,0.1);
-            border-radius: 3px;
+            border-radius: 5px;
             border-left: 3px solid #00ff00;
         }
         
@@ -158,8 +92,8 @@
         
         .direction-arrow {
             display: inline-block;
-            margin-right: 5px;
-            font-size: 14px;
+            margin-right: 8px;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -177,23 +111,9 @@
         📍 Hledám nejbližší bod...
     </div>
     
-    <!-- Kompas -->
-    <div class="compass-container">
-        <div class="compass">
-            <div class="compass-needle" id="compassNeedle"></div>
-            <div class="compass-center"></div>
-            <div class="compass-labels">
-                <div class="compass-label north">S</div>
-                <div class="compass-label east">V</div>
-                <div class="compass-label south">J</div>
-                <div class="compass-label west">Z</div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Navigační informace -->
+    <!-- Navigační informace (místo kompasu) -->
     <div class="navigation-info" id="navInfo">
-        <div style="font-weight: bold; margin-bottom: 5px;">📍 Navigace</div>
+        <div style="font-weight: bold; margin-bottom: 8px; text-align: center;">📍 Navigace</div>
         <div id="targetsList"></div>
     </div>
     
@@ -216,16 +136,16 @@
             <a-asset-item id="model3" src="https://your_model_url3.gltf"></a-asset-item>
         </a-assets>
 
-        <!-- Kamera s geolokací -->
+        <!-- Kamera s geolokací - OPRAVENO aspect ratio -->
         <a-camera 
             id="camera"
             gps-camera
             rotation-reader
-            camera="fov: 70; aspect: auto;">
+            camera="fov: 70;">
         </a-camera>
 
         <!-- AR objekty na konkrétních GPS souřadnicích -->
-        <!-- Masaryk monument (příklad souřadnic pro Kyjov) -->
+        <!-- Masaryk monument -->
         <a-entity 
             gps-entity-place="latitude: 49.0133; longitude: 17.1219"
             data-marker-id="hadanka_masaryk"
@@ -253,9 +173,9 @@
             </a-plane>
         </a-entity>
 
-        <!-- Adriánka - opravené souřadnice -->
+        <!-- Adriánka - OPRAVENÉ souřadnice -->
         <a-entity 
-            gps-entity-place="latitude: 49.009167; longitude: 17.128611"
+            gps-entity-place="latitude: 49.0091667; longitude: 17.1286111"
             data-marker-id="hadanka_adrianka"
             class="ar-object">
             <a-plane 
@@ -272,10 +192,9 @@
     <script>
         // GPS přesnost a debugging
         let userPosition = null;
-        let userHeading = 0; // Směr otočení uživatele
         const PROXIMITY_THRESHOLD = 50; // metry - vzdálenost pro aktivaci
         
-        // Definice cílových bodů - opravené souřadnice
+        // Definice cílových bodů - OPRAVENÉ souřadnice pro Adriánku
         const markers = [
             { 
                 id: "hadanka_masaryk", 
@@ -293,8 +212,8 @@
             },
             { 
                 id: "hadanka_adrianka", 
-                lat: 49.009167, // 49°00'33.0"N = 49 + 33/60 = 49.55/60 = 49.009167
-                lng: 17.128611, // 17°07'43.0"E = 17 + 7/60 + 43/3600 = 17.128611
+                lat: 49.0091667, // 49°00'33.0"N = 49 + 0/60 + 33/3600 = 49.0091667
+                lng: 17.1286111, // 17°07'43.0"E = 17 + 7/60 + 43/3600 = 17.1286111
                 name: "Adriánka",
                 description: "Socha Adriánky"
             }
@@ -327,15 +246,6 @@
                 return `${Math.round(distance)}m`;
             } else {
                 return `${(distance / 1000).toFixed(1)}km`;
-            }
-        }
-        
-        // Aktualizace kompasu - OPRAVENO
-        function updateCompass(heading) {
-            const needle = document.getElementById('compassNeedle');
-            if (needle) {
-                // Opravená rotace - rotuje kolem správného středu
-                needle.style.transform = `translate(-50%, -90%) rotate(${heading}deg)`;
             }
         }
         
@@ -438,7 +348,7 @@
                     <div class="${cssClass}">
                         <span class="direction-arrow">${arrow}</span>
                         <strong>${marker.name}</strong><br>
-                        ${formatDistance(marker.distance)}
+                        <small>${formatDistance(marker.distance)} | ${marker.bearing.toFixed(0)}°</small>
                     </div>
                 `;
             });
@@ -514,49 +424,6 @@
                 recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
             }
         }
-
-        // Sledování orientace zařízení pro kompas - OPRAVENO
-        function watchOrientation() {
-            if (window.DeviceOrientationEvent) {
-                // Zkusit různé event listenery pro lepší kompatibilitu
-                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    // iOS 13+
-                    DeviceOrientationEvent.requestPermission()
-                        .then(response => {
-                            if (response == 'granted') {
-                                window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-                                window.addEventListener('deviceorientation', handleOrientation, true);
-                            }
-                        });
-                } else {
-                    // Android a starší iOS
-                    window.addEventListener('deviceorientationabsolute', handleOrientation, true);
-                    window.addEventListener('deviceorientation', handleOrientation, true);
-                }
-            }
-        }
-        
-        function handleOrientation(event) {
-            let alpha = event.alpha;
-            
-            if (alpha !== null) {
-                // Pro absolutní orientaci (magnetický sever)
-                if (event.absolute === true || event.webkitCompassHeading) {
-                    // iOS
-                    if (event.webkitCompassHeading) {
-                        userHeading = event.webkitCompassHeading;
-                    } else {
-                        userHeading = alpha;
-                    }
-                } else {
-                    // Android - převod na magnetický sever
-                    userHeading = (360 - alpha) % 360;
-                }
-                
-                updateCompass(userHeading);
-                console.log(`Compass heading: ${userHeading.toFixed(1)}°`);
-            }
-        }
         
         // Sledování polohy v reálném čase
         function watchPosition() {
@@ -592,10 +459,9 @@
         window.addEventListener('load', () => {
             console.log("Starting geolocation AR scene...");
             
-            // Spuštění geolokace a orientace
+            // Spuštění geolokace
             getCurrentPosition();
             watchPosition();
-            watchOrientation();
             
             // Gamifikace setup
             const currentSceneId = getCurrentSceneId();
