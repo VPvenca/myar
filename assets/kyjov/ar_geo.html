@@ -253,9 +253,9 @@
             </a-plane>
         </a-entity>
 
-        <!-- Adriánka -->
+        <!-- Adriánka - opravené souřadnice -->
         <a-entity 
-            gps-entity-place="latitude: 49.0033; longitude: 17.0743"
+            gps-entity-place="latitude: 49.009167; longitude: 17.128611"
             data-marker-id="hadanka_adrianka"
             class="ar-object">
             <a-plane 
@@ -275,7 +275,7 @@
         let userHeading = 0; // Směr otočení uživatele
         const PROXIMITY_THRESHOLD = 50; // metry - vzdálenost pro aktivaci
         
-        // Definice cílových bodů - aktualizované souřadnice pro Adriánku
+        // Definice cílových bodů - opravené souřadnice
         const markers = [
             { 
                 id: "hadanka_masaryk", 
@@ -293,8 +293,8 @@
             },
             { 
                 id: "hadanka_adrianka", 
-                lat: 49.005833, // 49°00'33.0"N
-                lng: 17.128611, // 17°07'43.0"E
+                lat: 49.009167, // 49°00'33.0"N = 49 + 33/60 = 49.55/60 = 49.009167
+                lng: 17.128611, // 17°07'43.0"E = 17 + 7/60 + 43/3600 = 17.128611
                 name: "Adriánka",
                 description: "Socha Adriánky"
             }
@@ -373,7 +373,7 @@
             return closest;
         }
 
-        // Aktualizace zobrazení vzdálenosti
+        // Aktualizace zobrazení vzdálenosti s debugováním
         function updateDistanceDisplay() {
             const distanceInfo = document.getElementById('distanceInfo');
             const closest = findClosestMarker();
@@ -386,7 +386,12 @@
                 );
                 const arrow = getDirectionArrow(bearing);
                 
-                distanceInfo.innerHTML = `${arrow} ${closest.name}<br><strong>${distance}m</strong>`;
+                // Debug informace
+                console.log(`Closest: ${closest.name}, Distance: ${distance}m, Bearing: ${bearing.toFixed(1)}°`);
+                console.log(`User: ${userPosition.lat.toFixed(6)}, ${userPosition.lng.toFixed(6)}`);
+                console.log(`Target: ${closest.lat.toFixed(6)}, ${closest.lng.toFixed(6)}`);
+                
+                distanceInfo.innerHTML = `${arrow} ${closest.name}<br><strong>${distance}m</strong><br><small>Směr: ${bearing.toFixed(0)}°</small>`;
                 
                 // Změna barvy podle vzdálenosti
                 if (distance <= PROXIMITY_THRESHOLD) {
@@ -510,17 +515,46 @@
             }
         }
 
-        // Sledování orientace zařízení pro kompas
+        // Sledování orientace zařízení pro kompas - OPRAVENO
         function watchOrientation() {
             if (window.DeviceOrientationEvent) {
-                window.addEventListener('deviceorientation', (event) => {
-                    // Alpha představuje otočení kolem osy Z (kompas)
-                    let alpha = event.alpha || 0;
-                    
-                    // Převod na správný směr (sever = 0°)
+                // Zkusit různé event listenery pro lepší kompatibilitu
+                if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    // iOS 13+
+                    DeviceOrientationEvent.requestPermission()
+                        .then(response => {
+                            if (response == 'granted') {
+                                window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+                                window.addEventListener('deviceorientation', handleOrientation, true);
+                            }
+                        });
+                } else {
+                    // Android a starší iOS
+                    window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+                    window.addEventListener('deviceorientation', handleOrientation, true);
+                }
+            }
+        }
+        
+        function handleOrientation(event) {
+            let alpha = event.alpha;
+            
+            if (alpha !== null) {
+                // Pro absolutní orientaci (magnetický sever)
+                if (event.absolute === true || event.webkitCompassHeading) {
+                    // iOS
+                    if (event.webkitCompassHeading) {
+                        userHeading = event.webkitCompassHeading;
+                    } else {
+                        userHeading = alpha;
+                    }
+                } else {
+                    // Android - převod na magnetický sever
                     userHeading = (360 - alpha) % 360;
-                    updateCompass(userHeading);
-                });
+                }
+                
+                updateCompass(userHeading);
+                console.log(`Compass heading: ${userHeading.toFixed(1)}°`);
             }
         }
         
