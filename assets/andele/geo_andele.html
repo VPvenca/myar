@@ -112,7 +112,7 @@
             border-radius: 5px;
             cursor: pointer;
             transition: background-color 0.3s;
-            border-left: 3px solid #00ff00;
+            border-left: 3px solid #ff0000; /* Default: daleko = červená */
         }
         
         .target-item:hover {
@@ -125,7 +125,23 @@
         }
         
         .target-item.closest {
-            border-left-color: #ffaa00;
+            border-left-color: #00ff00; /* Nejbližší = zelená */
+        }
+        
+        .target-item.very-close {
+            border-left-color: #00ff00; /* Velmi blízko = zelená */
+        }
+        
+        .target-item.close {
+            border-left-color: #88ff00; /* Blízko = světle zelená */
+        }
+        
+        .target-item.medium {
+            border-left-color: #ffaa00; /* Středně = oranžová */
+        }
+        
+        .target-item.far {
+            border-left-color: #ff0000; /* Daleko = červená */
         }
         
         .target-name {
@@ -153,6 +169,19 @@
         .clear-selection:hover {
             background-color: rgba(255,68,68,1);
         }
+        
+        .audio-info {
+            position: fixed;
+            bottom: 120px;
+            left: 10px;
+            background-color: rgba(0,100,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -162,6 +191,10 @@
     
     <div class="geolocation-info" id="geoInfo">
         Získávání polohy...
+    </div>
+    
+    <div class="audio-info" id="audioInfo">
+        🎵 Audio přehrává...
     </div>
     
     <!-- Zobrazení vzdálenosti k vybranému nebo nejbližšímu bodu -->
@@ -194,8 +227,11 @@
             <img id="marker1" src="/assets/andele/img/andel_1.png">
             <img id="marker2" src="/assets/andele/img/andel_2.png">
             <img id="marker3" src="/assets/andele/img/andel_3.png">
-
             
+            <!-- Audio soubory -->
+            <audio id="audio1" src="/assets/andele/audio/andel_1.mp3" preload="auto"></audio>
+            <audio id="audio2" src="/assets/andele/audio/andel_2.mp3" preload="auto"></audio>
+            <audio id="audio3" src="/assets/andele/audio/andel_3.mp3" preload="auto"></audio>
         </a-assets>
 
         <!-- Kamera s geolokací -->
@@ -207,24 +243,50 @@
         </a-camera>
 
         <!-- AR objekty na konkrétních GPS souřadnicích -->
-    
-
         <!-- Angel_1 -->
         <a-entity 
             gps-entity-place="latitude: 49.0091667; longitude: 17.1286111"
             data-marker-id="andel_1"
+            data-audio-id="audio1"
             class="ar-object"
             visible="false">
-            <!-- Debugovací kostka - vždy viditelná -->
-            <a-box 
-                position="0 1 0" 
-                scale="1 1 1" 
-                color="red"
-                material="opacity: 0.8">
-            </a-box>
             
             <a-plane 
                 src="#marker1" 
+                position="0 3 0" 
+                scale="4 5 1" 
+                rotation="0 130 0"
+                material="transparent: true; alphaTest: 0.1; side: double">
+            </a-plane>
+        </a-entity>
+
+        <!-- Angel_2 -->
+        <a-entity 
+             gps-entity-place="latitude: 49.0907222; longitude: 17.1329444"
+                data-marker-id="andel_2"
+                data-audio-id="audio2"
+                class="ar-object"
+                visible="false">
+            
+            <a-plane 
+                src="#marker2" 
+                position="0 3 0" 
+                scale="4 5 1" 
+                rotation="0 130 0"
+                material="transparent: true; alphaTest: 0.1; side: double">
+            </a-plane>
+        </a-entity>
+
+        <!-- Angel_3 -->
+        <a-entity 
+             gps-entity-place="latitude: 48.9814167; longitude: 17.1526667"
+               data-marker-id="andel_3"
+               data-audio-id="audio3"
+               class="ar-object"
+               visible="false">
+            
+            <a-plane 
+                src="#marker3" 
                 position="0 3 0" 
                 scale="4 5 1" 
                 rotation="0 130 0"
@@ -239,8 +301,11 @@
         let userPosition = null;
         const PROXIMITY_THRESHOLD = 50; // metry - vzdálenost pro aktivaci gamifikace
         const AR_VISIBILITY_THRESHOLD = 20; // metry - vzdálenost pro zobrazení AR objektu
+        const AUDIO_THRESHOLD = 15; // metry - vzdálenost pro spuštění audio (můžete změnit)
         let arObjectsVisible = false;
         let selectedTargetId = null; // ID vybraného cíle
+        let currentlyPlayingAudio = null; // Aktuálně přehrávané audio
+        let audioPlayingForMarker = null; // ID markeru pro který se audio přehrává
         
         // Definice cílových bodů
         const markers = [
@@ -249,23 +314,78 @@
                 lat: 49.0091667,
                 lng: 17.1286111,
                 name: "Anděl",
-                description: "nebeský Anděl"
-            },
-             { 
-                id: "andel_2", 
-                lat: 49.0091667,
-                lng: 17.1286111,
-                name: "Anděl_2",
-                description: "nebeský Anděl 2"
+                description: "nebeský Anděl",
+                audioId: "audio1"
             },
             { 
-                id: "andel_3", 
-                lat: 49.0091667,
-                lng: 17.1286111,
-                name: "Anděl_3",
-                description: "nebeský Anděl 3"
+                 id: "andel_2", 
+                 lat: 49.0907222,  
+                 lng: 17.1329444,  
+                 name: "Anděl_2",
+                 description: "nebeský Anděl 2",
+                 audioId: "audio2"
+            },
+            { 
+                 id: "andel_3", 
+                 lat: 48.9814167,  
+                 lng: 17.1526667,  
+                 name: "Anděl_3",
+                 description: "nebeský Anděl 3",
+                 audioId: "audio3"
             }
         ];
+
+        // Funkce pro spuštění audio
+        function playAudio(markerId) {
+            const marker = markers.find(m => m.id === markerId);
+            if (!marker) return;
+            
+            // Pokud už hraje audio pro tento marker, neděláme nic
+            if (audioPlayingForMarker === markerId) return;
+            
+            // Zastavíme aktuální audio pokud hraje
+            stopCurrentAudio();
+            
+            const audioElement = document.getElementById(marker.audioId);
+            if (audioElement) {
+                console.log(`Playing audio for marker: ${markerId}`);
+                
+                audioElement.currentTime = 0; // Restart od začátku
+                audioElement.play().then(() => {
+                    currentlyPlayingAudio = audioElement;
+                    audioPlayingForMarker = markerId;
+                    
+                    // Zobrazíme info o přehrávání
+                    const audioInfo = document.getElementById('audioInfo');
+                    audioInfo.textContent = `🎵 ${marker.name} - Audio přehrává...`;
+                    audioInfo.style.display = 'block';
+                    
+                    // Event listener pro konec audio
+                    audioElement.onended = () => {
+                        console.log(`Audio ended for marker: ${markerId}`);
+                        stopCurrentAudio();
+                    };
+                    
+                }).catch(error => {
+                    console.error(`Error playing audio for ${markerId}:`, error);
+                });
+            }
+        }
+
+        // Funkce pro zastavení aktuálního audio
+        function stopCurrentAudio() {
+            if (currentlyPlayingAudio) {
+                currentlyPlayingAudio.pause();
+                currentlyPlayingAudio.currentTime = 0;
+                currentlyPlayingAudio.onended = null;
+                currentlyPlayingAudio = null;
+                audioPlayingForMarker = null;
+                
+                // Skryjeme audio info
+                document.getElementById('audioInfo').style.display = 'none';
+                console.log("Audio stopped");
+            }
+        }
 
         // Funkce pro formátování vzdálenosti
         function formatDistance(distance) {
@@ -333,24 +453,38 @@
             if (targetMarker) {
                 const distance = Math.round(targetMarker.distance);
                 const prefix = selectedTargetId ? '🎯' : '📍';
-                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}<br><strong>${distance}m</strong>`;
                 
-                // Změna barvy podle vzdálenosti
+                // Přidáme audio indikátor pokud je v dosahu
+                let audioIndicator = '';
+                if (distance <= AUDIO_THRESHOLD) {
+                    audioIndicator = ' 🎵';
+                }
+                
+                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${audioIndicator}<br><strong>${distance}m</strong>`;
+                
+                // Změna barvy podle vzdálenosti - OBRÁCENÁ LOGIKA (zelená = blízko, červená = daleko)
                 if (distance <= AR_VISIBILITY_THRESHOLD) {
-                    distanceInfo.style.borderColor = '#ff0000';
-                    distanceInfo.style.backgroundColor = 'rgba(255,0,0,0.8)';
+                    // Velmi blízko - jasně zelená
+                    distanceInfo.style.borderColor = '#00ff00';
+                    distanceInfo.style.backgroundColor = 'rgba(0,255,0,0.8)';
                 } else if (distance <= PROXIMITY_THRESHOLD) {
-                    distanceInfo.style.borderColor = '#ff4444';
-                    distanceInfo.style.backgroundColor = 'rgba(255,68,68,0.8)';
+                    // Blízko - světle zelená/žlutá
+                    distanceInfo.style.borderColor = '#88ff00';
+                    distanceInfo.style.backgroundColor = 'rgba(136,255,0,0.8)';
                 } else if (distance <= 100) {
+                    // Středně daleko - oranžová
                     distanceInfo.style.borderColor = '#ffaa00';
                     distanceInfo.style.backgroundColor = 'rgba(255,170,0,0.8)';
                 } else {
-                    distanceInfo.style.borderColor = '#00ff00';
-                    distanceInfo.style.backgroundColor = 'rgba(0,0,0,0.8)';
+                    // Daleko - červená
+                    distanceInfo.style.borderColor = '#ff0000';
+                    distanceInfo.style.backgroundColor = 'rgba(255,0,0,0.8)';
                 }
             } else {
                 distanceInfo.innerHTML = '📍 Hledám nejbližší bod...';
+                // Default stav - neutrální
+                distanceInfo.style.borderColor = '#ffffff';
+                distanceInfo.style.backgroundColor = 'rgba(0,0,0,0.8)';
             }
         }
 
@@ -375,13 +509,36 @@
                 const isSelected = marker.id === selectedTargetId;
                 
                 let cssClass = 'target-item';
-                if (isSelected) cssClass += ' selected';
-                else if (isClosest) cssClass += ' closest';
+                if (isSelected) {
+                    cssClass += ' selected';
+                } else {
+                    // Přidáme třídy podle vzdálenosti - OBRÁCENÁ LOGIKA (zelená = blízko)
+                    if (marker.distance <= AR_VISIBILITY_THRESHOLD) {
+                        cssClass += ' very-close'; // Velmi blízko - zelená
+                    } else if (marker.distance <= PROXIMITY_THRESHOLD) {
+                        cssClass += ' close'; // Blízko - světle zelená
+                    } else if (marker.distance <= 100) {
+                        cssClass += ' medium'; // Středně - oranžová
+                    } else {
+                        cssClass += ' far'; // Daleko - červená
+                    }
+                    
+                    // Nejbližší marker má vždy zelenou pokud není vybraný
+                    if (isClosest && !isSelected) {
+                        cssClass = 'target-item closest';
+                    }
+                }
+                
+                // Audio indikátor v navigaci
+                let audioIndicator = '';
+                if (marker.distance <= AUDIO_THRESHOLD) {
+                    audioIndicator = ' 🎵';
+                }
                 
                 html += `
                     <div class="${cssClass}" data-target-id="${marker.id}">
                         <div class="target-name">
-                            ${marker.name}
+                            ${marker.name}${audioIndicator}
                             ${isSelected ? ' 🎯' : ''}
                         </div>
                         <div class="target-details">
@@ -461,6 +618,8 @@
         function checkProximityToMarkers() {
             if (!userPosition) return;
             
+            let shouldStopAudio = true;
+            
             markers.forEach(marker => {
                 const distance = calculateDistance(
                     userPosition.lat, userPosition.lng,
@@ -469,25 +628,19 @@
                 
                 const arEntity = document.querySelector(`[data-marker-id="${marker.id}"]`);
                 if (arEntity) {
-                    // Zobrazení AR objektu pouze ve vzdálenosti 5m nebo méně
+                    // Zobrazení AR objektu
                     if (distance <= AR_VISIBILITY_THRESHOLD) {
                         arEntity.setAttribute('visible', 'true');
                         console.log(`AR object visible for ${marker.id} at distance ${distance.toFixed(2)}m`);
-                        
-                        // Extra debug log pro Adriánku
-                        if (marker.id === 'hadanka_adrianka') {
-                            console.log(`ADRIANKA DEBUG: Distance ${distance.toFixed(2)}m, AR entity:`, arEntity);
-                            console.log(`ADRIANKA DEBUG: Entity visible attribute:`, arEntity.getAttribute('visible'));
-                        }
-                        
                         arObjectsVisible = true;
                     } else {
                         arEntity.setAttribute('visible', 'false');
-                        
-                        // Debug log i při skrývání
-                        if (marker.id === 'hadanka_adrianka') {
-                            console.log(`ADRIANKA DEBUG: Too far (${distance.toFixed(2)}m), hiding AR object`);
-                        }
+                    }
+                    
+                    // Audio přehrávání podle threshold
+                    if (distance <= AUDIO_THRESHOLD) {
+                        playAudio(marker.id);
+                        shouldStopAudio = false;
                     }
                 }
                 
@@ -496,6 +649,11 @@
                     activateMarker(marker.id);
                 }
             });
+            
+            // Zastavíme audio pokud nejsme blízko žádného markeru
+            if (shouldStopAudio && currentlyPlayingAudio) {
+                stopCurrentAudio();
+            }
         }
 
         // Aktivace markeru (gamifikace)
@@ -565,7 +723,7 @@
 
         // Inicializace
         window.addEventListener('load', () => {
-            console.log("Starting geolocation AR scene...");
+            console.log("Starting geolocation AR scene with audio...");
             
             setupEventListeners();
             getCurrentPosition();
@@ -582,11 +740,13 @@
             if (!currentExpositionId || currentExpositionId === 'unknown') {
                 console.error("GAMIFICATION ERROR: Cannot determine exposition ID");
             }
+            
+            console.log(`Audio threshold set to: ${AUDIO_THRESHOLD} meters`);
         });
 
         // A-Frame scéna je připravena
         document.querySelector('a-scene').addEventListener('loaded', () => {
-            console.log("A-Frame scene loaded for geolocation AR");
+            console.log("A-Frame scene loaded for geolocation AR with audio");
         });
     </script>
 </body>
