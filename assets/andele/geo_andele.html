@@ -229,9 +229,9 @@
             <img id="marker3" src="/assets/andele/img/andel_1.png">
             
             <!-- Audio soubory -->
-            <audio id="audio1" src="/assets/andele/audio/andel_1.mp3" preload="auto"></audio>
-            <audio id="audio2" src="/assets/andele/audio/andel_2.mp3" preload="auto"></audio>
-            <audio id="audio3" src="/assets/andele/audio/andel_3.mp3" preload="auto"></audio>
+            <audio id="audio1" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
+            <audio id="audio2" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
+            <audio id="audio3" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
         </a-assets>
 
         <!-- Kamera s geolokací -->
@@ -301,7 +301,7 @@
         let userPosition = null;
         const PROXIMITY_THRESHOLD = 50; // metry - vzdálenost pro aktivaci gamifikace
         const AR_VISIBILITY_THRESHOLD = 20; // metry - vzdálenost pro zobrazení AR objektu
-        const AUDIO_THRESHOLD = 15; // metry - vzdálenost pro spuštění audio (můžete změnit)
+        const AUDIO_THRESHOLD = 10; // metry - vzdálenost pro spuštění audio (můžete změnit)
         let arObjectsVisible = false;
         let selectedTargetId = null; // ID vybraného cíle
         let currentlyPlayingAudio = null; // Aktuálně přehrávané audio
