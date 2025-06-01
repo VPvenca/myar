@@ -29,8 +29,8 @@
 }
 
 .star-image {
-    width: 40px;  /* Nebo jakákoliv jiná velikost */
-    height: 40px; /* Nebo jakákoliv jiná velikost */
+    width: 30px;  /* Nebo jakákoliv jiná velikost */
+    height: 30px; /* Nebo jakákoliv jiná velikost */
     /*vertical-align: middle; /* Pro lepší zarovnání s textem, pokud je vedle něj */
 }
 
