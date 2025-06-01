@@ -151,8 +151,8 @@ const KYJOV_EXPOSITION_CONFIG = {
 
     // === KATEGORIE ===
     category: {
-        name: "Muzeum Kyjovska",
-        description: "Úspěchy v Muzeu Kyjovska",
+        name: "Muzeum Kyjov",
+        description: "Úspěchy v Muzeu Kyjov",
         icon: "🏛️",
         color: "#28a745"
     },
