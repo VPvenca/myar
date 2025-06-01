@@ -78,6 +78,7 @@
 .back-button {
     background-color: #6c757d; /* Šedá barva pozadí */
     margin-top: 5px;           /* Horní okraj - může být upraven níže v kontextu */
+    width: 220px; /* Zmenšení z původních 280px na ?px */
 }
 
 .back-button:hover {
