@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <!-- Důležité: gamification-config.js musí být načten před gamification.js -->
-    <script src="/gamification-config.js"></script>
-    <script src="/gamification.js"></script>
     <style>
         #startButton {
             position: absolute;
@@ -23,7 +20,6 @@
             cursor: pointer;
             z-index: 1000;
         }
-         /* Styly pro tlačítko Zpět v AR scéně - doporučuji přesunout do CSS souboru */
         .back-button-ar {
              position: absolute;
              top: 10px;
@@ -36,14 +32,38 @@
              border-radius: 3px;
              font-size: 14px;
         }
+        .gamification-debug {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            z-index: 1000;
+            max-width: 300px;
+            display: block;
+        }
     </style>
 </head>
 <body>
     <button id="startButton">Spustit AR</button>
 
-<a href="/assets/kyjov/kyjov.html" class="back-button-ar">
-    Zpět do Menu
-</a>
+    <a href="/assets/kyjov/kyjov.html" class="back-button-ar">
+        Zpět do Menu
+    </a>
+
+    <!-- Debug panel pro gamifikaci -->
+    <div id="gamificationDebug" class="gamification-debug">
+        <h4>🐛 Gamification Debug</h4>
+        <div>Scene ID: <span id="debugSceneId">-</span></div>
+        <div>Exposition ID: <span id="debugExpoId">-</span></div>
+        <div>Config loaded: <span id="debugConfigLoaded">❌</span></div>
+        <div>Total scenes: <span id="debugTotalScenes">0</span></div>
+        <div>Total achievements: <span id="debugTotalAchievements">0</span></div>
+        <div>Markers activated: <span id="debugMarkersActivated">0</span></div>
+    </div>
 
     <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/terce.mind;
         uiLoading: yes; uiError: yes;
@@ -63,10 +83,8 @@
         <audio id="audio4" src="/assets/kyjov/mp3/terc_3.mp3" preload="auto"></audio>
          </a-assets>
 
-
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- KROK 2: Přidání data-marker-id -->
         <a-entity mindar-image-target="targetIndex: 0" data-marker-id="terc_selim">
             <a-video id="videoEntity1" src="#video1" position="0 0 0" scale="1 1 1" autoplay="false"></a-video>
         </a-entity>
@@ -84,9 +102,83 @@
         </a-entity>
     </a-scene>
 
+    <!-- GAMIFIKAČNÍ SKRIPTY - v správném pořadí -->
+    <script src="/gamification-config.js"></script>
+    <script src="/game/kyjov-config.js"></script>
+    <script src="/gamification.js"></script>
+
     <script>
         let audioContext;
         let audioBuffer1, audioBuffer2, audioBuffer3, audioBuffer4;
+        let audioSource1 = null, audioSource2 = null, audioSource3 = null, audioSource4 = null;
+
+        // === GAMIFIKACE SETUP ===
+        let currentSceneId;
+        let currentExpositionId;
+        let sceneConfigValid = false;
+        let gamificationInitialized = false;
+
+        // Funkce pro inicializaci gamifikace s debug informacemi
+        function initializeGamification() {
+            console.log("🎮 Initializing gamification system...");
+            
+            // Zavolej inicializaci expozičního systému
+            if (typeof initializeExpositions === 'function') {
+                initializeExpositions();
+                console.log("✅ Exposition system initialized");
+            } else {
+                console.error("❌ initializeExpositions function not found");
+            }
+
+            // Získej současné IDs
+            currentSceneId = getCurrentSceneId();
+            currentExpositionId = getCurrentExpositionId();
+
+            console.log("📍 Current scene:", currentSceneId);
+            console.log("📍 Current exposition:", currentExpositionId);
+
+            // Aktualizuj debug panel
+            updateDebugPanel();
+
+            // Ověř konfiguraci
+            if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
+                console.error("❌ SCENE_CONFIG not found for:", currentSceneId);
+                return false;
+            }
+
+            if (!currentExpositionId || currentExpositionId === 'unknown') {
+                console.error("❌ Cannot determine current exposition ID");
+                return false;
+            }
+
+            sceneConfigValid = true;
+            gamificationInitialized = true;
+            console.log("✅ Gamification setup OK");
+            
+            updateDebugPanel();
+            return true;
+        }
+
+        // Funkce pro aktualizaci debug panelu
+        function updateDebugPanel() {
+            document.getElementById('debugSceneId').textContent = currentSceneId || '-';
+            document.getElementById('debugExpoId').textContent = currentExpositionId || '-';
+            document.getElementById('debugConfigLoaded').textContent = sceneConfigValid ? '✅' : '❌';
+            document.getElementById('debugTotalScenes').textContent = SCENE_CONFIG ? Object.keys(SCENE_CONFIG).length : 0;
+            document.getElementById('debugTotalAchievements').textContent = ACHIEVEMENTS_CONFIG ? Object.keys(ACHIEVEMENTS_CONFIG).length : 0;
+            
+            // Počet aktivovaných markerů pro tuto scénu
+            if (sceneConfigValid && typeof getGamificationData === 'function') {
+                try {
+                    const expoData = getGamificationData(currentExpositionId);
+                    const sceneData = expoData[currentSceneId] || {};
+                    const activatedCount = Object.keys(sceneData).filter(key => sceneData[key] === true).length;
+                    document.getElementById('debugMarkersActivated').textContent = activatedCount;
+                } catch (e) {
+                    document.getElementById('debugMarkersActivated').textContent = 'Error';
+                }
+            }
+        }
 
         async function loadAudio(url) {
             const response = await fetch(url);
@@ -94,7 +186,31 @@
             return await audioContext.decodeAudioData(arrayBuffer);
         }
 
+        function playSound(buffer) {
+            if (audioContext && buffer) {
+                const source = audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.connect(audioContext.destination);
+                source.start();
+                return source;
+            }
+            return null;
+        }
+
+        // Čekáme na načtení všech skriptů a pak inicializujeme gamifikaci
+        window.addEventListener('load', () => {
+            console.log("📄 Page loaded, waiting for scripts...");
+            
+            // Počkáme trochu na načtení všech skriptů
+            setTimeout(() => {
+                console.log("🚀 Attempting gamification initialization...");
+                initializeGamification();
+            }, 500);
+        });
+
         document.getElementById('startButton').addEventListener('click', async function() {
+            console.log("🎬 Starting AR...");
+            
             const video1 = document.getElementById('video1');
             const video2 = document.getElementById('video2');
             const video3 = document.getElementById('video3');
@@ -102,7 +218,6 @@
 
             video1.muted = false; video2.muted = false; video3.muted = false; video4.muted = false;
 
-            // Přidáno .catch() pro ošetření chyb při přehrávání
             video1.play().catch(e => console.warn("Video 1 play failed:", e));
             video2.play().catch(e => console.warn("Video 2 play failed:", e));
             video3.play().catch(e => console.warn("Video 3 play failed:", e));
@@ -121,193 +236,63 @@
             }
         });
 
-        const target1 = document.querySelector('[mindar-image-target="targetIndex: 0"]');
-        const target2 = document.querySelector('[mindar-image-target="targetIndex: 1"]');
-        const target3 = document.querySelector('[mindar-image-target="targetIndex: 2"]');
-        const target4 = document.querySelector('[mindar-image-target="targetIndex: 3"]');
-        const videoEntity1 = document.getElementById('videoEntity1');
-        const videoEntity2 = document.getElementById('videoEntity2');
-        const videoEntity3 = document.getElementById('videoEntity3');
-        const videoEntity4 = document.getElementById('videoEntity4');
+        // === TARGET EVENT LISTENERS ===
+        const targets = [
+            { element: document.querySelector('[mindar-image-target="targetIndex: 0"]'), videoEntity: document.getElementById('videoEntity1'), audioBuffer: () => audioBuffer1, audioSource: 'audioSource1' },
+            { element: document.querySelector('[mindar-image-target="targetIndex: 1"]'), videoEntity: document.getElementById('videoEntity2'), audioBuffer: () => audioBuffer2, audioSource: 'audioSource2' },
+            { element: document.querySelector('[mindar-image-target="targetIndex: 2"]'), videoEntity: document.getElementById('videoEntity3'), audioBuffer: () => audioBuffer3, audioSource: 'audioSource3' },
+            { element: document.querySelector('[mindar-image-target="targetIndex: 3"]'), videoEntity: document.getElementById('videoEntity4'), audioBuffer: () => audioBuffer4, audioSource: 'audioSource4' }
+        ];
 
-        function playSound(buffer) {
-            if (audioContext && buffer) { // Přidána kontrola existence audioContext
-                const source = audioContext.createBufferSource();
-                source.buffer = buffer;
-                source.connect(audioContext.destination);
-                source.start();
-                return source;
+        targets.forEach((target, index) => {
+            if (target.element) {
+                const markerId = target.element.dataset.markerId;
+                if (!markerId) {
+                    console.warn(`Gamification: Target ${index + 1} is missing 'data-marker-id'.`);
+                    return;
+                }
+
+                target.element.addEventListener('targetFound', () => {
+                    console.log(`🎯 Target ${index + 1} (${markerId}) found!`);
+                    
+                    if (target.videoEntity.components.material?.material.map?.image) {
+                        target.videoEntity.components.material.material.map.image.play().catch(e => console.warn(`VideoEntity${index + 1} play failed`, e));
+                    }
+                    
+                    if (audioContext && target.audioBuffer() && !window[target.audioSource]) {
+                        window[target.audioSource] = playSound(target.audioBuffer());
+                    }
+
+                    // Gamifikace
+                    if (gamificationInitialized && markerId && typeof recordMarkerActivation === 'function') {
+                        console.log("🏆 Recording activation for marker:", markerId);
+                        recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
+                        updateDebugPanel();
+                    } else {
+                        console.error("❌ Cannot record marker activation:", {
+                            gamificationInitialized,
+                            markerId,
+                            hasFunction: typeof recordMarkerActivation === 'function'
+                        });
+                    }
+                });
+
+                target.element.addEventListener('targetLost', () => {
+                    console.log(`Target ${index + 1} lost!`);
+                    
+                    if (target.videoEntity.components.material?.material.map?.image) {
+                        target.videoEntity.components.material.material.map.image.pause();
+                    }
+                    
+                    if (window[target.audioSource]) {
+                        window[target.audioSource].stop();
+                        window[target.audioSource] = null;
+                    }
+                });
+            } else {
+                console.warn(`Target ${index + 1} (targetIndex: ${index}) not found in DOM.`);
             }
-            return null;
-        }
-
-        let audioSource1 = null, audioSource2 = null, audioSource3 = null, audioSource4 = null;
-
-        // KROK 3: Integrace gamifikační logiky
-        const currentSceneId = getCurrentSceneId();
-        const currentExpositionId = getCurrentExpositionId(); // Funkce z gamification-config.js
-
-        let sceneConfigValid = false;
-
-        if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
-            console.error("GAMIFICATION ERROR: Scene config not found for this page:", currentSceneId, ". Make sure gamification-config.js is loaded and the path is correct in SCENE_CONFIG.");
-        } else {
-            sceneConfigValid = true;
-        }
-
-         if (!currentExpositionId || currentExpositionId === 'unknown') {
-             console.error("GAMIFICATION ERROR: Cannot determine current exposition ID. Marker activations will not be recorded correctly.");
-             sceneConfigValid = false; // Deaktivujeme gamifikaci, pokud nevíme expozici
-         }
-
-
-        // === Listenery pro Target 1 ===
-        if (target1) {
-            const marker1Id = target1.dataset.markerId;
-            if (!marker1Id) {
-                console.warn("Gamification: Target 1 is missing 'data-marker-id'.");
-            }
-
-            target1.addEventListener('targetFound', () => {
-                console.log("Target 1 found!");
-                if (videoEntity1.components.material?.material.map?.image) {
-                    videoEntity1.components.material.material.map.image.play().catch(e => console.warn("VideoEntity1 play failed", e));
-                }
-                if (audioContext && audioBuffer1 && !audioSource1) { // Kontrola audioContext
-                    audioSource1 = playSound(audioBuffer1);
-                }
-                // Gamifikace - *** ZDE JE OPRAVA ***
-                if (sceneConfigValid && marker1Id) {
-                    console.log("Recording activation for marker:", marker1Id);
-                    // !!! DŮLEŽITÉ: Musí předávat 3 argumenty: expositionId, sceneId, markerId
-                    recordMarkerActivation(currentExpositionId, currentSceneId, marker1Id);
-                }
-            });
-
-            target1.addEventListener('targetLost', () => {
-                console.log("Target 1 lost!");
-                if (videoEntity1.components.material?.material.map?.image) {
-                    videoEntity1.components.material.material.map.image.pause();
-                }
-                if (audioSource1) {
-                    audioSource1.stop();
-                    audioSource1 = null;
-                }
-            });
-        } else {
-            console.warn("Target 1 (targetIndex: 0) not found in DOM.");
-        }
-
-        // === Listenery pro Target 2 ===
-        if (target2) {
-            const marker2Id = target2.dataset.markerId;
-            if (!marker2Id) {
-                console.warn("Gamification: Target 2 is missing 'data-marker-id'.");
-            }
-
-            target2.addEventListener('targetFound', () => {
-                console.log("Target 2 found!");
-                if (videoEntity2.components.material?.material.map?.image) {
-                    videoEntity2.components.material.material.map.image.play().catch(e => console.warn("VideoEntity2 play failed", e));
-                }
-                if (audioContext && audioBuffer2 && !audioSource2) { // Kontrola audioContext
-                    audioSource2 = playSound(audioBuffer2);
-                }
-                // Gamifikace - *** ZDE JE OPRAVA ***
-                if (sceneConfigValid && marker2Id) {
-                    console.log("Recording activation for marker:", marker2Id);
-                    // !!! DŮLEŽITÉ: Musí předávat 3 argumenty: expositionId, sceneId, markerId
-                    recordMarkerActivation(currentExpositionId, currentSceneId, marker2Id);
-                }
-            });
-
-            target2.addEventListener('targetLost', () => {
-                console.log("Target 2 lost!");
-                if (videoEntity2.components.material?.material.map?.image) {
-                    videoEntity2.components.material.material.map.image.pause();
-                }
-                if (audioSource2) {
-                    audioSource2.stop();
-                    audioSource2 = null;
-                }
-            });
-        } else {
-            console.warn("Target 2 (targetIndex: 1) not found in DOM.");
-        }
-
-        // === Listenery pro Target 3 ===
-        if (target3) {
-            const marker3Id = target3.dataset.markerId;
-            if (!marker3Id) {
-                console.warn("Gamification: Target 3 is missing 'data-marker-id'.");
-            }
-
-            target3.addEventListener('targetFound', () => {
-                console.log("Target 3 found!");
-                if (videoEntity3.components.material?.material.map?.image) {
-                    videoEntity3.components.material.material.map.image.play().catch(e => console.warn("VideoEntity3 play failed", e));
-                }
-                if (audioContext && audioBuffer3 && !audioSource3) { // Kontrola audioContext
-                    audioSource3 = playSound(audioBuffer3);
-                }
-                // Gamifikace - *** ZDE JE OPRAVA ***
-                if (sceneConfigValid && marker3Id) {
-                    console.log("Recording activation for marker:", marker3Id);
-                     // !!! DŮLEŽITÉ: Musí předávat 3 argumenty: expositionId, sceneId, markerId
-                    recordMarkerActivation(currentExpositionId, currentSceneId, marker3Id);
-                }
-            });
-
-            target3.addEventListener('targetLost', () => {
-                console.log("Target 3 lost!");
-                if (videoEntity3.components.material?.material.map?.image) {
-                    videoEntity3.components.material.material.map.image.pause();
-                }
-                if (audioSource3) {
-                    audioSource3.stop();
-                    audioSource3 = null;
-                }
-            });
-        } else {
-            console.warn("Target 3 (targetIndex: 2) not found in DOM.");
-        }
-
-        // === Listenery pro Target 4 ===
-        if (target4) {
-            const marker4Id = target4.dataset.markerId;
-            if (!marker4Id) {
-                console.warn("Gamification: Target 4 is missing 'data-marker-id'.");
-            }
-
-            target4.addEventListener('targetFound', () => {
-                console.log("Target 4 found!");
-                if (videoEntity4.components.material?.material.map?.image) {
-                    videoEntity4.components.material.material.map.image.play().catch(e => console.warn("VideoEntity4 play failed", e));
-                }
-                if (audioContext && audioBuffer4 && !audioSource4) { // Kontrola audioContext
-                    audioSource4 = playSound(audioBuffer4);
-                }
-                // Gamifikace - *** ZDE JE OPRAVA ***
-                if (sceneConfigValid && marker4Id) {
-                    console.log("Recording activation for marker:", marker4Id);
-                    // !!! DŮLEŽITÉ: Musí předávat 3 argumenty: expositionId, sceneId, markerId
-                    recordMarkerActivation(currentExpositionId, currentSceneId, marker4Id);
-                }
-            });
-
-            target4.addEventListener('targetLost', () => {
-                console.log("Target 4 lost!");
-                if (videoEntity4.components.material?.material.map?.image) {
-                    videoEntity4.components.material.material.map.image.pause();
-                }
-                if (audioSource4) {
-                    audioSource4.stop();
-                    audioSource4 = null;
-                }
-            });
-        } else {
-            console.warn("Target 4 (targetIndex: 3) not found in DOM.");
-        }
+        });
 
     </script>
 </body>

@@ -7,11 +7,8 @@
     <!-- A-Frame a MindAR knihovny -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <!-- Důležité: gamification-config.js musí být načten před gamification.js -->
-    <script src="/gamification-config.js"></script>
-    <script src="/gamification.js"></script>
+    
     <style>
-         /* Styly pro tlačítko Zpět v AR scéně - doporučuji přesunout do CSS souboru */
         .back-button-ar {
              position: absolute;
              top: 10px;
@@ -24,12 +21,37 @@
              border-radius: 3px;
              font-size: 14px;
         }
+        .gamification-debug {
+            position: absolute;
+            top: 50px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            z-index: 1000;
+            max-width: 300px;
+            display: block;
+        }
     </style>
 </head>
 <body>
     <a href="/assets/kyjov/kyjov.html" class="back-button-ar">
     Zpět do Menu
 </a>
+
+    <!-- Debug panel pro gamifikaci -->
+    <div id="gamificationDebug" class="gamification-debug">
+        <h4>🐛 Gamification Debug</h4>
+        <div>Scene ID: <span id="debugSceneId">-</span></div>
+        <div>Exposition ID: <span id="debugExpoId">-</span></div>
+        <div>Config loaded: <span id="debugConfigLoaded">❌</span></div>
+        <div>Total scenes: <span id="debugTotalScenes">0</span></div>
+        <div>Total achievements: <span id="debugTotalAchievements">0</span></div>
+        <div>Markers activated: <span id="debugMarkersActivated">0</span></div>
+    </div>
+
     <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/hadanky.mind;
         uiLoading: yes; uiError: yes;
         renderer: {colorManagement: true};
@@ -66,69 +88,119 @@
              <!-- Zde byste mohli přidat a-gltf-model odkazující na #model3 -->
         </a-entity>
 
-
     </a-scene>
 
+    <!-- GAMIFIKAČNÍ SKRIPTY - v správném pořadí -->
+    <script src="/gamification-config.js"></script>
+    <script src="/game/kyjov-config.js"></script>
+    <script src="/gamification.js"></script>
+
     <script>
-    function enableCamera() {
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
-                .then(function(stream) {
-                    console.log("✅ Přístup k zadní kameře povolen!");
-                })
-                .catch(function(error) {
-                    console.error("❌ Chyba přístupu k zadní kameře: ", error);
-                });
-        } else {
-            console.error("❌ Tento prohlížeč nepodporuje přístup k médiím.");
-        }
-    }
+        // === GAMIFIKACE SETUP ===
+        let currentSceneId;
+        let currentExpositionId;
+        let sceneConfigValid = false;
+        let gamificationInitialized = false;
 
-    window.onload = function() {
-        enableCamera();
-
-        document.querySelector('a-scene').addEventListener('loaded', () => {
-             console.log("A-Scene loaded, attempting to start MindAR...");
-             const mindarSystem = document.querySelector('[mindar-image]').components['mindar-image-system'];
-             // Pokud MindAR startuje automaticky, tento řádek může způsobit chybu nebo dvojí spuštění.
-             // Zkontrolujte konzoli a případně řádek níže odstraňte nebo zakomentujte.
-             // mindarSystem.start();
-             console.log("MindAR system start logic executed.");
-        });
-    };
-         // KROK 3: Integrace gamifikační logiky
-        document.addEventListener('DOMContentLoaded', () => {
-            // Pokud máte tlačítko startButton, jeho listener by byl zde:
-            /*
-            const startButton = document.getElementById('startButton');
-            if (startButton) {
-                startButton.addEventListener('click', () => {
-                    // Kód pro spuštění AR, skrytí tlačítka atd.
-                    // Například: document.querySelector('a-scene').components['mindar-image-system'].start();
-                    // startButton.style.display = 'none';
-                });
-            }
-            */
-
-            const currentSceneId = getCurrentSceneId();
-            const currentExpositionId = getCurrentExpositionId(); // Funkce z gamification-config.js
-
-
-            let sceneConfigValid = false;
-
-            if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
-                console.error("GAMIFICATION ERROR: Scene config not found for this page:", currentSceneId, ". Make sure gamification-config.js is loaded and the path is correct in SCENE_CONFIG.");
+        // Funkce pro inicializaci gamifikace s debug informacemi
+        function initializeGamification() {
+            console.log("🎮 Initializing gamification system...");
+            
+            // Zavolej inicializaci expozičního systému
+            if (typeof initializeExpositions === 'function') {
+                initializeExpositions();
+                console.log("✅ Exposition system initialized");
             } else {
-                sceneConfigValid = true;
-                console.log("Gamification config loaded successfully for scene:", currentSceneId, SCENE_CONFIG[currentSceneId]);
+                console.error("❌ initializeExpositions function not found");
             }
 
-             if (!currentExpositionId || currentExpositionId === 'unknown') {
-                 console.error("GAMIFICATION ERROR: Cannot determine current exposition ID. Marker activations will not be recorded correctly.");
-                 sceneConfigValid = false; // Deaktivujeme gamifikaci, pokud nevíme expozici
-             }
+            // Získej současné IDs
+            currentSceneId = getCurrentSceneId();
+            currentExpositionId = getCurrentExpositionId();
 
+            console.log("📍 Current scene:", currentSceneId);
+            console.log("📍 Current exposition:", currentExpositionId);
 
+            // Aktualizuj debug panel
+            updateDebugPanel();
+
+            // Ověř konfiguraci
+            if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
+                console.error("❌ SCENE_CONFIG not found for:", currentSceneId);
+                return false;
+            }
+
+            if (!currentExpositionId || currentExpositionId === 'unknown') {
+                console.error("❌ Cannot determine current exposition ID");
+                return false;
+            }
+
+            sceneConfigValid = true;
+            gamificationInitialized = true;
+            console.log("✅ Gamification setup OK");
+            
+            updateDebugPanel();
+            return true;
+        }
+
+        // Funkce pro aktualizaci debug panelu
+        function updateDebugPanel() {
+            document.getElementById('debugSceneId').textContent = currentSceneId || '-';
+            document.getElementById('debugExpoId').textContent = currentExpositionId || '-';
+            document.getElementById('debugConfigLoaded').textContent = sceneConfigValid ? '✅' : '❌';
+            document.getElementById('debugTotalScenes').textContent = SCENE_CONFIG ? Object.keys(SCENE_CONFIG).length : 0;
+            document.getElementById('debugTotalAchievements').textContent = ACHIEVEMENTS_CONFIG ? Object.keys(ACHIEVEMENTS_CONFIG).length : 0;
+            
+            // Počet aktivovaných markerů pro tuto scénu
+            if (sceneConfigValid && typeof getGamificationData === 'function') {
+                try {
+                    const expoData = getGamificationData(currentExpositionId);
+                    const sceneData = expoData[currentSceneId] || {};
+                    const activatedCount = Object.keys(sceneData).filter(key => sceneData[key] === true).length;
+                    document.getElementById('debugMarkersActivated').textContent = activatedCount;
+                } catch (e) {
+                    document.getElementById('debugMarkersActivated').textContent = 'Error';
+                }
+            }
+        }
+
+        function enableCamera() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } })
+                    .then(function(stream) {
+                        console.log("✅ Přístup k zadní kameře povolen!");
+                    })
+                    .catch(function(error) {
+                        console.error("❌ Chyba přístupu k zadní kameře: ", error);
+                    });
+            } else {
+                console.error("❌ Tento prohlížeč nepodporuje přístup k médiím.");
+            }
+        }
+
+        // Čekáme na načtení všech skriptů a pak inicializujeme gamifikaci
+        window.addEventListener('load', () => {
+            console.log("📄 Page loaded, waiting for scripts...");
+            
+            // Počkáme trochu na načtení všech skriptů
+            setTimeout(() => {
+                console.log("🚀 Attempting gamification initialization...");
+                initializeGamification();
+            }, 500);
+        });
+
+        window.onload = function() {
+            enableCamera();
+
+            document.querySelector('a-scene').addEventListener('loaded', () => {
+                 console.log("A-Scene loaded, attempting to start MindAR...");
+                 const mindarSystem = document.querySelector('[mindar-image]').components['mindar-image-system'];
+                 console.log("MindAR system start logic executed.");
+            });
+        };
+
+        // KROK 3: Integrace gamifikační logiky
+        document.addEventListener('DOMContentLoaded', () => {
             // Získání všech targetů
             const targetEntities = [
                 document.querySelector('[mindar-image-target="targetIndex: 0"]'),
@@ -145,14 +217,20 @@
                     }
 
                     targetEntity.addEventListener('targetFound', () => {
-                        console.log(`Target ${index + 1} (ID: ${markerId}) found!`);
+                        console.log(`🎯 Target ${index + 1} (ID: ${markerId}) found!`);
                         // Zde není žádné video ani audio k přehrání pro tento typ scény
 
-                        // Gamifikace - *** ZDE JE OPRAVA ***
-                        if (sceneConfigValid) { // sceneConfigValid už zahrnuje kontrolu markerId a expositionId
-                            console.log("Recording activation for marker:", markerId);
-                            // !!! DŮLEŽITÉ: Musí předávat 3 argumenty: expositionId, sceneId, markerId
+                        // Gamifikace
+                        if (gamificationInitialized && markerId && typeof recordMarkerActivation === 'function') {
+                            console.log("🏆 Recording activation for marker:", markerId);
                             recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
+                            updateDebugPanel();
+                        } else {
+                            console.error("❌ Cannot record marker activation:", {
+                                gamificationInitialized,
+                                markerId,
+                                hasFunction: typeof recordMarkerActivation === 'function'
+                            });
                         }
                     });
 
@@ -168,5 +246,4 @@
         });
     </script>
 </body>
-</html>
 </html>
