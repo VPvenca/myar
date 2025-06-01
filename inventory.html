@@ -40,11 +40,9 @@
             </div>
 
             <!-- Category Filter -->
-            <div class="category-filter">
+            <div class="category-filter" id="categoryFilter">
                 <button class="filter-btn active" data-category="all">Všechny</button>
-                <button class="filter-btn" data-category="global">🌍 Globální</button>
-                <button class="filter-btn" data-category="kyjov">🏛️ Kyjov</button>
-                <button class="filter-btn" data-category="secret">🔍 Skryté</button>
+                <!-- Kategorie se načtou dynamicky -->
             </div>
 
             <!-- Achievements Grid -->
@@ -84,26 +82,125 @@
         </div>
     </div>
 
-    <!-- Load scripts -->
+    <!-- Debug Panel (můžete skrýt v produkci) -->
+    <div id="debugPanel" style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 11px; max-width: 300px; z-index: 9999;">
+        <h4>🐛 Debug Info</h4>
+        <div>Gamification loaded: <span id="debugGamificationLoaded">❌</span></div>
+        <div>Expositions: <span id="debugExpositions">0</span></div>
+        <div>Total achievements: <span id="debugTotalAchievements">0</span></div>
+        <div>Categories: <span id="debugCategories">0</span></div>
+        <div>Unlocked: <span id="debugUnlocked">0</span></div>
+    </div>
+
+    <!-- Load scripts v správném pořadí -->
     <script src="gamification-config.js"></script>
+    <script src="game/kyjov-config.js"></script>
     <script src="gamification.js"></script>
 
     <script>
-        // Main inventory script
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeInventory();
-            setupFilterButtons();
-            setupModal();
-        });
+        // Globální proměnné
+        let gamificationInitialized = false;
+        let currentFilter = 'all';
 
+        // Debug funkce
+        function updateDebugInfo() {
+            document.getElementById('debugGamificationLoaded').textContent = gamificationInitialized ? '✅' : '❌';
+            document.getElementById('debugExpositions').textContent = Object.keys(EXPOSITION_REGISTRY || {}).length;
+            document.getElementById('debugTotalAchievements').textContent = Object.keys(ACHIEVEMENTS_CONFIG || {}).length;
+            document.getElementById('debugCategories').textContent = Object.keys(ACHIEVEMENT_CATEGORIES || {}).length;
+            
+            if (typeof getUnlockedAchievements === 'function') {
+                document.getElementById('debugUnlocked').textContent = getUnlockedAchievements().length;
+            }
+        }
+
+        // Funkce pro inicializaci gamifikačního systému
+        function initializeGamificationSystem() {
+            console.log("🎮 Initializing gamification system for inventory...");
+            
+            // Zavolej inicializaci expozičního systému
+            if (typeof initializeExpositions === 'function') {
+                initializeExpositions();
+                console.log("✅ Exposition system initialized");
+            } else {
+                console.error("❌ initializeExpositions function not found");
+                return false;
+            }
+
+            // Zkontroluj, zda je vše načteno
+            if (!ACHIEVEMENTS_CONFIG || Object.keys(ACHIEVEMENTS_CONFIG).length === 0) {
+                console.error("❌ ACHIEVEMENTS_CONFIG is empty or not loaded");
+                return false;
+            }
+
+            if (!ACHIEVEMENT_CATEGORIES || Object.keys(ACHIEVEMENT_CATEGORIES).length === 0) {
+                console.error("❌ ACHIEVEMENT_CATEGORIES is empty or not loaded");
+                return false;
+            }
+
+            console.log("✅ Gamification system ready");
+            console.log(`📊 Loaded ${Object.keys(ACHIEVEMENTS_CONFIG).length} achievements`);
+            console.log(`📋 Loaded ${Object.keys(ACHIEVEMENT_CATEGORIES).length} categories`);
+            
+            gamificationInitialized = true;
+            return true;
+        }
+
+        // Hlavní funkce pro inicializaci inventáře
         function initializeInventory() {
+            console.log("📦 Initializing inventory...");
+            
+            if (!gamificationInitialized) {
+                console.error("❌ Gamification system not initialized");
+                const grid = document.getElementById('achievements-grid');
+                grid.innerHTML = '<div class="no-achievements">❌ Chyba při načítání gamifikačního systému</div>';
+                return;
+            }
+
+            loadCategories();
             loadAchievements();
             updateProgressStats();
+            updateDebugInfo();
+        }
+
+        // Funkce pro načtení kategorií
+        function loadCategories() {
+            const filterContainer = document.getElementById('categoryFilter');
+            
+            // Odstraň existující kategorie (kromě "Všechny")
+            const existingButtons = filterContainer.querySelectorAll('[data-category]:not([data-category="all"])');
+            existingButtons.forEach(btn => btn.remove());
+
+            // Přidej kategorie
+            Object.keys(ACHIEVEMENT_CATEGORIES).forEach(categoryId => {
+                const category = ACHIEVEMENT_CATEGORIES[categoryId];
+                
+                // Spočítej kolik achievementů má tato kategorie
+                const categoryAchievements = Object.keys(ACHIEVEMENTS_CONFIG).filter(id => 
+                    ACHIEVEMENTS_CONFIG[id].category === categoryId
+                );
+                
+                if (categoryAchievements.length === 0) return; // Přeskoč prázdné kategorie
+
+                const button = document.createElement('button');
+                button.className = 'filter-btn';
+                button.dataset.category = categoryId;
+                button.innerHTML = `${category.icon || ''} ${category.name} (${categoryAchievements.length})`;
+                
+                filterContainer.appendChild(button);
+            });
         }
 
         function loadAchievements(filterCategory = 'all') {
+            console.log(`📋 Loading achievements for category: ${filterCategory}`);
+            
             const achievementsGrid = document.getElementById('achievements-grid');
             achievementsGrid.innerHTML = '';
+
+            if (!ACHIEVEMENTS_CONFIG || typeof getUnlockedAchievements !== 'function') {
+                achievementsGrid.innerHTML = '<div class="no-achievements">❌ Chyba při načítání achievementů</div>';
+                return;
+            }
 
             const unlockedAchievements = getUnlockedAchievements();
             const unlockedIds = unlockedAchievements.map(a => a.id);
@@ -118,6 +215,8 @@
                     ACHIEVEMENTS_CONFIG[id].category === filterCategory
                 );
             }
+
+            console.log(`📊 Found ${achievementsToShow.length} achievements for category ${filterCategory}`);
 
             // Sort achievements: unlocked first, then by rarity
             achievementsToShow.sort((a, b) => {
@@ -135,17 +234,31 @@
                 return aRarity - bRarity;
             });
 
+            let visibleAchievements = 0;
+
             achievementsToShow.forEach(achievementId => {
                 const achievement = ACHIEVEMENTS_CONFIG[achievementId];
                 const isUnlocked = unlockedIds.includes(achievementId);
                 const isHidden = achievement.hidden && !isUnlocked;
 
                 // Skip hidden achievements if not unlocked
-                if (isHidden) return;
+                if (isHidden) {
+                    console.log(`🔒 Skipping hidden achievement: ${achievementId}`);
+                    return;
+                }
 
                 const achievementElement = createAchievementElement(achievementId, achievement, isUnlocked);
                 achievementsGrid.appendChild(achievementElement);
+                visibleAchievements++;
             });
+
+            console.log(`✅ Displayed ${visibleAchievements} achievements`);
+
+            if (visibleAchievements === 0) {
+                achievementsGrid.innerHTML = '<div class="no-achievements">V této kategorii zatím nemáte žádné trofeje.</div>';
+            }
+
+            updateDebugInfo();
         }
 
         function createAchievementElement(achievementId, achievement, isUnlocked) {
@@ -160,6 +273,8 @@
                 achievementDiv.style.boxShadow = rarityConfig.glow;
             }
 
+            const categoryName = ACHIEVEMENT_CATEGORIES[achievement.category]?.name || achievement.category;
+
             achievementDiv.innerHTML = `
                 <div class="achievement-icon" style="color: ${rarityConfig.color}">
                     ${isUnlocked ? achievement.icon : '🔒'}
@@ -172,7 +287,7 @@
                             ${rarityConfig.name}
                         </span>
                         <span class="achievement-category">
-                            ${ACHIEVEMENT_CATEGORIES[achievement.category]?.name || achievement.category}
+                            ${categoryName}
                         </span>
                     </div>
                 </div>
@@ -186,9 +301,20 @@
         }
 
         function updateProgressStats() {
-            const totalAchievements = Object.keys(ACHIEVEMENTS_CONFIG).length;
+            if (!ACHIEVEMENTS_CONFIG || typeof getUnlockedAchievements !== 'function') {
+                return;
+            }
+
+            // Počítej pouze non-hidden achievementy pro total
+            const visibleAchievements = Object.keys(ACHIEVEMENTS_CONFIG).filter(id => {
+                const achievement = ACHIEVEMENTS_CONFIG[id];
+                const isUnlocked = isAchievementUnlocked(id);
+                return !achievement.hidden || isUnlocked;
+            });
+
+            const totalAchievements = visibleAchievements.length;
             const unlockedAchievements = getUnlockedAchievements();
-            const completionPercentage = Math.round((unlockedAchievements.length / totalAchievements) * 100);
+            const completionPercentage = totalAchievements > 0 ? Math.round((unlockedAchievements.length / totalAchievements) * 100) : 0;
 
             document.getElementById('total-achievements').textContent = totalAchievements;
             document.getElementById('unlocked-achievements').textContent = unlockedAchievements.length;
@@ -196,20 +322,22 @@
         }
 
         function setupFilterButtons() {
-            const filterButtons = document.querySelectorAll('.filter-btn');
+            const filterContainer = document.getElementById('categoryFilter');
             
-            filterButtons.forEach(button => {
-                button.addEventListener('click', () => {
+            filterContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('filter-btn')) {
                     // Remove active class from all buttons
-                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    filterContainer.querySelectorAll('.filter-btn').forEach(btn => 
+                        btn.classList.remove('active')
+                    );
                     
                     // Add active class to clicked button
-                    button.classList.add('active');
+                    e.target.classList.add('active');
                     
                     // Filter achievements
-                    const category = button.dataset.category;
-                    loadAchievements(category);
-                });
+                    currentFilter = e.target.dataset.category;
+                    loadAchievements(currentFilter);
+                }
             });
         }
 
@@ -267,20 +395,58 @@
             modal.classList.remove('visible');
         }
 
+        // Hlavní inicializační sekvence
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("📄 Inventory page loaded");
+            
+            // Počkáme na načtení všech skriptů
+            setTimeout(() => {
+                console.log("🚀 Starting gamification initialization...");
+                
+                const initSuccess = initializeGamificationSystem();
+                
+                if (initSuccess) {
+                    // Počkáme ještě chvilku a pak inicializujeme inventář
+                    setTimeout(() => {
+                        initializeInventory();
+                        setupFilterButtons();
+                        setupModal();
+                    }, 200);
+                } else {
+                    console.error("❌ Gamification initialization failed, retrying...");
+                    
+                    // Pokus o opakování za 1 sekundu
+                    setTimeout(() => {
+                        console.log("🔄 Retrying gamification initialization...");
+                        const retrySuccess = initializeGamificationSystem();
+                        
+                        if (retrySuccess) {
+                            setTimeout(() => {
+                                initializeInventory();
+                                setupFilterButtons();
+                                setupModal();
+                            }, 200);
+                        } else {
+                            console.error("❌ Gamification initialization failed completely");
+                            const grid = document.getElementById('achievements-grid');
+                            grid.innerHTML = '<div class="no-achievements">❌ Chyba při načítání systému achievementů. Zkuste obnovit stránku.</div>';
+                        }
+                    }, 1000);
+                }
+                
+                updateDebugInfo();
+            }, 500);
+        });
+
         // Listen for achievement unlocks (if user is on this page when achievement is unlocked)
         window.addEventListener('storage', (event) => {
             if (event.key === 'arAchievements') {
                 updateProgressStats();
                 // Reload current filter
-                const activeFilter = document.querySelector('.filter-btn.active');
-                if (activeFilter) {
-                    loadAchievements(activeFilter.dataset.category);
-                }
+                loadAchievements(currentFilter);
             }
         });
     </script>
-
-    
 
 </body>
 </html>
