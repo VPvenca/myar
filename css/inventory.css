@@ -3,7 +3,8 @@
    ========================================================================== */
 
         /* Complete CSS for Achievement Inventory */
-        
+        /* zobrazení debug okan */
+        #debugPanel { display: none !important; }
         /* Progress Overview */
         .progress-overview {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
