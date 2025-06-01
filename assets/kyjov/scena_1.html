@@ -5,10 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <!-- Důležité: gamification-config.js musí být načten před gamification.js -->
-    <script src="/gamification-config.js"></script>
-    <script src="/game/kyjov-config.js"></script>
-    <script src="/gamification.js"></script>
     <style>
         #startButton {
             position: absolute;
@@ -51,6 +47,21 @@
             z-index: 1000;
             display: none;
         }
+
+        /* Debug panel pro gamifikaci */
+        .gamification-debug {
+            position: absolute;
+            top: 120px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            z-index: 1000;
+            max-width: 300px;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -64,6 +75,17 @@
     <div id="timeDebug" class="time-debug">
         <div>Čas strávený: <span id="timeSpent">0</span>s</div>
         <div>Status: <span id="timeStatus">Neaktivní</span></div>
+    </div>
+
+    <!-- Debug panel pro gamifikaci -->
+    <div id="gamificationDebug" class="gamification-debug">
+        <h4>🐛 Gamification Debug</h4>
+        <div>Scene ID: <span id="debugSceneId">-</span></div>
+        <div>Exposition ID: <span id="debugExpoId">-</span></div>
+        <div>Config loaded: <span id="debugConfigLoaded">❌</span></div>
+        <div>Total scenes: <span id="debugTotalScenes">0</span></div>
+        <div>Total achievements: <span id="debugTotalAchievements">0</span></div>
+        <div>Markers activated: <span id="debugMarkersActivated">0</span></div>
     </div>
 
     <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/targets.mind;
@@ -91,6 +113,11 @@
         </a-entity>
     </a-scene>
 
+    <!-- GAMIFIKAČNÍ SKRIPTY - v správném pořadí -->
+    <script src="/gamification-config.js"></script>
+    <script src="/game/kyjov-config.js"></script>
+    <script src="/gamification.js"></script>
+
     <script>
         let audioContext;
         let audioBuffer1;
@@ -99,17 +126,71 @@
         let audioSource2 = null;
 
         // === GAMIFIKACE SETUP ===
-        const currentSceneId = getCurrentSceneId();
-        const currentExpositionId = getCurrentExpositionId();
+        let currentSceneId;
+        let currentExpositionId;
         let sceneConfigValid = false;
+        let gamificationInitialized = false;
 
-        if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
-            console.error("GAMIFICATION ERROR: Scene config not found for this page:", currentSceneId);
-        } else if (!currentExpositionId || currentExpositionId === 'unknown') {
-            console.error("GAMIFICATION ERROR: Cannot determine current exposition ID");
-        } else {
+        // Funkce pro inicializaci gamifikace s debug informacemi
+        function initializeGamification() {
+            console.log("🎮 Initializing gamification system...");
+            
+            // Zavolej inicializaci expozičního systému
+            if (typeof initializeExpositions === 'function') {
+                initializeExpositions();
+                console.log("✅ Exposition system initialized");
+            } else {
+                console.error("❌ initializeExpositions function not found");
+            }
+
+            // Získej současné IDs
+            currentSceneId = getCurrentSceneId();
+            currentExpositionId = getCurrentExpositionId();
+
+            console.log("📍 Current scene:", currentSceneId);
+            console.log("📍 Current exposition:", currentExpositionId);
+
+            // Aktualizuj debug panel
+            updateDebugPanel();
+
+            // Ověř konfiguraci
+            if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
+                console.error("❌ SCENE_CONFIG not found for:", currentSceneId);
+                return false;
+            }
+
+            if (!currentExpositionId || currentExpositionId === 'unknown') {
+                console.error("❌ Cannot determine current exposition ID");
+                return false;
+            }
+
             sceneConfigValid = true;
-            console.log("✅ Gamification setup OK:", currentExpositionId, currentSceneId);
+            gamificationInitialized = true;
+            console.log("✅ Gamification setup OK");
+            
+            updateDebugPanel();
+            return true;
+        }
+
+        // Funkce pro aktualizaci debug panelu
+        function updateDebugPanel() {
+            document.getElementById('debugSceneId').textContent = currentSceneId || '-';
+            document.getElementById('debugExpoId').textContent = currentExpositionId || '-';
+            document.getElementById('debugConfigLoaded').textContent = sceneConfigValid ? '✅' : '❌';
+            document.getElementById('debugTotalScenes').textContent = SCENE_CONFIG ? Object.keys(SCENE_CONFIG).length : 0;
+            document.getElementById('debugTotalAchievements').textContent = ACHIEVEMENTS_CONFIG ? Object.keys(ACHIEVEMENTS_CONFIG).length : 0;
+            
+            // Počet aktivovaných markerů pro tuto scénu
+            if (sceneConfigValid && typeof getGamificationData === 'function') {
+                try {
+                    const expoData = getGamificationData(currentExpositionId);
+                    const sceneData = expoData[currentSceneId] || {};
+                    const activatedCount = Object.keys(sceneData).filter(key => sceneData[key] === true).length;
+                    document.getElementById('debugMarkersActivated').textContent = activatedCount;
+                } catch (e) {
+                    document.getElementById('debugMarkersActivated').textContent = 'Error';
+                }
+            }
         }
 
         // === TIME TRACKING SETUP ===
@@ -117,18 +198,24 @@
         let debugUpdateInterval;
 
         function initializePageTimeTracking() {
-            if (sceneConfigValid && !timeTrackingInitialized) {
+            if (sceneConfigValid && !timeTrackingInitialized && typeof initializeTimeTracking === 'function') {
                 console.log("🕐 Initializing time tracking for scene");
                 initializeTimeTracking(currentExpositionId, currentSceneId);
                 timeTrackingInitialized = true;
                 
                 // Start debug updates
                 startDebugUpdates();
+            } else {
+                console.error("❌ Cannot initialize time tracking:", {
+                    sceneConfigValid,
+                    timeTrackingInitialized,
+                    hasFunction: typeof initializeTimeTracking === 'function'
+                });
             }
         }
 
         function finalizePageTimeTracking() {
-            if (timeTrackingInitialized) {
+            if (timeTrackingInitialized && typeof finalizeTimeTracking === 'function') {
                 console.log("🏁 Finalizing time tracking for scene");
                 finalizeTimeTracking(currentExpositionId, currentSceneId);
                 
@@ -149,10 +236,15 @@
             debugElement.style.display = 'block';
             
             debugUpdateInterval = setInterval(() => {
-                const currentTime = getCurrentTimeSpent();
-                const seconds = Math.floor(currentTime / 1000);
-                timeSpentElement.textContent = seconds;
-                timeStatusElement.textContent = timeTrackingData.isActive ? 'Aktivní' : 'Neaktivní';
+                if (typeof getCurrentTimeSpent === 'function' && typeof timeTrackingData !== 'undefined') {
+                    const currentTime = getCurrentTimeSpent();
+                    const seconds = Math.floor(currentTime / 1000);
+                    timeSpentElement.textContent = seconds;
+                    timeStatusElement.textContent = timeTrackingData.isActive ? 'Aktivní' : 'Neaktivní';
+                }
+                
+                // Aktualizuj také gamification debug panel
+                updateDebugPanel();
             }, 1000);
         }
 
@@ -174,8 +266,21 @@
             return null;
         }
 
+        // Čekáme na načtení všech skriptů a pak inicializujeme gamifikaci
+        window.addEventListener('load', () => {
+            console.log("📄 Page loaded, waiting for scripts...");
+            
+            // Počkáme trochu na načtení všech skriptů
+            setTimeout(() => {
+                console.log("🚀 Attempting gamification initialization...");
+                initializeGamification();
+            }, 500);
+        });
+
         // === EVENT LISTENERS SETUP ===
         document.getElementById('startButton').addEventListener('click', async function() {
+            console.log("🎬 Starting AR...");
+            
             const video1 = document.getElementById('video1');
             const video2 = document.getElementById('video2');
 
@@ -198,6 +303,7 @@
             }
 
             // === SPUSTIT TIME TRACKING PO SPUŠTĚNÍ AR ===
+            console.log("🕐 Starting time tracking...");
             initializePageTimeTracking();
         });
 
@@ -214,7 +320,7 @@
             }
 
             target1.addEventListener('targetFound', () => {
-                console.log("Target 1 found!");
+                console.log("🎯 Target 1 found!");
                 if (videoEntity1.components.material?.material.map?.image) {
                     videoEntity1.components.material.material.map.image.play().catch(e => console.warn("VideoEntity1 play failed", e));
                 }
@@ -223,9 +329,16 @@
                 }
 
                 // Gamifikace
-                if (sceneConfigValid && marker1Id) {
-                    console.log("Recording activation for marker:", marker1Id);
+                if (gamificationInitialized && marker1Id && typeof recordMarkerActivation === 'function') {
+                    console.log("🏆 Recording activation for marker:", marker1Id);
                     recordMarkerActivation(currentExpositionId, currentSceneId, marker1Id); 
+                    updateDebugPanel(); // Aktualizuj debug panel
+                } else {
+                    console.error("❌ Cannot record marker activation:", {
+                        gamificationInitialized,
+                        marker1Id,
+                        hasFunction: typeof recordMarkerActivation === 'function'
+                    });
                 }
             });
 
@@ -250,7 +363,7 @@
             }
 
             target2.addEventListener('targetFound', () => {
-                console.log("Target 2 found!");
+                console.log("🎯 Target 2 found!");
                  if (videoEntity2.components.material?.material.map?.image) {
                     videoEntity2.components.material.material.map.image.play().catch(e => console.warn("VideoEntity2 play failed", e));
                 }
@@ -259,9 +372,16 @@
                 }
 
                 // Gamifikace
-                if (sceneConfigValid && marker2Id) {
-                    console.log("Recording activation for marker:", marker2Id);
+                if (gamificationInitialized && marker2Id && typeof recordMarkerActivation === 'function') {
+                    console.log("🏆 Recording activation for marker:", marker2Id);
                     recordMarkerActivation(currentExpositionId, currentSceneId, marker2Id); 
+                    updateDebugPanel(); // Aktualizuj debug panel
+                } else {
+                    console.error("❌ Cannot record marker activation:", {
+                        gamificationInitialized,
+                        marker2Id,
+                        hasFunction: typeof recordMarkerActivation === 'function'
+                    });
                 }
             });
 
@@ -281,11 +401,6 @@
 
         // === PAGE LIFECYCLE EVENTS ===
         
-        // Spustit time tracking když se stránka načte a AR je spuštěno
-        window.addEventListener('load', () => {
-            console.log("Page loaded");
-        });
-
         // Pozastavit time tracking při opuštění stránky
         window.addEventListener('beforeunload', () => {
             finalizePageTimeTracking();
@@ -294,23 +409,31 @@
         // Pozastavit/obnovit time tracking při přepínání tabů
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
-                pauseTimeTracking();
-                console.log("🔍 Page hidden - time tracking paused");
+                if (typeof pauseTimeTracking === 'function') {
+                    pauseTimeTracking();
+                    console.log("🔍 Page hidden - time tracking paused");
+                }
             } else {
-                resumeTimeTracking();
-                console.log("🔍 Page visible - time tracking resumed");
+                if (typeof resumeTimeTracking === 'function') {
+                    resumeTimeTracking();
+                    console.log("🔍 Page visible - time tracking resumed");
+                }
             }
         });
 
         // Pozastavit time tracking při focus/blur
         window.addEventListener('blur', () => {
-            pauseTimeTracking();
-            console.log("👁️ Window blur - time tracking paused");
+            if (typeof pauseTimeTracking === 'function') {
+                pauseTimeTracking();
+                console.log("👁️ Window blur - time tracking paused");
+            }
         });
 
         window.addEventListener('focus', () => {
-            resumeTimeTracking();
-            console.log("👁️ Window focus - time tracking resumed");
+            if (typeof resumeTimeTracking === 'function') {
+                resumeTimeTracking();
+                console.log("👁️ Window focus - time tracking resumed");
+            }
         });
 
     </script>
