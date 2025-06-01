@@ -32,27 +32,38 @@
                 <a href="/assets/kyjov/terce.html" class="menu-button icon-button">
                     <img src="/assets/kyjov/thumb/terce_thumb.png" alt="" class="button-icon">
                     <span class="button-text">střelecké terče</span>
-                    <span class="star-display" data-scene-id="/assets/kyjov/terce.html"></span>
+                    <span class="star-display" data-scene-id="/assets/kyjov/terce.html">
+                        <!-- Zobrazujeme loading indikátor místo prázdného místa -->
+                        <div class="star-loading">⏳</div>
+                    </span>
                 </a>
                 <a href="/assets/kyjov/florian.html" class="menu-button icon-button">
                     <img src="/assets/kyjov/thumb/florian_thumb.png" alt="" class="button-icon">
                     <span class="button-text">obraz sv.Floriána</span>
-                    <span class="star-display" data-scene-id="/assets/kyjov/florian.html"></span>
+                    <span class="star-display" data-scene-id="/assets/kyjov/florian.html">
+                        <div class="star-loading">⏳</div>
+                    </span>
                 </a>
                 <a href="/assets/kyjov/scena_1.html" class="menu-button icon-button">
                     <img src="/assets/kyjov/thumb/obrazy_thumb.png" alt="" class="button-icon">
                     <span class="button-text">obrazy v mezipatře</span>
-                    <span class="star-display" data-scene-id="/assets/kyjov/scena_1.html"></span>
+                    <span class="star-display" data-scene-id="/assets/kyjov/scena_1.html">
+                        <div class="star-loading">⏳</div>
+                    </span>
                 </a>
                 <a href="/assets/kyjov/scena_3.html" class="menu-button icon-button">
                     <img src="/assets/kyjov/thumb/vedro_thumb.png" alt="" class="button-icon">
                     <span class="button-text">3D vědro</span>
-                    <span class="star-display" data-scene-id="/assets/kyjov/scena_3.html"></span>
+                    <span class="star-display" data-scene-id="/assets/kyjov/scena_3.html">
+                        <div class="star-loading">⏳</div>
+                    </span>
                 </a>
                 <a href="/assets/kyjov/scena_2.html" class="menu-button icon-button">
                     <img src="/assets/kyjov/thumb/hadanky_thumb.png" alt="" class="button-icon">
                     <span class="button-text">Hádanky</span>
-                    <span class="star-display" data-scene-id="/assets/kyjov/scena_2.html"></span>
+                    <span class="star-display" data-scene-id="/assets/kyjov/scena_2.html">
+                        <div class="star-loading">⏳</div>
+                    </span>
                 </a>
             </div>
 
@@ -157,18 +168,76 @@
     <!-- ZÁKLADNÍ LOGIKA STRÁNKY -->
     <script src="/script.js"></script>
 
-    <!-- Skript pro zobrazení hvězd na této stránce -->
+    <!-- Přidáme styly pro loading indikátor -->
+    <style>
+        .star-loading {
+            color: #999;
+            font-size: 0.8em;
+            opacity: 0.6;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        /* Smooth transition když se hvězdy načtou */
+        .star-display {
+            transition: all 0.3s ease;
+        }
+    </style>
+
     <script>
-        // Funkce pro inicializaci gamifikace
-        function initializeGamificationSystem() {
-            console.log("🎮 Initializing gamification system for menu...");
+        // === VYLEPŠENÁ INICIALIZACE GAMIFIKACE ===
+        
+        let gamificationReady = false;
+        let starsDisplayed = false;
+        
+        // Promise-based přístup pro lepší timing
+        function waitForGamification() {
+            return new Promise((resolve) => {
+                let attempts = 0;
+                const maxAttempts = 50; // 5 sekund (50 * 100ms)
+                
+                const checkInterval = setInterval(() => {
+                    attempts++;
+                    
+                    // Kontrola, zda jsou všechny potřebné objekty načtené
+                    if (typeof initializeExpositions === 'function' &&
+                        typeof SCENE_CONFIG !== 'undefined' &&
+                        typeof ACHIEVEMENTS_CONFIG !== 'undefined' &&
+                        typeof ACHIEVEMENT_CATEGORIES !== 'undefined') {
+                        
+                        console.log(`✅ Gamification ready after ${attempts * 100}ms`);
+                        clearInterval(checkInterval);
+                        resolve(true);
+                    } else if (attempts >= maxAttempts) {
+                        console.error("❌ Gamification timeout - some scripts failed to load");
+                        clearInterval(checkInterval);
+                        resolve(false);
+                    }
+                }, 100); // Kontrola každých 100ms
+            });
+        }
+        
+        // Funkce pro inicializaci gamifikačního systému
+        async function initializeGamificationSystem() {
+            console.log("🎮 Waiting for gamification system...");
+            
+            const isReady = await waitForGamification();
+            
+            if (!isReady) {
+                console.error("❌ Gamification system failed to load");
+                return false;
+            }
             
             // Zavolej inicializaci expozičního systému
-            if (typeof initializeExpositions === 'function') {
+            try {
                 initializeExpositions();
                 console.log("✅ Exposition system initialized");
-            } else {
-                console.error("❌ initializeExpositions function not found");
+            } catch (error) {
+                console.error("❌ Failed to initialize expositions:", error);
                 return false;
             }
 
@@ -187,90 +256,100 @@
             console.log(`📊 Loaded ${Object.keys(SCENE_CONFIG).length} scenes`);
             console.log(`🏆 Loaded ${Object.keys(ACHIEVEMENTS_CONFIG).length} achievements`);
             
+            gamificationReady = true;
             return true;
         }
 
-        // Funkce pro zobrazení hvězd s debug informacemi
-        function displayStarsWithDebug() {
-            console.log("⭐ Displaying stars for scenes...");
+        // Vylepšená funkce pro zobrazení hvězd
+        function displayStarsWithoutDelay() {
+            if (starsDisplayed || !gamificationReady) {
+                return; // Zabráníme dvojímu zobrazení
+            }
+            
+            console.log("⭐ Displaying stars immediately...");
             
             const starDisplayElements = document.querySelectorAll('.star-display[data-scene-id]');
             const currentExpositionId = getCurrentExpositionId(); 
             
-            console.log(`Found ${starDisplayElements.length} star display elements`);
-            console.log(`Current exposition ID: ${currentExpositionId}`);
-            
             if (!currentExpositionId || currentExpositionId === 'unknown') {
-                console.error("❌ Cannot determine current exposition ID. Stars may not display correctly.");
+                console.error("❌ Cannot determine current exposition ID");
+                return;
             }
 
             starDisplayElements.forEach((starElement, index) => {
                 const sceneId = starElement.dataset.sceneId;
-                console.log(`Processing star element ${index + 1}: ${sceneId}`);
 
                 if (SCENE_CONFIG && SCENE_CONFIG[sceneId]) {
-                    console.log(`✅ Config found for scene: ${sceneId}`);
+                    console.log(`✅ Processing star for scene: ${sceneId}`);
                     
-                    if (typeof getSceneStarLevel === 'function') {
+                    try {
                         const level = getSceneStarLevel(currentExpositionId, sceneId);
-                        console.log(`Star level for ${sceneId}: ${level}`);
                         
-                        if (typeof displayStars === 'function') {
-                            displayStars(starElement, level);
-                            console.log(`✅ Stars displayed for ${sceneId}`);
-                        } else {
-                            console.error("❌ displayStars function not found");
+                        // Odstraníme loading indikátor
+                        const loadingElement = starElement.querySelector('.star-loading');
+                        if (loadingElement) {
+                            loadingElement.remove();
                         }
-                    } else {
-                        console.error("❌ getSceneStarLevel function not found");
+                        
+                        // Zobrazíme hvězdy
+                        displayStars(starElement, level);
+                        
+                        console.log(`✅ Stars displayed for ${sceneId} (level: ${level})`);
+                    } catch (error) {
+                        console.error(`❌ Error displaying stars for ${sceneId}:`, error);
                     }
                 } else {
-                    console.warn(`⚠️ Config for scene ID "${sceneId}" not found in SCENE_CONFIG`);
-                    console.log("Available scenes:", Object.keys(SCENE_CONFIG || {}));
+                    console.warn(`⚠️ Config for scene ID "${sceneId}" not found`);
                 }
             });
+            
+            starsDisplayed = true;
+            console.log("✅ All stars displayed successfully");
         }
 
-        // Hlavní inicializační sekvence
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log("📄 DOM Content Loaded");
+        // Hlavní inicializační sekvence s vylepšeným timingem
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log("📄 DOM Content Loaded - starting gamification...");
             
-            // Počkáme na načtení všech skriptů
-            setTimeout(() => {
-                console.log("🚀 Starting gamification initialization...");
+            // Inicializace gamifikace s await
+            const initSuccess = await initializeGamificationSystem();
+            
+            if (initSuccess) {
+                // Okamžité zobrazení hvězd bez dalšího timeout
+                displayStarsWithoutDelay();
+            } else {
+                console.error("❌ Gamification initialization failed");
                 
-                // Pokus o inicializaci
-                const initSuccess = initializeGamificationSystem();
-                
-                if (initSuccess) {
-                    // Počkáme ještě chvilku a pak zobrazíme hvězdy
-                    setTimeout(() => {
-                        displayStarsWithDebug();
-                    }, 200);
-                } else {
-                    console.error("❌ Gamification initialization failed, retrying...");
-                    
-                    // Pokus o opakování za 1 sekundu
-                    setTimeout(() => {
-                        console.log("🔄 Retrying gamification initialization...");
-                        const retrySuccess = initializeGamificationSystem();
-                        
-                        if (retrySuccess) {
-                            setTimeout(() => {
-                                displayStarsWithDebug();
-                            }, 200);
-                        } else {
-                            console.error("❌ Gamification initialization failed completely");
-                            console.log("Debug info:");
-                            console.log("- SCENE_CONFIG:", typeof SCENE_CONFIG, SCENE_CONFIG);
-                            console.log("- ACHIEVEMENTS_CONFIG:", typeof ACHIEVEMENTS_CONFIG, ACHIEVEMENTS_CONFIG);
-                            console.log("- initializeExpositions:", typeof initializeExpositions);
-                            console.log("- getCurrentExpositionId:", typeof getCurrentExpositionId);
-                        }
-                    }, 1000);
-                }
-            }, 500);
+                // Fallback: odstraníme loading indikátory a zobrazíme prázdné místo
+                document.querySelectorAll('.star-loading').forEach(element => {
+                    element.textContent = '❓'; // Indikace problému
+                    element.title = 'Chyba při načítání gamifikace';
+                });
+            }
         });
+
+        // Backup řešení - pokud by se něco pokazilo, zkusíme to znovu
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (!starsDisplayed && gamificationReady) {
+                    console.log("🔄 Backup: Attempting to display stars again...");
+                    displayStarsWithoutDelay();
+                }
+            }, 1000);
+        });
+
+        // Debug funkce pro testování
+        window.debugStars = function() {
+            console.log("🐛 DEBUG INFO:");
+            console.log("- gamificationReady:", gamificationReady);
+            console.log("- starsDisplayed:", starsDisplayed);
+            console.log("- SCENE_CONFIG keys:", Object.keys(SCENE_CONFIG || {}));
+            console.log("- getCurrentExpositionId():", getCurrentExpositionId());
+            
+            // Force refresh hvězd
+            starsDisplayed = false;
+            displayStarsWithoutDelay();
+        };
 
     </script>
 
