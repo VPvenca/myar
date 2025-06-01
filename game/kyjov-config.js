@@ -172,6 +172,7 @@ const KYJOV_EXPOSITION_CONFIG = {
 
 // Automatická registrace při načtení skriptu
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("🏛️ Kyjov config: DOM loaded, registering exposition...");
     registerExposition('kyjov', KYJOV_EXPOSITION_CONFIG);
 });
 
