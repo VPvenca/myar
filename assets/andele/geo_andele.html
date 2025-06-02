@@ -283,6 +283,9 @@
             <img id="marker2" src="/assets/andele/img/andel_1.png">
             <img id="marker3" src="/assets/andele/img/andel_1.png">
             
+            <!-- Debug textura -->
+            <img id="debug-texture" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iIzAwZmYwMCIvPgogIDx0ZXh0IHg9IjUwIiB5PSI1NSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmaWxsPSIjMDAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5ERUJVRzwvdGV4dD4KPC9zdmc+">
+            
             <!-- Audio soubory -->
             <audio id="audio1" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
             <audio id="audio2" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
@@ -313,6 +316,34 @@
                 rotation="0 130 0"
                 material="transparent: true; alphaTest: 0.1; side: double">
             </a-plane>
+        </a-entity>
+
+        <!-- DEBUG KOSTKA - Stejná pozice jako Angel_1 -->
+        <a-entity 
+            gps-entity-place="latitude: 49.0091667; longitude: 17.1286111"
+            class="debug-object"
+            visible="true">
+            
+            <a-box 
+                position="2 4 0" 
+                scale="1 1 1" 
+                color="#00ff00"
+                material="src: #debug-texture">
+            </a-box>
+            
+            <a-sphere 
+                position="-2 4 0" 
+                radius="0.5" 
+                color="#ff0000">
+            </a-sphere>
+            
+            <a-text 
+                position="0 5.5 0" 
+                value="DEBUG MARKER 1" 
+                color="#ffffff" 
+                align="center"
+                scale="2 2 2">
+            </a-text>
         </a-entity>
 
         <!-- Angel_2 -->
@@ -352,6 +383,15 @@
     </a-scene>
 
     <script>
+        // Chybějící funkce pro gamifikaci
+        function getCurrentSceneId() {
+            return 'andele_geo'; // nebo název vaší scény
+        }
+
+        function getCurrentExpositionId() {
+            return 'default_exposition'; // nebo ID vaší expozice
+        }
+
         // GPS přesnost a debugging
         let userPosition = null;
         const PROXIMITY_THRESHOLD = 50; // metry - vzdálenost pro aktivaci gamifikace
@@ -759,6 +799,16 @@
         function checkProximityToMarkers() {
             if (!userPosition) return;
             
+            // Debug logování
+            console.log(`DEBUG: User position: ${userPosition.lat.toFixed(6)}, ${userPosition.lng.toFixed(6)}`);
+            
+            // Debug kostka kontrola
+            const debugDistance = calculateDistance(
+                userPosition.lat, userPosition.lng,
+                49.0091667, 17.1286111
+            );
+            console.log(`DEBUG: Distance to debug marker: ${debugDistance.toFixed(2)}m`);
+            
             let shouldStopAudio = true;
             const availableMarkers = getAvailableMarkers();
             
@@ -791,6 +841,12 @@
                     activateMarker(marker.id);
                 }
             });
+            
+            // Debug kostka - vždy viditelná
+            const debugEntity = document.querySelector('.debug-object');
+            if (debugEntity) {
+                debugEntity.setAttribute('visible', 'true');
+            }
             
             // Zastavíme audio pokud nejsme blízko žádného odemčeného markeru
             if (shouldStopAudio && currentlyPlayingAudio) {
@@ -830,9 +886,11 @@
                 const currentSceneId = getCurrentSceneId();
                 const currentExpositionId = getCurrentExpositionId();
                 
-                if (SCENE_CONFIG && SCENE_CONFIG[currentSceneId] && currentExpositionId) {
+                if (typeof recordMarkerActivation === 'function') {
                     console.log("Recording activation for marker:", markerId);
                     recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
+                } else {
+                    console.log("Gamification function not available");
                 }
                 
                 // Pokud je vše dokončeno, zobrazíme zprávu
@@ -904,7 +962,7 @@
 
         // Inicializace
         window.addEventListener('load', () => {
-            console.log("Starting sequential geolocation AR scene with audio...");
+            console.log("Starting sequential geolocation AR scene with audio and debug...");
             console.log(`Starting with marker sequence: ${markerSequence.map(m => m.name).join(' → ')}`);
             
             setupEventListeners();
@@ -915,21 +973,20 @@
             const currentSceneId = getCurrentSceneId();
             const currentExpositionId = getCurrentExpositionId();
             
-            if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
-                console.error("GAMIFICATION ERROR: Scene config not found for:", currentSceneId);
-            }
+            console.log(`Scene ID: ${currentSceneId}, Exposition ID: ${currentExpositionId}`);
             
-            if (!currentExpositionId || currentExpositionId === 'unknown') {
-                console.error("GAMIFICATION ERROR: Cannot determine exposition ID");
+            if (typeof SCENE_CONFIG === 'undefined') {
+                console.warn("SCENE_CONFIG not loaded - gamification may not work");
             }
             
             console.log(`Starting with unlocked markers: ${Array.from(unlockedMarkers).join(', ')}`);
             console.log(`Audio threshold set to: ${AUDIO_THRESHOLD} meters`);
+            console.log("Debug kostka should be visible at first marker location");
         });
 
         // A-Frame scéna je připravena
         document.querySelector('a-scene').addEventListener('loaded', () => {
-            console.log("A-Frame scene loaded for sequential geolocation AR with audio");
+            console.log("A-Frame scene loaded for sequential geolocation AR with audio and debug");
         });
     </script>
 </body>
