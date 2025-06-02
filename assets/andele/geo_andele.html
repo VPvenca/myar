@@ -311,7 +311,6 @@
                 position="0 3 0" 
                 scale="4 5 1" 
                 look-at="#camera"
-                look-at="enabled: true; axis: y"
                 material="transparent: true; alphaTest: 0.1; side: double">
             </a-plane>
         </a-entity>
@@ -355,7 +354,7 @@
     <script>
         // GPS přesnost a debugging
         let userPosition = null;
-        const PROXIMITY_THRESHOLD = 50; // metry - vzdálenost pro aktivaci gamifikace
+        const PROXIMITY_THRESHOLD = 10; // metry - vzdálenost pro aktivaci gamifikace
         const AR_VISIBILITY_THRESHOLD = 20; // metry - vzdálenost pro zobrazení AR objektu
         const AUDIO_THRESHOLD = 10; // metry - vzdálenost pro spuštění audio
         let arObjectsVisible = false;
