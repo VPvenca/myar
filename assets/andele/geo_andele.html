@@ -8,6 +8,11 @@
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
     
+    <!-- Gamifikační skripty -->
+    <script src="/gamification-config.js"></script>
+    <script src="/game/andele-config.js"></script>
+    <script src="/gamification.js"></script>
+    
     <style>
         body {
             margin: 0;
@@ -26,83 +31,6 @@
             text-decoration: none;
             border-radius: 3px;
             font-size: 14px;
-        }
-        
-        /* Ovládací panel pro kameru */
-        .camera-controls {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(0,0,0,0.8);
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 12px;
-            z-index: 1000;
-            min-width: 200px;
-            border: 2px solid #fff;
-        }
-        
-        .camera-controls h3 {
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            text-align: center;
-        }
-        
-        .control-group {
-            margin-bottom: 10px;
-        }
-        
-        .control-group label {
-            display: block;
-            margin-bottom: 3px;
-            font-weight: bold;
-        }
-        
-        .control-group input[type="range"] {
-            width: 100%;
-            margin-bottom: 3px;
-        }
-        
-        .control-value {
-            text-align: center;
-            font-size: 11px;
-            color: #ccc;
-        }
-        
-        .preset-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 5px;
-            margin-top: 10px;
-        }
-        
-        .preset-btn {
-            padding: 5px 8px;
-            background-color: rgba(255,255,255,0.2);
-            color: white;
-            border: 1px solid #fff;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 10px;
-            text-align: center;
-        }
-        
-        .preset-btn:hover {
-            background-color: rgba(255,255,255,0.3);
-        }
-        
-        .toggle-controls {
-            position: fixed;
-            top: 60px;
-            right: 10px;
-            background-color: rgba(0,0,0,0.6);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            z-index: 1000;
         }
         
         .geolocation-info {
@@ -133,6 +61,128 @@
             text-align: center;
             border: 2px solid #00ff00;
         }
+        
+        /* Navigační panel v pravém horním rohu */
+        .navigation-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+        
+        .navigation-toggle {
+            background-color: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            border: 2px solid #fff;
+            cursor: pointer;
+            user-select: none;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .navigation-toggle:hover {
+            background-color: rgba(255,255,255,0.1);
+        }
+        
+        .navigation-content {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 5px;
+            background-color: rgba(0,0,0,0.9);
+            border: 2px solid #fff;
+            border-radius: 8px;
+            padding: 10px;
+            min-width: 200px;
+            max-width: 250px;
+            display: none;
+        }
+        
+        .navigation-content.open {
+            display: block;
+        }
+        
+        .target-item {
+            padding: 10px;
+            margin: 5px 0;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            border-left: 3px solid #ff0000; /* Default: daleko = červená */
+        }
+        
+        .target-item:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        .target-item.selected {
+            background-color: rgba(255,68,68,0.3);
+            border-left-color: #ff4444;
+        }
+        
+        .target-item.closest {
+            border-left-color: #00ff00; /* Nejbližší = zelená */
+        }
+        
+        .target-item.very-close {
+            border-left-color: #00ff00; /* Velmi blízko = zelená */
+        }
+        
+        .target-item.close {
+            border-left-color: #88ff00; /* Blízko = světle zelená */
+        }
+        
+        .target-item.medium {
+            border-left-color: #ffaa00; /* Středně = oranžová */
+        }
+        
+        .target-item.far {
+            border-left-color: #ff0000; /* Daleko = červená */
+        }
+        
+        .target-name {
+            font-weight: bold;
+            color: white;
+        }
+        
+        .target-details {
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 2px;
+        }
+        
+        .clear-selection {
+            background-color: rgba(255,68,68,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+        
+        .clear-selection:hover {
+            background-color: rgba(255,68,68,1);
+        }
+        
+        .audio-info {
+            position: fixed;
+            bottom: 120px;
+            left: 10px;
+            background-color: rgba(0,100,0,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -140,52 +190,30 @@
         Zpět do Menu
     </a>
     
-    <div class="toggle-controls" id="toggleControls">
-        ⚙️ Nastavení kamery
-    </div>
-    
-    <!-- Ovládací panel kamery -->
-    <div class="camera-controls" id="cameraControls" style="display: none;">
-        <h3>🎥 Nastavení Kamery</h3>
-        
-        <div class="control-group">
-            <label>FOV (Zorný úhel)</label>
-            <input type="range" id="fovSlider" min="30" max="120" value="70" step="1">
-            <div class="control-value" id="fovValue">70°</div>
-        </div>
-        
-        <div class="control-group">
-            <label>Aspect Ratio</label>
-            <input type="range" id="aspectSlider" min="0.5" max="2.0" value="1.0" step="0.1">
-            <div class="control-value" id="aspectValue">1.0</div>
-        </div>
-        
-        <div class="control-group">
-            <label>Near Plane</label>
-            <input type="range" id="nearSlider" min="0.01" max="1.0" value="0.1" step="0.01">
-            <div class="control-value" id="nearValue">0.1</div>
-        </div>
-        
-        <div class="control-group">
-            <label>Far Plane</label>
-            <input type="range" id="farSlider" min="100" max="10000" value="1000" step="100">
-            <div class="control-value" id="farValue">1000</div>
-        </div>
-        
-        <div class="preset-buttons">
-            <button class="preset-btn" onclick="setPreset('phone')">📱 Telefon</button>
-            <button class="preset-btn" onclick="setPreset('tablet')">📲 Tablet</button>
-            <button class="preset-btn" onclick="setPreset('wide')">📺 Wide</button>
-            <button class="preset-btn" onclick="setPreset('default')">🔄 Default</button>
-        </div>
-    </div>
-    
     <div class="geolocation-info" id="geoInfo">
         Získávání polohy...
     </div>
     
+    <div class="audio-info" id="audioInfo">
+        🎵 Audio přehrává...
+    </div>
+    
+    <!-- Zobrazení vzdálenosti k vybranému nebo nejbližšímu bodu -->
     <div class="distance-info" id="distanceInfo">
         📍 Hledám nejbližší bod...
+    </div>
+    
+    <!-- Navigační panel (rozkliknutelný) -->
+    <div class="navigation-panel">
+        <div class="navigation-toggle" id="navToggle">
+            📍 Navigace
+        </div>
+        <div class="navigation-content" id="navContent">
+            <div id="targetsList"></div>
+            <div class="clear-selection" id="clearSelection" style="display: none;">
+                ✕ Zrušit výběr
+            </div>
+        </div>
     </div>
     
     <!-- AR scéna s geolokací -->
@@ -207,12 +235,12 @@
             <audio id="audio3" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
         </a-assets>
 
-        <!-- Kamera s geolokací a nastavitelnými parametry -->
+        <!-- Kamera s geolokací -->
         <a-camera 
             id="camera"
             gps-camera
             rotation-reader
-            camera="fov: 70; aspect: 1.0; near: 0.1; far: 1000;">
+            camera="fov: 70;">
         </a-camera>
 
         <!-- AR objekty na konkrétních GPS souřadnicích -->
@@ -270,16 +298,15 @@
     </a-scene>
 
     <script>
-        // Globální proměnné
+        // GPS přesnost a debugging
         let userPosition = null;
-        let camera = null;
-        let currentlyPlayingAudio = null;
-        let audioPlayingForMarker = null;
-        
-        // Konstanty
-        const PROXIMITY_THRESHOLD = 50;
-        const AR_VISIBILITY_THRESHOLD = 20;
-        const AUDIO_THRESHOLD = 10;
+        const PROXIMITY_THRESHOLD = 50; // metry - vzdálenost pro aktivaci gamifikace
+        const AR_VISIBILITY_THRESHOLD = 20; // metry - vzdálenost pro zobrazení AR objektu
+        const AUDIO_THRESHOLD = 10; // metry - vzdálenost pro spuštění audio (můžete změnit)
+        let arObjectsVisible = false;
+        let selectedTargetId = null; // ID vybraného cíle
+        let currentlyPlayingAudio = null; // Aktuálně přehrávané audio
+        let audioPlayingForMarker = null; // ID markeru pro který se audio přehrává
         
         // Definice cílových bodů
         const markers = [
@@ -309,111 +336,70 @@
             }
         ];
 
-        // Funkce pro aktualizaci kamery
-        function updateCamera() {
-            if (!camera) return;
+        // Funkce pro spuštění audio
+        function playAudio(markerId) {
+            const marker = markers.find(m => m.id === markerId);
+            if (!marker) return;
             
-            const fov = document.getElementById('fovSlider').value;
-            const aspect = document.getElementById('aspectSlider').value;
-            const near = document.getElementById('nearSlider').value;
-            const far = document.getElementById('farSlider').value;
+            // Pokud už hraje audio pro tento marker, neděláme nic
+            if (audioPlayingForMarker === markerId) return;
             
-            // Aktualizace A-Frame kamery
-            camera.setAttribute('camera', {
-                fov: parseFloat(fov),
-                aspect: parseFloat(aspect),
-                near: parseFloat(near),
-                far: parseFloat(far)
-            });
+            // Zastavíme aktuální audio pokud hraje
+            stopCurrentAudio();
             
-            // Aktualizace zobrazených hodnot
-            document.getElementById('fovValue').textContent = `${fov}°`;
-            document.getElementById('aspectValue').textContent = aspect;
-            document.getElementById('nearValue').textContent = near;
-            document.getElementById('farValue').textContent = far;
-            
-            console.log(`Camera updated: FOV=${fov}, Aspect=${aspect}, Near=${near}, Far=${far}`);
-        }
-
-        // Přednastavené konfigurace
-        function setPreset(presetName) {
-            const presets = {
-                'phone': { fov: 75, aspect: 0.6, near: 0.1, far: 1000 },
-                'tablet': { fov: 70, aspect: 1.3, near: 0.1, far: 1000 },
-                'wide': { fov: 90, aspect: 1.8, near: 0.1, far: 1000 },
-                'default': { fov: 70, aspect: 1.0, near: 0.1, far: 1000 }
-            };
-            
-            const preset = presets[presetName];
-            if (preset) {
-                document.getElementById('fovSlider').value = preset.fov;
-                document.getElementById('aspectSlider').value = preset.aspect;
-                document.getElementById('nearSlider').value = preset.near;
-                document.getElementById('farSlider').value = preset.far;
-                updateCamera();
+            const audioElement = document.getElementById(marker.audioId);
+            if (audioElement) {
+                console.log(`Playing audio for marker: ${markerId}`);
+                
+                audioElement.currentTime = 0; // Restart od začátku
+                audioElement.play().then(() => {
+                    currentlyPlayingAudio = audioElement;
+                    audioPlayingForMarker = markerId;
+                    
+                    // Zobrazíme info o přehrávání
+                    const audioInfo = document.getElementById('audioInfo');
+                    audioInfo.textContent = `🎵 ${marker.name} - Audio přehrává...`;
+                    audioInfo.style.display = 'block';
+                    
+                    // Event listener pro konec audio
+                    audioElement.onended = () => {
+                        console.log(`Audio ended for marker: ${markerId}`);
+                        stopCurrentAudio();
+                    };
+                    
+                }).catch(error => {
+                    console.error(`Error playing audio for ${markerId}:`, error);
+                });
             }
         }
 
-        // Automatické určení aspect ratio podle rozměrů obrazovky
-        function getScreenAspectRatio() {
-            return window.innerWidth / window.innerHeight;
+        // Funkce pro zastavení aktuálního audio
+        function stopCurrentAudio() {
+            if (currentlyPlayingAudio) {
+                currentlyPlayingAudio.pause();
+                currentlyPlayingAudio.currentTime = 0;
+                currentlyPlayingAudio.onended = null;
+                currentlyPlayingAudio = null;
+                audioPlayingForMarker = null;
+                
+                // Skryjeme audio info
+                document.getElementById('audioInfo').style.display = 'none';
+                console.log("Audio stopped");
+            }
         }
 
-        // Optimalizace pro mobilní zařízení
-        function optimizeForMobile() {
-            const aspectRatio = getScreenAspectRatio();
-            const isPortrait = aspectRatio < 1.0;
-            
-            if (isPortrait) {
-                // Portrétní orientace - adjustace pro vysoké telefony
-                document.getElementById('fovSlider').value = 75;
-                document.getElementById('aspectSlider').value = Math.min(aspectRatio * 1.2, 1.0);
+        // Funkce pro formátování vzdálenosti
+        function formatDistance(distance) {
+            if (distance < 1000) {
+                return `${Math.round(distance)}m`;
             } else {
-                // Landscape orientace
-                document.getElementById('fovSlider').value = 85;
-                document.getElementById('aspectSlider').value = Math.min(aspectRatio * 0.8, 1.5);
+                return `${(distance / 1000).toFixed(1)}km`;
             }
-            
-            updateCamera();
         }
-
-        // Setup event listenerů pro ovládací prvky
-        function setupCameraControls() {
-            // Slidery
-            document.getElementById('fovSlider').addEventListener('input', updateCamera);
-            document.getElementById('aspectSlider').addEventListener('input', updateCamera);
-            document.getElementById('nearSlider').addEventListener('input', updateCamera);
-            document.getElementById('farSlider').addEventListener('input', updateCamera);
-            
-            // Toggle pro zobrazení/skrytí ovládání
-            document.getElementById('toggleControls').addEventListener('click', () => {
-                const controls = document.getElementById('cameraControls');
-                controls.style.display = controls.style.display === 'none' ? 'block' : 'none';
-            });
-            
-            // Automatická optimalizace při změně orientace
-            window.addEventListener('orientationchange', () => {
-                setTimeout(optimizeForMobile, 500); // Čekání na dokončení rotace
-            });
-            
-            // Klávesové zkratky pro rychlé nastavení
-            document.addEventListener('keydown', (event) => {
-                switch(event.key) {
-                    case '1': setPreset('phone'); break;
-                    case '2': setPreset('tablet'); break;
-                    case '3': setPreset('wide'); break;
-                    case '0': setPreset('default'); break;
-                    case 'c': 
-                        const controls = document.getElementById('cameraControls');
-                        controls.style.display = controls.style.display === 'none' ? 'block' : 'none';
-                        break;
-                }
-            });
-        }
-
-        // Výpočet vzdálenosti
+        
+        // Funkce pro výpočet vzdálenosti mezi dvěma GPS body
         function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371000;
+            const R = 6371000; // Poloměr Země v metrech
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -445,30 +431,155 @@
             return closest;
         }
 
+        // Nalezení vybraného markeru
+        function findSelectedMarker() {
+            if (!userPosition || !selectedTargetId) return null;
+            
+            const marker = markers.find(m => m.id === selectedTargetId);
+            if (!marker) return null;
+            
+            const distance = calculateDistance(
+                userPosition.lat, userPosition.lng,
+                marker.lat, marker.lng
+            );
+            
+            return { ...marker, distance };
+        }
+
         // Aktualizace zobrazení vzdálenosti
         function updateDistanceDisplay() {
             const distanceInfo = document.getElementById('distanceInfo');
-            const targetMarker = findClosestMarker();
+            const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
             
             if (targetMarker) {
                 const distance = Math.round(targetMarker.distance);
-                distanceInfo.innerHTML = `📍 ${targetMarker.name}<br><strong>${distance}m</strong>`;
+                const prefix = selectedTargetId ? '🎯' : '📍';
                 
-                // Změna barvy podle vzdálenosti
+                // Přidáme audio indikátor pokud je v dosahu
+                let audioIndicator = '';
+                if (distance <= AUDIO_THRESHOLD) {
+                    audioIndicator = ' 🎵';
+                }
+                
+                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${audioIndicator}<br><strong>${distance}m</strong>`;
+                
+                // Změna barvy podle vzdálenosti - OBRÁCENÁ LOGIKA (zelená = blízko, červená = daleko)
                 if (distance <= AR_VISIBILITY_THRESHOLD) {
+                    // Velmi blízko - jasně zelená
                     distanceInfo.style.borderColor = '#00ff00';
                     distanceInfo.style.backgroundColor = 'rgba(0,255,0,0.8)';
                 } else if (distance <= PROXIMITY_THRESHOLD) {
+                    // Blízko - světle zelená/žlutá
                     distanceInfo.style.borderColor = '#88ff00';
                     distanceInfo.style.backgroundColor = 'rgba(136,255,0,0.8)';
                 } else if (distance <= 100) {
+                    // Středně daleko - oranžová
                     distanceInfo.style.borderColor = '#ffaa00';
                     distanceInfo.style.backgroundColor = 'rgba(255,170,0,0.8)';
                 } else {
+                    // Daleko - červená
                     distanceInfo.style.borderColor = '#ff0000';
                     distanceInfo.style.backgroundColor = 'rgba(255,0,0,0.8)';
                 }
+            } else {
+                distanceInfo.innerHTML = '📍 Hledám nejbližší bod...';
+                // Default stav - neutrální
+                distanceInfo.style.borderColor = '#ffffff';
+                distanceInfo.style.backgroundColor = 'rgba(0,0,0,0.8)';
             }
+        }
+
+        // Aktualizace navigačního seznamu
+        function updateNavigation() {
+            if (!userPosition) return;
+            
+            const targetsList = document.getElementById('targetsList');
+            let html = '';
+            
+            // Vypočítání vzdáleností a seřazení
+            const markersWithDistance = markers.map(marker => {
+                const distance = calculateDistance(
+                    userPosition.lat, userPosition.lng,
+                    marker.lat, marker.lng
+                );
+                return { ...marker, distance };
+            }).sort((a, b) => a.distance - b.distance);
+            
+            markersWithDistance.forEach((marker, index) => {
+                const isClosest = index === 0;
+                const isSelected = marker.id === selectedTargetId;
+                
+                let cssClass = 'target-item';
+                if (isSelected) {
+                    cssClass += ' selected';
+                } else {
+                    // Přidáme třídy podle vzdálenosti - OBRÁCENÁ LOGIKA (zelená = blízko)
+                    if (marker.distance <= AR_VISIBILITY_THRESHOLD) {
+                        cssClass += ' very-close'; // Velmi blízko - zelená
+                    } else if (marker.distance <= PROXIMITY_THRESHOLD) {
+                        cssClass += ' close'; // Blízko - světle zelená
+                    } else if (marker.distance <= 100) {
+                        cssClass += ' medium'; // Středně - oranžová
+                    } else {
+                        cssClass += ' far'; // Daleko - červená
+                    }
+                    
+                    // Nejbližší marker má vždy zelenou pokud není vybraný
+                    if (isClosest && !isSelected) {
+                        cssClass = 'target-item closest';
+                    }
+                }
+                
+                // Audio indikátor v navigaci
+                let audioIndicator = '';
+                if (marker.distance <= AUDIO_THRESHOLD) {
+                    audioIndicator = ' 🎵';
+                }
+                
+                html += `
+                    <div class="${cssClass}" data-target-id="${marker.id}">
+                        <div class="target-name">
+                            ${marker.name}${audioIndicator}
+                            ${isSelected ? ' 🎯' : ''}
+                        </div>
+                        <div class="target-details">
+                            ${formatDistance(marker.distance)}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            targetsList.innerHTML = html;
+            
+            // Přidání event listenerů pro výběr cíle
+            document.querySelectorAll('.target-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const targetId = item.getAttribute('data-target-id');
+                    selectTarget(targetId);
+                });
+            });
+            
+            // Aktualizace hlavního displeje vzdálenosti
+            updateDistanceDisplay();
+        }
+
+        // Výběr cíle pro trackování
+        function selectTarget(targetId) {
+            selectedTargetId = targetId;
+            document.getElementById('clearSelection').style.display = 'block';
+            updateNavigation();
+            updateDistanceDisplay();
+            
+            // Zavřít navigační panel
+            document.getElementById('navContent').classList.remove('open');
+        }
+
+        // Zrušení výběru cíle
+        function clearSelection() {
+            selectedTargetId = null;
+            document.getElementById('clearSelection').style.display = 'none';
+            updateNavigation();
+            updateDistanceDisplay();
         }
 
         // Získání aktuální polohy
@@ -486,8 +597,9 @@
                             `Poloha: ${userPosition.lat.toFixed(6)}, ${userPosition.lng.toFixed(6)}<br>
                              Přesnost: ${userPosition.accuracy.toFixed(0)}m`;
                         
+                        console.log("User position:", userPosition);
                         checkProximityToMarkers();
-                        updateDistanceDisplay();
+                        updateNavigation();
                     },
                     (error) => {
                         console.error("Geolocation error:", error);
@@ -507,6 +619,8 @@
         function checkProximityToMarkers() {
             if (!userPosition) return;
             
+            let shouldStopAudio = true;
+            
             markers.forEach(marker => {
                 const distance = calculateDistance(
                     userPosition.lat, userPosition.lng,
@@ -515,17 +629,48 @@
                 
                 const arEntity = document.querySelector(`[data-marker-id="${marker.id}"]`);
                 if (arEntity) {
+                    // Zobrazení AR objektu
                     if (distance <= AR_VISIBILITY_THRESHOLD) {
                         arEntity.setAttribute('visible', 'true');
                         console.log(`AR object visible for ${marker.id} at distance ${distance.toFixed(2)}m`);
+                        arObjectsVisible = true;
                     } else {
                         arEntity.setAttribute('visible', 'false');
                     }
+                    
+                    // Audio přehrávání podle threshold
+                    if (distance <= AUDIO_THRESHOLD) {
+                        playAudio(marker.id);
+                        shouldStopAudio = false;
+                    }
+                }
+                
+                // Aktivace gamifikace při přiblížení
+                if (distance <= PROXIMITY_THRESHOLD) {
+                    activateMarker(marker.id);
                 }
             });
+            
+            // Zastavíme audio pokud nejsme blízko žádného markeru
+            if (shouldStopAudio && currentlyPlayingAudio) {
+                stopCurrentAudio();
+            }
         }
 
-        // Sledování polohy
+        // Aktivace markeru (gamifikace)
+        function activateMarker(markerId) {
+            console.log(`Marker activated: ${markerId}`);
+            
+            const currentSceneId = getCurrentSceneId();
+            const currentExpositionId = getCurrentExpositionId();
+            
+            if (SCENE_CONFIG && SCENE_CONFIG[currentSceneId] && currentExpositionId) {
+                console.log("Recording activation for marker:", markerId);
+                recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
+            }
+        }
+        
+        // Sledování polohy v reálném čase
         function watchPosition() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
@@ -541,7 +686,7 @@
                              Přesnost: ${userPosition.accuracy.toFixed(0)}m`;
                         
                         checkProximityToMarkers();
-                        updateDistanceDisplay();
+                        updateNavigation();
                     },
                     (error) => {
                         console.error("Geolocation watch error:", error);
@@ -555,29 +700,54 @@
             }
         }
 
+        // Event listenery pro UI
+        function setupEventListeners() {
+            // Toggle navigačního panelu
+            document.getElementById('navToggle').addEventListener('click', () => {
+                const navContent = document.getElementById('navContent');
+                navContent.classList.toggle('open');
+            });
+            
+            // Zavření navigačního panelu při kliku mimo
+            document.addEventListener('click', (e) => {
+                const navPanel = document.querySelector('.navigation-panel');
+                const navContent = document.getElementById('navContent');
+                
+                if (!navPanel.contains(e.target)) {
+                    navContent.classList.remove('open');
+                }
+            });
+            
+            // Zrušení výběru
+            document.getElementById('clearSelection').addEventListener('click', clearSelection);
+        }
+
         // Inicializace
         window.addEventListener('load', () => {
-            console.log("Starting geolocation AR scene with camera controls...");
+            console.log("Starting geolocation AR scene with audio...");
             
-            // Získání reference na kameru
-            camera = document.getElementById('camera');
-            
-            // Setup ovládacích prvků
-            setupCameraControls();
-            
-            // Automatická optimalizace pro mobilní zařízení
-            optimizeForMobile();
-            
-            // Spuštění geolokace
+            setupEventListeners();
             getCurrentPosition();
             watchPosition();
+            
+            // Gamifikace setup
+            const currentSceneId = getCurrentSceneId();
+            const currentExpositionId = getCurrentExpositionId();
+            
+            if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
+                console.error("GAMIFICATION ERROR: Scene config not found for:", currentSceneId);
+            }
+            
+            if (!currentExpositionId || currentExpositionId === 'unknown') {
+                console.error("GAMIFICATION ERROR: Cannot determine exposition ID");
+            }
+            
+            console.log(`Audio threshold set to: ${AUDIO_THRESHOLD} meters`);
         });
 
         // A-Frame scéna je připravena
         document.querySelector('a-scene').addEventListener('loaded', () => {
-            console.log("A-Frame scene loaded with camera controls");
-            camera = document.getElementById('camera');
-            updateCamera(); // Aplikovat nastavení po načtení scény
+            console.log("A-Frame scene loaded for geolocation AR with audio");
         });
     </script>
 </body>
