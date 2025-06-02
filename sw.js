@@ -2,7 +2,7 @@
 console.log('Service Worker soubor načten.');
 // Service Worker soubor
 
-const CACHE_NAME = 'ar-app-cache-v55'; // Název cache (změňte 'v1' při aktualizaci cache)
+const CACHE_NAME = 'ar-app-cache-v56'; // Název cache (změňte 'v1' při aktualizaci cache)
 const urlsToCache = [
   
   '/index.html',
