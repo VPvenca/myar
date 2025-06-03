@@ -357,11 +357,16 @@
         // NOVÉ: Funkce pro rotaci modelu dotykem
         function setupModelRotation() {
             let touchStarted = false;
+            let rotationActive = false;
             
             // Touch/Mouse start events
             document.addEventListener('touchstart', (e) => {
+                // Kontrola, zda se nedotýkáme UI elementů
+                if (isTouchingUI(e.target)) return;
                 if (!isModelVisible()) return;
+                
                 touchStarted = true;
+                rotationActive = true;
                 isRotating = true;
                 startX = e.touches[0].clientX;
                 showRotationHintOnce();
@@ -369,15 +374,20 @@
             }, { passive: false });
             
             document.addEventListener('mousedown', (e) => {
+                // Kontrola, zda neklikáme na UI elementy
+                if (isTouchingUI(e.target)) return;
                 if (!isModelVisible()) return;
+                
+                rotationActive = true;
                 isRotating = true;
                 startX = e.clientX;
                 showRotationHintOnce();
+                e.preventDefault();
             });
             
             // Touch/Mouse move events
             document.addEventListener('touchmove', (e) => {
-                if (!isRotating || !touchStarted) return;
+                if (!isRotating || !touchStarted || !rotationActive) return;
                 const currentX = e.touches[0].clientX;
                 const deltaX = currentX - startX;
                 modelRotationY += deltaX * 0.3; // Citlivost rotace
@@ -387,22 +397,50 @@
             }, { passive: false });
             
             document.addEventListener('mousemove', (e) => {
-                if (!isRotating) return;
+                if (!isRotating || !rotationActive) return;
                 const deltaX = e.clientX - startX;
                 modelRotationY += deltaX * 0.3;
                 updateModelRotation();
                 startX = e.clientX;
+                e.preventDefault();
             });
             
             // Touch/Mouse end events
             document.addEventListener('touchend', () => {
                 isRotating = false;
                 touchStarted = false;
+                rotationActive = false;
             });
             
             document.addEventListener('mouseup', () => {
                 isRotating = false;
+                rotationActive = false;
             });
+        }
+        
+        // Kontrola, zda se dotýkáme UI elementů
+        function isTouchingUI(target) {
+            // Kontrola všech UI elementů a jejich potomků
+            const uiSelectors = [
+                '.back-button-ar',
+                '.navigation-panel', 
+                '.navigation-toggle',
+                '.navigation-content',
+                '.target-item',
+                '.clear-selection',
+                '.distance-info',
+                '.audio-info',
+                '.rotation-hint'
+            ];
+            
+            for (let selector of uiSelectors) {
+                const element = document.querySelector(selector);
+                if (element && (element === target || element.contains(target))) {
+                    return true;
+                }
+            }
+            
+            return false;
         }
         
         function updateModelRotation() {
