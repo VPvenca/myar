@@ -199,10 +199,10 @@
         </div>
     </div>
     
-    <!-- AR scéna s geolokací -->
+            <!-- AR scéna s geolokací -->
     <a-scene 
         vr-mode-ui="enabled: false"
-        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false"
+        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; gpsMinDistance: 5;"
         renderer="logarithmicDepthBuffer: true; antialias: true; precision: medium;"
         device-orientation-permission-ui="enabled: false"
         style="width: 100vw; height: 100vh;">
@@ -247,7 +247,7 @@
 
         <!-- Angel_2 - GLB Model -->
         <a-entity 
-             gps-entity-place="latitude: 49.0091667; longitude: 17.1286111"
+             gps-entity-place="latitude: 49.0091667; longitude: 17.1286111; gpsMinDistance: 3;"
                 data-marker-id="andel_2"
                 data-audio-id="audio2"
                 class="ar-object"
@@ -262,16 +262,6 @@
                 animation-mixer="clip: *; loop: repeat"
                 shadow="cast: true; receive: true">
             </a-gltf-model>
-            
-            <!-- Podstavec pro lepší vizualizaci -->
-            <!-- <a-cylinder 
-                position="0 0.5 0" 
-                radius="1" 
-                height="1" 
-                color="#444444"
-                material="metalness: 0.5; roughness: 0.3"
-                shadow="receive: true">
-            </a-cylinder> -->
         </a-entity>
 
         <!-- Angel_3 -->
@@ -300,13 +290,17 @@
     <script>
         // GPS přesnost a debugging
         let userPosition = null;
+        let lastStablePosition = null;
         const PROXIMITY_THRESHOLD = 10; // metry - vzdálenost pro aktivaci gamifikace
         const AR_VISIBILITY_THRESHOLD = 50; // metry - zvýšeno pro lepší testování
         const AUDIO_THRESHOLD = 10; // metry - vzdálenost pro spuštění audio
+        const GPS_SMOOTHING_FACTOR = 0.3; // Faktor pro vyhlazování GPS (0.1-0.5)
+        const MIN_GPS_ACCURACY = 20; // Minimální přesnost GPS v metrech
         let arObjectsVisible = false;
         let selectedTargetId = null; // ID vybraného cíle
         let currentlyPlayingAudio = null; // Aktuálně přehrávané audio
         let audioPlayingForMarker = null; // ID markeru pro který se audio přehrává
+        let positionHistory = []; // Historie pozic pro vyhlazování
         
         // Definice cílových bodů
         const markers = [
@@ -388,7 +382,50 @@
             }
         }
 
-        // Funkce pro formátování vzdálenosti
+        // Funkce pro vyhlazení GPS pozice
+        function smoothGPSPosition(newPosition) {
+            // Kontrola přesnosti GPS
+            if (newPosition.accuracy > MIN_GPS_ACCURACY) {
+                console.log(`GPS accuracy too low: ${newPosition.accuracy}m, skipping update`);
+                return userPosition; // Vrátíme předchozí pozici
+            }
+            
+            // První pozice
+            if (!userPosition) {
+                return newPosition;
+            }
+            
+            // Vyhlazení pomocí exponenciálního klouzavého průměru
+            const smoothedPosition = {
+                lat: userPosition.lat + GPS_SMOOTHING_FACTOR * (newPosition.lat - userPosition.lat),
+                lng: userPosition.lng + GPS_SMOOTHING_FACTOR * (newPosition.lng - userPosition.lng),
+                accuracy: newPosition.accuracy
+            };
+            
+            return smoothedPosition;
+        }
+
+        // Kontrola stability pozice
+        function isPositionStable(position) {
+            if (!lastStablePosition) {
+                lastStablePosition = position;
+                return true;
+            }
+            
+            const distance = calculateDistance(
+                lastStablePosition.lat, lastStablePosition.lng,
+                position.lat, position.lng
+            );
+            
+            // Pokud je změna menší než 2 metry, považujeme pozici za stabilní
+            if (distance < 2) {
+                return true;
+            }
+            
+            // Aktualizujeme stabilní pozici pokud je změna výrazná
+            lastStablePosition = position;
+            return false;
+        }
         function formatDistance(distance) {
             if (distance < 1000) {
                 return `${Math.round(distance)}m`;
@@ -581,23 +618,29 @@
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        userPosition = {
+                        const rawPosition = {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude,
                             accuracy: position.coords.accuracy
                         };
                         
-                        console.log("User position:", userPosition);
-                        checkProximityToMarkers();
-                        updateNavigation();
+                        // Aplikace vyhlazení
+                        const smoothedPosition = smoothGPSPosition(rawPosition);
+                        
+                        if (smoothedPosition) {
+                            userPosition = smoothedPosition;
+                            console.log("User position updated:", userPosition);
+                            checkProximityToMarkers();
+                            updateNavigation();
+                        }
                     },
                     (error) => {
                         console.error("Geolocation error:", error);
                     },
                     {
                         enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 60000
+                        timeout: 15000,
+                        maximumAge: 30000
                     }
                 );
             }
@@ -668,22 +711,28 @@
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
                     (position) => {
-                        userPosition = {
+                        const rawPosition = {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude,
                             accuracy: position.coords.accuracy
                         };
                         
-                        checkProximityToMarkers();
-                        updateNavigation();
+                        // Aplikace vyhlazení
+                        const smoothedPosition = smoothGPSPosition(rawPosition);
+                        
+                        if (smoothedPosition && isPositionStable(smoothedPosition)) {
+                            userPosition = smoothedPosition;
+                            checkProximityToMarkers();
+                            updateNavigation();
+                        }
                     },
                     (error) => {
                         console.error("Geolocation watch error:", error);
                     },
                     {
                         enableHighAccuracy: true,
-                        timeout: 5000,
-                        maximumAge: 30000
+                        timeout: 8000,
+                        maximumAge: 20000
                     }
                 );
             }
