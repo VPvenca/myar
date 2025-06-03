@@ -247,7 +247,7 @@
 
         <!-- Angel_2 - GLB Model -->
         <a-entity 
-             gps-entity-place="latitude: 49.0091667; longitude: 17.1286111; gpsMinDistance: 3;"
+             gps-entity-place="latitude: 49.0091389; longitude: 17.1286111; gpsMinDistance: 3;"
                 data-marker-id="andel_2"
                 data-audio-id="audio2"
                 class="ar-object"
@@ -292,7 +292,7 @@
         let userPosition = null;
         let lastStablePosition = null;
         const PROXIMITY_THRESHOLD = 10; // metry - vzdálenost pro aktivaci gamifikace
-        const AR_VISIBILITY_THRESHOLD = 50; // metry - zvýšeno pro lepší testování
+        const AR_VISIBILITY_THRESHOLD = 20; // metry - zvýšeno pro lepší testování
         const AUDIO_THRESHOLD = 10; // metry - vzdálenost pro spuštění audio
         const GPS_SMOOTHING_FACTOR = 0.3; // Faktor pro vyhlazování GPS (0.1-0.5)
         const MIN_GPS_ACCURACY = 20; // Minimální přesnost GPS v metrech
@@ -314,7 +314,7 @@
             },
             { 
                  id: "andel_2", 
-                 lat: 49.0091667,  
+                 lat: 49.0091389,  
                  lng: 17.1286111,  
                  name: "3D Anděl",
                  description: "3D GLB model anděla",
