@@ -226,7 +226,7 @@
 
         <a-assets>
             <img id="marker1" src="/assets/andele/img/andel_1.png">
-            <a-asset-item id="gltf-model" src="/path/to/your/model.gltf"></a-asset-item>
+            <a-asset-item id="gltf-model" src="/assets/andele/3d/andel.gltf"></a-asset-item>
             <img id="marker3" src="/assets/andele/img/andel_1.png">
             
             <!-- Audio soubory -->
@@ -263,7 +263,7 @@
 
         <!-- Angel_2 - GLTF Model -->
         <a-entity 
-             gps-entity-place="latitude: 49.0907222; longitude: 17.1329444"
+             gps-entity-place="latitude: 49.0338889; longitude: 17.2698056"
                 data-marker-id="andel_2"
                 data-audio-id="audio2"
                 class="ar-object"
@@ -301,7 +301,7 @@
     <script>
         // GPS přesnost a debugging
         let userPosition = null;
-        const PROXIMITY_THRESHOLD = 50; // metry - vzdálenost pro aktivaci gamifikace
+        const PROXIMITY_THRESHOLD = 10; // metry - vzdálenost pro aktivaci gamifikace
         const AR_VISIBILITY_THRESHOLD = 20; // metry - vzdálenost pro zobrazení AR objektu
         const AUDIO_THRESHOLD = 10; // metry - vzdálenost pro spuštění audio (můžete změnit)
         let arObjectsVisible = false;
@@ -321,8 +321,8 @@
             },
             { 
                  id: "andel_2", 
-                 lat: 49.0907222,  
-                 lng: 17.1329444,  
+                 lat: 49.0338889,  
+                 lng: 17.2698056,  
                  name: "3D Anděl",
                  description: "3D GLTF model anděla",
                  audioId: "audio2"
