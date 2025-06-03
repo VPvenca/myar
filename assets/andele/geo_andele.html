@@ -170,6 +170,27 @@
             z-index: 1000;
             display: none;
         }
+        
+        .rotation-hint {
+            position: fixed;
+            bottom: 120px;
+            left: 10px;
+            background-color: rgba(0,150,255,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .rotatable-model {
+            cursor: grab;
+        }
+        
+        .rotatable-model:active {
+            cursor: grabbing;
+        }
     </style>
 </head>
 <body>
@@ -179,6 +200,10 @@
     
     <div class="audio-info" id="audioInfo">
         🎵 Audio přehrává...
+    </div>
+    
+    <div class="rotation-hint" id="rotationHint">
+        🔄 Tažením otočíte anděla
     </div>
     
     <!-- Zobrazení vzdálenosti k vybranému nebo nejbližšímu bodu -->
@@ -199,10 +224,10 @@
         </div>
     </div>
     
-            <!-- AR scéna s geolokací -->
+    <!-- AR scéna s geolokací - VRÁCENO k původnímu funkčnímu nastavení -->
     <a-scene 
         vr-mode-ui="enabled: false"
-        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; gpsMinDistance: 5;"
+        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; gpsMinDistance: 2;"
         renderer="logarithmicDepthBuffer: true; antialias: true; precision: medium;"
         device-orientation-permission-ui="enabled: false"
         style="width: 100vw; height: 100vh;">
@@ -219,10 +244,10 @@
             <audio id="audio3" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
         </a-assets>
 
-        <!-- Kamera s geolokací -->
+        <!-- Kamera s geolokací - optimalizováno pro obcházení -->
         <a-camera 
             id="camera"
-            gps-camera
+            gps-camera="simulateLatitude: 0; simulateLongitude: 0; positionMinAccuracy: 100; alert: false; minDistance: 1; maxDistance: 0;"
             rotation-reader
             camera="fov: 70;">
         </a-camera>
@@ -245,20 +270,20 @@
             </a-plane>
         </a-entity>
 
-        <!-- Angel_2 - GLB Model -->
+        <!-- Angel_2 - GLB Model - ZACHOVÁNY vaše původní souřadnice -->
         <a-entity 
-             gps-entity-place="latitude: 49.0091389; longitude: 17.1286111; gpsMinDistance: 3;"
+             gps-entity-place="latitude: 49.0091389; longitude: 17.1286111"
                 data-marker-id="andel_2"
                 data-audio-id="audio2"
                 class="ar-object"
                 visible="false">
             
-            <!-- GLB model s lepším nastavením -->
+            <!-- GLB model - vráceno k původnímu funkčnímu nastavení -->
             <a-gltf-model 
                 src="#glb-model"
                 position="0 0 0"
-                scale="4 4 4"
-                rotation="0 40 0"
+                scale="2 2 2"
+                rotation="0 30 0"
                 animation-mixer="clip: *; loop: repeat"
                 shadow="cast: true; receive: true">
             </a-gltf-model>
@@ -288,19 +313,20 @@
     </a-scene>
 
     <script>
-        // GPS přesnost a debugging
+        // GPS přesnost a debugging - VYLEPŠENO pro obcházení
         let userPosition = null;
         let lastStablePosition = null;
+        let positionBuffer = []; // Buffer pro vyhlazování pozice
         const PROXIMITY_THRESHOLD = 10; // metry - vzdálenost pro aktivaci gamifikace
-        const AR_VISIBILITY_THRESHOLD = 20; // metry - zvýšeno pro lepší testování
+        const AR_VISIBILITY_THRESHOLD = 20; // metry - původní hodnota
         const AUDIO_THRESHOLD = 10; // metry - vzdálenost pro spuštění audio
-        const GPS_SMOOTHING_FACTOR = 0.3; // Faktor pro vyhlazování GPS (0.1-0.5)
-        const MIN_GPS_ACCURACY = 20; // Minimální přesnost GPS v metrech
+        const GPS_SMOOTHING_FACTOR = 0.2; // Jemné vyhlazování
+        const MIN_GPS_ACCURACY = 25; // Tolerantnější přesnost
+        const POSITION_BUFFER_SIZE = 3; // Počet pozic v bufferu
         let arObjectsVisible = false;
         let selectedTargetId = null; // ID vybraného cíle
         let currentlyPlayingAudio = null; // Aktuálně přehrávané audio
         let audioPlayingForMarker = null; // ID markeru pro který se audio přehrává
-        let positionHistory = []; // Historie pozic pro vyhlazování
         
         // Definice cílových bodů
         const markers = [
@@ -314,7 +340,7 @@
             },
             { 
                  id: "andel_2", 
-                 lat: 49.0091389,  
+                 lat: 49.0091389,  // ZACHOVÁNA vaše GPS souřadnice
                  lng: 17.1286111,  
                  name: "3D Anděl",
                  description: "3D GLB model anděla",
@@ -330,7 +356,134 @@
             }
         ];
 
-        // Funkce pro spuštění audio
+        // Vylepšené vyhlazování GPS pozice s bufferem
+        function smoothGPSPosition(newPosition) {
+            // Kontrola přesnosti GPS
+            if (newPosition.accuracy > MIN_GPS_ACCURACY) {
+                console.log(`GPS accuracy too low: ${newPosition.accuracy}m, skipping update`);
+                return userPosition; // Vrátíme předchozí pozici
+            }
+            
+            // Přidáme novou pozici do bufferu
+            positionBuffer.push(newPosition);
+            
+            // Udržujeme jen posledních N pozic
+            if (positionBuffer.length > POSITION_BUFFER_SIZE) {
+                positionBuffer.shift();
+            }
+            
+            // První pozice
+            if (!userPosition) {
+                return newPosition;
+            }
+            
+            // Průměr z bufferu pozic
+            const avgLat = positionBuffer.reduce((sum, pos) => sum + pos.lat, 0) / positionBuffer.length;
+            const avgLng = positionBuffer.reduce((sum, pos) => sum + pos.lng, 0) / positionBuffer.length;
+            
+            // Jemné vyhlazení s průměrem
+            const smoothedPosition = {
+                lat: userPosition.lat + GPS_SMOOTHING_FACTOR * (avgLat - userPosition.lat),
+                lng: userPosition.lng + GPS_SMOOTHING_FACTOR * (avgLng - userPosition.lng),
+                accuracy: newPosition.accuracy
+            };
+            
+            return smoothedPosition;
+        }
+
+        // Kontrola stability pozice - vylepšeno pro obcházení
+        function isPositionStable(position) {
+            if (!lastStablePosition) {
+                lastStablePosition = position;
+                return true;
+            }
+            
+            const distance = calculateDistance(
+                lastStablePosition.lat, lastStablePosition.lng,
+                position.lat, position.lng
+            );
+            
+            // Pro obcházení povolíme častější aktualizace
+            if (distance > 0.5) { // Sníženo z 2m na 0.5m
+                lastStablePosition = position;
+                return true;
+            }
+            
+            return true; // Povolíme všechny aktualizace
+        }
+
+        // Funkce pro nastavení rotace modelu dotykem
+        function setupModelRotation() {
+            const scene = document.querySelector('a-scene');
+            if (!scene) return;
+            
+            // Předcházíme konfliktům s AR.js touch eventy
+            scene.addEventListener('mousedown', handleRotationStart);
+            scene.addEventListener('touchstart', handleRotationStart);
+            
+            document.addEventListener('mousemove', handleRotationMove);
+            document.addEventListener('touchmove', handleRotationMove);
+            
+            document.addEventListener('mouseup', handleRotationEnd);
+            document.addEventListener('touchend', handleRotationEnd);
+        }
+        
+        function handleRotationStart(e) {
+            // Kontrola, zda klikneme na model
+            const glbModel = document.querySelector('.rotatable-model');
+            if (!glbModel || !isModelVisible()) return;
+            
+            isRotating = true;
+            startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            
+            // Zobrazení hint při prvním použití
+            if (!rotationHintShown) {
+                showRotationHint();
+                rotationHintShown = true;
+            }
+            
+            e.preventDefault();
+        }
+        
+        function handleRotationMove(e) {
+            if (!isRotating || !isModelVisible()) return;
+            
+            const currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const deltaX = currentX - startX;
+            
+            // Aktualizace rotace (citlivost 0.5)
+            modelRotationY += deltaX * 0.5;
+            updateModelRotation();
+            
+            startX = currentX;
+            e.preventDefault();
+        }
+        
+        function handleRotationEnd(e) {
+            isRotating = false;
+        }
+        
+        function updateModelRotation() {
+            const glbModel = document.querySelector('.rotatable-model');
+            if (glbModel) {
+                glbModel.setAttribute('rotation', `0 ${modelRotationY} 0`);
+            }
+        }
+        
+        function isModelVisible() {
+            const angelEntity = document.querySelector('[data-marker-id="andel_2"]');
+            return angelEntity && angelEntity.getAttribute('visible');
+        }
+        
+        function showRotationHint() {
+            const rotationHint = document.getElementById('rotationHint');
+            rotationHint.style.display = 'block';
+            
+            // Automaticky skrýt po 3 sekundách
+            setTimeout(() => {
+                rotationHint.style.display = 'none';
+            }, 3000);
+        }
         function playAudio(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (!marker) return;
@@ -382,50 +535,6 @@
             }
         }
 
-        // Funkce pro vyhlazení GPS pozice
-        function smoothGPSPosition(newPosition) {
-            // Kontrola přesnosti GPS
-            if (newPosition.accuracy > MIN_GPS_ACCURACY) {
-                console.log(`GPS accuracy too low: ${newPosition.accuracy}m, skipping update`);
-                return userPosition; // Vrátíme předchozí pozici
-            }
-            
-            // První pozice
-            if (!userPosition) {
-                return newPosition;
-            }
-            
-            // Vyhlazení pomocí exponenciálního klouzavého průměru
-            const smoothedPosition = {
-                lat: userPosition.lat + GPS_SMOOTHING_FACTOR * (newPosition.lat - userPosition.lat),
-                lng: userPosition.lng + GPS_SMOOTHING_FACTOR * (newPosition.lng - userPosition.lng),
-                accuracy: newPosition.accuracy
-            };
-            
-            return smoothedPosition;
-        }
-
-        // Kontrola stability pozice
-        function isPositionStable(position) {
-            if (!lastStablePosition) {
-                lastStablePosition = position;
-                return true;
-            }
-            
-            const distance = calculateDistance(
-                lastStablePosition.lat, lastStablePosition.lng,
-                position.lat, position.lng
-            );
-            
-            // Pokud je změna menší než 2 metry, považujeme pozici za stabilní
-            if (distance < 2) {
-                return true;
-            }
-            
-            // Aktualizujeme stabilní pozici pokud je změna výrazná
-            lastStablePosition = position;
-            return false;
-        }
         function formatDistance(distance) {
             if (distance < 1000) {
                 return `${Math.round(distance)}m`;
@@ -706,7 +815,7 @@
             }
         }
         
-        // Sledování polohy v reálném čase
+        // Sledování polohy v reálném čase - optimalizováno pro obcházení
         function watchPosition() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
@@ -732,7 +841,7 @@
                     {
                         enableHighAccuracy: true,
                         timeout: 8000,
-                        maximumAge: 20000
+                        maximumAge: 15000  // Středně krátká cache pro responsive obcházení
                     }
                 );
             }
@@ -762,7 +871,7 @@
 
         // Inicializace
         window.addEventListener('load', () => {
-            console.log("Starting geolocation AR scene with GLB model...");
+            console.log("Starting geolocation AR scene with improved stability for walking around...");
             
             setupEventListeners();
             getCurrentPosition();
@@ -788,6 +897,4 @@
                 });
             }
         });
-    </script>
-</body>
-</html>
+    
