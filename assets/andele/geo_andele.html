@@ -199,10 +199,10 @@
         </div>
     </div>
     
-            <!-- AR scéna s geolokací -->
+        <!-- AR scéna s geolokací -->
     <a-scene 
         vr-mode-ui="enabled: false"
-        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; gpsMinDistance: 5;"
+        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; gpsMinDistance: 0.5;"
         renderer="logarithmicDepthBuffer: true; antialias: true; precision: medium;"
         device-orientation-permission-ui="enabled: false"
         style="width: 100vw; height: 100vh;">
@@ -222,7 +222,7 @@
         <!-- Kamera s geolokací -->
         <a-camera 
             id="camera"
-            gps-camera="gpsMinDistance: 1; positionMinAccuracy: 2;"
+            gps-camera="gpsMinDistance: 0.5; positionMinAccuracy: 1; alert: false; minDistance: 0.5; maxDistance: 0;"
             rotation-reader
             camera="fov: 80;">
         </a-camera>
@@ -247,32 +247,37 @@
 
         <!-- Angel_2 - GLB Model -->
         <a-entity 
-             gps-entity-place="latitude: 49.0091389; longitude: 17.1286111"
+             gps-entity-place="latitude: 49.0091389; longitude: 17.1286111; alert: false;"
                 data-marker-id="andel_2"
                 data-audio-id="audio2"
                 class="ar-object"
                 visible="false">
             
-            <!-- GLB model s nastavením pro obcházení -->
+            <!-- GLB model s pevným umístěním -->
             <a-gltf-model 
                 src="#glb-model"
-                position="0 1 0"
-                scale="1 1 1"
+                position="0 2 0"
+                scale="1.5 1.5 1.5"
                 rotation="0 0 0"
                 animation-mixer="clip: *; loop: repeat"
-                shadow="cast: true; receive: true">
+                shadow="cast: true; receive: true"
+                material="side: double">
             </a-gltf-model>
             
-            <!-- Pomocný základ pro orientaci při obcházení -->
-            <a-ring 
-                position="0 0.1 0" 
-                radius-inner="0.8" 
-                radius-outer="1.2" 
-                color="#ffffff" 
-                opacity="0.1"
-                rotation="-90 0 0"
-                material="transparent: true; side: double">
-            </a-ring>
+            <!-- Debug marker pro kontrolu pozice -->
+            <a-box 
+                position="0 5 0" 
+                scale="0.5 0.5 0.5" 
+                color="red"
+                material="color: red;">
+                <a-text 
+                    value="ANDĚL POZICE" 
+                    position="0 1 0" 
+                    align="center" 
+                    color="white"
+                    scale="2 2 2">
+                </a-text>
+            </a-box>
         </a-entity>
 
         <!-- Angel_3 -->
@@ -303,10 +308,10 @@
         let userPosition = null;
         let lastStablePosition = null;
         const PROXIMITY_THRESHOLD = 10; // metry - vzdálenost pro aktivaci gamifikace
-        const AR_VISIBILITY_THRESHOLD = 80; // metry - široký dosah pro obcházení
+        const AR_VISIBILITY_THRESHOLD = 100; // metry - velmi široký dosah
         const AUDIO_THRESHOLD = 15; // metry - vzdálenost pro spuštění audio
-        const GPS_SMOOTHING_FACTOR = 0.15; // Nižší faktor pro stabilnější obcházení
-        const MIN_GPS_ACCURACY = 12; // Přesnější GPS pro lepší obcházení
+        const GPS_SMOOTHING_FACTOR = 0.1; // Velmi nízký faktor pro stabilitu
+        const MIN_GPS_ACCURACY = 20; // Tolerantnější přesnost
         let arObjectsVisible = false;
         let selectedTargetId = null; // ID vybraného cíle
         let currentlyPlayingAudio = null; // Aktuálně přehrávané audio
@@ -732,9 +737,12 @@
                         // Aplikace vyhlazení
                         const smoothedPosition = smoothGPSPosition(rawPosition);
                         
-                        // Pro obcházení povolíme častější aktualizace
-                        if (smoothedPosition) {
+                        // Pouze významné změny pozice (> 1m)
+                        if (smoothedPosition && (!userPosition || 
+                            calculateDistance(userPosition.lat, userPosition.lng, 
+                                            smoothedPosition.lat, smoothedPosition.lng) > 1)) {
                             userPosition = smoothedPosition;
+                            console.log("Position updated:", userPosition);
                             checkProximityToMarkers();
                             updateNavigation();
                         }
@@ -744,8 +752,8 @@
                     },
                     {
                         enableHighAccuracy: true,
-                        timeout: 5000,
-                        maximumAge: 10000  // Kratší cache pro responsivnější obcházení
+                        timeout: 10000,
+                        maximumAge: 30000  // Delší cache pro stabilitu
                     }
                 );
             }
