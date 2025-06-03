@@ -309,6 +309,12 @@
     </a-scene>
 
     <script>
+        // Přidejte do setupCameraFix() pokud stále není v pořádku
+const canvas = document.querySelector('canvas');
+if (canvas) {
+    canvas.style.objectFit = 'cover';
+    canvas.style.objectPosition = 'center';
+}
         // GPS přesnost a debugging - ZACHOVÁNO z funkčního kódu
         let userPosition = null;
         let lastStablePosition = null;
