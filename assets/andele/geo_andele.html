@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1, maximum-scale=1">
 
     <!-- A-Frame a AR.js pro geolokaci -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
@@ -216,13 +216,14 @@
         </div>
     </div>
     
-    <!-- AR scéna s geolokací - ZACHOVÁNO z funkčního kódu -->
+    <!-- AR scéna s geolokací - OPRAVENO pro mobil -->
     <a-scene 
         vr-mode-ui="enabled: false"
-        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; gpsMinDistance: 5;"
-        renderer="logarithmicDepthBuffer: true; antialias: true; precision: medium;"
+        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; gpsMinDistance: 5; trackingMethod: best;"
+        renderer="logarithmicDepthBuffer: true; antialias: true; precision: medium; alpha: true;"
         device-orientation-permission-ui="enabled: false"
-        style="width: 100vw; height: 100vh;">
+        embedded
+        style="width: 100vw; height: 100vh; position: fixed; top: 0; left: 0;">
 
         <a-assets>
             <img id="marker1" src="/assets/andele/img/andel_1.png">
@@ -236,17 +237,20 @@
             <audio id="audio3" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
         </a-assets>
 
-        <!-- Kamera s geolokací - ZACHOVÁNO -->
+        <!-- Kamera s lepším nastavením pro mobil -->
         <a-camera 
             id="camera"
-            gps-camera
-            rotation-reader>
+            gps-camera="simulateLatitude: 0; simulateLongitude: 0;"
+            rotation-reader
+            look-controls="enabled: false"
+            wasd-controls="enabled: false"
+            camera="active: true;">
         </a-camera>
 
         <!-- AR objekty na konkrétních GPS souřadnicích - ZACHOVÁNO -->
         <!-- Angel_1 -->
         <a-entity 
-            gps-entity-place="latitude: 49.0100000; longitude: 17.1245278"
+            gps-entity-place="latitude: 49.0338889; longitude: 17.2698056"
             data-marker-id="andel_1"
             data-audio-id="audio1"
             class="ar-object"
@@ -254,7 +258,7 @@
             
             <a-plane 
                 src="#marker1" 
-                position="0 2 0" 
+                position="0 3 0" 
                 scale="4 5 1" 
                 rotation="0 130 0"
                 material="transparent: true; alphaTest: 0.1; side: double">
@@ -263,7 +267,7 @@
 
         <!-- Angel_2 - GLB Model - ZACHOVÁNO z funkčního kódu -->
         <a-entity 
-             gps-entity-place="latitude: 49.0130833; longitude: 17.1269167; gpsMinDistance: 3;"
+             gps-entity-place="latitude: 49.0091389; longitude: 17.1286111; gpsMinDistance: 3;"
                 data-marker-id="andel_2"
                 data-audio-id="audio2"
                 class="ar-object"
@@ -283,7 +287,7 @@
 
         <!-- Angel_3 -->
         <a-entity 
-             gps-entity-place="latitude: 49.2081389; longitude: 16.6884722"
+             gps-entity-place="latitude: 48.9814167; longitude: 17.1526667"
                data-marker-id="andel_3"
                data-audio-id="audio3"
                class="ar-object"
@@ -291,7 +295,7 @@
             
             <a-plane 
                 src="#marker3" 
-                position="0 2 0" 
+                position="0 3 0" 
                 scale="4 5 1" 
                 rotation="0 130 0"
                 material="transparent: true; alphaTest: 0.1; side: double">
@@ -329,24 +333,24 @@
         const markers = [
             { 
                 id: "andel_1", 
-                lat: 49.0100000,
-                lng: 17.1245278,
+                lat: 49.0338889,
+                lng: 17.2698056,
                 name: "Anděl",
                 description: "nebeský Anděl",
                 audioId: "audio1"
             },
             { 
                  id: "andel_2", 
-                 lat: 49.0130833,  
-                 lng: 17.1269167,  
+                 lat: 49.0091389,  
+                 lng: 17.1286111,  
                  name: "3D Anděl",
                  description: "3D GLB model anděla",
                  audioId: "audio2"
             },
             { 
                  id: "andel_3", 
-                 lat: 49.2081389,  
-                 lng: 16.6884722,  
+                 lat: 48.9814167,  
+                 lng: 17.1526667,  
                  name: "Anděl_3",
                  description: "nebeský Anděl 3",
                  audioId: "audio3"
@@ -933,6 +937,7 @@
             
             setupEventListeners();
             setupModelRotation(); // NOVÉ: Přidána rotace dotykem
+            setupCameraFix(); // NOVÉ: Oprava kamery pro mobil
             getCurrentPosition();
             watchPosition();
             
@@ -940,6 +945,45 @@
             console.log(`AR visibility threshold set to: ${AR_VISIBILITY_THRESHOLD} meters`);
             console.log("Touch rotation enabled for angel model");
         });
+
+        // NOVÉ: Oprava aspect ratio pro mobilní kameru
+        function setupCameraFix() {
+            // Oprava pro mobilní zařízení
+            const scene = document.querySelector('a-scene');
+            if (scene) {
+                scene.addEventListener('camera-init', () => {
+                    setTimeout(() => {
+                        const video = document.querySelector('video');
+                        if (video) {
+                            video.style.objectFit = 'cover';
+                            video.style.width = '100%';
+                            video.style.height = '100%';
+                            console.log("Camera aspect ratio fixed");
+                        }
+                    }, 1000);
+                });
+            }
+            
+            // Oprava při změně orientace
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => {
+                    const scene = document.querySelector('a-scene');
+                    if (scene && scene.resize) {
+                        scene.resize();
+                    }
+                }, 500);
+            });
+            
+            // Oprava při změně velikosti okna
+            window.addEventListener('resize', () => {
+                setTimeout(() => {
+                    const scene = document.querySelector('a-scene');
+                    if (scene && scene.resize) {
+                        scene.resize();
+                    }
+                }, 300);
+            });
+        }
 
         // A-Frame scéna je připravena
         document.querySelector('a-scene').addEventListener('loaded', () => {
