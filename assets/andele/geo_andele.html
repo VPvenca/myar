@@ -222,9 +222,9 @@
         <!-- Kamera s geolokací -->
         <a-camera 
             id="camera"
-            gps-camera
+            gps-camera="gpsMinDistance: 1; positionMinAccuracy: 2;"
             rotation-reader
-            camera="fov: 70;">
+            camera="fov: 80;">
         </a-camera>
 
         <!-- AR objekty na konkrétních GPS souřadnicích -->
@@ -247,21 +247,62 @@
 
         <!-- Angel_2 - GLB Model -->
         <a-entity 
-             gps-entity-place="latitude: 49.0091667; longitude: 17.1286111; gpsMinDistance: 3;"
+             gps-entity-place="latitude: 49.0091667; longitude: 17.1286111"
                 data-marker-id="andel_2"
                 data-audio-id="audio2"
                 class="ar-object"
                 visible="false">
             
-            <!-- GLB model s lepším nastavením -->
+            <!-- GLB model s lepším nastavením pro obcházení -->
             <a-gltf-model 
                 src="#glb-model"
-                position="0 0 0"
-                scale="2 2 2"
-                rotation="0 30 0"
+                position="0 1 0"
+                scale="3 3 3"
+                rotation="0 0 0"
                 animation-mixer="clip: *; loop: repeat"
                 shadow="cast: true; receive: true">
             </a-gltf-model>
+            
+            <!-- Pomocný základ pro orientaci -->
+            <a-ring 
+                position="0 0.1 0" 
+                radius-inner="0.8" 
+                radius-outer="1.2" 
+                color="#ffffff" 
+                opacity="0.3"
+                rotation="-90 0 0"
+                material="transparent: true; side: double">
+            </a-ring>
+            
+            <!-- Compass rose pro orientaci -->
+            <a-text 
+                value="S" 
+                position="0 0.2 1" 
+                align="center" 
+                color="#ff0000"
+                scale="2 2 2">
+            </a-text>
+            <a-text 
+                value="J" 
+                position="0 0.2 -1" 
+                align="center" 
+                color="#0000ff"
+                scale="2 2 2">
+            </a-text>
+            <a-text 
+                value="V" 
+                position="1 0.2 0" 
+                align="center" 
+                color="#00ff00"
+                scale="2 2 2">
+            </a-text>
+            <a-text 
+                value="Z" 
+                position="-1 0.2 0" 
+                align="center" 
+                color="#ffff00"
+                scale="2 2 2">
+            </a-text>
         </a-entity>
 
         <!-- Angel_3 -->
@@ -292,10 +333,10 @@
         let userPosition = null;
         let lastStablePosition = null;
         const PROXIMITY_THRESHOLD = 10; // metry - vzdálenost pro aktivaci gamifikace
-        const AR_VISIBILITY_THRESHOLD = 50; // metry - zvýšeno pro lepší testování
-        const AUDIO_THRESHOLD = 10; // metry - vzdálenost pro spuštění audio
-        const GPS_SMOOTHING_FACTOR = 0.3; // Faktor pro vyhlazování GPS (0.1-0.5)
-        const MIN_GPS_ACCURACY = 20; // Minimální přesnost GPS v metrech
+        const AR_VISIBILITY_THRESHOLD = 80; // metry - zvýšeno pro lepší obcházení
+        const AUDIO_THRESHOLD = 15; // metry - vzdálenost pro spuštění audio
+        const GPS_SMOOTHING_FACTOR = 0.2; // Faktor pro vyhlazování GPS (nižší pro stabilnější obcházení)
+        const MIN_GPS_ACCURACY = 15; // Minimální přesnost GPS v metrech
         let arObjectsVisible = false;
         let selectedTargetId = null; // ID vybraného cíle
         let currentlyPlayingAudio = null; // Aktuálně přehrávané audio
@@ -417,14 +458,15 @@
                 position.lat, position.lng
             );
             
-            // Pokud je změna menší než 2 metry, považujeme pozici za stabilní
-            if (distance < 2) {
+            // Pokud je změna menší než 1 metr, považujeme pozici za stabilní
+            // (sníženo z 2m pro lepší responsivnost při obcházení)
+            if (distance < 1) {
                 return true;
             }
             
             // Aktualizujeme stabilní pozici pokud je změna výrazná
             lastStablePosition = position;
-            return false;
+            return true; // Povolíme všechny změny pro lepší obcházení
         }
         function formatDistance(distance) {
             if (distance < 1000) {
