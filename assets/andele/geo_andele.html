@@ -18,6 +18,35 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+        }
+        
+        /* Force proper video scaling */
+        video {
+            object-fit: cover !important;
+            width: 100% !important;
+            height: 100% !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+        }
+        
+        /* Force proper canvas scaling */
+        canvas {
+            object-fit: cover !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        /* Ensure a-scene fills screen properly */
+        a-scene {
+            width: 100vw !important;
+            height: 100vh !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
         }
         
         .back-button-ar {
@@ -309,12 +338,6 @@
     </a-scene>
 
     <script>
-        // Přidejte do setupCameraFix() pokud stále není v pořádku
-const canvas = document.querySelector('canvas');
-if (canvas) {
-    canvas.style.objectFit = 'cover';
-    canvas.style.objectPosition = 'center';
-}
         // GPS přesnost a debugging - ZACHOVÁNO z funkčního kódu
         let userPosition = null;
         let lastStablePosition = null;
