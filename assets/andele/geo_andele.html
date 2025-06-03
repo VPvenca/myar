@@ -49,6 +49,20 @@
             border: 2px solid #00ff00;
         }
         
+        .debug-info {
+            position: fixed;
+            top: 60px;
+            left: 10px;
+            background-color: rgba(255,0,0,0.9);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            z-index: 1000;
+            max-width: 300px;
+            font-family: monospace;
+        }
+        
         /* Navigační panel v pravém horním rohu */
         .navigation-panel {
             position: fixed;
@@ -177,6 +191,10 @@
         Zpět do Menu
     </a>
     
+    <div class="debug-info" id="debugInfo">
+        DEBUG: Inicializace...
+    </div>
+    
     <div class="audio-info" id="audioInfo">
         🎵 Audio přehrává...
     </div>
@@ -199,17 +217,16 @@
         </div>
     </div>
     
-        <!-- AR scéna s geolokací -->
+    <!-- AR scéna BEZ gps-entity-place -->
     <a-scene 
         vr-mode-ui="enabled: false"
-        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; gpsMinDistance: 0.5;"
+        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
         renderer="logarithmicDepthBuffer: true; antialias: true; precision: medium;"
         device-orientation-permission-ui="enabled: false"
         style="width: 100vw; height: 100vh;">
 
         <a-assets>
             <img id="marker1" src="/assets/andele/img/andel_1.png">
-            <!-- Opraveno: Načítání GLB modelu místo GLTF -->
             <a-asset-item id="glb-model" src="/assets/andele/3d/andel.glb"></a-asset-item>
             <img id="marker3" src="/assets/andele/img/andel_1.png">
             
@@ -219,18 +236,17 @@
             <audio id="audio3" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
         </a-assets>
 
-        <!-- Kamera s geolokací -->
+        <!-- Kamera bez gps-camera -->
         <a-camera 
             id="camera"
-            gps-camera="gpsMinDistance: 0.5; positionMinAccuracy: 1; alert: false; minDistance: 0.5; maxDistance: 0;"
-            rotation-reader
-            camera="fov: 80;">
+            camera="fov: 80;"
+            position="0 1.6 0">
         </a-camera>
 
-        <!-- AR objekty na konkrétních GPS souřadnicích -->
+        <!-- AR objekty na klasických souřadnicích - MANUÁLNÍ GPS pozicování -->
         <!-- Angel_1 -->
         <a-entity 
-            gps-entity-place="latitude: 49.0338889; longitude: 17.2698056"
+            id="andel_1_entity"
             data-marker-id="andel_1"
             data-audio-id="audio1"
             class="ar-object"
@@ -247,46 +263,45 @@
 
         <!-- Angel_2 - GLB Model -->
         <a-entity 
-             gps-entity-place="latitude: 49.0091389; longitude: 17.1286111; alert: false;"
-                data-marker-id="andel_2"
-                data-audio-id="audio2"
-                class="ar-object"
-                visible="false">
+            id="andel_2_entity"
+            data-marker-id="andel_2"
+            data-audio-id="audio2"
+            class="ar-object"
+            visible="false">
             
-            <!-- GLB model s pevným umístěním -->
+            <!-- DEBUG kostky pro testování -->
+            <a-box 
+                position="0 5 0" 
+                scale="1 1 1" 
+                color="red"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 4000">
+                <a-text 
+                    value="ANDĚL\nTADY!" 
+                    position="0 1.5 0" 
+                    align="center" 
+                    color="white"
+                    scale="2 2 2">
+                </a-text>
+            </a-box>
+            
+            <!-- GLB model -->
             <a-gltf-model 
                 src="#glb-model"
                 position="0 2 0"
                 scale="1.5 1.5 1.5"
                 rotation="0 0 0"
                 animation-mixer="clip: *; loop: repeat"
-                shadow="cast: true; receive: true"
-                material="side: double">
+                shadow="cast: true; receive: true">
             </a-gltf-model>
-            
-            <!-- Debug marker pro kontrolu pozice -->
-            <a-box 
-                position="0 5 0" 
-                scale="0.5 0.5 0.5" 
-                color="red"
-                material="color: red;">
-                <a-text 
-                    value="ANDĚL POZICE" 
-                    position="0 1 0" 
-                    align="center" 
-                    color="white"
-                    scale="2 2 2">
-                </a-text>
-            </a-box>
         </a-entity>
 
         <!-- Angel_3 -->
         <a-entity 
-             gps-entity-place="latitude: 48.9814167; longitude: 17.1526667"
-               data-marker-id="andel_3"
-               data-audio-id="audio3"
-               class="ar-object"
-               visible="false">
+            id="andel_3_entity"
+            data-marker-id="andel_3"
+            data-audio-id="audio3"
+            class="ar-object"
+            visible="false">
             
             <a-plane 
                 src="#marker3" 
@@ -306,17 +321,13 @@
     <script>
         // GPS přesnost a debugging
         let userPosition = null;
-        let lastStablePosition = null;
         const PROXIMITY_THRESHOLD = 10; // metry - vzdálenost pro aktivaci gamifikace
-        const AR_VISIBILITY_THRESHOLD = 100; // metry - velmi široký dosah
+        const AR_VISIBILITY_THRESHOLD = 100; // metry - široký dosah
         const AUDIO_THRESHOLD = 15; // metry - vzdálenost pro spuštění audio
-        const GPS_SMOOTHING_FACTOR = 0.1; // Velmi nízký faktor pro stabilitu
-        const MIN_GPS_ACCURACY = 20; // Tolerantnější přesnost
         let arObjectsVisible = false;
-        let selectedTargetId = null; // ID vybraného cíle
-        let currentlyPlayingAudio = null; // Aktuálně přehrávané audio
-        let audioPlayingForMarker = null; // ID markeru pro který se audio přehrává
-        let positionHistory = []; // Historie pozic pro vyhlazování
+        let selectedTargetId = null;
+        let currentlyPlayingAudio = null;
+        let audioPlayingForMarker = null;
         
         // Definice cílových bodů
         const markers = [
@@ -329,49 +340,141 @@
                 audioId: "audio1"
             },
             { 
-                 id: "andel_2", 
-                 lat: 49.0091389,  
-                 lng: 17.1286111,  
-                 name: "3D Anděl",
-                 description: "3D GLB model anděla",
-                 audioId: "audio2"
+                id: "andel_2", 
+                lat: 49.0091389,  
+                lng: 17.1286111,  
+                name: "3D Anděl",
+                description: "3D GLB model anděla",
+                audioId: "audio2"
             },
             { 
-                 id: "andel_3", 
-                 lat: 48.9814167,  
-                 lng: 17.1526667,  
-                 name: "Anděl_3",
-                 description: "nebeský Anděl 3",
-                 audioId: "audio3"
+                id: "andel_3", 
+                lat: 48.9814167,  
+                lng: 17.1526667,  
+                name: "Anděl_3",
+                description: "nebeský Anděl 3",
+                audioId: "audio3"
             }
         ];
+
+        // Manuální GPS pozicování
+        function updateObjectPositions() {
+            if (!userPosition) return;
+            
+            markers.forEach(marker => {
+                const entity = document.getElementById(`${marker.id}_entity`);
+                if (!entity) return;
+                
+                // Výpočet relativní pozice objektu vzhledem k uživateli
+                const distance = calculateDistance(
+                    userPosition.lat, userPosition.lng,
+                    marker.lat, marker.lng
+                );
+                
+                // Výpočet směru (bearing) k objektu
+                const bearing = calculateBearing(
+                    userPosition.lat, userPosition.lng,
+                    marker.lat, marker.lng
+                );
+                
+                // Konverze na kartézské souřadnice
+                const x = Math.sin(bearing * Math.PI / 180) * distance;
+                const z = -Math.cos(bearing * Math.PI / 180) * distance;
+                
+                // Nastavení pozice objektu
+                entity.setAttribute('position', `${x} 0 ${z}`);
+                
+                // Zobrazení pokud je v dosahu
+                if (distance <= AR_VISIBILITY_THRESHOLD) {
+                    entity.setAttribute('visible', 'true');
+                    console.log(`${marker.name} visible at distance ${distance.toFixed(1)}m, bearing ${bearing.toFixed(1)}°`);
+                } else {
+                    entity.setAttribute('visible', 'false');
+                }
+            });
+            
+            updateDebugInfo();
+        }
+
+        // Výpočet vzdálenosti mezi dvěma GPS body
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000; // Poloměr Země v metrech
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                     Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Výpočet směru (bearing) mezi dvěma GPS body
+        function calculateBearing(lat1, lon1, lat2, lon2) {
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const lat1Rad = lat1 * Math.PI / 180;
+            const lat2Rad = lat2 * Math.PI / 180;
+            
+            const y = Math.sin(dLon) * Math.cos(lat2Rad);
+            const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - 
+                      Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
+            
+            let bearing = Math.atan2(y, x) * 180 / Math.PI;
+            return (bearing + 360) % 360; // Normalizace na 0-360°
+        }
+
+        // Debug informace
+        function updateDebugInfo() {
+            const debugInfo = document.getElementById('debugInfo');
+            let debugText = 'MANUÁLNÍ GPS POZICOVÁNÍ:\n';
+            
+            if (userPosition) {
+                debugText += `Pozice: ${userPosition.lat.toFixed(6)}, ${userPosition.lng.toFixed(6)}\n`;
+                debugText += `Přesnost: ${userPosition.accuracy.toFixed(0)}m\n\n`;
+                
+                debugText += 'OBJEKTY:\n';
+                markers.forEach(marker => {
+                    const distance = calculateDistance(
+                        userPosition.lat, userPosition.lng,
+                        marker.lat, marker.lng
+                    );
+                    const bearing = calculateBearing(
+                        userPosition.lat, userPosition.lng,
+                        marker.lat, marker.lng
+                    );
+                    const entity = document.getElementById(`${marker.id}_entity`);
+                    const isVisible = entity ? entity.getAttribute('visible') : false;
+                    
+                    debugText += `${marker.name}: ${Math.round(distance)}m, ${Math.round(bearing)}° (${isVisible ? 'VID' : 'SKRYT'})\n`;
+                });
+            } else {
+                debugText += 'Čekám na GPS pozici...\n';
+            }
+            
+            debugInfo.innerHTML = debugText.replace(/\n/g, '<br>');
+        }
 
         // Funkce pro spuštění audio
         function playAudio(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (!marker) return;
             
-            // Pokud už hraje audio pro tento marker, neděláme nic
             if (audioPlayingForMarker === markerId) return;
             
-            // Zastavíme aktuální audio pokud hraje
             stopCurrentAudio();
             
             const audioElement = document.getElementById(marker.audioId);
             if (audioElement) {
                 console.log(`Playing audio for marker: ${markerId}`);
                 
-                audioElement.currentTime = 0; // Restart od začátku
+                audioElement.currentTime = 0;
                 audioElement.play().then(() => {
                     currentlyPlayingAudio = audioElement;
                     audioPlayingForMarker = markerId;
                     
-                    // Zobrazíme info o přehrávání
                     const audioInfo = document.getElementById('audioInfo');
                     audioInfo.textContent = `🎵 ${marker.name} - Audio přehrává...`;
                     audioInfo.style.display = 'block';
                     
-                    // Event listener pro konec audio
                     audioElement.onended = () => {
                         console.log(`Audio ended for marker: ${markerId}`);
                         stopCurrentAudio();
@@ -392,75 +495,17 @@
                 currentlyPlayingAudio = null;
                 audioPlayingForMarker = null;
                 
-                // Skryjeme audio info
                 document.getElementById('audioInfo').style.display = 'none';
                 console.log("Audio stopped");
             }
         }
 
-        // Funkce pro vyhlazení GPS pozice
-        function smoothGPSPosition(newPosition) {
-            // Kontrola přesnosti GPS
-            if (newPosition.accuracy > MIN_GPS_ACCURACY) {
-                console.log(`GPS accuracy too low: ${newPosition.accuracy}m, skipping update`);
-                return userPosition; // Vrátíme předchozí pozici
-            }
-            
-            // První pozice
-            if (!userPosition) {
-                return newPosition;
-            }
-            
-            // Vyhlazení pomocí exponenciálního klouzavého průměru
-            const smoothedPosition = {
-                lat: userPosition.lat + GPS_SMOOTHING_FACTOR * (newPosition.lat - userPosition.lat),
-                lng: userPosition.lng + GPS_SMOOTHING_FACTOR * (newPosition.lng - userPosition.lng),
-                accuracy: newPosition.accuracy
-            };
-            
-            return smoothedPosition;
-        }
-
-        // Kontrola stability pozice
-        function isPositionStable(position) {
-            if (!lastStablePosition) {
-                lastStablePosition = position;
-                return true;
-            }
-            
-            const distance = calculateDistance(
-                lastStablePosition.lat, lastStablePosition.lng,
-                position.lat, position.lng
-            );
-            
-            // Pokud je změna menší než 1 metr, považujeme pozici za stabilní
-            // (sníženo z 2m pro lepší responsivnost při obcházení)
-            if (distance < 1) {
-                return true;
-            }
-            
-            // Aktualizujeme stabilní pozici pokud je změna výrazná
-            lastStablePosition = position;
-            return true; // Povolíme všechny změny pro lepší obcházení
-        }
         function formatDistance(distance) {
             if (distance < 1000) {
                 return `${Math.round(distance)}m`;
             } else {
                 return `${(distance / 1000).toFixed(1)}km`;
             }
-        }
-        
-        // Funkce pro výpočet vzdálenosti mezi dvěma GPS body
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371000; // Poloměr Země v metrech
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                     Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
         }
 
         // Nalezení nejbližšího markeru
@@ -485,7 +530,6 @@
             return closest;
         }
 
-        // Nalezení vybraného markeru
         function findSelectedMarker() {
             if (!userPosition || !selectedTargetId) return null;
             
@@ -500,7 +544,6 @@
             return { ...marker, distance };
         }
 
-        // Aktualizace zobrazení vzdálenosti
         function updateDistanceDisplay() {
             const distanceInfo = document.getElementById('distanceInfo');
             const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
@@ -509,7 +552,6 @@
                 const distance = Math.round(targetMarker.distance);
                 const prefix = selectedTargetId ? '🎯' : '📍';
                 
-                // Přidáme audio indikátor pokud je v dosahu
                 let audioIndicator = '';
                 if (distance <= AUDIO_THRESHOLD) {
                     audioIndicator = ' 🎵';
@@ -517,36 +559,29 @@
                 
                 distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${audioIndicator}<br><strong>${distance}m</strong>`;
                 
-                // Změna barvy podle vzdálenosti
                 if (distance <= AR_VISIBILITY_THRESHOLD) {
-                    // Velmi blízko - jasně zelená
                     distanceInfo.style.borderColor = '#00ff00';
                     distanceInfo.style.backgroundColor = 'rgba(0,255,0,0.8)';
-                } else if (distance <= 100) {
-                    // Středně daleko - oranžová
+                } else if (distance <= 200) {
                     distanceInfo.style.borderColor = '#ffaa00';
                     distanceInfo.style.backgroundColor = 'rgba(255,170,0,0.8)';
                 } else {
-                    // Daleko - červená
                     distanceInfo.style.borderColor = '#ff0000';
                     distanceInfo.style.backgroundColor = 'rgba(255,0,0,0.8)';
                 }
             } else {
                 distanceInfo.innerHTML = '📍 Hledám nejbližší bod...';
-                // Default stav - neutrální
                 distanceInfo.style.borderColor = '#ffffff';
                 distanceInfo.style.backgroundColor = 'rgba(0,0,0,0.8)';
             }
         }
 
-        // Aktualizace navigačního seznamu
         function updateNavigation() {
             if (!userPosition) return;
             
             const targetsList = document.getElementById('targetsList');
             let html = '';
             
-            // Vypočítání vzdáleností a seřazení
             const markersWithDistance = markers.map(marker => {
                 const distance = calculateDistance(
                     userPosition.lat, userPosition.lng,
@@ -563,22 +598,19 @@
                 if (isSelected) {
                     cssClass += ' selected';
                 } else {
-                    // Přidáme třídy podle vzdálenosti
                     if (marker.distance <= AR_VISIBILITY_THRESHOLD) {
-                        cssClass += ' very-close'; // Velmi blízko - zelená
-                    } else if (marker.distance <= 100) {
-                        cssClass += ' medium'; // Středně - oranžová
+                        cssClass += ' very-close';
+                    } else if (marker.distance <= 200) {
+                        cssClass += ' medium';
                     } else {
-                        cssClass += ' far'; // Daleko - červená
+                        cssClass += ' far';
                     }
                     
-                    // Nejbližší marker má vždy zelenou pokud není vybraný
                     if (isClosest && !isSelected) {
                         cssClass = 'target-item closest';
                     }
                 }
                 
-                // Audio indikátor v navigaci
                 let audioIndicator = '';
                 if (marker.distance <= AUDIO_THRESHOLD) {
                     audioIndicator = ' 🎵';
@@ -599,7 +631,6 @@
             
             targetsList.innerHTML = html;
             
-            // Přidání event listenerů pro výběr cíle
             document.querySelectorAll('.target-item').forEach(item => {
                 item.addEventListener('click', () => {
                     const targetId = item.getAttribute('data-target-id');
@@ -607,22 +638,18 @@
                 });
             });
             
-            // Aktualizace hlavního displeje vzdálenosti
             updateDistanceDisplay();
         }
 
-        // Výběr cíle pro trackování
         function selectTarget(targetId) {
             selectedTargetId = targetId;
             document.getElementById('clearSelection').style.display = 'block';
             updateNavigation();
             updateDistanceDisplay();
             
-            // Zavřít navigační panel
             document.getElementById('navContent').classList.remove('open');
         }
 
-        // Zrušení výběru cíle
         function clearSelection() {
             selectedTargetId = null;
             document.getElementById('clearSelection').style.display = 'none';
@@ -630,26 +657,20 @@
             updateDistanceDisplay();
         }
 
-        // Získání aktuální polohy
         function getCurrentPosition() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        const rawPosition = {
+                        userPosition = {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude,
                             accuracy: position.coords.accuracy
                         };
                         
-                        // Aplikace vyhlazení
-                        const smoothedPosition = smoothGPSPosition(rawPosition);
-                        
-                        if (smoothedPosition) {
-                            userPosition = smoothedPosition;
-                            console.log("User position updated:", userPosition);
-                            checkProximityToMarkers();
-                            updateNavigation();
-                        }
+                        console.log("User position updated:", userPosition);
+                        updateObjectPositions();
+                        checkProximityToMarkers();
+                        updateNavigation();
                     },
                     (error) => {
                         console.error("Geolocation error:", error);
@@ -663,7 +684,6 @@
             }
         }
 
-        // Kontrola blízkosti k markerům
         function checkProximityToMarkers() {
             if (!userPosition) return;
             
@@ -675,41 +695,24 @@
                     marker.lat, marker.lng
                 );
                 
-                const arEntity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                if (arEntity) {
-                    // Zobrazení AR objektu
-                    if (distance <= AR_VISIBILITY_THRESHOLD) {
-                        arEntity.setAttribute('visible', 'true');
-                        console.log(`AR object visible for ${marker.id} at distance ${distance.toFixed(2)}m`);
-                        arObjectsVisible = true;
-                    } else {
-                        arEntity.setAttribute('visible', 'false');
-                    }
-                    
-                    // Audio přehrávání podle threshold
-                    if (distance <= AUDIO_THRESHOLD) {
-                        playAudio(marker.id);
-                        shouldStopAudio = false;
-                    }
+                if (distance <= AUDIO_THRESHOLD) {
+                    playAudio(marker.id);
+                    shouldStopAudio = false;
                 }
                 
-                // Aktivace gamifikace při přiblížení
                 if (distance <= PROXIMITY_THRESHOLD) {
                     activateMarker(marker.id);
                 }
             });
             
-            // Zastavíme audio pokud nejsme blízko žádného markeru
             if (shouldStopAudio && currentlyPlayingAudio) {
                 stopCurrentAudio();
             }
         }
 
-        // Aktivace markeru (gamifikace)
         function activateMarker(markerId) {
             console.log(`Marker activated: ${markerId}`);
             
-            // Gamifikace - pouze pokud jsou funkce dostupné
             if (typeof getCurrentSceneId === 'function' && typeof getCurrentExpositionId === 'function') {
                 const currentSceneId = getCurrentSceneId();
                 const currentExpositionId = getCurrentExpositionId();
@@ -723,29 +726,19 @@
             }
         }
         
-        // Sledování polohy v reálném čase
         function watchPosition() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
                     (position) => {
-                        const rawPosition = {
+                        userPosition = {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude,
                             accuracy: position.coords.accuracy
                         };
                         
-                        // Aplikace vyhlazení
-                        const smoothedPosition = smoothGPSPosition(rawPosition);
-                        
-                        // Pouze významné změny pozice (> 1m)
-                        if (smoothedPosition && (!userPosition || 
-                            calculateDistance(userPosition.lat, userPosition.lng, 
-                                            smoothedPosition.lat, smoothedPosition.lng) > 1)) {
-                            userPosition = smoothedPosition;
-                            console.log("Position updated:", userPosition);
-                            checkProximityToMarkers();
-                            updateNavigation();
-                        }
+                        updateObjectPositions();
+                        checkProximityToMarkers();
+                        updateNavigation();
                     },
                     (error) => {
                         console.error("Geolocation watch error:", error);
@@ -753,21 +746,18 @@
                     {
                         enableHighAccuracy: true,
                         timeout: 10000,
-                        maximumAge: 30000  // Delší cache pro stabilitu
+                        maximumAge: 20000
                     }
                 );
             }
         }
 
-        // Event listenery pro UI
         function setupEventListeners() {
-            // Toggle navigačního panelu
             document.getElementById('navToggle').addEventListener('click', () => {
                 const navContent = document.getElementById('navContent');
                 navContent.classList.toggle('open');
             });
             
-            // Zavření navigačního panelu při kliku mimo
             document.addEventListener('click', (e) => {
                 const navPanel = document.querySelector('.navigation-panel');
                 const navContent = document.getElementById('navContent');
@@ -777,13 +767,12 @@
                 }
             });
             
-            // Zrušení výběru
             document.getElementById('clearSelection').addEventListener('click', clearSelection);
         }
 
         // Inicializace
         window.addEventListener('load', () => {
-            console.log("Starting geolocation AR scene with GLB model...");
+            console.log("Starting MANUAL GPS positioning AR scene...");
             
             setupEventListeners();
             getCurrentPosition();
@@ -793,11 +782,9 @@
             console.log(`AR visibility threshold set to: ${AR_VISIBILITY_THRESHOLD} meters`);
         });
 
-        // A-Frame scéna je připravena
         document.querySelector('a-scene').addEventListener('loaded', () => {
-            console.log("A-Frame scene loaded for geolocation AR with GLB model");
+            console.log("A-Frame scene loaded with MANUAL GPS positioning");
             
-            // Kontrola načtení GLB modelu
             const glbModel = document.querySelector('[src="#glb-model"]');
             if (glbModel) {
                 glbModel.addEventListener('model-loaded', () => {
