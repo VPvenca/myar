@@ -444,15 +444,45 @@
         }
         
         function updateModelRotation() {
+            // Rotace pro GLB model (3D anděl) - pouze kolem Y osy
             const angelModel = document.getElementById('rotatable-angel');
             if (angelModel) {
                 angelModel.setAttribute('rotation', `0 ${modelRotationY} 0`);
             }
+            
+            // Rotace pro PNG markery (2D obrázky) - pouze kolem Y osy
+            const currentVisibleMarker = getCurrentVisibleMarker();
+            if (currentVisibleMarker && currentVisibleMarker !== 'andel_2') {
+                const markerPlane = document.querySelector(`[data-marker-id="${currentVisibleMarker}"] a-plane`);
+                if (markerPlane) {
+                    // Pouze Y rotace - X a Z zůstávají na 0
+                    markerPlane.setAttribute('rotation', `0 ${modelRotationY + 130} 0`);
+                }
+            }
+        }
+        
+        // Získání aktuálně viditelného markeru
+        function getCurrentVisibleMarker() {
+            let visibleMarker = null;
+            markers.forEach(marker => {
+                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                if (entity && entity.getAttribute('visible') === true) {
+                    visibleMarker = marker.id;
+                }
+            });
+            return visibleMarker;
         }
         
         function isModelVisible() {
-            const angelEntity = document.querySelector('[data-marker-id="andel_2"]');
-            return angelEntity && angelEntity.getAttribute('visible') === true;
+            // Kontrola jakéhokoli viditelného AR objektu (GLB nebo PNG)
+            let anyVisible = false;
+            markers.forEach(marker => {
+                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                if (entity && entity.getAttribute('visible') === true) {
+                    anyVisible = true;
+                }
+            });
+            return anyVisible;
         }
         
         function showRotationHintOnce() {
