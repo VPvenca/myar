@@ -62,6 +62,21 @@
             border: 2px solid #00ff00;
         }
         
+        /* Debug info panel */
+        .debug-info {
+            position: fixed;
+            top: 60px;
+            left: 10px;
+            background-color: rgba(255,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 11px;
+            z-index: 1000;
+            max-width: 250px;
+            font-family: monospace;
+        }
+        
         /* Navigační panel v pravém horním rohu */
         .navigation-panel {
             position: fixed;
@@ -194,6 +209,10 @@
         Získávání polohy...
     </div>
     
+    <div class="debug-info" id="debugInfo">
+        DEBUG: Inicializace...
+    </div>
+    
     <div class="audio-info" id="audioInfo">
         🎵 Audio přehrává...
     </div>
@@ -252,6 +271,26 @@
             class="ar-object"
             visible="false">
             
+            <!-- DEBUG KOSTKA - VŽDY VIDITELNÁ -->
+            <a-box 
+                position="0 1 0" 
+                scale="2 2 2" 
+                color="red"
+                material="color: red; metalness: 0.2; roughness: 0.8"
+                animation="property: rotation; to: 0 360 0; loop: true; dur: 4000">
+                <!-- Text label nad kostkou -->
+                <a-text 
+                    value="ANDĚL 1\nDEBUG KOSTKA" 
+                    position="0 2 0" 
+                    align="center" 
+                    color="white"
+                    scale="3 3 3"
+                    geometry="primitive: plane; width: 2; height: 1"
+                    material="color: black; opacity: 0.8">
+                </a-text>
+            </a-box>
+            
+            <!-- Původní obrázek -->
             <a-plane 
                 src="#marker1" 
                 position="0 3 0" 
@@ -261,13 +300,32 @@
             </a-plane>
         </a-entity>
 
-        <!-- Angel_2 - GLTF Model -->
+        <!-- Angel_2 - GLTF Model s debug kostkou -->
         <a-entity 
              gps-entity-place="latitude: 49.0091667; longitude: 17.1286111"
                 data-marker-id="andel_2"
                 data-audio-id="audio2"
                 class="ar-object"
                 visible="false">
+            
+            <!-- DEBUG KOSTKA - VŽDY VIDITELNÁ -->
+            <a-box 
+                position="0 1 0" 
+                scale="2 2 2" 
+                color="blue"
+                material="color: blue; metalness: 0.2; roughness: 0.8"
+                animation="property: rotation; to: 360 0 360; loop: true; dur: 6000">
+                <!-- Text label nad kostkou -->
+                <a-text 
+                    value="ANDĚL 2\n3D MODEL" 
+                    position="0 2 0" 
+                    align="center" 
+                    color="white"
+                    scale="3 3 3"
+                    geometry="primitive: plane; width: 2; height: 1"
+                    material="color: black; opacity: 0.8">
+                </a-text>
+            </a-box>
             
             <!-- GLTF model místo obrázku -->
             <a-gltf-model 
@@ -286,6 +344,25 @@
                data-audio-id="audio3"
                class="ar-object"
                visible="false">
+            
+            <!-- DEBUG KOSTKA - VŽDY VIDITELNÁ -->
+            <a-box 
+                position="0 1 0" 
+                scale="2 2 2" 
+                color="green"
+                material="color: green; metalness: 0.2; roughness: 0.8"
+                animation="property: rotation; to: 0 0 360; loop: true; dur: 5000">
+                <!-- Text label nad kostkou -->
+                <a-text 
+                    value="ANDĚL 3\nDEBUG KOSTKA" 
+                    position="0 2 0" 
+                    align="center" 
+                    color="white"
+                    scale="3 3 3"
+                    geometry="primitive: plane; width: 2; height: 1"
+                    material="color: black; opacity: 0.8">
+                </a-text>
+            </a-box>
             
             <a-plane 
                 src="#marker3" 
@@ -336,6 +413,36 @@
                  audioId: "audio3"
             }
         ];
+
+        // Debug funkce pro zobrazení informací
+        function updateDebugInfo() {
+            const debugInfo = document.getElementById('debugInfo');
+            let debugText = 'DEBUG INFO:\n';
+            
+            if (userPosition) {
+                debugText += `Pozice: ${userPosition.lat.toFixed(6)}, ${userPosition.lng.toFixed(6)}\n`;
+                debugText += `Přesnost: ${userPosition.accuracy.toFixed(0)}m\n\n`;
+                
+                debugText += 'VZDÁLENOSTI:\n';
+                markers.forEach(marker => {
+                    const distance = calculateDistance(
+                        userPosition.lat, userPosition.lng,
+                        marker.lat, marker.lng
+                    );
+                    const arEntity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                    const isVisible = arEntity ? arEntity.getAttribute('visible') : 'N/A';
+                    
+                    debugText += `${marker.name}: ${Math.round(distance)}m (${isVisible ? 'VID' : 'SKRYT'})\n`;
+                });
+            } else {
+                debugText += 'Čekám na GPS pozici...\n';
+            }
+            
+            debugText += `\nAR Threshold: ${AR_VISIBILITY_THRESHOLD}m`;
+            debugText += `\nAudio Threshold: ${AUDIO_THRESHOLD}m`;
+            
+            debugInfo.innerHTML = debugText.replace(/\n/g, '<br>');
+        }
 
         // Funkce pro spuštění audio
         function playAudio(markerId) {
@@ -562,6 +669,9 @@
             
             // Aktualizace hlavního displeje vzdálenosti
             updateDistanceDisplay();
+            
+            // Aktualizace debug info
+            updateDebugInfo();
         }
 
         // Výběr cíle pro trackování
@@ -656,6 +766,9 @@
             if (shouldStopAudio && currentlyPlayingAudio) {
                 stopCurrentAudio();
             }
+            
+            // Aktualizace debug informací
+            updateDebugInfo();
         }
 
         // Aktivace markeru (gamifikace)
@@ -723,9 +836,25 @@
             document.getElementById('clearSelection').addEventListener('click', clearSelection);
         }
 
+        // Pomocné funkce pro gamifikaci
+        function getCurrentSceneId() {
+            // Simulace - v reálné aplikaci by se toto získalo z URL nebo konfigurace
+            return 'andele';
+        }
+
+        function getCurrentExpositionId() {
+            // Simulace - v reálné aplikaci by se toto získalo z konfigurace
+            return 'main';
+        }
+
+        function recordMarkerActivation(expositionId, sceneId, markerId) {
+            // Simulace gamifikace - v reálné aplikaci by se data poslala na server
+            console.log(`GAMIFICATION: Marker ${markerId} activated in scene ${sceneId} of exposition ${expositionId}`);
+        }
+
         // Inicializace
         window.addEventListener('load', () => {
-            console.log("Starting geolocation AR scene with GLTF model...");
+            console.log("Starting geolocation AR scene with DEBUG CUBES...");
             
             setupEventListeners();
             getCurrentPosition();
@@ -735,20 +864,32 @@
             const currentSceneId = getCurrentSceneId();
             const currentExpositionId = getCurrentExpositionId();
             
-            if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
-                console.error("GAMIFICATION ERROR: Scene config not found for:", currentSceneId);
-            }
-            
-            if (!currentExpositionId || currentExpositionId === 'unknown') {
-                console.error("GAMIFICATION ERROR: Cannot determine exposition ID");
-            }
-            
+            console.log(`Scene ID: ${currentSceneId}, Exposition ID: ${currentExpositionId}`);
             console.log(`Audio threshold set to: ${AUDIO_THRESHOLD} meters`);
+            console.log(`AR visibility threshold set to: ${AR_VISIBILITY_THRESHOLD} meters`);
+            
+            // Inicializace debug info
+            updateDebugInfo();
         });
 
         // A-Frame scéna je připravena
         document.querySelector('a-scene').addEventListener('loaded', () => {
-            console.log("A-Frame scene loaded for geolocation AR with GLTF model");
+            console.log("A-Frame scene loaded for geolocation AR with DEBUG CUBES");
+            
+            // Kontrola, zda se AR objekty správně načetly
+            const arObjects = document.querySelectorAll('.ar-object');
+            console.log(`Found ${arObjects.length} AR objects in scene:`);
+            arObjects.forEach((obj, index) => {
+                const markerId = obj.getAttribute('data-marker-id');
+                const gpsPlace = obj.getAttribute('gps-entity-place');
+                console.log(`- Object ${index + 1}: ${markerId} at ${gpsPlace}`);
+            });
+        });
+
+        // Error handling pro gamifikaci
+        window.addEventListener('error', (e) => {
+            console.error('JavaScript Error:', e.error);
+            document.getElementById('debugInfo').innerHTML += '<br><span style="color: red;">ERROR: ' + e.message + '</span>';
         });
     </script>
 </body>
