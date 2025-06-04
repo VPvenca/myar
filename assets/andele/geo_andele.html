@@ -18,6 +18,35 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+        }
+        
+        /* Force proper video scaling */
+        video {
+            object-fit: cover !important;
+            width: 100% !important;
+            height: 100% !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+        }
+        
+        /* Force proper canvas scaling */
+        canvas {
+            object-fit: cover !important;
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        /* Ensure a-scene fills screen properly */
+        a-scene {
+            width: 100vw !important;
+            height: 100vh !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
         }
         
         .back-button-ar {
@@ -929,80 +958,41 @@
             document.getElementById('clearSelection').addEventListener('click', clearSelection);
         }
 
-        // NOVÉ: Oprava kamery pro mobilní zařízení
+        // NOVÉ: Oprava kamery pro mobilní zařízení - PŘEVZATO z funkčního geo_andele.html
         function setupCameraFix() {
-            // Počkat až se scéna načte
-            setTimeout(() => {
-                const video = document.querySelector('video');
-                if (video) {
-                    // Oprava aspect ratio
-                    video.style.objectFit = 'cover';
-                    video.style.width = '100vw';
-                    video.style.height = '100vh';
-                    video.style.position = 'absolute';
-                    video.style.top = '0';
-                    video.style.left = '0';
-                    video.style.zIndex = '-1';
-                    console.log("Camera aspect ratio fixed for mobile");
-                }
-                
-                // Oprava canvasu
-                const canvas = document.querySelector('canvas');
-                if (canvas) {
-                    canvas.style.objectFit = 'cover';
-                    canvas.style.width = '100vw';
-                    canvas.style.height = '100vh';
-                    console.log("Canvas aspect ratio fixed");
-                }
-            }, 2000);
+            // Oprava pro mobilní zařízení
+            const scene = document.querySelector('a-scene');
+            if (scene) {
+                scene.addEventListener('camera-init', () => {
+                    setTimeout(() => {
+                        const video = document.querySelector('video');
+                        if (video) {
+                            video.style.objectFit = 'cover';
+                            video.style.width = '100%';
+                            video.style.height = '100%';
+                            console.log("Camera aspect ratio fixed");
+                        }
+                    }, 1000);
+                });
+            }
             
             // Oprava při změně orientace
             window.addEventListener('orientationchange', () => {
                 setTimeout(() => {
-                    const video = document.querySelector('video');
-                    const canvas = document.querySelector('canvas');
-                    
-                    if (video) {
-                        video.style.objectFit = 'cover';
-                        video.style.width = '100vw';
-                        video.style.height = '100vh';
-                    }
-                    
-                    if (canvas) {
-                        canvas.style.objectFit = 'cover';
-                        canvas.style.width = '100vw';
-                        canvas.style.height = '100vh';
-                    }
-                    
-                    // Resize scény
                     const scene = document.querySelector('a-scene');
                     if (scene && scene.resize) {
                         scene.resize();
                     }
-                    
-                    console.log("Camera fixed after orientation change");
                 }, 500);
             });
             
             // Oprava při změně velikosti okna
             window.addEventListener('resize', () => {
                 setTimeout(() => {
-                    const video = document.querySelector('video');
-                    const canvas = document.querySelector('canvas');
-                    
-                    if (video) {
-                        video.style.objectFit = 'cover';
-                        video.style.width = '100vw';
-                        video.style.height = '100vh';
+                    const scene = document.querySelector('a-scene');
+                    if (scene && scene.resize) {
+                        scene.resize();
                     }
-                    
-                    if (canvas) {
-                        canvas.style.objectFit = 'cover';
-                        canvas.style.width = '100vw';
-                        canvas.style.height = '100vh';
-                    }
-                    
-                    console.log("Camera fixed after window resize");
                 }, 300);
             });
         }
