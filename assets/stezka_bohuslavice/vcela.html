@@ -16,53 +16,46 @@
             font-family: 'Arial', sans-serif;
         }
         
-        /* Oprava kamery - kompromisní řešení */
-video {
-    object-fit: cover; /* vrátíme cover pro odstranění deformace */
-    object-position: center;
-    width: 100vw;
-    height: 100vh;
-}
+        /* Oprava kamery - řešení roztažení na výšku */
+        video {
+            object-fit: cover !important;
+            object-position: center !important;
+            width: 100vw !important;
+            height: auto !important; /* Klíčová změna - auto místo 100vh */
+            min-height: 100vh !important;
+            max-width: none !important;
+        }
 
-canvas {
-    object-fit: cover;
-    object-position: center;
-    width: 100vw;
-    height: 100vh;
-}
-
-/* Specifické úpravy pro mobilní telefony */
-@media screen and (max-width: 768px) {
-    video {
-        object-fit: cover;
-        width: 100vw;
-        height: 100vh;
-        /* Mírně zvětšíme pro odstranění okrajů */
-        transform: scale(1.05);
-        transform-origin: center;
-    }
-    
-    canvas {
-        object-fit: cover;
-        width: 100vw;
-        height: 100vh;
-    }
-}
-
-/* Pro telefony v portrait módu */
-@media screen and (orientation: portrait) and (max-width: 768px) {
-    video {
-        object-fit: cover;
-        width: 100vw;
-        height: 100vh;
-        transform: scale(1.1); /* trochu více pro portrait */
-        transform-origin: center;
-    }
-}
+        canvas {
+            object-fit: cover !important;
+            object-position: center !important;
+            width: 100vw !important;
+            height: 100vh !important;
+        }
 
         a-scene {
-            width: 100vw;
-            height: 100vh;
+            width: 100vw !important;
+            height: 100vh !important;
+        }
+
+        /* Specificky pro mobilní telefony v portrait */
+        @media screen and (orientation: portrait) {
+            video {
+                width: auto !important;
+                height: 100vh !important;
+                min-width: 100vw !important;
+                object-fit: cover !important;
+            }
+        }
+
+        /* Specificky pro mobilní telefony v landscape */
+        @media screen and (orientation: landscape) {
+            video {
+                width: 100vw !important;
+                height: auto !important;
+                min-height: 100vh !important;
+                object-fit: cover !important;
+            }
         }
         
         .back-button-ar {
@@ -298,10 +291,11 @@ canvas {
     <!-- AR scéna s geolokací -->
     <a-scene 
         vr-mode-ui="enabled: false"
-        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; gpsMinDistance: 5;"
+        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; gpsMinDistance: 5; cameraParametersUrl: data/camera_para.dat;"
         renderer="logarithmicDepthBuffer: true; antialias: true; precision: medium;"
         device-orientation-permission-ui="enabled: false"
-        style="width: 100vw; height: 100vh;">
+        style="width: 100vw; height: 100vh;"
+        camera="active: true;">
 
         <a-assets>
             <!-- Všechny tři GLB modely včel -->
@@ -1008,63 +1002,61 @@ canvas {
             document.getElementById('clearSelection').addEventListener('click', clearSelection);
         }
 
-        // Oprava kamery pro mobilní zařízení - OPRAVENÁ VERZE
+        // Oprava kamery pro mobilní zařízení - speciálně pro roztažení na výšku
         function setupCameraFix() {
             function fixCameraAspectRatio() {
                 const video = document.querySelector('video');
                 if (video) {
-                    console.log("Fixing camera aspect ratio...");
+                    console.log("Fixing camera stretch on mobile...");
                     
-                    // Získáme skutečné rozměry videa
-                    const videoWidth = video.videoWidth;
-                    const videoHeight = video.videoHeight;
                     const screenWidth = window.innerWidth;
                     const screenHeight = window.innerHeight;
+                    const isPortrait = screenHeight > screenWidth;
                     
-                    console.log(`Video: ${videoWidth}x${videoHeight}, Screen: ${screenWidth}x${screenHeight}`);
+                    console.log(`Screen: ${screenWidth}x${screenHeight}, Portrait: ${isPortrait}`);
                     
-                    // Jemnější oprava bez narušení A-Frame
-                    video.style.objectFit = 'cover';
-                    video.style.objectPosition = 'center';
-                    video.style.width = '100vw';
-                    video.style.height = '100vh';
-                    
-                    // Pouze pokud je video výrazně protažené
-                    const videoAspect = videoWidth / videoHeight;
-                    const screenAspect = screenWidth / screenHeight;
-                    
-                    if (Math.abs(videoAspect - screenAspect) > 0.3) {
-                        if (videoAspect > screenAspect) {
-                            video.style.width = 'auto';
-                            video.style.height = '100vh';
-                        } else {
-                            video.style.width = '100vw';
-                            video.style.height = 'auto';
-                        }
+                    if (isPortrait) {
+                        // Portrait - opravíme roztažení na výšku
+                        video.style.setProperty('width', 'auto', 'important');
+                        video.style.setProperty('height', '100vh', 'important');
+                        video.style.setProperty('min-width', '100vw', 'important');
+                        video.style.setProperty('object-fit', 'cover', 'important');
+                        video.style.setProperty('object-position', 'center', 'important');
+                    } else {
+                        // Landscape
+                        video.style.setProperty('width', '100vw', 'important');
+                        video.style.setProperty('height', 'auto', 'important');
+                        video.style.setProperty('min-height', '100vh', 'important');
+                        video.style.setProperty('object-fit', 'cover', 'important');
+                        video.style.setProperty('object-position', 'center', 'important');
                     }
+                    
+                    console.log("Video aspect fix applied for orientation:", isPortrait ? 'portrait' : 'landscape');
                 }
             }
             
-            // Oprava při načtení kamery
+            // Více pokusů o opravu
+            setTimeout(fixCameraAspectRatio, 100);
+            setTimeout(fixCameraAspectRatio, 500);
+            setTimeout(fixCameraAspectRatio, 1000);
+            setTimeout(fixCameraAspectRatio, 2000);
+            
+            // Event listenery
             const scene = document.querySelector('a-scene');
             if (scene) {
                 scene.addEventListener('camera-init', () => {
-                    setTimeout(fixCameraAspectRatio, 1000);
+                    setTimeout(fixCameraAspectRatio, 200);
                 });
             }
             
-            // Oprava při změně orientace
             window.addEventListener('orientationchange', () => {
-                setTimeout(fixCameraAspectRatio, 500);
-            });
-            
-            // Oprava při změně velikosti okna
-            window.addEventListener('resize', () => {
                 setTimeout(fixCameraAspectRatio, 300);
+                setTimeout(fixCameraAspectRatio, 1000);
             });
             
-            // Pokus o okamžitou opravu - méně agresivní
-            setTimeout(fixCameraAspectRatio, 2000);
+            window.addEventListener('resize', () => {
+                setTimeout(fixCameraAspectRatio, 200);
+            });
         }
 
         // Inicializace
