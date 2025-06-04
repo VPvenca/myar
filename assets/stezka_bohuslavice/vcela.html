@@ -234,6 +234,12 @@ a-scene {
         .flower-icon::before {
             content: "🌸 ";
         }
+        /* Silnější override pro kameru */
+video[autoplay] {
+    object-fit: contain !important;
+    width: 100vw !important;
+    height: 100vh !important;
+}
     </style>
 </head>
 <body>
