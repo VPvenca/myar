@@ -16,21 +16,49 @@
             font-family: 'Arial', sans-serif;
         }
         
-        /* Oprava kamery - obsahuje celý obraz bez ořezu */
-        video {
-            object-fit: contain; /* místo cover */
-            object-position: center;
-            width: 100vw;
-            height: 100vh;
-            background: black; /* vyplní prázdné místo */
-        }
+        /* Oprava kamery - kompromisní řešení */
+video {
+    object-fit: cover; /* vrátíme cover pro odstranění deformace */
+    object-position: center;
+    width: 100vw;
+    height: 100vh;
+}
 
-        canvas {
-            object-fit: contain;
-            object-position: center;
-            width: 100vw;
-            height: 100vh;
-        }
+canvas {
+    object-fit: cover;
+    object-position: center;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Specifické úpravy pro mobilní telefony */
+@media screen and (max-width: 768px) {
+    video {
+        object-fit: cover;
+        width: 100vw;
+        height: 100vh;
+        /* Mírně zvětšíme pro odstranění okrajů */
+        transform: scale(1.05);
+        transform-origin: center;
+    }
+    
+    canvas {
+        object-fit: cover;
+        width: 100vw;
+        height: 100vh;
+    }
+}
+
+/* Pro telefony v portrait módu */
+@media screen and (orientation: portrait) and (max-width: 768px) {
+    video {
+        object-fit: cover;
+        width: 100vw;
+        height: 100vh;
+        transform: scale(1.1); /* trochu více pro portrait */
+        transform-origin: center;
+    }
+}
 
         a-scene {
             width: 100vw;
