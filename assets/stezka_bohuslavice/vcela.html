@@ -16,19 +16,19 @@
             font-family: 'Arial', sans-serif;
         }
         
-     /* Oprava kamery - dynamická výška pro mobily */
 video {
-    object-fit: cover;
+    object-fit: contain; /* místo cover */
+    object-position: center;
     width: 100vw;
-    height: 100dvh; /* dynamic viewport height - lépe pro mobily */
-    max-height: 100vh;
+    height: 100vh;
+    background: black; /* vyplní prázdné místo */
 }
 
 canvas {
-    object-fit: cover;
+    object-fit: contain;
+    object-position: center;
     width: 100vw;
-    height: 100dvh;
-    max-height: 100vh;
+    height: 100vh;
 }
 
 a-scene {
