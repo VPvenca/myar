@@ -255,14 +255,14 @@
         style="width: 100vw; height: 100vh; position: fixed; top: 0; left: 0;">
 
         <a-assets>
-            <img id="marker1" src="/assets/andele/img/andel_1.png">
-            <!-- Opraveno: Načítání GLB modelu místo GLTF -->
-            <a-asset-item id="glb-model" src="/assets/andele/3d/andel.glb"></a-asset-item>
-            <img id="marker3" src="/assets/andele/img/andel_1.png">
+            <!-- Všechny tři GLB modely -->
+            <a-asset-item id="glb-model-1" src="/assets/andele/3d/gabriel.glb"></a-asset-item>
+            <a-asset-item id="glb-model-2" src="/assets/andele/3d/michael.glb"></a-asset-item>
+            <a-asset-item id="glb-model-3" src="/assets/andele/3d/rafael.glb"></a-asset-item>
             
             <!-- Audio soubory -->
             <audio id="audio1" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
-            <audio id="audio2" src="/assets/andele/mp3/tnt.mp3" preload="auto"></audio>
+            <audio id="audio2" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
             <audio id="audio3" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
         </a-assets>
 
@@ -276,36 +276,18 @@
             camera="active: true;">
         </a-camera>
 
-        <!-- AR objekty na konkrétních GPS souřadnicích - ZACHOVÁNO -->
-        <!-- Angel_1 -->
+        <!-- AR objekty na konkrétních GPS souřadnicích - VŠECHNY NYNÍ GLB MODELY -->
+        <!-- Angel_1 - GLB Model -->
         <a-entity 
             gps-entity-place="latitude: 49.0338889; longitude: 17.2698056"
-            data-marker-id="andel_1"
+            data-marker-id="Gabriel"
             data-audio-id="audio1"
             class="ar-object"
             visible="false">
             
-            <a-plane 
-                src="#marker1" 
-                position="0 3 0" 
-                scale="4 5 1" 
-                rotation="0 130 0"
-                material="transparent: true; alphaTest: 0.1; side: double">
-            </a-plane>
-        </a-entity>
-
-        <!-- Angel_2 - GLB Model - ZACHOVÁNO z funkčního kódu -->
-        <a-entity 
-             gps-entity-place="latitude: 49.0091389; longitude: 17.1286111; gpsMinDistance: 3;"
-                data-marker-id="andel_2"
-                data-audio-id="audio2"
-                class="ar-object"
-                visible="false">
-            
-            <!-- GLB model - pouze přidána ID pro rotaci -->
             <a-gltf-model 
-                id="rotatable-angel"
-                src="#glb-model"
+                id="rotatable-angel-1"
+                src="#glb-model-1"
                 position="0 0 0"
                 scale="4 4 4"
                 rotation="0 30 0"
@@ -314,24 +296,45 @@
             </a-gltf-model>
         </a-entity>
 
-        <!-- Angel_3 -->
+        <!-- Angel_2 - GLB Model -->
+        <a-entity 
+             gps-entity-place="latitude: 49.0091389; longitude: 17.1286111; gpsMinDistance: 3;"
+                data-marker-id="Michael"
+                data-audio-id="audio2"
+                class="ar-object"
+                visible="false">
+            
+            <a-gltf-model 
+                id="rotatable-angel-2"
+                src="#glb-model-2"
+                position="0 0 0"
+                scale="4 4 4"
+                rotation="0 30 0"
+                animation-mixer="clip: *; loop: repeat"
+                shadow="cast: true; receive: true">
+            </a-gltf-model>
+        </a-entity>
+
+        <!-- Angel_3 - GLB Model -->
         <a-entity 
              gps-entity-place="latitude: 48.9814167; longitude: 17.1526667"
-               data-marker-id="andel_3"
+               data-marker-id="Rafael"
                data-audio-id="audio3"
                class="ar-object"
                visible="false">
             
-            <a-plane 
-                src="#marker3" 
-                position="0 3 0" 
-                scale="4 5 1" 
-                rotation="0 130 0"
-                material="transparent: true; alphaTest: 0.1; side: double">
-            </a-plane>
+            <a-gltf-model 
+                id="rotatable-angel-3"
+                src="#glb-model-3"
+                position="0 0 0"
+                scale="4 4 4"
+                rotation="0 30 0"
+                animation-mixer="clip: *; loop: repeat"
+                shadow="cast: true; receive: true">
+            </a-gltf-model>
         </a-entity>
 
-        <!-- Základní osvětlení pro 3D model -->
+        <!-- Základní osvětlení pro 3D modely -->
         <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
         <a-light type="directional" color="#ffffff" intensity="0.8" position="0 10 5"></a-light>
 
@@ -352,7 +355,7 @@
         let audioPlayingForMarker = null; // ID markeru pro který se audio přehrává
         let positionHistory = []; // Historie pozic pro vyhlazování
         
-        // NOVÉ: Proměnné pro rotaci modelu
+        // NOVÉ: Proměnné pro rotaci modelů - všechny tři modely
         let modelRotationY = 30; // Aktuální rotace Y (začíná na 30° jako v původním nastavení)
         let isRotating = false;
         let startX = 0;
@@ -364,29 +367,29 @@
                 id: "andel_1", 
                 lat: 49.0338889,
                 lng: 17.2698056,
-                name: "Anděl",
-                description: "nebeský Anděl",
+                name: "3D Anděl 1",
+                description: "3D GLB model anděla 1",
                 audioId: "audio1"
             },
             { 
                  id: "andel_2", 
                  lat: 49.0091389,  
                  lng: 17.1286111,  
-                 name: "3D Anděl",
-                 description: "3D GLB model anděla",
+                 name: "3D Anděl 2",
+                 description: "3D GLB model anděla 2",
                  audioId: "audio2"
             },
             { 
                  id: "andel_3", 
                  lat: 48.9814167,  
                  lng: 17.1526667,  
-                 name: "Anděl_3",
-                 description: "nebeský Anděl 3",
+                 name: "3D Anděl 3",
+                 description: "3D GLB model anděla 3",
                  audioId: "audio3"
             }
         ];
 
-        // NOVÉ: Funkce pro rotaci modelu dotykem
+        // UPRAVENO: Funkce pro rotaci všech tří GLB modelů dotykem
         function setupModelRotation() {
             let touchStarted = false;
             let rotationActive = false;
@@ -475,25 +478,25 @@
             return false;
         }
         
+        // UPRAVENO: Rotace pro všechny tři GLB modely
         function updateModelRotation() {
-            // Rotace pro GLB model (3D anděl) - pouze kolem Y osy
-            const angelModel = document.getElementById('rotatable-angel');
-            if (angelModel) {
-                angelModel.setAttribute('rotation', `0 ${modelRotationY} 0`);
-            }
+            // Rotace pro všechny tři GLB modely
+            const angelModel1 = document.getElementById('rotatable-angel-1');
+            const angelModel2 = document.getElementById('rotatable-angel-2');
+            const angelModel3 = document.getElementById('rotatable-angel-3');
             
-            // Rotace pro PNG markery (2D obrázky) - pouze kolem Y osy
-            const currentVisibleMarker = getCurrentVisibleMarker();
-            if (currentVisibleMarker && currentVisibleMarker !== 'andel_2') {
-                const markerPlane = document.querySelector(`[data-marker-id="${currentVisibleMarker}"] a-plane`);
-                if (markerPlane) {
-                    // Pouze Y rotace - X a Z zůstávají na 0
-                    markerPlane.setAttribute('rotation', `0 ${modelRotationY + 130} 0`);
-                }
+            if (angelModel1) {
+                angelModel1.setAttribute('rotation', `0 ${modelRotationY} 0`);
+            }
+            if (angelModel2) {
+                angelModel2.setAttribute('rotation', `0 ${modelRotationY} 0`);
+            }
+            if (angelModel3) {
+                angelModel3.setAttribute('rotation', `0 ${modelRotationY} 0`);
             }
         }
         
-        // Získání aktuálně viditelného markeru
+        // UPRAVENO: Získání aktuálně viditelného markeru - všechny jsou nyní GLB
         function getCurrentVisibleMarker() {
             let visibleMarker = null;
             markers.forEach(marker => {
@@ -506,7 +509,7 @@
         }
         
         function isModelVisible() {
-            // Kontrola jakéhokoli viditelného AR objektu (GLB nebo PNG)
+            // Kontrola jakéhokoli viditelného AR objektu (všechny jsou nyní GLB)
             let anyVisible = false;
             markers.forEach(marker => {
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
@@ -962,20 +965,20 @@
 
         // Inicializace
         window.addEventListener('load', () => {
-            console.log("Starting geolocation AR scene with GLB model and touch rotation...");
+            console.log("Starting geolocation AR scene with 3 GLB models and touch rotation...");
             
             setupEventListeners();
-            setupModelRotation(); // NOVÉ: Přidána rotace dotykem
-            setupCameraFix(); // NOVÉ: Oprava kamery pro mobil
+            setupModelRotation(); // Rotace dotykem pro všechny tři GLB modely
+            setupCameraFix(); // Oprava kamery pro mobil
             getCurrentPosition();
             watchPosition();
             
             console.log(`Audio threshold set to: ${AUDIO_THRESHOLD} meters`);
             console.log(`AR visibility threshold set to: ${AR_VISIBILITY_THRESHOLD} meters`);
-            console.log("Touch rotation enabled for angel model");
+            console.log("Touch rotation enabled for all 3 angel GLB models");
         });
 
-        // NOVÉ: Oprava aspect ratio pro mobilní kameru
+        // Oprava aspect ratio pro mobilní kameru
         function setupCameraFix() {
             // Oprava pro mobilní zařízení
             const scene = document.querySelector('a-scene');
@@ -1016,17 +1019,37 @@
 
         // A-Frame scéna je připravena
         document.querySelector('a-scene').addEventListener('loaded', () => {
-            console.log("A-Frame scene loaded for geolocation AR with GLB model");
+            console.log("A-Frame scene loaded for geolocation AR with 3 GLB models");
             
-            // Kontrola načtení GLB modelu
-            const glbModel = document.querySelector('[src="#glb-model"]');
-            if (glbModel) {
-                glbModel.addEventListener('model-loaded', () => {
-                    console.log("GLB model successfully loaded!");
+            // Kontrola načtení všech GLB modelů
+            const glbModel1 = document.querySelector('#rotatable-angel-1');
+            const glbModel2 = document.querySelector('#rotatable-angel-2');
+            const glbModel3 = document.querySelector('#rotatable-angel-3');
+            
+            if (glbModel1) {
+                glbModel1.addEventListener('model-loaded', () => {
+                    console.log("GLB model 1 successfully loaded!");
                 });
-                
-                glbModel.addEventListener('model-error', (error) => {
-                    console.error("GLB model loading error:", error);
+                glbModel1.addEventListener('model-error', (error) => {
+                    console.error("GLB model 1 loading error:", error);
+                });
+            }
+            
+            if (glbModel2) {
+                glbModel2.addEventListener('model-loaded', () => {
+                    console.log("GLB model 2 successfully loaded!");
+                });
+                glbModel2.addEventListener('model-error', (error) => {
+                    console.error("GLB model 2 loading error:", error);
+                });
+            }
+            
+            if (glbModel3) {
+                glbModel3.addEventListener('model-loaded', () => {
+                    console.log("GLB model 3 successfully loaded!");
+                });
+                glbModel3.addEventListener('model-error', (error) => {
+                    console.error("GLB model 3 loading error:", error);
                 });
             }
         });
