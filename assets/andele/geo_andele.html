@@ -257,12 +257,12 @@
         <a-assets>
             <!-- Všechny tři GLB modely -->
             <a-asset-item id="glb-model-1" src="/assets/andele/3d/gabriel.glb"></a-asset-item>
-            <a-asset-item id="glb-model-2" src="/assets/andele/3d/michael.glb"></a-asset-item>
-            <a-asset-item id="glb-model-3" src="/assets/andele/3d/rafael.glb"></a-asset-item>
+            <a-asset-item id="glb-model-2" src="/assets/andele/3d/rafael.glb"></a-asset-item>
+            <a-asset-item id="glb-model-3" src="/assets/andele/3d/michael.glb"></a-asset-item>
             
             <!-- Audio soubory -->
             <audio id="audio1" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
-            <audio id="audio2" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
+            <audio id="audio2" src="/assets/andele/mp3/tnt.mp3" preload="auto"></audio>
             <audio id="audio3" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
         </a-assets>
 
@@ -280,7 +280,7 @@
         <!-- Angel_1 - GLB Model -->
         <a-entity 
             gps-entity-place="latitude: 49.0338889; longitude: 17.2698056"
-            data-marker-id="Gabriel"
+            data-marker-id="andel_1"
             data-audio-id="audio1"
             class="ar-object"
             visible="false">
@@ -299,7 +299,7 @@
         <!-- Angel_2 - GLB Model -->
         <a-entity 
              gps-entity-place="latitude: 49.0091389; longitude: 17.1286111; gpsMinDistance: 3;"
-                data-marker-id="Michael"
+                data-marker-id="andel_2"
                 data-audio-id="audio2"
                 class="ar-object"
                 visible="false">
@@ -318,7 +318,7 @@
         <!-- Angel_3 - GLB Model -->
         <a-entity 
              gps-entity-place="latitude: 48.9814167; longitude: 17.1526667"
-               data-marker-id="Rafael"
+               data-marker-id="andel_3"
                data-audio-id="audio3"
                class="ar-object"
                visible="false">
@@ -368,7 +368,7 @@
                 lat: 49.0338889,
                 lng: 17.2698056,
                 name: "3D Anděl 1",
-                description: "3D GLB model anděla 1",
+                description: "Gabriel",
                 audioId: "audio1"
             },
             { 
@@ -376,7 +376,7 @@
                  lat: 49.0091389,  
                  lng: 17.1286111,  
                  name: "3D Anděl 2",
-                 description: "3D GLB model anděla 2",
+                 description: "Rafael",
                  audioId: "audio2"
             },
             { 
@@ -384,7 +384,7 @@
                  lat: 48.9814167,  
                  lng: 17.1526667,  
                  name: "3D Anděl 3",
-                 description: "3D GLB model anděla 3",
+                 description: "Michael",
                  audioId: "audio3"
             }
         ];
