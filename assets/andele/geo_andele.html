@@ -216,7 +216,7 @@
         </div>
     </div>
     
-    <!-- AR scéna s geolokací - ZACHOVÁNO z funkčního kódu -->
+    <!-- AR scéna s geolokací - OPRAVENO: Zachováno z funkčního kódu s úpravami pro 3D modely -->
     <a-scene 
         vr-mode-ui="enabled: false"
         arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; gpsMinDistance: 5;"
@@ -225,18 +225,18 @@
         style="width: 100vw; height: 100vh;">
 
         <a-assets>
-            <img id="marker1" src="/assets/andele/img/andel_1.png">
-            <!-- Opraveno: Načítání GLB modelu místo GLTF -->
-            <a-asset-item id="glb-model" src="/assets/andele/3d/gabriel.glb"></a-asset-item>
-            <img id="marker3" src="/assets/andele/img/andel_1.png">
+            <!-- Všechny tři GLB modely -->
+            <a-asset-item id="glb-model-1" src="/assets/andele/3d/gabriel.glb"></a-asset-item>
+            <a-asset-item id="glb-model-2" src="/assets/andele/3d/rafael.glb"></a-asset-item>
+            <a-asset-item id="glb-model-3" src="/assets/andele/3d/michael.glb"></a-asset-item>
             
             <!-- Audio soubory -->
             <audio id="audio1" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
-            <audio id="audio2" src="/assets/andele/mp3/andel_1" preload="auto"></audio>
+            <audio id="audio2" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
             <audio id="audio3" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
         </a-assets>
 
-        <!-- Kamera s geolokací - ZACHOVÁNO -->
+        <!-- Kamera s geolokací - ZACHOVÁNO z funkčního kódu -->
         <a-camera 
             id="camera"
             gps-camera
@@ -244,8 +244,8 @@
             camera="fov: 70;">
         </a-camera>
 
-        <!-- AR objekty na konkrétních GPS souřadnicích - ZACHOVÁNO -->
-        <!-- Angel_1 -->
+        <!-- AR objekty na konkrétních GPS souřadnicích - ZMĚNĚNO: Všechny nyní GLB modely -->
+        <!-- Angel_1 - GLB Model Gabriel -->
         <a-entity 
             gps-entity-place="latitude: 49.0338889; longitude: 17.2698056"
             data-marker-id="andel_1"
@@ -253,27 +253,9 @@
             class="ar-object"
             visible="false">
             
-            <a-plane 
-                src="#marker1" 
-                position="0 3 0" 
-                scale="4 5 1" 
-                rotation="0 130 0"
-                material="transparent: true; alphaTest: 0.1; side: double">
-            </a-plane>
-        </a-entity>
-
-        <!-- Angel_2 - GLB Model - ZACHOVÁNO z funkčního kódu -->
-        <a-entity 
-             gps-entity-place="latitude: 49.0091389; longitude: 17.1286111; gpsMinDistance: 3;"
-                data-marker-id="andel_2"
-                data-audio-id="audio2"
-                class="ar-object"
-                visible="false">
-            
-            <!-- GLB model - pouze přidána ID pro rotaci -->
             <a-gltf-model 
-                id="rotatable-angel"
-                src="#glb-model"
+                id="rotatable-angel-1"
+                src="#glb-model-1"
                 position="0 0 0"
                 scale="4 4 4"
                 rotation="0 30 0"
@@ -282,7 +264,26 @@
             </a-gltf-model>
         </a-entity>
 
-        <!-- Angel_3 -->
+        <!-- Angel_2 - GLB Model Rafael -->
+        <a-entity 
+             gps-entity-place="latitude: 49.0091389; longitude: 17.1286111; gpsMinDistance: 3;"
+                data-marker-id="andel_2"
+                data-audio-id="audio2"
+                class="ar-object"
+                visible="false">
+            
+            <a-gltf-model 
+                id="rotatable-angel-2"
+                src="#glb-model-2"
+                position="0 0 0"
+                scale="4 4 4"
+                rotation="0 30 0"
+                animation-mixer="clip: *; loop: repeat"
+                shadow="cast: true; receive: true">
+            </a-gltf-model>
+        </a-entity>
+
+        <!-- Angel_3 - GLB Model Michael -->
         <a-entity 
              gps-entity-place="latitude: 48.9814167; longitude: 17.1526667"
                data-marker-id="andel_3"
@@ -290,16 +291,18 @@
                class="ar-object"
                visible="false">
             
-            <a-plane 
-                src="#marker3" 
-                position="0 3 0" 
-                scale="4 5 1" 
-                rotation="0 130 0"
-                material="transparent: true; alphaTest: 0.1; side: double">
-            </a-plane>
+            <a-gltf-model 
+                id="rotatable-angel-3"
+                src="#glb-model-3"
+                position="0 0 0"
+                scale="4 4 4"
+                rotation="0 30 0"
+                animation-mixer="clip: *; loop: repeat"
+                shadow="cast: true; receive: true">
+            </a-gltf-model>
         </a-entity>
 
-        <!-- Základní osvětlení pro 3D model -->
+        <!-- Základní osvětlení pro 3D modely -->
         <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
         <a-light type="directional" color="#ffffff" intensity="0.8" position="0 10 5"></a-light>
 
@@ -320,41 +323,41 @@
         let audioPlayingForMarker = null; // ID markeru pro který se audio přehrává
         let positionHistory = []; // Historie pozic pro vyhlazování
         
-        // NOVÉ: Proměnné pro rotaci modelu
+        // Proměnné pro rotaci modelů - všechny tři modely
         let modelRotationY = 30; // Aktuální rotace Y (začíná na 30° jako v původním nastavení)
         let isRotating = false;
         let startX = 0;
         let rotationHintShown = false;
         
-        // Definice cílových bodů - ZACHOVÁNO
+        // Definice cílových bodů - UPRAVENO pro 3D modely
         const markers = [
             { 
                 id: "andel_1", 
                 lat: 49.0338889,
                 lng: 17.2698056,
-                name: "Anděl",
-                description: "nebeský Anděl",
+                name: "3D Anděl Gabriel",
+                description: "Gabriel - Anděl zvěstování",
                 audioId: "audio1"
             },
             { 
                  id: "andel_2", 
                  lat: 49.0091389,  
                  lng: 17.1286111,  
-                 name: "3D Anděl",
-                 description: "3D GLB model anděla",
+                 name: "3D Anděl Rafael",
+                 description: "Rafael - Anděl léčení",
                  audioId: "audio2"
             },
             { 
                  id: "andel_3", 
                  lat: 48.9814167,  
                  lng: 17.1526667,  
-                 name: "Anděl_3",
-                 description: "nebeský Anděl 3",
+                 name: "3D Anděl Michael",
+                 description: "Michael - Archanděl",
                  audioId: "audio3"
             }
         ];
 
-        // NOVÉ: Funkce pro rotaci modelu dotykem
+        // Funkce pro rotace všech tří GLB modelů dotykem
         function setupModelRotation() {
             let touchStarted = false;
             let rotationActive = false;
@@ -443,21 +446,21 @@
             return false;
         }
         
+        // Rotace pro všechny tři GLB modely
         function updateModelRotation() {
-            // Rotace pro GLB model (3D anděl) - pouze kolem Y osy
-            const angelModel = document.getElementById('rotatable-angel');
-            if (angelModel) {
-                angelModel.setAttribute('rotation', `0 ${modelRotationY} 0`);
-            }
+            // Rotace pro všechny tři GLB modely
+            const angelModel1 = document.getElementById('rotatable-angel-1');
+            const angelModel2 = document.getElementById('rotatable-angel-2');
+            const angelModel3 = document.getElementById('rotatable-angel-3');
             
-            // Rotace pro PNG markery (2D obrázky) - pouze kolem Y osy
-            const currentVisibleMarker = getCurrentVisibleMarker();
-            if (currentVisibleMarker && currentVisibleMarker !== 'andel_2') {
-                const markerPlane = document.querySelector(`[data-marker-id="${currentVisibleMarker}"] a-plane`);
-                if (markerPlane) {
-                    // Pouze Y rotace - X a Z zůstávají na 0
-                    markerPlane.setAttribute('rotation', `0 ${modelRotationY + 130} 0`);
-                }
+            if (angelModel1) {
+                angelModel1.setAttribute('rotation', `0 ${modelRotationY} 0`);
+            }
+            if (angelModel2) {
+                angelModel2.setAttribute('rotation', `0 ${modelRotationY} 0`);
+            }
+            if (angelModel3) {
+                angelModel3.setAttribute('rotation', `0 ${modelRotationY} 0`);
             }
         }
         
@@ -474,7 +477,7 @@
         }
         
         function isModelVisible() {
-            // Kontrola jakéhokoli viditelného AR objektu (GLB nebo PNG)
+            // Kontrola jakéhokoli viditelného AR objektu (všechny jsou nyní GLB)
             let anyVisible = false;
             markers.forEach(marker => {
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
@@ -546,8 +549,6 @@
                 console.log("Audio stopped");
             }
         }
-
-        // VŠECHNY OSTATNÍ FUNKCE ZACHOVÁNY Z FUNKČNÍHO KÓDU
 
         // Funkce pro vyhlazení GPS pozice
         function smoothGPSPosition(newPosition) {
@@ -928,36 +929,140 @@
             document.getElementById('clearSelection').addEventListener('click', clearSelection);
         }
 
+        // NOVÉ: Oprava kamery pro mobilní zařízení
+        function setupCameraFix() {
+            // Počkat až se scéna načte
+            setTimeout(() => {
+                const video = document.querySelector('video');
+                if (video) {
+                    // Oprava aspect ratio
+                    video.style.objectFit = 'cover';
+                    video.style.width = '100vw';
+                    video.style.height = '100vh';
+                    video.style.position = 'absolute';
+                    video.style.top = '0';
+                    video.style.left = '0';
+                    video.style.zIndex = '-1';
+                    console.log("Camera aspect ratio fixed for mobile");
+                }
+                
+                // Oprava canvasu
+                const canvas = document.querySelector('canvas');
+                if (canvas) {
+                    canvas.style.objectFit = 'cover';
+                    canvas.style.width = '100vw';
+                    canvas.style.height = '100vh';
+                    console.log("Canvas aspect ratio fixed");
+                }
+            }, 2000);
+            
+            // Oprava při změně orientace
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => {
+                    const video = document.querySelector('video');
+                    const canvas = document.querySelector('canvas');
+                    
+                    if (video) {
+                        video.style.objectFit = 'cover';
+                        video.style.width = '100vw';
+                        video.style.height = '100vh';
+                    }
+                    
+                    if (canvas) {
+                        canvas.style.objectFit = 'cover';
+                        canvas.style.width = '100vw';
+                        canvas.style.height = '100vh';
+                    }
+                    
+                    // Resize scény
+                    const scene = document.querySelector('a-scene');
+                    if (scene && scene.resize) {
+                        scene.resize();
+                    }
+                    
+                    console.log("Camera fixed after orientation change");
+                }, 500);
+            });
+            
+            // Oprava při změně velikosti okna
+            window.addEventListener('resize', () => {
+                setTimeout(() => {
+                    const video = document.querySelector('video');
+                    const canvas = document.querySelector('canvas');
+                    
+                    if (video) {
+                        video.style.objectFit = 'cover';
+                        video.style.width = '100vw';
+                        video.style.height = '100vh';
+                    }
+                    
+                    if (canvas) {
+                        canvas.style.objectFit = 'cover';
+                        canvas.style.width = '100vw';
+                        canvas.style.height = '100vh';
+                    }
+                    
+                    console.log("Camera fixed after window resize");
+                }, 300);
+            });
+        }
+
         // Inicializace
         window.addEventListener('load', () => {
-            console.log("Starting geolocation AR scene with GLB model and touch rotation...");
+            console.log("Starting geolocation AR scene with 3 GLB models and touch rotation...");
             
             setupEventListeners();
-            setupModelRotation(); // NOVÉ: Přidána rotace dotykem
+            setupModelRotation(); // Rotace dotykem pro všechny tři GLB modely
+            setupCameraFix(); // DŮLEŽITÉ: Oprava kamery pro mobil
             getCurrentPosition();
             watchPosition();
             
             console.log(`Audio threshold set to: ${AUDIO_THRESHOLD} meters`);
             console.log(`AR visibility threshold set to: ${AR_VISIBILITY_THRESHOLD} meters`);
-            console.log("Touch rotation enabled for angel model");
+            console.log("Touch rotation enabled for all 3 angel GLB models");
+            console.log("Camera fix applied for mobile devices");
         });
 
         // A-Frame scéna je připravena
         document.querySelector('a-scene').addEventListener('loaded', () => {
-            console.log("A-Frame scene loaded for geolocation AR with GLB model");
+            console.log("A-Frame scene loaded for geolocation AR with 3 GLB models");
             
-            // Kontrola načtení GLB modelu
-            const glbModel = document.querySelector('[src="#glb-model"]');
-            if (glbModel) {
-                glbModel.addEventListener('model-loaded', () => {
-                    console.log("GLB model successfully loaded!");
+            // Aplikace opravy kamery po načtení scény
+            setupCameraFix();
+            
+            // Kontrola načtení všech GLB modelů
+            const glbModel1 = document.querySelector('#rotatable-angel-1');
+            const glbModel2 = document.querySelector('#rotatable-angel-2');
+            const glbModel3 = document.querySelector('#rotatable-angel-3');
+            
+            if (glbModel1) {
+                glbModel1.addEventListener('model-loaded', () => {
+                    console.log("GLB model 1 (Gabriel) successfully loaded!");
                 });
-                
-                glbModel.addEventListener('model-error', (error) => {
-                    console.error("GLB model loading error:", error);
+                glbModel1.addEventListener('model-error', (error) => {
+                    console.error("GLB model 1 (Gabriel) loading error:", error);
+                });
+            }
+            
+            if (glbModel2) {
+                glbModel2.addEventListener('model-loaded', () => {
+                    console.log("GLB model 2 (Rafael) successfully loaded!");
+                });
+                glbModel2.addEventListener('model-error', (error) => {
+                    console.error("GLB model 2 (Rafael) loading error:", error);
+                });
+            }
+            
+            if (glbModel3) {
+                glbModel3.addEventListener('model-loaded', () => {
+                    console.log("GLB model 3 (Michael) successfully loaded!");
+                });
+                glbModel3.addEventListener('model-error', (error) => {
+                    console.error("GLB model 3 (Michael) loading error:", error);
                 });
             }
         });
     </script>
 </body>
 </html>
+                        
