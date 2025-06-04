@@ -16,23 +16,26 @@
             font-family: 'Arial', sans-serif;
         }
         
-        /* Oprava kamery - mírnější approach */
-        video {
-            object-fit: cover;
-            width: 100vw;
-            height: 100vh;
-        }
-        
-        canvas {
-            object-fit: cover;
-            width: 100vw;
-            height: 100vh;
-        }
-        
-        a-scene {
-            width: 100vw;
-            height: 100vh;
-        }
+     /* Oprava kamery - dynamická výška pro mobily */
+video {
+    object-fit: cover;
+    width: 100vw;
+    height: 100dvh; /* dynamic viewport height - lépe pro mobily */
+    max-height: 100vh;
+}
+
+canvas {
+    object-fit: cover;
+    width: 100vw;
+    height: 100dvh;
+    max-height: 100vh;
+}
+
+a-scene {
+    width: 100vw;
+    height: 100dvh;
+    max-height: 100vh;
+}
         
         .back-button-ar {
             position: fixed;
