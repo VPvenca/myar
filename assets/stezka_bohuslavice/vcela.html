@@ -234,12 +234,7 @@ a-scene {
         .flower-icon::before {
             content: "🌸 ";
         }
-        /* Silnější override pro kameru */
-video[autoplay] {
-    object-fit: contain !important;
-    width: 100vw !important;
-    height: 100vh !important;
-}
+
     </style>
 </head>
 <body>
@@ -987,43 +982,67 @@ video[autoplay] {
         }
 
         // Oprava kamery pro mobilní zařízení
-        function setupCameraFix() {
-            // Oprava pro mobilní zařízení
-            const scene = document.querySelector('a-scene');
-            if (scene) {
-                scene.addEventListener('camera-init', () => {
-                    setTimeout(() => {
-                        const video = document.querySelector('video');
-                        if (video) {
-                            video.style.objectFit = 'cover';
-                            video.style.width = '100%';
-                            video.style.height = '100%';
-                            console.log("Camera aspect ratio fixed for bee tracking");
-                        }
-                    }, 1000);
-                });
+function setupCameraFix() {
+    function fixCameraAspectRatio() {
+        const video = document.querySelector('video');
+        if (video) {
+            console.log("Fixing camera aspect ratio...");
+            
+            // Získáme skutečné rozměry videa
+            const videoWidth = video.videoWidth;
+            const videoHeight = video.videoHeight;
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            
+            console.log(`Video: ${videoWidth}x${videoHeight}, Screen: ${screenWidth}x${screenHeight}`);
+            
+            // Vypočítáme správný poměr stran
+            const videoAspect = videoWidth / videoHeight;
+            const screenAspect = screenWidth / screenHeight;
+            
+            if (videoAspect > screenAspect) {
+                // Video je širší než obrazovka
+                video.style.width = 'auto';
+                video.style.height = '100vh';
+            } else {
+                // Video je vyšší než obrazovka
+                video.style.width = '100vw';
+                video.style.height = 'auto';
             }
             
-            // Oprava při změně orientace
-            window.addEventListener('orientationchange', () => {
-                setTimeout(() => {
-                    const scene = document.querySelector('a-scene');
-                    if (scene && scene.resize) {
-                        scene.resize();
-                    }
-                }, 500);
-            });
-            
-            // Oprava při změně velikosti okna
-            window.addEventListener('resize', () => {
-                setTimeout(() => {
-                    const scene = document.querySelector('a-scene');
-                    if (scene && scene.resize) {
-                        scene.resize();
-                    }
-                }, 300);
-            });
+            video.style.objectFit = 'cover';
+            video.style.objectPosition = 'center';
+            video.style.position = 'fixed';
+            video.style.top = '50%';
+            video.style.left = '50%';
+            video.style.transform = 'translate(-50%, -50%)';
         }
+    }
+    
+    // Oprava při načtení kamery
+    const scene = document.querySelector('a-scene');
+    if (scene) {
+        scene.addEventListener('camera-init', () => {
+            setTimeout(fixCameraAspectRatio, 1000);
+            setTimeout(fixCameraAspectRatio, 3000);
+        });
+    }
+    
+    // Oprava při změně orientace
+    window.addEventListener('orientationchange', () => {
+        setTimeout(fixCameraAspectRatio, 500);
+        setTimeout(fixCameraAspectRatio, 1500);
+    });
+    
+    // Oprava při změně velikosti okna
+    window.addEventListener('resize', () => {
+        setTimeout(fixCameraAspectRatio, 300);
+    });
+    
+    // Pokus o okamžitou opravu
+    setTimeout(fixCameraAspectRatio, 2000);
+    setTimeout(fixCameraAspectRatio, 5000);
+}
 
         // Inicializace
         window.addEventListener('load', () => {
