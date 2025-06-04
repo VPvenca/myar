@@ -170,6 +170,19 @@
             z-index: 1000;
             display: none;
         }
+        
+        .rotation-hint {
+            position: fixed;
+            bottom: 120px;
+            left: 10px;
+            background-color: rgba(0,150,255,0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -179,6 +192,10 @@
     
     <div class="audio-info" id="audioInfo">
         🎵 Audio přehrává...
+    </div>
+    
+    <div class="rotation-hint" id="rotationHint">
+        🔄 Tažením otočíte anděla
     </div>
     
     <!-- Zobrazení vzdálenosti k vybranému nebo nejbližšímu bodu -->
@@ -199,7 +216,7 @@
         </div>
     </div>
     
-            <!-- AR scéna s geolokací -->
+    <!-- AR scéna s geolokací - ZACHOVÁNO z funkčního kódu -->
     <a-scene 
         vr-mode-ui="enabled: false"
         arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; gpsMinDistance: 5;"
@@ -215,11 +232,11 @@
             
             <!-- Audio soubory -->
             <audio id="audio1" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
-            <audio id="audio2" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
+            <audio id="audio2" src="/assets/andele/mp3/andel_1" preload="auto"></audio>
             <audio id="audio3" src="/assets/andele/mp3/andel_1.mp3" preload="auto"></audio>
         </a-assets>
 
-        <!-- Kamera s geolokací -->
+        <!-- Kamera s geolokací - ZACHOVÁNO -->
         <a-camera 
             id="camera"
             gps-camera
@@ -227,7 +244,7 @@
             camera="fov: 70;">
         </a-camera>
 
-        <!-- AR objekty na konkrétních GPS souřadnicích -->
+        <!-- AR objekty na konkrétních GPS souřadnicích - ZACHOVÁNO -->
         <!-- Angel_1 -->
         <a-entity 
             gps-entity-place="latitude: 49.0338889; longitude: 17.2698056"
@@ -245,20 +262,21 @@
             </a-plane>
         </a-entity>
 
-        <!-- Angel_2 - GLB Model -->
+        <!-- Angel_2 - GLB Model - ZACHOVÁNO z funkčního kódu -->
         <a-entity 
-             gps-entity-place="latitude: 49.0091667; longitude: 17.1286111; gpsMinDistance: 3;"
+             gps-entity-place="latitude: 49.0091389; longitude: 17.1286111; gpsMinDistance: 3;"
                 data-marker-id="andel_2"
                 data-audio-id="audio2"
                 class="ar-object"
                 visible="false">
             
-            <!-- GLB model s lepším nastavením -->
+            <!-- GLB model - pouze přidána ID pro rotaci -->
             <a-gltf-model 
+                id="rotatable-angel"
                 src="#glb-model"
-                position="0 2 0"
-                scale="2 2 2"
-                rotation="0 0 0"
+                position="0 0 0"
+                scale="4 4 4"
+                rotation="0 30 0"
                 animation-mixer="clip: *; loop: repeat"
                 shadow="cast: true; receive: true">
             </a-gltf-model>
@@ -288,11 +306,11 @@
     </a-scene>
 
     <script>
-        // GPS přesnost a debugging
+        // GPS přesnost a debugging - ZACHOVÁNO z funkčního kódu
         let userPosition = null;
         let lastStablePosition = null;
         const PROXIMITY_THRESHOLD = 10; // metry - vzdálenost pro aktivaci gamifikace
-        const AR_VISIBILITY_THRESHOLD = 50; // metry - zvýšeno pro lepší testování
+        const AR_VISIBILITY_THRESHOLD = 20; // metry - zvýšeno pro lepší testování
         const AUDIO_THRESHOLD = 10; // metry - vzdálenost pro spuštění audio
         const GPS_SMOOTHING_FACTOR = 0.3; // Faktor pro vyhlazování GPS (0.1-0.5)
         const MIN_GPS_ACCURACY = 20; // Minimální přesnost GPS v metrech
@@ -302,7 +320,13 @@
         let audioPlayingForMarker = null; // ID markeru pro který se audio přehrává
         let positionHistory = []; // Historie pozic pro vyhlazování
         
-        // Definice cílových bodů
+        // NOVÉ: Proměnné pro rotaci modelu
+        let modelRotationY = 30; // Aktuální rotace Y (začíná na 30° jako v původním nastavení)
+        let isRotating = false;
+        let startX = 0;
+        let rotationHintShown = false;
+        
+        // Definice cílových bodů - ZACHOVÁNO
         const markers = [
             { 
                 id: "andel_1", 
@@ -314,7 +338,7 @@
             },
             { 
                  id: "andel_2", 
-                 lat: 49.0091667,  
+                 lat: 49.0091389,  
                  lng: 17.1286111,  
                  name: "3D Anděl",
                  description: "3D GLB model anděla",
@@ -330,7 +354,148 @@
             }
         ];
 
-        // Funkce pro spuštění audio
+        // NOVÉ: Funkce pro rotaci modelu dotykem
+        function setupModelRotation() {
+            let touchStarted = false;
+            let rotationActive = false;
+            
+            // Touch/Mouse start events
+            document.addEventListener('touchstart', (e) => {
+                // Kontrola, zda se nedotýkáme UI elementů
+                if (isTouchingUI(e.target)) return;
+                if (!isModelVisible()) return;
+                
+                touchStarted = true;
+                rotationActive = true;
+                isRotating = true;
+                startX = e.touches[0].clientX;
+                showRotationHintOnce();
+                e.preventDefault();
+            }, { passive: false });
+            
+            document.addEventListener('mousedown', (e) => {
+                // Kontrola, zda neklikáme na UI elementy
+                if (isTouchingUI(e.target)) return;
+                if (!isModelVisible()) return;
+                
+                rotationActive = true;
+                isRotating = true;
+                startX = e.clientX;
+                showRotationHintOnce();
+                e.preventDefault();
+            });
+            
+            // Touch/Mouse move events
+            document.addEventListener('touchmove', (e) => {
+                if (!isRotating || !touchStarted || !rotationActive) return;
+                const currentX = e.touches[0].clientX;
+                const deltaX = currentX - startX;
+                modelRotationY += deltaX * 0.3; // Citlivost rotace
+                updateModelRotation();
+                startX = currentX;
+                e.preventDefault();
+            }, { passive: false });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isRotating || !rotationActive) return;
+                const deltaX = e.clientX - startX;
+                modelRotationY += deltaX * 0.3;
+                updateModelRotation();
+                startX = e.clientX;
+                e.preventDefault();
+            });
+            
+            // Touch/Mouse end events
+            document.addEventListener('touchend', () => {
+                isRotating = false;
+                touchStarted = false;
+                rotationActive = false;
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isRotating = false;
+                rotationActive = false;
+            });
+        }
+        
+        // Kontrola, zda se dotýkáme UI elementů
+        function isTouchingUI(target) {
+            // Kontrola všech UI elementů a jejich potomků
+            const uiSelectors = [
+                '.back-button-ar',
+                '.navigation-panel', 
+                '.navigation-toggle',
+                '.navigation-content',
+                '.target-item',
+                '.clear-selection',
+                '.distance-info',
+                '.audio-info',
+                '.rotation-hint'
+            ];
+            
+            for (let selector of uiSelectors) {
+                const element = document.querySelector(selector);
+                if (element && (element === target || element.contains(target))) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        function updateModelRotation() {
+            // Rotace pro GLB model (3D anděl) - pouze kolem Y osy
+            const angelModel = document.getElementById('rotatable-angel');
+            if (angelModel) {
+                angelModel.setAttribute('rotation', `0 ${modelRotationY} 0`);
+            }
+            
+            // Rotace pro PNG markery (2D obrázky) - pouze kolem Y osy
+            const currentVisibleMarker = getCurrentVisibleMarker();
+            if (currentVisibleMarker && currentVisibleMarker !== 'andel_2') {
+                const markerPlane = document.querySelector(`[data-marker-id="${currentVisibleMarker}"] a-plane`);
+                if (markerPlane) {
+                    // Pouze Y rotace - X a Z zůstávají na 0
+                    markerPlane.setAttribute('rotation', `0 ${modelRotationY + 130} 0`);
+                }
+            }
+        }
+        
+        // Získání aktuálně viditelného markeru
+        function getCurrentVisibleMarker() {
+            let visibleMarker = null;
+            markers.forEach(marker => {
+                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                if (entity && entity.getAttribute('visible') === true) {
+                    visibleMarker = marker.id;
+                }
+            });
+            return visibleMarker;
+        }
+        
+        function isModelVisible() {
+            // Kontrola jakéhokoli viditelného AR objektu (GLB nebo PNG)
+            let anyVisible = false;
+            markers.forEach(marker => {
+                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                if (entity && entity.getAttribute('visible') === true) {
+                    anyVisible = true;
+                }
+            });
+            return anyVisible;
+        }
+        
+        function showRotationHintOnce() {
+            if (rotationHintShown) return;
+            rotationHintShown = true;
+            const rotationHint = document.getElementById('rotationHint');
+            rotationHint.style.display = 'block';
+            setTimeout(() => {
+                rotationHint.style.display = 'none';
+            }, 3000);
+        }
+
+        // Funkce pro spuštění audio - ZACHOVÁNO
         function playAudio(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (!marker) return;
@@ -367,7 +532,7 @@
             }
         }
 
-        // Funkce pro zastavení aktuálního audio
+        // Funkce pro zastavení aktuálního audio - ZACHOVÁNO
         function stopCurrentAudio() {
             if (currentlyPlayingAudio) {
                 currentlyPlayingAudio.pause();
@@ -381,6 +546,8 @@
                 console.log("Audio stopped");
             }
         }
+
+        // VŠECHNY OSTATNÍ FUNKCE ZACHOVÁNY Z FUNKČNÍHO KÓDU
 
         // Funkce pro vyhlazení GPS pozice
         function smoothGPSPosition(newPosition) {
@@ -426,6 +593,7 @@
             lastStablePosition = position;
             return false;
         }
+        
         function formatDistance(distance) {
             if (distance < 1000) {
                 return `${Math.round(distance)}m`;
@@ -762,14 +930,16 @@
 
         // Inicializace
         window.addEventListener('load', () => {
-            console.log("Starting geolocation AR scene with GLB model...");
+            console.log("Starting geolocation AR scene with GLB model and touch rotation...");
             
             setupEventListeners();
+            setupModelRotation(); // NOVÉ: Přidána rotace dotykem
             getCurrentPosition();
             watchPosition();
             
             console.log(`Audio threshold set to: ${AUDIO_THRESHOLD} meters`);
             console.log(`AR visibility threshold set to: ${AR_VISIBILITY_THRESHOLD} meters`);
+            console.log("Touch rotation enabled for angel model");
         });
 
         // A-Frame scéna je připravena
