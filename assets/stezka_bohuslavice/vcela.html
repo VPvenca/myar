@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Včelí AR Stezka - Čistý AR.js</title>
     
-    <!-- AR.js bez A-Frame -->
-    <script src="https://threejs.org/build/three.min.js"></script>
-    <script src="https://threejs.org/examples/js/loaders/GLTFLoader.js"></script>
+    <!-- AR.js bez A-Frame - opravené odkazy -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/three.js/build/ar-threejs.js"></script>
     
     <style>
@@ -348,88 +348,124 @@
         function initAR() {
             console.log("Initializing pure AR.js with Three.js...");
             
-            // Scene setup
-            scene = new THREE.Scene();
-            
-            // Camera setup
-            camera = new THREE.Camera();
-            scene.add(camera);
-            
-            // Renderer setup
-            renderer = new THREE.WebGLRenderer({ 
-                antialias: true, 
-                alpha: true,
-                precision: 'mediump'
-            });
-            renderer.setClearColor(new THREE.Color('lightgrey'), 0);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.domElement.style.position = 'absolute';
-            renderer.domElement.style.top = '0px';
-            renderer.domElement.style.left = '0px';
-            document.body.appendChild(renderer.domElement);
-            
-            // AR Toolkit Source (webcam)
-            arToolkitSource = new THREEx.ArToolkitSource({
-                sourceType: 'webcam',
-            });
-            
-            function onResize() {
-                arToolkitSource.onResizeElement();
-                arToolkitSource.copyElementSizeTo(renderer.domElement);
-                if (arToolkitContext.arController !== null) {
-                    arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas);
+            try {
+                // Kontrola, zda jsou všechny knihovny načtené
+                if (typeof THREE === 'undefined') {
+                    console.error("Three.js is not loaded!");
+                    document.getElementById('loadingInfo').innerHTML = '❌ Chyba: Three.js se nenačetl';
+                    return;
                 }
+                
+                if (typeof THREEx === 'undefined') {
+                    console.error("AR.js THREEx is not loaded!");
+                    document.getElementById('loadingInfo').innerHTML = '❌ Chyba: AR.js se nenačetl';
+                    return;
+                }
+                
+                console.log("All libraries loaded successfully");
+                document.getElementById('loadingInfo').innerHTML = '🐝 Inicializuji kameru...';
+                
+                // Scene setup
+                scene = new THREE.Scene();
+                
+                // Camera setup
+                camera = new THREE.Camera();
+                scene.add(camera);
+                
+                // Renderer setup
+                renderer = new THREE.WebGLRenderer({ 
+                    antialias: true, 
+                    alpha: true,
+                    precision: 'mediump'
+                });
+                renderer.setClearColor(new THREE.Color('lightgrey'), 0);
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.domElement.style.position = 'absolute';
+                renderer.domElement.style.top = '0px';
+                renderer.domElement.style.left = '0px';
+                document.body.appendChild(renderer.domElement);
+                
+                console.log("Three.js scene initialized");
+                document.getElementById('loadingInfo').innerHTML = '🐝 Spouštím kameru...';
+                
+                // AR Toolkit Source (webcam)
+                arToolkitSource = new THREEx.ArToolkitSource({
+                    sourceType: 'webcam',
+                });
+                
+                function onResize() {
+                    arToolkitSource.onResizeElement();
+                    arToolkitSource.copyElementSizeTo(renderer.domElement);
+                    if (arToolkitContext.arController !== null) {
+                        arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas);
+                    }
+                }
+                
+                arToolkitSource.init(function onReady() {
+                    console.log("AR.js camera initialized");
+                    onResize();
+                    
+                    // Hide loading info
+                    document.getElementById('loadingInfo').style.display = 'none';
+                    
+                    // Start GPS tracking
+                    initGPS();
+                }, function onError(error) {
+                    console.error("Camera initialization error:", error);
+                    document.getElementById('loadingInfo').innerHTML = '❌ Chyba kamery: ' + error.message;
+                });
+                
+                // Handle resize
+                window.addEventListener('resize', function() {
+                    onResize();
+                });
+                
+                // AR Toolkit Context
+                arToolkitContext = new THREEx.ArToolkitContext({
+                    cameraParametersUrl: 'data/camera_para.dat',
+                    detectionMode: 'mono'
+                });
+                
+                arToolkitContext.init(function onCompleted() {
+                    camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+                    console.log("AR.js context initialized");
+                    
+                    // Lighting
+                    const ambientLight = new THREE.AmbientLight(0xfff8dc, 0.7);
+                    scene.add(ambientLight);
+                    
+                    const directionalLight = new THREE.DirectionalLight(0xffeb3b, 0.8);
+                    directionalLight.position.set(0, 10, 5);
+                    scene.add(directionalLight);
+                    
+                    // Load bee models
+                    loadBeeModels();
+                    
+                    // Setup event listeners
+                    setupEventListeners();
+                    setupModelRotation();
+                    
+                    // Start render loop
+                    animate();
+                });
+                
+            } catch (error) {
+                console.error("AR initialization error:", error);
+                document.getElementById('loadingInfo').innerHTML = '❌ Chyba inicializace: ' + error.message;
             }
-            
-            arToolkitSource.init(function onReady() {
-                console.log("AR.js camera initialized");
-                onResize();
-                
-                // Hide loading info
-                document.getElementById('loadingInfo').style.display = 'none';
-                
-                // Start GPS tracking
-                initGPS();
-            });
-            
-            // Handle resize
-            window.addEventListener('resize', function() {
-                onResize();
-            });
-            
-            // AR Toolkit Context
-            arToolkitContext = new THREEx.ArToolkitContext({
-                cameraParametersUrl: 'data/camera_para.dat',
-                detectionMode: 'mono'
-            });
-            
-            arToolkitContext.init(function onCompleted() {
-                camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
-                console.log("AR.js context initialized");
-            });
-            
-            // Lighting
-            const ambientLight = new THREE.AmbientLight(0xfff8dc, 0.7);
-            scene.add(ambientLight);
-            
-            const directionalLight = new THREE.DirectionalLight(0xffeb3b, 0.8);
-            directionalLight.position.set(0, 10, 5);
-            scene.add(directionalLight);
-            
-            // Load bee models
-            loadBeeModels();
-            
-            // Setup event listeners
-            setupEventListeners();
-            setupModelRotation();
-            
-            // Start render loop
-            animate();
         }
 
         // Načtení 3D modelů včel
         function loadBeeModels() {
+            // Kontrola, zda je GLTFLoader k dispozici
+            if (typeof THREE.GLTFLoader === 'undefined') {
+                console.error("GLTFLoader is not available!");
+                document.getElementById('loadingInfo').innerHTML = '❌ Chyba: GLTFLoader se nenačetl';
+                return;
+            }
+            
             const loader = new THREE.GLTFLoader();
+            console.log("Loading bee models...");
             
             markers.forEach((marker, index) => {
                 loader.load('/assets/stezka_bohuslavice/3d/vcela.glb', 
@@ -453,12 +489,17 @@
                         scene.add(model);
                         marker.model = model;
                         beeModels.push(model);
+                        
+                        console.log(`Bee model ${index + 1} added to scene`);
                     },
                     function(progress) {
-                        console.log(`Loading bee model ${index + 1}: ${(progress.loaded / progress.total * 100)}%`);
+                        const percentage = (progress.loaded / progress.total * 100);
+                        console.log(`Loading bee model ${index + 1}: ${percentage}%`);
+                        document.getElementById('loadingInfo').innerHTML = `🐝 Načítám model včely ${index + 1}: ${Math.round(percentage)}%`;
                     },
                     function(error) {
                         console.error(`Error loading bee model ${index + 1}:`, error);
+                        document.getElementById('loadingInfo').innerHTML = `❌ Chyba načítání modelu ${index + 1}: ${error.message}`;
                     }
                 );
             });
@@ -987,7 +1028,16 @@
         // Initialize everything when page loads
         window.addEventListener('load', () => {
             console.log("Starting pure AR.js bee tracking application...");
-            initAR();
+            
+            // Počkáme chvíli na načtení všech skriptů
+            setTimeout(() => {
+                console.log("Checking libraries...");
+                console.log("THREE available:", typeof THREE !== 'undefined');
+                console.log("THREEx available:", typeof THREEx !== 'undefined');
+                console.log("GLTFLoader available:", typeof THREE !== 'undefined' && typeof THREE.GLTFLoader !== 'undefined');
+                
+                initAR();
+            }, 500); // Počkáme 500ms
         });
 
         // Handle window resize
