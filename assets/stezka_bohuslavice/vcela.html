@@ -3,566 +3,323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Včelí AR Stezka - Čistý AR.js</title>
+    <title>Včelí AR Stezka - Minimalistická verze</title>
     
-    <!-- AR.js bez A-Frame - opravené odkazy -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/three.js/build/ar-threejs.js"></script>
+    <!-- Pouze A-Frame a AR.js - nejjednodušší možná konfigurace -->
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
     
     <style>
         body {
             margin: 0;
-            padding: 0;
-            overflow: hidden;
-            font-family: 'Arial', sans-serif;
-            background: #000;
+            font-family: Arial, sans-serif;
         }
         
-        /* Jednoduchá oprava kamery bez A-Frame konfliktů */
-        video {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            object-fit: cover !important;
-            z-index: -1 !important;
+        /* Úplně základní CSS - žádné komplikované opravy */
+        .ui-overlay {
+            position: fixed;
+            z-index: 1000;
+            pointer-events: none;
         }
         
-        #arjs-video {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            object-fit: cover !important;
-            z-index: -1 !important;
+        .ui-element {
+            pointer-events: auto;
         }
         
-        canvas {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            z-index: 1 !important;
-        }
-        
-        .back-button-ar {
+        .back-button {
             position: fixed;
             top: 10px;
             left: 10px;
             z-index: 1001;
-            padding: 8px 15px;
-            background-color: rgba(255, 193, 7, 0.9);
-            color: #000;
+            padding: 10px 15px;
+            background: rgba(255, 193, 7, 0.9);
+            color: black;
             text-decoration: none;
             border-radius: 8px;
-            font-size: 14px;
             font-weight: bold;
-            border: 2px solid #fff;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
-        
-        .back-button-ar:hover {
-            background-color: rgba(255, 193, 7, 1);
         }
         
         .distance-info {
             position: fixed;
-            bottom: 10px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: rgba(255, 193, 7, 0.95);
-            color: #000;
+            background: rgba(255, 193, 7, 0.9);
+            color: black;
             padding: 15px 20px;
             border-radius: 12px;
-            font-size: 16px;
             font-weight: bold;
-            z-index: 1000;
             text-align: center;
-            border: 3px solid #FFD700;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
         }
         
-        /* Navigační panel v pravém horním rohu */
-        .navigation-panel {
+        .navigation {
             position: fixed;
             top: 10px;
             right: 10px;
             z-index: 1000;
         }
         
-        .navigation-toggle {
-            background-color: rgba(255, 193, 7, 0.95);
-            color: #000;
-            padding: 12px 15px;
-            border-radius: 12px;
-            font-size: 14px;
-            font-weight: bold;
-            border: 3px solid #FFD700;
+        .nav-toggle {
+            background: rgba(255, 193, 7, 0.9);
+            color: black;
+            padding: 10px 15px;
+            border-radius: 8px;
             cursor: pointer;
-            user-select: none;
-            text-align: center;
-            min-width: 140px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-weight: bold;
         }
         
-        .navigation-toggle:hover {
-            background-color: rgba(255, 215, 0, 1);
-        }
-        
-        .navigation-content {
+        .nav-content {
             position: absolute;
             top: 100%;
             right: 0;
             margin-top: 5px;
-            background-color: rgba(255, 193, 7, 0.98);
-            border: 3px solid #FFD700;
-            border-radius: 12px;
-            padding: 15px;
-            min-width: 220px;
-            max-width: 280px;
+            background: rgba(255, 193, 7, 0.95);
+            border-radius: 8px;
+            padding: 10px;
+            min-width: 200px;
             display: none;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
         }
         
-        .navigation-content.open {
+        .nav-content.open {
             display: block;
         }
         
         .target-item {
-            padding: 12px;
-            margin: 8px 0;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 8px;
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 5px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            border-left: 4px solid #ff6b35;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-left: 3px solid #ff6b35;
         }
         
         .target-item:hover {
-            background-color: rgba(255, 255, 255, 0.95);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 1);
         }
         
         .target-item.selected {
-            background-color: rgba(255, 215, 0, 0.9);
+            background: rgba(255, 215, 0, 0.9);
             border-left-color: #FFD700;
-            border-left-width: 6px;
         }
         
         .target-item.closest {
             border-left-color: #28a745;
         }
         
-        .target-item.very-close {
-            border-left-color: #28a745;
-        }
-        
-        .target-item.close {
-            border-left-color: #90ee90;
-        }
-        
-        .target-item.medium {
-            border-left-color: #ffa500;
-        }
-        
-        .target-item.far {
-            border-left-color: #ff6b35;
-        }
-        
-        .target-name {
-            font-weight: bold;
-            color: #000;
-            font-size: 14px;
-        }
-        
-        .target-details {
-            font-size: 12px;
-            color: #444;
-            margin-top: 3px;
-        }
-        
-        .clear-selection {
-            background-color: rgba(255, 99, 71, 0.9);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-align: center;
-            margin-top: 15px;
-            font-size: 13px;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        
-        .clear-selection:hover {
-            background-color: rgba(255, 99, 71, 1);
-        }
-        
         .audio-info {
             position: fixed;
-            bottom: 70px;
+            bottom: 80px;
             left: 10px;
-            background-color: rgba(40, 167, 69, 0.9);
+            background: rgba(40, 167, 69, 0.9);
             color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 13px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
             z-index: 1000;
             display: none;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            border: 2px solid #fff;
-        }
-        
-        .rotation-hint {
-            position: fixed;
-            bottom: 130px;
-            left: 10px;
-            background-color: rgba(0, 123, 255, 0.9);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 13px;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            border: 2px solid #fff;
-        }
-
-        .loading-info {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            font-size: 16px;
-            z-index: 2000;
-            text-align: center;
         }
     </style>
 </head>
 <body>
-    <a href="/assets/stezka_bohuslavice/bohuslavice.html" class="back-button-ar">
+    <!-- UI Elementy -->
+    <a href="/assets/stezka_bohuslavice/bohuslavice.html" class="back-button ui-element">
         🐝 Zpět do Menu
     </a>
     
-    <div class="loading-info" id="loadingInfo">
-        🐝 Načítám včelí AR...
-    </div>
-    
-    <div class="audio-info" id="audioInfo">
-        🎵 Audio přehrává...
-    </div>
-    
-    <div class="rotation-hint" id="rotationHint">
-        🔄 Tažením otočíte včelu
-    </div>
-    
-    <!-- Zobrazení vzdálenosti k vybranému nebo nejbližšímu bodu -->
-    <div class="distance-info" id="distanceInfo">
+    <div class="distance-info ui-element" id="distanceInfo">
         🐝 Hledám nejbližší včelu...
     </div>
     
-    <!-- Navigační panel (rozkliknutelný) -->
-    <div class="navigation-panel">
-        <div class="navigation-toggle" id="navToggle">
-            🐝 Včelí Navigace
-        </div>
-        <div class="navigation-content" id="navContent">
+    <div class="navigation ui-element">
+        <div class="nav-toggle" id="navToggle">🐝 Včelí Navigace</div>
+        <div class="nav-content" id="navContent">
             <div id="targetsList"></div>
-            <div class="clear-selection" id="clearSelection" style="display: none;">
+            <div id="clearSelection" style="display: none; background: tomato; color: white; padding: 5px; text-align: center; margin-top: 10px; border-radius: 5px; cursor: pointer;">
                 ✕ Zrušit výběr
             </div>
         </div>
     </div>
+    
+    <div class="audio-info" id="audioInfo">🎵 Audio přehrává...</div>
 
-    <!-- Audio soubory pro včely -->
-    <audio id="audio1" src="/assets/stezka_bohuslavice/mp3/vcela.mp3" preload="auto"></audio>
-    <audio id="audio2" src="/assets/stezka_bohuslavice/mp3/vcela.mp3" preload="auto"></audio>
-    <audio id="audio3" src="/assets/stezka_bohuslavice/mp3/vcela.mp3" preload="auto"></audio>
+    <!-- Nejjednodušší možná A-Frame AR scéna -->
+    <a-scene 
+        vr-mode-ui="enabled: false"
+        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
+        renderer="logarithmicDepthBuffer: true; antialias: true;"
+        device-orientation-permission-ui="enabled: false">
+
+        <a-assets>
+            <!-- GLB modely včel -->
+            <a-asset-item id="bee-model-1" src="/assets/stezka_bohuslavice/3d/vcela.glb"></a-asset-item>
+            <a-asset-item id="bee-model-2" src="/assets/stezka_bohuslavice/3d/vcela.glb"></a-asset-item>
+            <a-asset-item id="bee-model-3" src="/assets/stezka_bohuslavice/3d/vcela.glb"></a-asset-item>
+            
+            <!-- Audio soubory -->
+            <audio id="audio1" src="/assets/stezka_bohuslavice/mp3/vcela.mp3" preload="auto"></audio>
+            <audio id="audio2" src="/assets/stezka_bohuslavice/mp3/vcela.mp3" preload="auto"></audio>
+            <audio id="audio3" src="/assets/stezka_bohuslavice/mp3/vcela.mp3" preload="auto"></audio>
+        </a-assets>
+
+        <!-- Kamera s geolokací -->
+        <a-camera 
+            gps-camera
+            rotation-reader>
+        </a-camera>
+
+        <!-- AR objekty na GPS souřadnicích -->
+        <!-- Včela 1 - Dělnice -->
+        <a-entity 
+            gps-entity-place="latitude: 49.090675; longitude: 17.132976"
+            data-marker-id="vcela_1"
+            data-audio-id="audio1"
+            visible="false">
+            <a-gltf-model 
+                src="#bee-model-1"
+                position="0 0 0"
+                scale="3 3 3"
+                rotation="0 0 0"
+                animation-mixer>
+            </a-gltf-model>
+        </a-entity>
+
+        <!-- Včela 2 - Trubec -->
+        <a-entity 
+            gps-entity-place="latitude: 49.049455; longitude: 17.122738"
+            data-marker-id="vcela_2"
+            data-audio-id="audio2"
+            visible="false">
+            <a-gltf-model 
+                src="#bee-model-2"
+                position="0 0 0"
+                scale="3 3 3"
+                rotation="0 0 0"
+                animation-mixer>
+            </a-gltf-model>
+        </a-entity>
+
+        <!-- Včela 3 - Královna -->
+        <a-entity 
+            gps-entity-place="latitude: 49.009057; longitude: 17.128693"
+            data-marker-id="vcela_3"
+            data-audio-id="audio3"
+            visible="false">
+            <a-gltf-model 
+                src="#bee-model-3"
+                position="0 0 0"
+                scale="3 3 3"
+                rotation="0 0 0"
+                animation-mixer>
+            </a-gltf-model>
+        </a-entity>
+
+        <!-- Základní osvětlení -->
+        <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
+        <a-light type="directional" color="#ffeb3b" intensity="0.8" position="0 5 0"></a-light>
+    </a-scene>
 
     <script>
-        // Three.js a AR.js proměnné
-        let scene, camera, renderer, arToolkitSource, arToolkitContext;
-        let beeModels = []; // Array pro 3D modely včel
-        let modelRotationY = 30;
-        let isRotating = false;
-        let startX = 0;
-        let rotationHintShown = false;
-
         // GPS a navigační proměnné
         let userPosition = null;
-        let lastStablePosition = null;
         const PROXIMITY_THRESHOLD = 10;
-        const AR_VISIBILITY_THRESHOLD = 20;
-        const AUDIO_THRESHOLD = 10;
-        const GPS_SMOOTHING_FACTOR = 0.3;
-        const MIN_GPS_ACCURACY = 20;
+        const AR_VISIBILITY_THRESHOLD = 30; // Zvětšeno pro lepší testování
+        const AUDIO_THRESHOLD = 15;
         let selectedTargetId = null;
         let currentlyPlayingAudio = null;
         let audioPlayingForMarker = null;
         
-        // Definice cílových bodů - včelí tematika
+        // Definice včelích markerů
         const markers = [
             { 
                 id: "vcela_1", 
-                lat: 49.090675,
+                lat: 49.090675, 
                 lng: 17.132976,
                 name: "🐝 Dělnice",
-                description: "Pracovitá včela dělnice - základ úlu",
-                audioId: "audio1",
-                model: null,
-                visible: false
+                description: "Pracovitá včela dělnice",
+                audioId: "audio1"
             },
             { 
                 id: "vcela_2", 
-                lat: 49.049455,  
-                lng: 17.122738,  
-                name: "🐝 Trubec",
-                description: "Samec včely - zodpovědný za rozmnožování",
-                audioId: "audio2",
-                model: null,
-                visible: false
+                lat: 49.049455, 
+                lng: 17.122738,
+                name: "🐝 Trubec", 
+                description: "Samec včely",
+                audioId: "audio2"
             },
             { 
                 id: "vcela_3", 
-                lat: 49.009057,  
-                lng: 17.128693,  
+                lat: 49.009057, 
+                lng: 17.128693,
                 name: "👑 Královna",
-                description: "Matka úlu - vládkyně včelího státu",
-                audioId: "audio3",
-                model: null,
-                visible: false
+                description: "Matka úlu",
+                audioId: "audio3"
             }
         ];
 
-        // Inicializace AR.js s Three.js
-        function initAR() {
-            console.log("Initializing pure AR.js with Three.js...");
-            
-            try {
-                // Kontrola, zda jsou všechny knihovny načtené
-                if (typeof THREE === 'undefined') {
-                    console.error("Three.js is not loaded!");
-                    document.getElementById('loadingInfo').innerHTML = '❌ Chyba: Three.js se nenačetl';
-                    return;
-                }
-                
-                if (typeof THREEx === 'undefined') {
-                    console.error("AR.js THREEx is not loaded!");
-                    document.getElementById('loadingInfo').innerHTML = '❌ Chyba: AR.js se nenačetl';
-                    return;
-                }
-                
-                console.log("All libraries loaded successfully");
-                document.getElementById('loadingInfo').innerHTML = '🐝 Inicializuji kameru...';
-                
-                // Scene setup
-                scene = new THREE.Scene();
-                
-                // Camera setup
-                camera = new THREE.Camera();
-                scene.add(camera);
-                
-                // Renderer setup
-                renderer = new THREE.WebGLRenderer({ 
-                    antialias: true, 
-                    alpha: true,
-                    precision: 'mediump'
-                });
-                renderer.setClearColor(new THREE.Color('lightgrey'), 0);
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.domElement.style.position = 'absolute';
-                renderer.domElement.style.top = '0px';
-                renderer.domElement.style.left = '0px';
-                document.body.appendChild(renderer.domElement);
-                
-                console.log("Three.js scene initialized");
-                document.getElementById('loadingInfo').innerHTML = '🐝 Spouštím kameru...';
-                
-                // AR Toolkit Source (webcam)
-                arToolkitSource = new THREEx.ArToolkitSource({
-                    sourceType: 'webcam',
-                });
-                
-                function onResize() {
-                    arToolkitSource.onResizeElement();
-                    arToolkitSource.copyElementSizeTo(renderer.domElement);
-                    if (arToolkitContext.arController !== null) {
-                        arToolkitSource.copyElementSizeTo(arToolkitContext.arController.canvas);
-                    }
-                }
-                
-                arToolkitSource.init(function onReady() {
-                    console.log("AR.js camera initialized");
-                    onResize();
-                    
-                    // Hide loading info
-                    document.getElementById('loadingInfo').style.display = 'none';
-                    
-                    // Start GPS tracking
-                    initGPS();
-                }, function onError(error) {
-                    console.error("Camera initialization error:", error);
-                    document.getElementById('loadingInfo').innerHTML = '❌ Chyba kamery: ' + error.message;
-                });
-                
-                // Handle resize
-                window.addEventListener('resize', function() {
-                    onResize();
-                });
-                
-                // AR Toolkit Context
-                arToolkitContext = new THREEx.ArToolkitContext({
-                    cameraParametersUrl: 'data/camera_para.dat',
-                    detectionMode: 'mono'
-                });
-                
-                arToolkitContext.init(function onCompleted() {
-                    camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
-                    console.log("AR.js context initialized");
-                    
-                    // Lighting
-                    const ambientLight = new THREE.AmbientLight(0xfff8dc, 0.7);
-                    scene.add(ambientLight);
-                    
-                    const directionalLight = new THREE.DirectionalLight(0xffeb3b, 0.8);
-                    directionalLight.position.set(0, 10, 5);
-                    scene.add(directionalLight);
-                    
-                    // Load bee models
-                    loadBeeModels();
-                    
-                    // Setup event listeners
-                    setupEventListeners();
-                    setupModelRotation();
-                    
-                    // Start render loop
-                    animate();
-                });
-                
-            } catch (error) {
-                console.error("AR initialization error:", error);
-                document.getElementById('loadingInfo').innerHTML = '❌ Chyba inicializace: ' + error.message;
+        // Výpočet vzdálenosti mezi GPS body
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371000; // Poloměr Země v metrech
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                     Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Formátování vzdálenosti
+        function formatDistance(distance) {
+            if (distance < 1000) {
+                return `${Math.round(distance)}m`;
+            } else {
+                return `${(distance / 1000).toFixed(1)}km`;
             }
         }
 
-        // Načtení 3D modelů včel
-        function loadBeeModels() {
-            // Kontrola, zda je GLTFLoader k dispozici
-            if (typeof THREE.GLTFLoader === 'undefined') {
-                console.error("GLTFLoader is not available!");
-                document.getElementById('loadingInfo').innerHTML = '❌ Chyba: GLTFLoader se nenačetl';
-                return;
-            }
-            
-            const loader = new THREE.GLTFLoader();
-            console.log("Loading bee models...");
-            
-            markers.forEach((marker, index) => {
-                loader.load('/assets/stezka_bohuslavice/3d/vcela.glb', 
-                    function(gltf) {
-                        console.log(`Bee model ${index + 1} loaded for ${marker.name}`);
-                        
-                        const model = gltf.scene;
-                        model.scale.set(4, 4, 4);
-                        model.rotation.y = THREE.MathUtils.degToRad(30);
-                        model.visible = false;
-                        
-                        // Animation mixer pro animace
-                        if (gltf.animations && gltf.animations.length > 0) {
-                            const mixer = new THREE.AnimationMixer(model);
-                            gltf.animations.forEach(clip => {
-                                mixer.clipAction(clip).play();
-                            });
-                            model.mixer = mixer;
-                        }
-                        
-                        scene.add(model);
-                        marker.model = model;
-                        beeModels.push(model);
-                        
-                        console.log(`Bee model ${index + 1} added to scene`);
-                    },
-                    function(progress) {
-                        const percentage = (progress.loaded / progress.total * 100);
-                        console.log(`Loading bee model ${index + 1}: ${percentage}%`);
-                        document.getElementById('loadingInfo').innerHTML = `🐝 Načítám model včely ${index + 1}: ${Math.round(percentage)}%`;
-                    },
-                    function(error) {
-                        console.error(`Error loading bee model ${index + 1}:`, error);
-                        document.getElementById('loadingInfo').innerHTML = `❌ Chyba načítání modelu ${index + 1}: ${error.message}`;
-                    }
-                );
-            });
-        }
-
-        // GPS funkcionalita
-        function initGPS() {
-            console.log("Initializing GPS tracking for bees...");
-            getCurrentPosition();
-            watchPosition();
-        }
-
+        // Získání aktuální pozice
         function getCurrentPosition() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
-                        const rawPosition = {
+                        userPosition = {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude,
                             accuracy: position.coords.accuracy
                         };
-                        
-                        const smoothedPosition = smoothGPSPosition(rawPosition);
-                        
-                        if (smoothedPosition) {
-                            userPosition = smoothedPosition;
-                            console.log("User position updated for bee tracking:", userPosition);
-                            checkProximityToMarkers();
-                            updateNavigation();
-                        }
+                        console.log("Position updated:", userPosition);
+                        checkProximityToMarkers();
+                        updateNavigation();
                     },
                     (error) => {
                         console.error("Geolocation error:", error);
+                        document.getElementById('distanceInfo').innerHTML = '❌ GPS nedostupný';
                     },
                     {
                         enableHighAccuracy: true,
-                        timeout: 15000,
+                        timeout: 10000,
                         maximumAge: 30000
                     }
                 );
             }
         }
 
+        // Sledování pozice
         function watchPosition() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
                     (position) => {
-                        const rawPosition = {
+                        userPosition = {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude,
                             accuracy: position.coords.accuracy
                         };
-                        
-                        const smoothedPosition = smoothGPSPosition(rawPosition);
-                        
-                        if (smoothedPosition && isPositionStable(smoothedPosition)) {
-                            userPosition = smoothedPosition;
-                            checkProximityToMarkers();
-                            updateNavigation();
-                        }
+                        checkProximityToMarkers();
+                        updateNavigation();
                     },
                     (error) => {
-                        console.error("Geolocation watch error:", error);
+                        console.error("Watch position error:", error);
                     },
                     {
                         enableHighAccuracy: true,
@@ -573,57 +330,7 @@
             }
         }
 
-        // GPS helper functions
-        function smoothGPSPosition(newPosition) {
-            if (newPosition.accuracy > MIN_GPS_ACCURACY) {
-                console.log(`GPS accuracy too low: ${newPosition.accuracy}m, skipping update`);
-                return userPosition;
-            }
-            
-            if (!userPosition) {
-                return newPosition;
-            }
-            
-            const smoothedPosition = {
-                lat: userPosition.lat + GPS_SMOOTHING_FACTOR * (newPosition.lat - userPosition.lat),
-                lng: userPosition.lng + GPS_SMOOTHING_FACTOR * (newPosition.lng - userPosition.lng),
-                accuracy: newPosition.accuracy
-            };
-            
-            return smoothedPosition;
-        }
-
-        function isPositionStable(position) {
-            if (!lastStablePosition) {
-                lastStablePosition = position;
-                return true;
-            }
-            
-            const distance = calculateDistance(
-                lastStablePosition.lat, lastStablePosition.lng,
-                position.lat, position.lng
-            );
-            
-            if (distance < 2) {
-                return true;
-            }
-            
-            lastStablePosition = position;
-            return false;
-        }
-
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371000;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                     Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
-        }
-
-        // Kontrola blízkosti k markerům
+        // Kontrola proximity k markerům
         function checkProximityToMarkers() {
             if (!userPosition) return;
             
@@ -635,66 +342,53 @@
                     marker.lat, marker.lng
                 );
                 
-                if (marker.model) {
+                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                if (entity) {
                     // Zobrazení AR objektu
                     if (distance <= AR_VISIBILITY_THRESHOLD) {
-                        marker.model.visible = true;
-                        marker.visible = true;
-                        console.log(`3D bee visible for ${marker.id} at distance ${distance.toFixed(2)}m`);
+                        entity.setAttribute('visible', 'true');
+                        console.log(`Bee visible: ${marker.id} at ${distance.toFixed(1)}m`);
                     } else {
-                        marker.model.visible = false;
-                        marker.visible = false;
+                        entity.setAttribute('visible', 'false');
                     }
                     
-                    // Audio přehrávání podle threshold
+                    // Audio přehrávání
                     if (distance <= AUDIO_THRESHOLD) {
                         playAudio(marker.id);
                         shouldStopAudio = false;
                     }
                 }
                 
-                // Aktivace gamifikace při přiblížení
+                // Gamifikace
                 if (distance <= PROXIMITY_THRESHOLD) {
-                    activateMarker(marker.id);
+                    console.log(`Bee activated: ${marker.id}`);
                 }
             });
             
-            // Zastavíme audio pokud nejsme blízko žádného markeru
             if (shouldStopAudio && currentlyPlayingAudio) {
                 stopCurrentAudio();
             }
         }
 
-        // Audio functions
+        // Audio funkce
         function playAudio(markerId) {
             const marker = markers.find(m => m.id === markerId);
-            if (!marker) return;
-            
-            if (audioPlayingForMarker === markerId) return;
+            if (!marker || audioPlayingForMarker === markerId) return;
             
             stopCurrentAudio();
             
             const audioElement = document.getElementById(marker.audioId);
             if (audioElement) {
-                console.log(`Playing bee audio for marker: ${markerId}`);
-                
                 audioElement.currentTime = 0;
                 audioElement.play().then(() => {
                     currentlyPlayingAudio = audioElement;
                     audioPlayingForMarker = markerId;
                     
-                    const audioInfo = document.getElementById('audioInfo');
-                    audioInfo.textContent = `🎵 ${marker.name} - Audio přehrává...`;
-                    audioInfo.style.display = 'block';
+                    document.getElementById('audioInfo').textContent = `🎵 ${marker.name}`;
+                    document.getElementById('audioInfo').style.display = 'block';
                     
-                    audioElement.onended = () => {
-                        console.log(`Bee audio ended for marker: ${markerId}`);
-                        stopCurrentAudio();
-                    };
-                    
-                }).catch(error => {
-                    console.error(`Error playing bee audio for ${markerId}:`, error);
-                });
+                    audioElement.onended = stopCurrentAudio;
+                }).catch(console.error);
             }
         }
 
@@ -702,120 +396,13 @@
             if (currentlyPlayingAudio) {
                 currentlyPlayingAudio.pause();
                 currentlyPlayingAudio.currentTime = 0;
-                currentlyPlayingAudio.onended = null;
                 currentlyPlayingAudio = null;
                 audioPlayingForMarker = null;
-                
                 document.getElementById('audioInfo').style.display = 'none';
-                console.log("Bee audio stopped");
             }
         }
 
-        // Model rotation functions
-        function setupModelRotation() {
-            let touchStarted = false;
-            let rotationActive = false;
-            
-            document.addEventListener('touchstart', (e) => {
-                if (isTouchingUI(e.target)) return;
-                if (!isAnyModelVisible()) return;
-                
-                touchStarted = true;
-                rotationActive = true;
-                isRotating = true;
-                startX = e.touches[0].clientX;
-                showRotationHintOnce();
-                e.preventDefault();
-            }, { passive: false });
-            
-            document.addEventListener('mousedown', (e) => {
-                if (isTouchingUI(e.target)) return;
-                if (!isAnyModelVisible()) return;
-                
-                rotationActive = true;
-                isRotating = true;
-                startX = e.clientX;
-                showRotationHintOnce();
-                e.preventDefault();
-            });
-            
-            document.addEventListener('touchmove', (e) => {
-                if (!isRotating || !touchStarted || !rotationActive) return;
-                const currentX = e.touches[0].clientX;
-                const deltaX = currentX - startX;
-                modelRotationY += deltaX * 0.3;
-                updateModelRotation();
-                startX = currentX;
-                e.preventDefault();
-            }, { passive: false });
-            
-            document.addEventListener('mousemove', (e) => {
-                if (!isRotating || !rotationActive) return;
-                const deltaX = e.clientX - startX;
-                modelRotationY += deltaX * 0.3;
-                updateModelRotation();
-                startX = e.clientX;
-                e.preventDefault();
-            });
-            
-            document.addEventListener('touchend', () => {
-                isRotating = false;
-                touchStarted = false;
-                rotationActive = false;
-            });
-            
-            document.addEventListener('mouseup', () => {
-                isRotating = false;
-                rotationActive = false;
-            });
-        }
-
-        function updateModelRotation() {
-            beeModels.forEach(model => {
-                if (model && model.visible) {
-                    model.rotation.y = THREE.MathUtils.degToRad(modelRotationY);
-                }
-            });
-        }
-
-        function isAnyModelVisible() {
-            return markers.some(marker => marker.visible);
-        }
-
-        function isTouchingUI(target) {
-            const uiSelectors = [
-                '.back-button-ar',
-                '.navigation-panel', 
-                '.navigation-toggle',
-                '.navigation-content',
-                '.target-item',
-                '.clear-selection',
-                '.distance-info',
-                '.audio-info',
-                '.rotation-hint'
-            ];
-            
-            for (let selector of uiSelectors) {
-                const element = document.querySelector(selector);
-                if (element && (element === target || element.contains(target))) {
-                    return true;
-                }
-            }
-            
-            return false;
-        }
-
-        function showRotationHintOnce() {
-            if (rotationHintShown) return;
-            rotationHintShown = true;
-            const rotationHint = document.getElementById('rotationHint');
-            rotationHint.style.display = 'block';
-            setTimeout(() => {
-                rotationHint.style.display = 'none';
-            }, 3000);
-        }
-
-        // Navigation functions
+        // Navigace
         function updateNavigation() {
             if (!userPosition) return;
             
@@ -835,46 +422,23 @@
                 const isSelected = marker.id === selectedTargetId;
                 
                 let cssClass = 'target-item';
-                if (isSelected) {
-                    cssClass += ' selected';
-                } else {
-                    if (marker.distance <= AR_VISIBILITY_THRESHOLD) {
-                        cssClass += ' very-close';
-                    } else if (marker.distance <= 100) {
-                        cssClass += ' medium';
-                    } else {
-                        cssClass += ' far';
-                    }
-                    
-                    if (isClosest && !isSelected) {
-                        cssClass = 'target-item closest';
-                    }
-                }
-                
-                let audioIndicator = '';
-                if (marker.distance <= AUDIO_THRESHOLD) {
-                    audioIndicator = ' 🎵';
-                }
+                if (isSelected) cssClass += ' selected';
+                else if (isClosest) cssClass += ' closest';
                 
                 html += `
                     <div class="${cssClass}" data-target-id="${marker.id}">
-                        <div class="target-name">
-                            ${marker.name}${audioIndicator}
-                            ${isSelected ? ' 🎯' : ''}
-                        </div>
-                        <div class="target-details">
-                            ${formatDistance(marker.distance)} - ${marker.description}
-                        </div>
+                        <div style="font-weight: bold;">${marker.name} ${isSelected ? '🎯' : ''}</div>
+                        <div style="font-size: 12px; color: #666;">${formatDistance(marker.distance)} - ${marker.description}</div>
                     </div>
                 `;
             });
             
             targetsList.innerHTML = html;
             
+            // Event listenery pro výběr
             document.querySelectorAll('.target-item').forEach(item => {
                 item.addEventListener('click', () => {
-                    const targetId = item.getAttribute('data-target-id');
-                    selectTarget(targetId);
+                    selectTarget(item.getAttribute('data-target-id'));
                 });
             });
             
@@ -888,28 +452,9 @@
             if (targetMarker) {
                 const distance = Math.round(targetMarker.distance);
                 const prefix = selectedTargetId ? '🎯' : '🐝';
-                
-                let audioIndicator = '';
-                if (distance <= AUDIO_THRESHOLD) {
-                    audioIndicator = ' 🎵';
-                }
-                
-                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${audioIndicator}<br><strong>${distance}m</strong>`;
-                
-                if (distance <= AR_VISIBILITY_THRESHOLD) {
-                    distanceInfo.style.borderColor = '#FFD700';
-                    distanceInfo.style.backgroundColor = 'rgba(255, 215, 0, 0.9)';
-                } else if (distance <= 100) {
-                    distanceInfo.style.borderColor = '#FFA500';
-                    distanceInfo.style.backgroundColor = 'rgba(255, 165, 0, 0.9)';
-                } else {
-                    distanceInfo.style.borderColor = '#ff6b35';
-                    distanceInfo.style.backgroundColor = 'rgba(255, 107, 53, 0.9)';
-                }
+                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}<br><strong>${distance}m</strong>`;
             } else {
                 distanceInfo.innerHTML = '🐝 Hledám nejbližší včelu...';
-                distanceInfo.style.borderColor = '#FFD700';
-                distanceInfo.style.backgroundColor = 'rgba(255, 193, 7, 0.95)';
             }
         }
 
@@ -948,20 +493,10 @@
             return { ...marker, distance };
         }
 
-        function formatDistance(distance) {
-            if (distance < 1000) {
-                return `${Math.round(distance)}m`;
-            } else {
-                return `${(distance / 1000).toFixed(1)}km`;
-            }
-        }
-
         function selectTarget(targetId) {
             selectedTargetId = targetId;
             document.getElementById('clearSelection').style.display = 'block';
             updateNavigation();
-            updateDistanceDisplay();
-            
             document.getElementById('navContent').classList.remove('open');
         }
 
@@ -969,85 +504,35 @@
             selectedTargetId = null;
             document.getElementById('clearSelection').style.display = 'none';
             updateNavigation();
-            updateDistanceDisplay();
         }
 
-        function activateMarker(markerId) {
-            console.log(`Bee marker activated: ${markerId}`);
-            
-            if (typeof getCurrentSceneId === 'function' && typeof getCurrentExpositionId === 'function') {
-                const currentSceneId = getCurrentSceneId();
-                const currentExpositionId = getCurrentExpositionId();
-                
-                if (typeof SCENE_CONFIG !== 'undefined' && SCENE_CONFIG && SCENE_CONFIG[currentSceneId] && currentExpositionId) {
-                    console.log("Recording bee activation for marker:", markerId);
-                    if (typeof recordMarkerActivation === 'function') {
-                        recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
-                    }
-                }
+        // Event listenery
+        document.getElementById('navToggle').addEventListener('click', () => {
+            document.getElementById('navContent').classList.toggle('open');
+        });
+
+        document.getElementById('clearSelection').addEventListener('click', clearSelection);
+
+        document.addEventListener('click', (e) => {
+            const navPanel = document.querySelector('.navigation');
+            if (!navPanel.contains(e.target)) {
+                document.getElementById('navContent').classList.remove('open');
             }
-        }
+        });
 
-        // Event listeners
-        function setupEventListeners() {
-            document.getElementById('navToggle').addEventListener('click', () => {
-                const navContent = document.getElementById('navContent');
-                navContent.classList.toggle('open');
-            });
-            
-            document.addEventListener('click', (e) => {
-                const navPanel = document.querySelector('.navigation-panel');
-                const navContent = document.getElementById('navContent');
-                
-                if (!navPanel.contains(e.target)) {
-                    navContent.classList.remove('open');
-                }
-            });
-            
-            document.getElementById('clearSelection').addEventListener('click', clearSelection);
-        }
-
-        // Render loop
-        function animate() {
-            requestAnimationFrame(animate);
-            
-            if (arToolkitSource && arToolkitSource.ready !== false) {
-                arToolkitContext.update(arToolkitSource.domElement);
-            }
-            
-            // Update animation mixers
-            beeModels.forEach(model => {
-                if (model && model.mixer) {
-                    model.mixer.update(0.016); // ~60fps
-                }
-            });
-            
-            renderer.render(scene, camera);
-        }
-
-        // Initialize everything when page loads
+        // Inicializace při načtení
         window.addEventListener('load', () => {
-            console.log("Starting pure AR.js bee tracking application...");
+            console.log("Starting minimal bee AR application...");
             
-            // Počkáme chvíli na načtení všech skriptů
-            setTimeout(() => {
-                console.log("Checking libraries...");
-                console.log("THREE available:", typeof THREE !== 'undefined');
-                console.log("THREEx available:", typeof THREEx !== 'undefined');
-                console.log("GLTFLoader available:", typeof THREE !== 'undefined' && typeof THREE.GLTFLoader !== 'undefined');
-                
-                initAR();
-            }, 500); // Počkáme 500ms
+            // Počkáme na A-Frame
+            document.querySelector('a-scene').addEventListener('loaded', () => {
+                console.log("A-Frame scene loaded");
+                getCurrentPosition();
+                watchPosition();
+            });
         });
 
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            if (renderer) {
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            }
-        });
-
-        console.log("Pure AR.js bee tracking script loaded - no A-Frame dependency!");
+        console.log("Minimal bee AR script loaded successfully!");
     </script>
 </body>
 </html>
