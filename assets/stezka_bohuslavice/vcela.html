@@ -16,21 +16,27 @@
             font-family: 'Arial', sans-serif;
         }
         
-        /* Oprava kamery - řešení roztažení na výšku */
+        /* Radikální oprava kamery - transform approach */
         video {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            min-width: 100% !important;
+            min-height: 100% !important;
+            width: auto !important;
+            height: auto !important;
+            z-index: -1 !important;
+            transform: translate(-50%, -50%) scaleX(0.8) !important; /* Klíčová oprava - zmenšíme šířku */
             object-fit: cover !important;
-            object-position: center !important;
-            width: 100vw !important;
-            height: auto !important; /* Klíčová změna - auto místo 100vh */
-            min-height: 100vh !important;
-            max-width: none !important;
         }
 
         canvas {
-            object-fit: cover !important;
-            object-position: center !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
             width: 100vw !important;
             height: 100vh !important;
+            object-fit: cover !important;
         }
 
         a-scene {
@@ -38,23 +44,17 @@
             height: 100vh !important;
         }
 
-        /* Specificky pro mobilní telefony v portrait */
-        @media screen and (orientation: portrait) {
+        /* Specifické úpravy pro portrait mobily */
+        @media screen and (orientation: portrait) and (max-width: 768px) {
             video {
-                width: auto !important;
-                height: 100vh !important;
-                min-width: 100vw !important;
-                object-fit: cover !important;
+                transform: translate(-50%, -50%) scaleX(0.75) !important; /* Ještě více zmenšíme pro portrait */
             }
         }
 
-        /* Specificky pro mobilní telefony v landscape */
-        @media screen and (orientation: landscape) {
+        /* Landscape mobily */
+        @media screen and (orientation: landscape) and (max-width: 768px) {
             video {
-                width: 100vw !important;
-                height: auto !important;
-                min-height: 100vh !important;
-                object-fit: cover !important;
+                transform: translate(-50%, -50%) scaleY(0.8) !important; /* Pro landscape upravíme výšku */
             }
         }
         
@@ -291,11 +291,10 @@
     <!-- AR scéna s geolokací -->
     <a-scene 
         vr-mode-ui="enabled: false"
-        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; gpsMinDistance: 5; cameraParametersUrl: data/camera_para.dat;"
-        renderer="logarithmicDepthBuffer: true; antialias: true; precision: medium;"
+        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false; gpsMinDistance: 5; displayWidth: 1280; displayHeight: 960; cameraParametersUrl: data/camera_para.dat;"
+        renderer="logarithmicDepthBuffer: true; antialias: true; precision: medium; alpha: true;"
         device-orientation-permission-ui="enabled: false"
-        style="width: 100vw; height: 100vh;"
-        camera="active: true;">
+        style="width: 100vw; height: 100vh;">
 
         <a-assets>
             <!-- Všechny tři GLB modely včel -->
@@ -1002,85 +1001,30 @@
             document.getElementById('clearSelection').addEventListener('click', clearSelection);
         }
 
-        // Oprava kamery pro mobilní zařízení - speciálně pro roztažení na výšku
+        // Oprava kamery - nyní řešeno pomocí CSS
         function setupCameraFix() {
-            function fixCameraAspectRatio() {
-                const video = document.querySelector('video');
-                if (video) {
-                    console.log("Fixing camera stretch on mobile...");
-                    
-                    const screenWidth = window.innerWidth;
-                    const screenHeight = window.innerHeight;
-                    const isPortrait = screenHeight > screenWidth;
-                    
-                    console.log(`Screen: ${screenWidth}x${screenHeight}, Portrait: ${isPortrait}`);
-                    
-                    if (isPortrait) {
-                        // Portrait - opravíme roztažení na výšku
-                        video.style.setProperty('width', 'auto', 'important');
-                        video.style.setProperty('height', '100vh', 'important');
-                        video.style.setProperty('min-width', '100vw', 'important');
-                        video.style.setProperty('object-fit', 'cover', 'important');
-                        video.style.setProperty('object-position', 'center', 'important');
-                    } else {
-                        // Landscape
-                        video.style.setProperty('width', '100vw', 'important');
-                        video.style.setProperty('height', 'auto', 'important');
-                        video.style.setProperty('min-height', '100vh', 'important');
-                        video.style.setProperty('object-fit', 'cover', 'important');
-                        video.style.setProperty('object-position', 'center', 'important');
-                    }
-                    
-                    console.log("Video aspect fix applied for orientation:", isPortrait ? 'portrait' : 'landscape');
-                }
-            }
-            
-            // Více pokusů o opravu
-            setTimeout(fixCameraAspectRatio, 100);
-            setTimeout(fixCameraAspectRatio, 500);
-            setTimeout(fixCameraAspectRatio, 1000);
-            setTimeout(fixCameraAspectRatio, 2000);
-            
-            // Event listenery
-            const scene = document.querySelector('a-scene');
-            if (scene) {
-                scene.addEventListener('camera-init', () => {
-                    setTimeout(fixCameraAspectRatio, 200);
-                });
-            }
-            
-            window.addEventListener('orientationchange', () => {
-                setTimeout(fixCameraAspectRatio, 300);
-                setTimeout(fixCameraAspectRatio, 1000);
-            });
-            
-            window.addEventListener('resize', () => {
-                setTimeout(fixCameraAspectRatio, 200);
-            });
+            console.log("Camera fix handled by CSS transforms");
         }
 
         // Inicializace
         window.addEventListener('load', () => {
-            console.log("Starting bee AR scene with 3 GLB models and touch rotation...");
+            console.log("Starting bee AR scene with 3 GLB models and CSS camera transform fix...");
             
             setupEventListeners();
             setupModelRotation(); // Rotace dotykem pro všechny tři GLB včely
-            setupCameraFix(); // DŮLEŽITÉ: Oprava kamery pro mobil
+            setupCameraFix(); // Prázdná funkce - oprava je v CSS
             getCurrentPosition();
             watchPosition();
             
             console.log(`Bee audio threshold set to: ${AUDIO_THRESHOLD} meters`);
             console.log(`Bee AR visibility threshold set to: ${AR_VISIBILITY_THRESHOLD} meters`);
             console.log("Touch rotation enabled for all 3 bee GLB models");
-            console.log("Camera fix applied for mobile devices - bee tracking ready");
+            console.log("CSS transform camera fix applied - scaleX(0.8) for portrait");
         });
 
         // A-Frame scéna je připravena
         document.querySelector('a-scene').addEventListener('loaded', () => {
             console.log("A-Frame scene loaded for bee geolocation AR with 3 GLB models");
-            
-            // Aplikace opravy kamery po načtení scény
-            setupCameraFix();
             
             // Kontrola načtení všech GLB modelů včel
             const glbModel1 = document.querySelector('#rotatable-bee-1');
