@@ -124,8 +124,37 @@
             <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
         </div>
     </div> <!-- Konec modal-overlay -->
+    <script src="/gamification-config.js"></script>
+    <script src="/game/bohuslavice_stezka_config.js"></script>
+    <script src="/gamification.js"></script>
     <script src="/script.js"></script>
-    
+
+    <!-- Skript pro zobrazení hvězd na této stránce -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const starDisplayElements = document.querySelectorAll('.star-display[data-scene-id]');
+            // *** NOVINKA: Získání ID aktuální expozice jednou na začátku ***
+            const currentExpositionId = getCurrentExpositionId(); 
+            
+            if (!currentExpositionId || currentExpositionId === 'unknown') {
+                 console.error("Cannot determine current exposition ID. Stars may not display correctly.");
+                 // Možná zde zobrazit nějakou chybovou zprávu uživateli, pokud je to kritické
+            }
+
+            starDisplayElements.forEach(starElement => {
+                const sceneId = starElement.dataset.sceneId;
+
+                if (SCENE_CONFIG && SCENE_CONFIG[sceneId]) {
+                    // *** UPRAVENO: Předání ID expozice funkci getSceneStarLevel ***
+                    const level = getSceneStarLevel(currentExpositionId, sceneId); 
+                    displayStars(starElement, level);
+                } else {
+                    console.warn(`Config for scene ID "${sceneId}" not found in SCENE_CONFIG. Cannot display stars.`);
+                }
+            });
+        });
+    </script>
+   
 
 </body>
 </html>
