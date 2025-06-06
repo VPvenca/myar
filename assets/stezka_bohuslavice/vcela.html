@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Včelí AR Stezka - Mind AR</title>
     
-    <!-- Mind AR a Three.js -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image.prod.js"></script>
+    <!-- Mind AR a Three.js - opravené odkazy -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"></script>
     
     <style>
         body {
@@ -333,11 +333,19 @@
                 document.getElementById('loadingInfo').style.display = 'block';
                 document.getElementById('loadingInfo').innerHTML = '🐝 Inicializuji Mind AR...';
                 
-                // Vytvoření prázdného image target pro geolokační AR
-                // Mind AR obvykle používá image tracking, ale můžeme ho "hacknut" pro geolokaci
-                const imageTargetSrc = createDummyTarget();
+                // Kontrola dostupnosti Mind AR
+                if (typeof window.MINDAR === 'undefined') {
+                    throw new Error('Mind AR library not loaded');
+                }
                 
-                // Mind AR setup
+                console.log("Mind AR library detected:", window.MINDAR);
+                
+                // Vytvoření jednoduchého image target
+                const imageTargetSrc = await createImageTarget();
+                
+                console.log("Creating Mind AR instance...");
+                
+                // Mind AR setup s correct syntax
                 mindarThree = new window.MINDAR.IMAGE.MindARThree({
                     container: document.querySelector("#container"),
                     imageTargetSrc: imageTargetSrc,
@@ -345,17 +353,14 @@
                     filterMinCF: 0.0001,
                     filterBeta: 0.001,
                     warmupTolerance: 2,
-                    missTolerance: 5
+                    missTolerance: 5,
+                    showStats: false,
+                    showInfo: false
                 });
                 
                 const {renderer, scene, camera} = mindarThree;
                 
-                // Uložení referenci
-                window.renderer = renderer;
-                window.scene = scene;
-                window.camera = camera;
-                
-                console.log("Mind AR initialized successfully");
+                console.log("Mind AR instance created successfully");
                 document.getElementById('loadingInfo').innerHTML = '🐝 Načítám 3D modely včel...';
                 
                 // Načtení 3D modelů
@@ -372,6 +377,8 @@
                 // Setup event listenery
                 setupEventListeners();
                 setupModelRotation();
+                
+                console.log("Starting Mind AR...");
                 
                 // Spuštění Mind AR
                 await mindarThree.start();
@@ -394,27 +401,38 @@
                 
             } catch (error) {
                 console.error("Mind AR initialization failed:", error);
-                document.getElementById('loadingInfo').innerHTML = '❌ Chyba Mind AR: ' + error.message;
+                document.getElementById('loadingInfo').innerHTML = `❌ Chyba Mind AR: ${error.message}<br><br>🔄 <span style="cursor: pointer; text-decoration: underline;" onclick="location.reload()">Zkusit znovu</span>`;
             }
         }
 
-        // Vytvoření dummy image target pro "hacknutí" Mind AR pro geolokaci
-        function createDummyTarget() {
-            // Vytvoříme jednoduchý base64 obrázek jako target
-            const canvas = document.createElement('canvas');
-            canvas.width = 256;
-            canvas.height = 256;
-            const ctx = canvas.getContext('2d');
-            
-            // Vyplníme canvas jednoduchým vzorem
-            ctx.fillStyle = '#FFD700';
-            ctx.fillRect(0, 0, 256, 256);
-            ctx.fillStyle = '#000';
-            ctx.font = '30px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('🐝', 128, 128);
-            
-            return canvas.toDataURL();
+        // Vytvoření image target (jednodušší přístup)
+        async function createImageTarget() {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 480;
+                canvas.height = 480;
+                const ctx = canvas.getContext('2d');
+                
+                // Vytvoříme jednoduchou texturu s vysokým kontrastem
+                ctx.fillStyle = '#000000';
+                ctx.fillRect(0, 0, 480, 480);
+                
+                // Přidáme bílé body pro tracking
+                ctx.fillStyle = '#FFFFFF';
+                for (let i = 0; i < 50; i++) {
+                    const x = Math.random() * 480;
+                    const y = Math.random() * 480;
+                    ctx.fillRect(x, y, 10, 10);
+                }
+                
+                // Přidáme včelí emoji ve středu
+                ctx.fillStyle = '#FFD700';
+                ctx.font = '60px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('🐝', 240, 260);
+                
+                resolve(canvas.toDataURL());
+            });
         }
 
         // Načtení 3D modelů včel
