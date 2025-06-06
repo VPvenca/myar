@@ -157,12 +157,13 @@
     <div class="audio-info" id="audioInfo">🎵 Audio přehrává...</div>
     <div class="rotation-hint" id="rotationHint">🔄 Tažením otočíte včelu</div>
 
-    <!-- A-Frame AR scéna s GPS pozicováním -->
+    <!-- A-Frame AR scéna s povolenými stíny -->
     <a-scene 
         vr-mode-ui="enabled: false"
         arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
-        renderer="logarithmicDepthBuffer: true; antialias: true;"
-        device-orientation-permission-ui="enabled: false">
+        renderer="logarithmicDepthBuffer: true; antialias: true; shadowMap: true; shadowMapType: pcf;"
+        device-orientation-permission-ui="enabled: false"
+        shadow="type: pcf; autoUpdate: true">
 
         <a-assets>
             <!-- GLB modely včel - OPRAVENÉ CESTY -->
@@ -189,13 +190,26 @@
             data-marker-id="vcela_1"
             data-audio-id="audio1"
             visible="false">
+            
+            <!-- Kruhový stín pod včelou -->
+            <a-circle 
+                position="0 -1.5 0" 
+                radius="1.2" 
+                rotation="-90 0 0" 
+                color="#000000" 
+                opacity="0.3"
+                material="transparent: true; alphaTest: 0.1">
+            </a-circle>
+            
+            <!-- GLB model včely -->
             <a-gltf-model 
                 id="bee-model-1-gltf"
                 src="#bee-model-1"
-                position="0 0 0"
+                position="0 -1 0"
                 scale="3 3 3"
                 rotation="0 30 0"
-                animation-mixer>
+                animation-mixer
+                shadow="cast: true; receive: false">
             </a-gltf-model>
         </a-entity>
 
@@ -205,13 +219,26 @@
             data-marker-id="vcela_2"
             data-audio-id="audio2"
             visible="false">
+            
+            <!-- Kruhový stín pod včelou -->
+            <a-circle 
+                position="0 -1.5 0" 
+                radius="1.2" 
+                rotation="-90 0 0" 
+                color="#000000" 
+                opacity="0.3"
+                material="transparent: true; alphaTest: 0.1">
+            </a-circle>
+            
+            <!-- GLB model včely -->
             <a-gltf-model 
                 id="bee-model-2-gltf"
                 src="#bee-model-2"
-                position="0 0 0"
+                position="0 -1 0"
                 scale="3 3 3"
                 rotation="0 30 0"
-                animation-mixer>
+                animation-mixer
+                shadow="cast: true; receive: false">
             </a-gltf-model>
         </a-entity>
 
@@ -221,19 +248,38 @@
             data-marker-id="vcela_3"
             data-audio-id="audio3"
             visible="false">
+            
+            <!-- Kruhový stín pod včelou -->
+            <a-circle 
+                position="0 -1.5 0" 
+                radius="1.2" 
+                rotation="-90 0 0" 
+                color="#000000" 
+                opacity="0.3"
+                material="transparent: true; alphaTest: 0.1">
+            </a-circle>
+            
+            <!-- GLB model včely -->
             <a-gltf-model 
                 id="bee-model-3-gltf"
                 src="#bee-model-3"
-                position="0 0 0"
+                position="0 -1 0"
                 scale="3 3 3"
                 rotation="0 30 0"
-                animation-mixer>
+                animation-mixer
+                shadow="cast: true; receive: false">
             </a-gltf-model>
         </a-entity>
 
-        <!-- Základní osvětlení -->
+        <!-- Základní osvětlení s povolenými stíny -->
         <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
-        <a-light type="directional" color="#ffeb3b" intensity="0.8" position="0 5 0"></a-light>
+        <a-light 
+            type="directional" 
+            color="#ffeb3b" 
+            intensity="0.8" 
+            position="0 10 5"
+            shadow="cast: true; type: pcf; autoUpdate: true; shadowMapHeight: 1024; shadowMapWidth: 1024">
+        </a-light>
     </a-scene>
 
     <script>
