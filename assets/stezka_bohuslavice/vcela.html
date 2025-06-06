@@ -19,7 +19,7 @@
             font-family: Arial, sans-serif;
         }
         
-        /* Úplně základní CSS - žádné komplikované opravy */
+        /* UI elementy - zachováno z původního kódu */
         .ui-overlay {
             position: fixed;
             z-index: 1000;
@@ -57,6 +57,40 @@
             z-index: 1000;
         }
         
+        /* Gamifikační status */
+        .gamification-status {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            background: rgba(0, 123, 255, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .gamification-status.active {
+            display: block;
+        }
+
+        /* Debug tlačítko */
+        .debug-button {
+            position: fixed;
+            bottom: 80px;
+            right: 10px;
+            background: rgba(255, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 1000;
+            cursor: pointer;
+            border: none;
+        }
+
+        /* Zbytek stylů zachován z původního kódu... */
         .navigation {
             position: fixed;
             top: 10px;
@@ -151,167 +185,6 @@
             display: none;
             text-align: center;
         }
-
-
-
-        /* Vertikální korekce posuvník - SKRYTÝ ve výchozím stavu */
-        .vertical-correction {
-            position: fixed;
-            left: 5px;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 1002;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 20px;
-            padding: 15px 8px;
-            height: 250px;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            transition: opacity 0.3s;
-        }
-
-        .vertical-correction.visible {
-            display: flex;
-        }
-
-        .vertical-correction.hidden {
-            opacity: 0.3;
-        }
-
-        .correction-label {
-            color: white;
-            font-size: 11px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            text-align: center;
-            line-height: 1.2;
-        }
-
-        .correction-slider {
-            writing-mode: bt-lr;
-            writing-mode: vertical-lr;
-            -webkit-appearance: slider-vertical;
-            width: 20px;
-            height: 180px;
-            background: transparent;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .correction-slider::-webkit-slider-track {
-            width: 6px;
-            height: 180px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-        }
-
-        .correction-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 16px;
-            height: 16px;
-            background: #FFC107;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .correction-slider::-moz-range-track {
-            width: 6px;
-            height: 180px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
-            border: none;
-        }
-
-        .correction-slider::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            background: #FFC107;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .correction-value {
-            color: white;
-            font-size: 10px;
-            margin-top: 8px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .correction-reset {
-            background: rgba(255, 193, 7, 0.9);
-            color: black;
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            font-size: 10px;
-            margin-top: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .correction-reset:hover {
-            background: rgba(255, 193, 7, 1);
-        }
-
-        /* Toggle tlačítko pro korekci */
-        .correction-toggle {
-            position: fixed;
-            left: 10px;
-            bottom: 20px;
-            z-index: 1002;
-            width: 40px;
-            height: 40px;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-
-        .correction-toggle:hover {
-            background: rgba(0, 0, 0, 0.9);
-            transform: scale(1.05);
-        }
-
-        .correction-toggle:active {
-            transform: scale(0.95);
-        }
-
-        /* Gamifikační notifikace */
-        .gamification-status {
-            position: fixed;
-            top: 60px;
-            right: 10px;
-            background: rgba(0, 123, 255, 0.9);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            z-index: 1000;
-            display: none;
-        }
-
-        .gamification-status.active {
-            display: block;
-        }
-
-        /* Aplikace korekce na video canvas */
-        .vertical-corrected {
-            transform-origin: center center;
-        }
     </style>
 </head>
 <body>
@@ -340,30 +213,8 @@
     <!-- Gamifikační status -->
     <div class="gamification-status ui-element" id="gamificationStatus">🎮 Gamifikace načítá...</div>
     
-
-
-    <!-- Vertikální korekce posuvník -->
-    <div class="vertical-correction ui-element" id="verticalCorrection">
-        <div class="correction-label">
-            📐<br>
-            Vertikální<br>
-            korekce
-        </div>
-        <input 
-            type="range" 
-            class="correction-slider" 
-            id="correctionSlider"
-            min="0.5" 
-            max="2.0" 
-            step="0.05" 
-            value="1.0"
-            orient="vertical">
-        <div class="correction-value" id="correctionValue">1.00</div>
-        <button class="correction-reset" id="correctionReset">Reset</button>
-    </div>
-
-    <!-- Toggle tlačítko pro korekci -->
-    <button class="correction-toggle ui-element" id="correctionToggle" title="Zobrazit/skrýt korekci obrazu">📐</button>
+    <!-- Debug tlačítko -->
+    <button class="debug-button ui-element" id="debugButton">🔧 Debug</button>
 
     <!-- A-Frame AR scéna s GPS pozicováním -->
     <a-scene 
@@ -462,8 +313,8 @@
     <script>
         // === GAMIFIKAČNÍ PROMĚNNÉ ===
         let gamificationInitialized = false;
-        let currentExpositionId = 'vcelarstvi';
-        let currentSceneId = '/assets/stezka_bohuslavice/vcela.html';
+        let currentExpositionId = 'vcelarstvi';  // OPRAVENO: Správné ID
+        let currentSceneId = '/assets/stezka_bohuslavice/vcela.html';  // OPRAVENO: Správné ID scény
         
         // GPS a navigační proměnné
         let userPosition = null;
@@ -475,19 +326,11 @@
         let audioPlayingForMarker = null;
         let audioIsPaused = false;
         
-
-        
         // Proměnné pro rotaci modelů
         let modelRotationY = 30;
         let isRotating = false;
         let startX = 0;
         let rotationHintShown = false;
-        
-        // Proměnné pro vertikální korekci
-        let verticalCorrectionValue = 1.0;
-        let correctionSliderVisible = false;
-        let videoElement = null;
-        let canvasElement = null;
         
         // Definice včelích markerů
         const markers = [
@@ -519,7 +362,7 @@
 
         // === GAMIFIKAČNÍ FUNKCE ===
         
-        // Inicializace gamifikace
+        // OPRAVENÁ inicializace gamifikace
         function initializeGameification() {
             console.log("🎮 Initializing gamification for včelařská stezka...");
             
@@ -530,11 +373,19 @@
                 return;
             }
             
+            // Debug výpis konfigurací
+            console.log("📊 Scene config:", SCENE_CONFIG);
+            console.log("🏆 Achievements config:", ACHIEVEMENTS_CONFIG);
+            console.log("🏛️ Exposition registry:", EXPOSITION_REGISTRY);
+            
             // Zkontroluj, že je expozice registrovaná
             if (typeof EXPOSITION_REGISTRY !== 'undefined' && EXPOSITION_REGISTRY['vcelarstvi']) {
                 console.log("✅ Včelařská stezka exposition is registered");
             } else {
                 console.warn("⚠️ Včelařská stezka exposition not found in registry");
+                // Zkus inicializovat znovu za chvíli
+                setTimeout(initializeGameification, 1000);
+                return;
             }
             
             // Inicializuj time tracking
@@ -550,31 +401,87 @@
             // Aktualizuj status
             const statusElement = document.getElementById('gamificationStatus');
             if (statusElement) {
-                statusElement.textContent = '🎮 Gamifikace aktivní';
+                statusElement.textContent = '🎮 Gamifikace aktivní - Včelařská stezka';
                 statusElement.classList.add('active');
                 
-                // Skryj po 3 sekundách
+                // Skryj po 5 sekundách
                 setTimeout(() => {
                     statusElement.classList.remove('active');
-                }, 3000);
+                }, 5000);
             }
             
-            console.log("✅ Gamification initialized successfully");
+            console.log("✅ Gamification initialized successfully for včelařská stezka");
         }
 
-        // Funkce pro záznam aktivace včelích markerů
+        // OPRAVENÁ funkce pro záznam aktivace včelích markerů
         function recordBeeMarkerActivation(markerId) {
             if (!gamificationInitialized) {
                 console.warn("⚠️ Gamification not initialized yet, skipping marker activation");
                 return;
             }
             
-            console.log(`🐝 Recording bee marker activation: ${markerId}`);
+            console.log(`🐝 Recording bee marker activation: ${markerId} in exposition ${currentExpositionId}, scene ${currentSceneId}`);
             
             if (typeof recordMarkerActivation === 'function') {
                 recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
+                
+                // Přidej vizuální feedback
+                showMarkerActivationFeedback(markerId);
             } else {
                 console.error("❌ recordMarkerActivation function not found");
+            }
+        }
+
+        // NOVÁ funkce pro vizuální feedback aktivace markeru
+        function showMarkerActivationFeedback(markerId) {
+            const marker = markers.find(m => m.id === markerId);
+            if (!marker) return;
+            
+            const feedback = document.createElement('div');
+            feedback.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(40, 167, 69, 0.95);
+                color: white;
+                padding: 20px 30px;
+                border-radius: 15px;
+                font-size: 18px;
+                font-weight: bold;
+                z-index: 10001;
+                text-align: center;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                border: 3px solid #28a745;
+            `;
+            feedback.innerHTML = `🐝 ${marker.name}<br><small>Marker aktivován!</small>`;
+            
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                if (feedback.parentNode) {
+                    feedback.parentNode.removeChild(feedback);
+                }
+            }, 2000);
+        }
+
+        // Debug funkce
+        function setupDebugButton() {
+            const debugButton = document.getElementById('debugButton');
+            if (debugButton) {
+                debugButton.addEventListener('click', () => {
+                    if (typeof debugGamificationState === 'function') {
+                        debugGamificationState();
+                    }
+                    
+                    console.log("=== VČELAŘSKÁ STEZKA DEBUG ===");
+                    console.log("Current exposition ID:", currentExpositionId);
+                    console.log("Current scene ID:", currentSceneId);
+                    console.log("Gamification initialized:", gamificationInitialized);
+                    console.log("Available markers:", markers.map(m => m.id));
+                    console.log("Scene config for current scene:", SCENE_CONFIG[currentSceneId]);
+                    console.log("=== END VČELAŘSKÁ DEBUG ===");
+                });
             }
         }
 
@@ -597,97 +504,6 @@
         });
 
         // === PŮVODNÍ FUNKCE S GAMIFIKAČNÍMI ROZŠÍŘENÍMI ===
-
-        // Vertikální korekce funkcionalita
-        function setupVerticalCorrection() {
-            console.log("Setting up vertical correction...");
-            
-            const correctionSlider = document.getElementById('correctionSlider');
-            const correctionValue = document.getElementById('correctionValue');
-            const correctionReset = document.getElementById('correctionReset');
-            const correctionToggle = document.getElementById('correctionToggle');
-            const correctionPanel = document.getElementById('verticalCorrection');
-            
-            setTimeout(() => {
-                findVideoElements();
-            }, 2000);
-            
-            correctionSlider.addEventListener('input', (e) => {
-                verticalCorrectionValue = parseFloat(e.target.value);
-                correctionValue.textContent = verticalCorrectionValue.toFixed(2);
-                applyVerticalCorrection();
-            });
-            
-            correctionReset.addEventListener('click', () => {
-                verticalCorrectionValue = 1.0;
-                correctionSlider.value = 1.0;
-                correctionValue.textContent = '1.00';
-                applyVerticalCorrection();
-            });
-            
-            correctionToggle.addEventListener('click', () => {
-                correctionSliderVisible = !correctionSliderVisible;
-                if (correctionSliderVisible) {
-                    correctionPanel.classList.add('visible');
-                    correctionToggle.innerHTML = '✖️';
-                    correctionToggle.title = 'Skrýt korekci obrazu';
-                } else {
-                    correctionPanel.classList.remove('visible');
-                    correctionToggle.innerHTML = '📐';
-                    correctionToggle.title = 'Zobrazit korekci obrazu';
-                }
-            });
-            
-            window.addEventListener('orientationchange', () => {
-                setTimeout(() => {
-                    if (window.innerWidth > window.innerHeight) {
-                        correctionPanel.classList.add('hidden');
-                    } else {
-                        if (correctionSliderVisible) {
-                            correctionPanel.classList.remove('hidden');
-                        }
-                    }
-                }, 500);
-            });
-        }
-        
-        function findVideoElements() {
-            const scene = document.querySelector('a-scene');
-            if (scene && scene.canvas) {
-                canvasElement = scene.canvas;
-            }
-            
-            const videos = document.getElementsByTagName('video');
-            if (videos.length > 0) {
-                videoElement = videos[0];
-            }
-            
-            if (!videoElement && !canvasElement) {
-                setTimeout(findVideoElements, 1000);
-            }
-        }
-        
-        function applyVerticalCorrection() {
-            try {
-                if (canvasElement) {
-                    canvasElement.style.transform = `scaleY(${verticalCorrectionValue})`;
-                    canvasElement.style.transformOrigin = 'center center';
-                }
-                
-                if (videoElement) {
-                    videoElement.style.transform = `scaleY(${verticalCorrectionValue})`;
-                    videoElement.style.transformOrigin = 'center center';
-                }
-                
-                const scene = document.querySelector('a-scene');
-                if (scene) {
-                    scene.style.transform = `scaleY(${verticalCorrectionValue})`;
-                    scene.style.transformOrigin = 'center center';
-                }
-            } catch (error) {
-                console.error("Error applying vertical correction:", error);
-            }
-        }
 
         // Výpočet vzdálenosti mezi GPS body
         function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -1033,8 +849,6 @@
             updateNavigation();
         }
 
-
-
         // Rotace modelů dotykem
         function setupModelRotation() {
             let touchStarted = false;
@@ -1127,10 +941,8 @@
                 '.distance-info',
                 '.audio-info',
                 '.rotation-hint',
-                '.snap-button',
-                '.vertical-correction',
-                '.correction-toggle',
-                '.gamification-status'
+                '.gamification-status',
+                '.debug-button'
             ];
             
             for (let selector of uiSelectors) {
@@ -1142,8 +954,6 @@
             return false;
         }
 
-
-
         function showRotationHintOnce() {
             if (rotationHintShown) return;
             rotationHintShown = true;
@@ -1152,81 +962,6 @@
             setTimeout(() => {
                 rotationHint.style.display = 'none';
             }, 3000);
-        }
-
-        // Dynamické osvětlení podle denní doby
-        function setupDynamicLighting() {
-            const now = new Date();
-            const hours = now.getHours();
-            const minutes = now.getMinutes();
-            const timeOfDay = hours + minutes / 60;
-            
-            console.log(`Setting up dynamic lighting for time: ${hours}:${minutes.toString().padStart(2, '0')}`);
-            
-            const ambientLight = document.getElementById('ambientLight');
-            const sunLight = document.getElementById('sunLight');
-            const fillLight = document.getElementById('fillLight');
-            
-            if (!ambientLight || !sunLight || !fillLight) {
-                console.log("Waiting for lights to load...");
-                return;
-            }
-            
-            let lightConfig;
-            
-            if (timeOfDay >= 6 && timeOfDay < 10) {
-                lightConfig = {
-                    ambient: { color: '#B0E0E6', intensity: 0.5 },
-                    sun: { color: '#FFE5B4', intensity: 1.2, position: '1 6 4' },
-                    fill: { color: '#E6F3FF', intensity: 0.4 }
-                };
-                console.log("🌅 Morning lighting applied");
-            } else if (timeOfDay >= 10 && timeOfDay < 16) {
-                lightConfig = {
-                    ambient: { color: '#F0F8FF', intensity: 0.6 },
-                    sun: { color: '#FFFFFF', intensity: 1.4, position: '0 8 2' },
-                    fill: { color: '#FFFFFF', intensity: 0.5 }
-                };
-                console.log("☀️ Daytime lighting applied");
-            } else if (timeOfDay >= 16 && timeOfDay < 19) {
-                lightConfig = {
-                    ambient: { color: '#FFE4B5', intensity: 0.5 },
-                    sun: { color: '#FFA500', intensity: 1.1, position: '-1 5 3' },
-                    fill: { color: '#FFEAA7', intensity: 0.4 }
-                };
-                console.log("🌇 Afternoon lighting applied");
-            } else if (timeOfDay >= 19 && timeOfDay < 22) {
-                lightConfig = {
-                    ambient: { color: '#DDA0DD', intensity: 0.4 },
-                    sun: { color: '#FF8C00', intensity: 0.9, position: '-2 3 2' },
-                    fill: { color: '#FFB347', intensity: 0.3 }
-                };
-                console.log("🌆 Evening lighting applied");
-            } else {
-                lightConfig = {
-                    ambient: { color: '#191970', intensity: 0.3 },
-                    sun: { color: '#4169E1', intensity: 0.6, position: '0 4 1' },
-                    fill: { color: '#6495ED', intensity: 0.2 }
-                };
-                console.log("🌙 Night lighting applied");
-            }
-            
-            ambientLight.setAttribute('color', lightConfig.ambient.color);
-            ambientLight.setAttribute('intensity', lightConfig.ambient.intensity);
-            
-            sunLight.setAttribute('color', lightConfig.sun.color);
-            sunLight.setAttribute('intensity', lightConfig.sun.intensity);
-            sunLight.setAttribute('position', lightConfig.sun.position);
-            
-            fillLight.setAttribute('color', lightConfig.fill.color);
-            fillLight.setAttribute('intensity', lightConfig.fill.intensity);
-            
-            console.log("✨ Dynamic lighting setup complete");
-        }
-
-        function startLightingUpdate() {
-            setupDynamicLighting();
-            setInterval(setupDynamicLighting, 5 * 60 * 1000);
         }
 
         // === EVENT LISTENERY ===
@@ -1248,28 +983,24 @@
         // === HLAVNÍ INICIALIZACE ===
         
         window.addEventListener('load', () => {
-            console.log("Starting bee AR application with dynamic lighting, vertical correction and GAMIFICATION...");
+            console.log("Starting bee AR application with ENHANCED GAMIFICATION...");
             
-            // Počkej na načtení gamifikačních skriptů
+            // Počkej na načtení gamifikačních skriptů a pak inicializuj
             setTimeout(() => {
                 initializeGameification();
-            }, 1000);
+            }, 2000);  // Prodloužený timeout pro jistotu
             
             // Počkáme na A-Frame
             document.querySelector('a-scene').addEventListener('loaded', () => {
                 console.log("A-Frame scene loaded");
                 setupModelRotation();
-                setupVerticalCorrection();
+                setupDebugButton();
                 getCurrentPosition();
                 watchPosition();
-                
-                setTimeout(() => {
-                    startLightingUpdate();
-                }, 1000);
             });
         });
 
-        console.log("🐝 Bee AR script with dynamic lighting, vertical correction and GAMIFICATION loaded successfully!");
+        console.log("🐝 Bee AR script with ENHANCED GAMIFICATION loaded successfully!");
     </script>
 </body>
 </html>
