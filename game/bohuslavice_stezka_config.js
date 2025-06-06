@@ -18,7 +18,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             name: "Pozorovatel dělnic",
             description: "Pochopil jsi život pracovitých dělnic",
             icon: "🐝",
-            category: "vcelarstvi",
+            category: "stezka_bohuslavice",
             rarity: "uncommon",
             // OPRAVENO: Používáme sceneId místo condition
             sceneId: "/assets/stezka_bohuslavice/vcela.html",
@@ -30,7 +30,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             name: "Badatel trubců",
             description: "Se zájmem jsi prostudoval život trubců",
             icon: "🐛",
-            category: "vcelarstvi", 
+            category: "stezka_bohuslavice",
             rarity: "uncommon",
             sceneId: "/assets/stezka_bohuslavice/vcela.html",
             markerId: "vcela_2",
@@ -41,7 +41,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             name: "Ctitel královny",
             description: "Nahlédl jsi do života včelí královny",
             icon: "👑",
-            category: "vcelarstvi",
+            category: "stezka_bohuslavice",
             rarity: "uncommon", 
             sceneId: "/assets/stezka_bohuslavice/vcela.html",
             markerId: "vcela_3",
@@ -52,7 +52,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             name: "Znalec včelstva",
             description: "Poznáš všechny typy včel - dělnice, trubce i královnu",
             icon: "🍯",
-            category: "vcelarstvi",
+            category: "stezka_bohuslavice",
             rarity: "rare",
             condition: "complete_all_markers",
             sceneId: "/assets/stezka_bohuslavice/vcela.html",
@@ -64,7 +64,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             name: "První krůčky ve včelařství",
             description: "Dokončil jsi první scénu na Včelařské stezce",
             icon: "🐝",
-            category: "vcelarstvi",
+            category: "stezka_bohuslavice",
             rarity: "common",
             image: "/img/achievements/vcelarstvi_first_scene.png"
         },
@@ -73,7 +73,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             name: "Znalec včelařství",
             description: "Dokončil jsi všechny scény na Včelařské stezce",
             icon: "🎓",
-            category: "vcelarstvi",
+            category: "stezka_bohuslavice",
             rarity: "rare",
             image: "/img/achievements/vcelarstvi_all_scenes.png"
         },
@@ -82,7 +82,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             name: "Mistr včelařství",
             description: "Získal jsi zlaté hvězdy ve všech scénách Včelařské stezky",
             icon: "👑",
-            category: "vcelarstvi",
+            category: "stezka_bohuslavice",
             rarity: "legendary",
             image: "/img/achievements/vcelarstvi_perfectionist.png"
         }
