@@ -642,10 +642,12 @@
                 return;
             }
             
-            // Skryjeme GPS entitu
+            // DŮKLADNĚ skryjeme GPS entitu
             const gpsEntity = document.querySelector(`[data-marker-id="${closestMarker.id}"]`);
             if (gpsEntity) {
                 gpsEntity.setAttribute('visible', 'false');
+                // Zajistíme, že je opravdu skrytá
+                gpsEntity.style.display = 'none';
                 console.log(`Hidden GPS entity for ${closestMarker.id}`);
             }
             
@@ -670,11 +672,11 @@
             const cameraEntity = document.createElement('a-entity');
             cameraEntity.id = 'snap-camera-model';
             
-            // Vytvoříme GLB model
+            // Vytvoříme GLB model - UPRAVENÁ POZICE
             const gltfModel = document.createElement('a-gltf-model');
             gltfModel.setAttribute('src', `#bee-model-${marker.id.split('_')[1]}`);
-            gltfModel.setAttribute('position', '0 -1 -2.5'); // Před kamerou
-            gltfModel.setAttribute('scale', '2 2 2'); // Trochu menší
+            gltfModel.setAttribute('position', '0 0.5 -2'); // VÝŠE A BLÍŽE ke kameře
+            gltfModel.setAttribute('scale', '1.5 1.5 1.5'); // Trochu menší
             gltfModel.setAttribute('rotation', `0 ${modelRotationY} 0`);
             gltfModel.setAttribute('animation-mixer', '');
             
@@ -682,7 +684,7 @@
             camera.appendChild(cameraEntity);
             
             cameraRelativeModel = gltfModel;
-            console.log("Camera relative model created");
+            console.log("Camera relative model created at better position");
         }
 
         function fixAtCurrentPosition() {
@@ -696,28 +698,28 @@
                 return;
             }
             
-            // Získáme world pozici kamery
-            const cameraPos = camera.object3D.position;
-            const cameraRot = camera.object3D.rotation;
+            // Získáme PŘESNOU pozici camera modelu ve world space
+            const cameraModelPosition = new THREE.Vector3();
+            const cameraModelQuaternion = new THREE.Quaternion();
             
-            // Vypočítáme pozici před kamerou
-            const forwardDistance = 2.5;
-            const fixedX = cameraPos.x + Math.sin(cameraRot.y) * forwardDistance;
-            const fixedZ = cameraPos.z - Math.cos(cameraRot.y) * forwardDistance;
-            const fixedY = cameraPos.y - 1;
+            // Získáme world pozici camera modelu
+            cameraModel.object3D.getWorldPosition(cameraModelPosition);
+            cameraModel.object3D.getWorldQuaternion(cameraModelQuaternion);
+            
+            console.log("Camera model world position:", cameraModelPosition);
             
             // Odebereme model z kamery
             camera.removeChild(cameraModel);
             
-            // Vytvoříme fixní entitu
+            // Vytvoříme fixní entitu NA PŘESNÉ POZICI camera modelu
             const fixedEntity = document.createElement('a-entity');
             fixedEntity.id = 'snap-fixed-model';
-            fixedEntity.setAttribute('position', `${fixedX} ${fixedY} ${fixedZ}`);
+            fixedEntity.setAttribute('position', `${cameraModelPosition.x} ${cameraModelPosition.y} ${cameraModelPosition.z}`);
             
             const gltfModel = document.createElement('a-gltf-model');
             gltfModel.setAttribute('src', `#bee-model-${snappedMarker.id.split('_')[1]}`);
             gltfModel.setAttribute('position', '0 0 0');
-            gltfModel.setAttribute('scale', '2 2 2');
+            gltfModel.setAttribute('scale', '1.5 1.5 1.5'); // STEJNÁ velikost jako camera model
             gltfModel.setAttribute('rotation', `0 ${modelRotationY} 0`);
             gltfModel.setAttribute('animation-mixer', '');
             
@@ -728,7 +730,7 @@
             snapMode = 'fixed';
             updateSnapButtonVisibility();
             
-            console.log(`Model fixed at position: ${fixedX}, ${fixedY}, ${fixedZ}`);
+            console.log(`Model fixed at EXACT camera position: ${cameraModelPosition.x}, ${cameraModelPosition.y}, ${cameraModelPosition.z}`);
         }
 
         function returnToGPS() {
@@ -740,6 +742,7 @@
                 const camera = document.querySelector('a-camera');
                 if (camera) {
                     camera.removeChild(cameraModel);
+                    console.log("Removed camera model");
                 }
             }
             
@@ -747,14 +750,21 @@
             const fixedModel = document.getElementById('snap-fixed-model');
             if (fixedModel) {
                 document.querySelector('a-scene').removeChild(fixedModel);
+                console.log("Removed fixed model");
             }
             
-            // Zobrazíme zpět GPS entitu
+            // DŮKLADNĚ zobrazíme zpět GPS entitu
             if (snappedMarker) {
                 const gpsEntity = document.querySelector(`[data-marker-id="${snappedMarker.id}"]`);
                 if (gpsEntity) {
                     gpsEntity.setAttribute('visible', 'true');
+                    gpsEntity.style.display = ''; // Odstraníme display:none
                     console.log(`Restored GPS entity for ${snappedMarker.id}`);
+                    
+                    // Znovu zkontrolujeme proximity pro správné zobrazení
+                    setTimeout(() => {
+                        checkProximityToMarkers();
+                    }, 100);
                 }
             }
             
