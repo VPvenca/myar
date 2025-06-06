@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Včelí AR Stezka - Mind AR</title>
+    <title>Včelí AR Stezka - WebXR + Three.js</title>
     
-    <!-- Mind AR a Three.js - opravené odkazy -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"></script>
+    <!-- Pouze Three.js - žádné externí AR knihovny -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/loaders/GLTFLoader.js"></script>
     
     <style>
         body {
@@ -19,11 +18,25 @@
             background: #000;
         }
         
-        /* Mind AR automaticky řeší camera styling */
-        #container {
-            position: relative;
+        /* Perfektní camera styling bez konfliktu */
+        #video {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100vw;
             height: 100vh;
+            object-fit: cover;
+            z-index: -1;
+        }
+        
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 1;
+            pointer-events: auto;
         }
         
         .back-button {
@@ -123,18 +136,6 @@
             border-left-color: #28a745;
         }
         
-        .target-item.very-close {
-            border-left-color: #28a745;
-        }
-        
-        .target-item.medium {
-            border-left-color: #ffa500;
-        }
-        
-        .target-item.far {
-            border-left-color: #ff6b35;
-        }
-        
         .target-name {
             font-weight: bold;
             color: #000;
@@ -158,10 +159,6 @@
             font-size: 13px;
             font-weight: bold;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        
-        .clear-selection:hover {
-            background: rgba(255, 99, 71, 1);
         }
         
         .audio-info {
@@ -194,21 +191,6 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
         
-        .loading-info {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            font-size: 16px;
-            z-index: 2000;
-            text-align: center;
-            border: 2px solid #FFD700;
-        }
-        
         .start-button {
             position: fixed;
             top: 50%;
@@ -226,12 +208,27 @@
             z-index: 2000;
         }
         
-        .start-button:hover {
-            background: rgba(255, 215, 0, 1);
+        .loading-info {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 16px;
+            z-index: 2000;
+            text-align: center;
+            border: 2px solid #FFD700;
+            display: none;
         }
     </style>
 </head>
 <body>
+    <!-- Video element pro kameru -->
+    <video id="video" autoplay muted playsinline></video>
+    
     <!-- UI Elementy -->
     <a href="/assets/stezka_bohuslavice/bohuslavice.html" class="back-button">
         🐝 Zpět do Menu
@@ -241,7 +238,7 @@
         🐝 Spustit Včelí AR
     </div>
     
-    <div class="loading-info" id="loadingInfo" style="display: none;">
+    <div class="loading-info" id="loadingInfo">
         🐝 Načítám včelí AR...
     </div>
     
@@ -267,14 +264,11 @@
     <audio id="audio2" src="/assets/stezka_bohuslavice/mp3/vcela.mp3" preload="auto"></audio>
     <audio id="audio3" src="/assets/stezka_bohuslavice/mp3/vcela.mp3" preload="auto"></audio>
 
-    <!-- Mind AR Container -->
-    <div id="container"></div>
-
     <script>
-        // Mind AR a Three.js proměnné
-        let mindarThree, scene, camera, renderer;
+        // Three.js proměnné
+        let scene, camera, renderer;
         let beeModels = [];
-        let anchor = null;
+        let video, canvas;
         
         // GPS a navigační proměnné
         let userPosition = null;
@@ -326,113 +320,71 @@
             }
         ];
 
-        // Inicializace Mind AR
-        async function initMindAR() {
+        // Inicializace kamery
+        async function initCamera() {
             try {
-                console.log("Initializing Mind AR for bee tracking...");
-                document.getElementById('loadingInfo').style.display = 'block';
-                document.getElementById('loadingInfo').innerHTML = '🐝 Inicializuji Mind AR...';
+                console.log("Initializing camera...");
                 
-                // Kontrola dostupnosti Mind AR
-                if (typeof window.MINDAR === 'undefined') {
-                    throw new Error('Mind AR library not loaded');
-                }
+                video = document.getElementById('video');
                 
-                console.log("Mind AR library detected:", window.MINDAR);
-                
-                // Vytvoření jednoduchého image target
-                const imageTargetSrc = await createImageTarget();
-                
-                console.log("Creating Mind AR instance...");
-                
-                // Mind AR setup s correct syntax
-                mindarThree = new window.MINDAR.IMAGE.MindARThree({
-                    container: document.querySelector("#container"),
-                    imageTargetSrc: imageTargetSrc,
-                    maxTrack: 1,
-                    filterMinCF: 0.0001,
-                    filterBeta: 0.001,
-                    warmupTolerance: 2,
-                    missTolerance: 5,
-                    showStats: false,
-                    showInfo: false
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'environment', // Zadní kamera
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    },
+                    audio: false
                 });
                 
-                const {renderer, scene, camera} = mindarThree;
+                video.srcObject = stream;
                 
-                console.log("Mind AR instance created successfully");
-                document.getElementById('loadingInfo').innerHTML = '🐝 Načítám 3D modely včel...';
-                
-                // Načtení 3D modelů
-                await loadBeeModels();
-                
-                // Setup anchor pro všechny modely
-                anchor = mindarThree.addAnchor(0);
-                
-                // Přidání modelů do anchor
-                beeModels.forEach(model => {
-                    anchor.group.add(model);
-                });
-                
-                // Setup event listenery
-                setupEventListeners();
-                setupModelRotation();
-                
-                console.log("Starting Mind AR...");
-                
-                // Spuštění Mind AR
-                await mindarThree.start();
-                
-                console.log("Mind AR started successfully");
-                document.getElementById('loadingInfo').style.display = 'none';
-                document.getElementById('distanceInfo').style.display = 'block';
-                document.getElementById('navigation').style.display = 'block';
-                
-                isARActive = true;
-                
-                // Spuštění GPS trackingu
-                initGPS();
-                
-                // Render loop
-                renderer.setAnimationLoop(() => {
-                    renderer.render(scene, camera);
-                    updateBeeAnimations();
+                return new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
+                        console.log("Camera initialized successfully");
+                        console.log(`Video resolution: ${video.videoWidth}x${video.videoHeight}`);
+                        resolve();
+                    };
                 });
                 
             } catch (error) {
-                console.error("Mind AR initialization failed:", error);
-                document.getElementById('loadingInfo').innerHTML = `❌ Chyba Mind AR: ${error.message}<br><br>🔄 <span style="cursor: pointer; text-decoration: underline;" onclick="location.reload()">Zkusit znovu</span>`;
+                console.error("Camera initialization failed:", error);
+                throw new Error('Kamera není dostupná: ' + error.message);
             }
         }
 
-        // Vytvoření image target (jednodušší přístup)
-        async function createImageTarget() {
-            return new Promise((resolve) => {
-                const canvas = document.createElement('canvas');
-                canvas.width = 480;
-                canvas.height = 480;
-                const ctx = canvas.getContext('2d');
-                
-                // Vytvoříme jednoduchou texturu s vysokým kontrastem
-                ctx.fillStyle = '#000000';
-                ctx.fillRect(0, 0, 480, 480);
-                
-                // Přidáme bílé body pro tracking
-                ctx.fillStyle = '#FFFFFF';
-                for (let i = 0; i < 50; i++) {
-                    const x = Math.random() * 480;
-                    const y = Math.random() * 480;
-                    ctx.fillRect(x, y, 10, 10);
-                }
-                
-                // Přidáme včelí emoji ve středu
-                ctx.fillStyle = '#FFD700';
-                ctx.font = '60px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText('🐝', 240, 260);
-                
-                resolve(canvas.toDataURL());
+        // Inicializace Three.js scény
+        function initThreeJS() {
+            console.log("Initializing Three.js scene...");
+            
+            // Scene
+            scene = new THREE.Scene();
+            
+            // Camera - nastavíme podle velikosti okna
+            const aspect = window.innerWidth / window.innerHeight;
+            camera = new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
+            camera.position.set(0, 0, 0);
+            
+            // Renderer
+            canvas = document.createElement('canvas');
+            canvas.id = 'canvas';
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: canvas,
+                alpha: true,
+                antialias: true 
             });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000000, 0); // Transparent background
+            document.body.appendChild(canvas);
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffeb3b, 0.8);
+            directionalLight.position.set(0, 5, 5);
+            scene.add(directionalLight);
+            
+            console.log("Three.js scene initialized");
         }
 
         // Načtení 3D modelů včel
@@ -461,9 +413,18 @@
                     console.log(`Bee model ${i + 1} loaded for ${marker.name}`);
                     
                     const model = gltf.scene;
-                    model.scale.set(3, 3, 3);
+                    model.scale.set(0.5, 0.5, 0.5); // Menší modely pro lepší zobrazení
                     model.rotation.y = THREE.MathUtils.degToRad(30);
                     model.visible = false;
+                    
+                    // Pozice modelů v prostoru (rozmístíme je)
+                    const angle = (i / markers.length) * Math.PI * 2;
+                    const radius = 2;
+                    model.position.set(
+                        Math.cos(angle) * radius,
+                        0,
+                        Math.sin(angle) * radius - 5 // Před kamerou
+                    );
                     
                     // Animation mixer
                     if (gltf.animations && gltf.animations.length > 0) {
@@ -474,10 +435,7 @@
                         model.mixer = mixer;
                     }
                     
-                    // Pozice modelů v prostoru (rozložíme je)
-                    const spacing = 2;
-                    model.position.set((i - 1) * spacing, 0, 0);
-                    
+                    scene.add(model);
                     marker.model = model;
                     beeModels.push(model);
                     
@@ -489,13 +447,18 @@
             console.log(`${beeModels.length} bee models loaded successfully`);
         }
 
-        // Update animací
-        function updateBeeAnimations() {
+        // Render loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Update animací
             beeModels.forEach(model => {
                 if (model && model.mixer) {
                     model.mixer.update(0.016); // ~60fps
                 }
             });
+            
+            renderer.render(scene, camera);
         }
 
         // GPS funkcionalita
@@ -645,8 +608,7 @@
             let touchStarted = false;
             let rotationActive = false;
             
-            document.addEventListener('touchstart', (e) => {
-                if (isTouchingUI(e.target)) return;
+            canvas.addEventListener('touchstart', (e) => {
                 if (!isAnyModelVisible()) return;
                 
                 touchStarted = true;
@@ -657,8 +619,7 @@
                 e.preventDefault();
             }, { passive: false });
             
-            document.addEventListener('mousedown', (e) => {
-                if (isTouchingUI(e.target)) return;
+            canvas.addEventListener('mousedown', (e) => {
                 if (!isAnyModelVisible()) return;
                 
                 rotationActive = true;
@@ -668,7 +629,7 @@
                 e.preventDefault();
             });
             
-            document.addEventListener('touchmove', (e) => {
+            canvas.addEventListener('touchmove', (e) => {
                 if (!isRotating || !touchStarted || !rotationActive) return;
                 const currentX = e.touches[0].clientX;
                 const deltaX = currentX - startX;
@@ -678,7 +639,7 @@
                 e.preventDefault();
             }, { passive: false });
             
-            document.addEventListener('mousemove', (e) => {
+            canvas.addEventListener('mousemove', (e) => {
                 if (!isRotating || !rotationActive) return;
                 const deltaX = e.clientX - startX;
                 modelRotationY += deltaX * 0.3;
@@ -687,13 +648,13 @@
                 e.preventDefault();
             });
             
-            document.addEventListener('touchend', () => {
+            canvas.addEventListener('touchend', () => {
                 isRotating = false;
                 touchStarted = false;
                 rotationActive = false;
             });
             
-            document.addEventListener('mouseup', () => {
+            canvas.addEventListener('mouseup', () => {
                 isRotating = false;
                 rotationActive = false;
             });
@@ -711,28 +672,6 @@
             return markers.some(marker => marker.visible);
         }
 
-        function isTouchingUI(target) {
-            const uiSelectors = [
-                '.back-button',
-                '.navigation', 
-                '.nav-toggle',
-                '.nav-content',
-                '.target-item',
-                '.distance-info',
-                '.audio-info',
-                '.rotation-hint',
-                '.clear-selection'
-            ];
-            
-            for (let selector of uiSelectors) {
-                const element = document.querySelector(selector);
-                if (element && (element === target || element.contains(target))) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
         function showRotationHintOnce() {
             if (rotationHintShown) return;
             rotationHintShown = true;
@@ -743,7 +682,7 @@
             }, 3000);
         }
 
-        // Navigation functions
+        // Navigation functions (stejné jako předtím)
         function updateNavigation() {
             if (!userPosition) return;
             
@@ -765,18 +704,8 @@
                 let cssClass = 'target-item';
                 if (isSelected) {
                     cssClass += ' selected';
-                } else {
-                    if (marker.distance <= AR_VISIBILITY_THRESHOLD) {
-                        cssClass += ' very-close';
-                    } else if (marker.distance <= 100) {
-                        cssClass += ' medium';
-                    } else {
-                        cssClass += ' far';
-                    }
-                    
-                    if (isClosest && !isSelected) {
-                        cssClass = 'target-item closest';
-                    }
+                } else if (isClosest) {
+                    cssClass += ' closest';
                 }
                 
                 let audioIndicator = '';
@@ -822,22 +751,8 @@
                 }
                 
                 distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${audioIndicator}<br><strong>${distance}m</strong>`;
-                
-                // Barvy podle vzdálenosti
-                if (distance <= AR_VISIBILITY_THRESHOLD) {
-                    distanceInfo.style.borderColor = '#FFD700';
-                    distanceInfo.style.backgroundColor = 'rgba(255, 215, 0, 0.9)';
-                } else if (distance <= 100) {
-                    distanceInfo.style.borderColor = '#FFA500';
-                    distanceInfo.style.backgroundColor = 'rgba(255, 165, 0, 0.9)';
-                } else {
-                    distanceInfo.style.borderColor = '#ff6b35';
-                    distanceInfo.style.backgroundColor = 'rgba(255, 107, 53, 0.9)';
-                }
             } else {
                 distanceInfo.innerHTML = '🐝 Hledám nejbližší včelu...';
-                distanceInfo.style.borderColor = '#FFD700';
-                distanceInfo.style.backgroundColor = 'rgba(255, 193, 7, 0.95)';
             }
         }
 
@@ -876,6 +791,14 @@
             return { ...marker, distance };
         }
 
+        function formatDistance(distance) {
+            if (distance < 1000) {
+                return `${Math.round(distance)}m`;
+            } else {
+                return `${(distance / 1000).toFixed(1)}km`;
+            }
+        }
+
         function selectTarget(targetId) {
             selectedTargetId = targetId;
             document.getElementById('clearSelection').style.display = 'block';
@@ -905,26 +828,72 @@
             });
         }
 
+        // Hlavní inicializace
+        async function initBeeAR() {
+            try {
+                document.getElementById('startButton').style.display = 'none';
+                document.getElementById('loadingInfo').style.display = 'block';
+                document.getElementById('loadingInfo').innerHTML = '🐝 Spouštím kameru...';
+                
+                // Inicializace kamery
+                await initCamera();
+                
+                document.getElementById('loadingInfo').innerHTML = '🐝 Inicializuji 3D scénu...';
+                
+                // Inicializace Three.js
+                initThreeJS();
+                
+                document.getElementById('loadingInfo').innerHTML = '🐝 Načítám 3D modely...';
+                
+                // Načtení modelů
+                await loadBeeModels();
+                
+                // Setup event listenerů
+                setupEventListeners();
+                setupModelRotation();
+                
+                // Spuštění GPS
+                initGPS();
+                
+                // Spuštění render loop
+                animate();
+                
+                // Ukončení loading
+                document.getElementById('loadingInfo').style.display = 'none';
+                document.getElementById('distanceInfo').style.display = 'block';
+                document.getElementById('navigation').style.display = 'block';
+                
+                isARActive = true;
+                
+                console.log("Bee AR initialized successfully!");
+                
+            } catch (error) {
+                console.error("AR initialization failed:", error);
+                document.getElementById('loadingInfo').innerHTML = `❌ Chyba: ${error.message}<br><br>🔄 <span style="cursor: pointer; text-decoration: underline;" onclick="location.reload()">Zkusit znovu</span>`;
+            }
+        }
+
+        // Window resize handler
+        window.addEventListener('resize', () => {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+
         // Start button handler
-        document.getElementById('startButton').addEventListener('click', async () => {
-            document.getElementById('startButton').style.display = 'none';
-            await initMindAR();
+        document.getElementById('startButton').addEventListener('click', () => {
+            initBeeAR();
         });
 
         // Inicializace při načtení
         window.addEventListener('load', () => {
-            console.log("Mind AR bee tracking application loaded");
+            console.log("WebXR + Three.js bee AR application loaded");
             console.log("Click 'Spustit Včelí AR' to begin");
         });
 
-        // Handle page unload
-        window.addEventListener('beforeunload', () => {
-            if (mindarThree) {
-                mindarThree.stop();
-            }
-        });
-
-        console.log("Mind AR bee tracking script loaded successfully!");
+        console.log("WebXR + Three.js bee AR script loaded successfully!");
     </script>
 </body>
 </html>
