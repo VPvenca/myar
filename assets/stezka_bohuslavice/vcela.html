@@ -646,12 +646,12 @@
                     
                     document.getElementById('distanceInfo').innerHTML = errorMsg;
                     
-                    // Fallback po chybě - testovací pozice
+                    // Fallback po chybě - testovací pozice BLÍZKO včel
                     setTimeout(() => {
                         console.log("Using fallback position due to GPS error");
                         userPosition = {
-                            lat: 49.195060, // Brno centrum
-                            lng: 16.606836,
+                            lat: 49.090675, // Přesně na pozici Dělnice z A-Frame kódu
+                            lng: 17.132976,
                             accuracy: 100
                         };
                         document.getElementById('distanceInfo').innerHTML = '🔄 Používám testovací pozici';
@@ -923,8 +923,15 @@
             updateDistanceDisplay();
         }
 
+        // Aktualizace zobrazení vzdálenosti - VYLEPŠENÁ s více informací
         function updateDistanceDisplay() {
             const distanceInfo = document.getElementById('distanceInfo');
+            
+            if (!userPosition) {
+                distanceInfo.innerHTML = '📍 Čekám na GPS...';
+                return;
+            }
+            
             const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
             
             if (targetMarker) {
@@ -936,9 +943,28 @@
                     audioIndicator = ' 🎵';
                 }
                 
-                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${audioIndicator}<br><strong>${distance}m</strong>`;
+                let visibilityIndicator = '';
+                if (distance <= AR_VISIBILITY_THRESHOLD) {
+                    visibilityIndicator = ' 👁️';
+                }
+                
+                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${audioIndicator}${visibilityIndicator}<br><strong>${distance}m</strong><br><small>GPS: ±${Math.round(userPosition.accuracy)}m</small>`;
+                
+                // Barvy podle vzdálenosti
+                if (distance <= AR_VISIBILITY_THRESHOLD) {
+                    distanceInfo.style.borderColor = '#FFD700';
+                    distanceInfo.style.backgroundColor = 'rgba(255, 215, 0, 0.9)';
+                } else if (distance <= 100) {
+                    distanceInfo.style.borderColor = '#FFA500';
+                    distanceInfo.style.backgroundColor = 'rgba(255, 165, 0, 0.9)';
+                } else {
+                    distanceInfo.style.borderColor = '#ff6b35';
+                    distanceInfo.style.backgroundColor = 'rgba(255, 107, 53, 0.9)';
+                }
             } else {
-                distanceInfo.innerHTML = '🐝 Hledám nejbližší včelu...';
+                distanceInfo.innerHTML = `🐝 GPS aktivní<br><small>Lat: ${userPosition.lat.toFixed(6)}<br>Lng: ${userPosition.lng.toFixed(6)}</small>`;
+                distanceInfo.style.borderColor = '#FFD700';
+                distanceInfo.style.backgroundColor = 'rgba(255, 193, 7, 0.95)';
             }
         }
 
