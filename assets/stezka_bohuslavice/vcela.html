@@ -294,9 +294,9 @@
             </a-gltf-model>
         </a-entity>
 
-        <!-- Včela 3 - Královna -->
+        <!-- Včela 3 - Královna - OPRAVENÉ SOUŘADNICE -->
         <a-entity 
-            gps-entity-place="latitude: 49.009057; longitude: 17.128693"
+            gps-entity-place="latitude: 49.009245; longitude: 17.128867"
             data-marker-id="vcela_3"
             data-audio-id="audio3"
             visible="false">
@@ -404,23 +404,29 @@
             }
         }
 
-        // Získání aktuální pozice - VYLEPŠENÁ s fallback
+        // Získání aktuální pozice - ZJEDNODUŠENÁ bez konfliktů
         function getCurrentPosition() {
             console.log("Requesting GPS position...");
             document.getElementById('distanceInfo').innerHTML = '📍 Hledám GPS signál...';
             
+            // OKAMŽITÝ fallback pro testování
+            setTimeout(() => {
+                if (!userPosition) {
+                    console.log("Using immediate fallback position");
+                    userPosition = {
+                        lat: 49.090675, // Pozice Dělnice
+                        lng: 17.132976,
+                        accuracy: 100
+                    };
+                    document.getElementById('distanceInfo').innerHTML = '🔄 Testovací pozice (Dělnice)';
+                    console.log("Fallback position set:", userPosition);
+                    checkProximityToMarkers();
+                    updateNavigation();
+                }
+            }, 1000); // Rychlý fallback po 1 sekundě
+            
             if (!navigator.geolocation) {
                 console.error("Geolocation is not supported");
-                document.getElementById('distanceInfo').innerHTML = '❌ GPS není podporován';
-                // Fallback na pozici Dělnice
-                userPosition = {
-                    lat: 49.090675,
-                    lng: 17.132976,
-                    accuracy: 50
-                };
-                console.log("Using fallback position (Dělnice):", userPosition);
-                checkProximityToMarkers();
-                updateNavigation();
                 return;
             }
 
@@ -431,48 +437,20 @@
                         lng: position.coords.longitude,
                         accuracy: position.coords.accuracy
                     };
-                    console.log("GPS position found:", userPosition);
-                    console.log(`GPS accuracy: ${position.coords.accuracy}m`);
+                    console.log("Real GPS position found:", userPosition);
                     checkProximityToMarkers();
                     updateNavigation();
                 },
                 (error) => {
-                    console.error("Geolocation error:", error);
-                    console.log("Error code:", error.code, "Message:", error.message);
-                    
-                    // Fallback na pozici Dělnice při chybě
-                    userPosition = {
-                        lat: 49.090675, // Pozice Dělnice z vašeho kódu
-                        lng: 17.132976,
-                        accuracy: 100
-                    };
-                    
-                    document.getElementById('distanceInfo').innerHTML = '🔄 Používám testovací pozici (Dělnice)';
-                    console.log("Using fallback position due to GPS error:", userPosition);
-                    checkProximityToMarkers();
-                    updateNavigation();
+                    console.error("GPS error:", error.code, error.message);
+                    // Fallback už je nastaven výše
                 },
                 {
                     enableHighAccuracy: true,
-                    timeout: 15000, // Zvýšený timeout
-                    maximumAge: 60000
+                    timeout: 10000,
+                    maximumAge: 30000
                 }
             );
-            
-            // Automatický fallback po 5 sekundách
-            setTimeout(() => {
-                if (!userPosition) {
-                    console.log("GPS timeout - activating fallback position");
-                    userPosition = {
-                        lat: 49.090675, // Pozice Dělnice
-                        lng: 17.132976,
-                        accuracy: 100
-                    };
-                    document.getElementById('distanceInfo').innerHTML = '🔄 Testovací pozice aktivní (Dělnice)';
-                    checkProximityToMarkers();
-                    updateNavigation();
-                }
-            }, 5000);
         }
 
         // Sledování pozice
