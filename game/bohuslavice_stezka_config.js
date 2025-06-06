@@ -111,7 +111,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
 document.addEventListener('DOMContentLoaded', () => {
     console.log("🐝 Bohuslavice včelařská stezka config: DOM loaded, registering exposition...");
     if (typeof registerExposition === 'function') {
-        registerExposition('vcelarstvi', BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG);
+        registerExposition('stezka_bohuslavice', BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG);
     } else {
         console.error("❌ registerExposition function not available");
     }
