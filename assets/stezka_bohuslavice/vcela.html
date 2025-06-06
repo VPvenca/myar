@@ -315,6 +315,11 @@
         let audioPlayingForMarker = null;
         let audioPaused = false;
         
+        // Proměnné pro snap funkcionalitu
+        let snapMode = 'gps'; // 'gps', 'camera', 'fixed'
+        let snappedMarker = null;
+        let cameraRelativeModel = null;
+        
         // Proměnné pro rotaci modelů
         let modelRotationY = 30; // Začínáme na 30 stupňů
         let isRotating = false;
@@ -584,22 +589,208 @@
             }
         }
 
-        // Snap to camera funkcionalita - ZJEDNODUŠENÁ
+        // Snap to camera funkcionalita - OPATRNÁ IMPLEMENTACE
         function updateSnapButtonVisibility() {
             const snapButton = document.getElementById('snapButton');
             const anyVisible = isAnyModelVisible();
             
-            if (anyVisible) {
+            if (anyVisible && snapMode === 'gps') {
                 snapButton.style.display = 'block';
+                snapButton.innerHTML = '📱';
+                snapButton.title = 'Přichytit k pohledu';
+                snapButton.className = 'snap-button ui-element';
+            } else if (snapMode === 'camera') {
+                snapButton.style.display = 'block';
+                snapButton.innerHTML = '📍';
+                snapButton.title = 'Fixovat pozici';
+                snapButton.className = 'snap-button ui-element camera-mode';
+            } else if (snapMode === 'fixed') {
+                snapButton.style.display = 'block';
+                snapButton.innerHTML = '🔄';
+                snapButton.title = 'Zpět na GPS';
+                snapButton.className = 'snap-button ui-element';
             } else {
                 snapButton.style.display = 'none';
             }
         }
 
         function handleSnapButtonClick() {
-            console.log("Snap button clicked - basic version");
-            // Zatím jen základní funkce - rozšíříme později
-            alert("Snap funkce bude aktivní v příští verzi!");
+            console.log(`Snap button clicked, current mode: ${snapMode}`);
+            
+            try {
+                if (snapMode === 'gps') {
+                    snapToCamera();
+                } else if (snapMode === 'camera') {
+                    fixAtCurrentPosition();
+                } else if (snapMode === 'fixed') {
+                    returnToGPS();
+                }
+            } catch (error) {
+                console.error("Snap function error:", error);
+                // Bezpečný návrat na GPS mód při chybě
+                returnToGPS();
+            }
+        }
+
+        function snapToCamera() {
+            console.log("Attempting to snap model to camera...");
+            
+            // Najdeme nejbližší viditelný marker
+            const closestMarker = findClosestVisibleMarker();
+            if (!closestMarker) {
+                console.log("No visible marker found");
+                return;
+            }
+            
+            // Skryjeme GPS entitu
+            const gpsEntity = document.querySelector(`[data-marker-id="${closestMarker.id}"]`);
+            if (gpsEntity) {
+                gpsEntity.setAttribute('visible', 'false');
+                console.log(`Hidden GPS entity for ${closestMarker.id}`);
+            }
+            
+            // Vytvoříme model relativní ke kameře
+            createCameraRelativeModel(closestMarker);
+            
+            snappedMarker = closestMarker;
+            snapMode = 'camera';
+            updateSnapButtonVisibility();
+            
+            console.log("Model snapped to camera successfully");
+        }
+
+        function createCameraRelativeModel(marker) {
+            const camera = document.querySelector('a-camera');
+            if (!camera) {
+                console.error("Camera not found");
+                return;
+            }
+            
+            // Vytvoříme wrapper entitu
+            const cameraEntity = document.createElement('a-entity');
+            cameraEntity.id = 'snap-camera-model';
+            
+            // Vytvoříme GLB model
+            const gltfModel = document.createElement('a-gltf-model');
+            gltfModel.setAttribute('src', `#bee-model-${marker.id.split('_')[1]}`);
+            gltfModel.setAttribute('position', '0 -1 -2.5'); // Před kamerou
+            gltfModel.setAttribute('scale', '2 2 2'); // Trochu menší
+            gltfModel.setAttribute('rotation', `0 ${modelRotationY} 0`);
+            gltfModel.setAttribute('animation-mixer', '');
+            
+            cameraEntity.appendChild(gltfModel);
+            camera.appendChild(cameraEntity);
+            
+            cameraRelativeModel = gltfModel;
+            console.log("Camera relative model created");
+        }
+
+        function fixAtCurrentPosition() {
+            console.log("Fixing model at current position...");
+            
+            const camera = document.querySelector('a-camera');
+            const cameraModel = document.getElementById('snap-camera-model');
+            
+            if (!camera || !cameraModel || !snappedMarker) {
+                console.error("Missing required elements for fixing position");
+                return;
+            }
+            
+            // Získáme world pozici kamery
+            const cameraPos = camera.object3D.position;
+            const cameraRot = camera.object3D.rotation;
+            
+            // Vypočítáme pozici před kamerou
+            const forwardDistance = 2.5;
+            const fixedX = cameraPos.x + Math.sin(cameraRot.y) * forwardDistance;
+            const fixedZ = cameraPos.z - Math.cos(cameraRot.y) * forwardDistance;
+            const fixedY = cameraPos.y - 1;
+            
+            // Odebereme model z kamery
+            camera.removeChild(cameraModel);
+            
+            // Vytvoříme fixní entitu
+            const fixedEntity = document.createElement('a-entity');
+            fixedEntity.id = 'snap-fixed-model';
+            fixedEntity.setAttribute('position', `${fixedX} ${fixedY} ${fixedZ}`);
+            
+            const gltfModel = document.createElement('a-gltf-model');
+            gltfModel.setAttribute('src', `#bee-model-${snappedMarker.id.split('_')[1]}`);
+            gltfModel.setAttribute('position', '0 0 0');
+            gltfModel.setAttribute('scale', '2 2 2');
+            gltfModel.setAttribute('rotation', `0 ${modelRotationY} 0`);
+            gltfModel.setAttribute('animation-mixer', '');
+            
+            fixedEntity.appendChild(gltfModel);
+            document.querySelector('a-scene').appendChild(fixedEntity);
+            
+            cameraRelativeModel = gltfModel;
+            snapMode = 'fixed';
+            updateSnapButtonVisibility();
+            
+            console.log(`Model fixed at position: ${fixedX}, ${fixedY}, ${fixedZ}`);
+        }
+
+        function returnToGPS() {
+            console.log("Returning to GPS mode...");
+            
+            // Odebereme camera model
+            const cameraModel = document.getElementById('snap-camera-model');
+            if (cameraModel) {
+                const camera = document.querySelector('a-camera');
+                if (camera) {
+                    camera.removeChild(cameraModel);
+                }
+            }
+            
+            // Odebereme fixed model
+            const fixedModel = document.getElementById('snap-fixed-model');
+            if (fixedModel) {
+                document.querySelector('a-scene').removeChild(fixedModel);
+            }
+            
+            // Zobrazíme zpět GPS entitu
+            if (snappedMarker) {
+                const gpsEntity = document.querySelector(`[data-marker-id="${snappedMarker.id}"]`);
+                if (gpsEntity) {
+                    gpsEntity.setAttribute('visible', 'true');
+                    console.log(`Restored GPS entity for ${snappedMarker.id}`);
+                }
+            }
+            
+            // Reset proměnných
+            snapMode = 'gps';
+            snappedMarker = null;
+            cameraRelativeModel = null;
+            updateSnapButtonVisibility();
+            
+            console.log("Returned to GPS mode successfully");
+        }
+
+        function findClosestVisibleMarker() {
+            let closest = null;
+            let minDistance = Infinity;
+            
+            markers.forEach(marker => {
+                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                if (entity && entity.getAttribute('visible') === true) {
+                    if (userPosition) {
+                        const distance = calculateDistance(
+                            userPosition.lat, userPosition.lng,
+                            marker.lat, marker.lng
+                        );
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            closest = marker;
+                        }
+                    } else {
+                        // Pokud nemáme GPS, vezme první viditelný
+                        closest = marker;
+                    }
+                }
+            });
+            
+            return closest;
         }
 
         // Navigace
@@ -796,6 +987,11 @@
             }
             if (beeModel3) {
                 beeModel3.setAttribute('rotation', `0 ${modelRotationY} 0`);
+            }
+            
+            // Rotace i snap modelu pokud existuje
+            if (cameraRelativeModel) {
+                cameraRelativeModel.setAttribute('rotation', `0 ${modelRotationY} 0`);
             }
         }
 
