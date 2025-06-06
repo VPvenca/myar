@@ -1,5 +1,5 @@
 // game/andele-config.js
-// Konfigurace pro Andělé v Kyjově
+// OPRAVENÁ Konfigurace pro Andělé v Kyjově
 
 const ANDELE_EXPOSITION_CONFIG = {
     // === SCÉNY ===
@@ -23,7 +23,7 @@ const ANDELE_EXPOSITION_CONFIG = {
 
     // === ACHIEVEMENTY ===
     achievements: {
-        // === ZÁKLADNÍ ACHIEVEMENTY PRO STEZKU ===
+        // === MARKER-SPECIFICKÉ ACHIEVEMENTY (OPRAVENO) ===
         
         "andele_first_angel": {
             name: "První setkání",
@@ -31,9 +31,42 @@ const ANDELE_EXPOSITION_CONFIG = {
             icon: "😇",
             category: "andele",
             rarity: "common",
-            condition: "complete_marker",
+            sceneId: "/assets/andele/geo_andele.html",
             markerId: "andel_1",
             image: "/img/achievements/first_angel.png"
+        },
+
+        "andele_guardian_gabriel": {
+            name: "Setkání s Gabrielem",
+            description: "Setkal ses s andělem Gabriel",
+            icon: "👼",
+            category: "andele",
+            rarity: "uncommon",
+            sceneId: "/assets/andele/geo_andele.html",
+            markerId: "andel_1",
+            image: "/img/achievements/gabriel.png"
+        },
+
+        "andele_guardian_rafael": {
+            name: "Setkání s Rafaelem",
+            description: "Setkal ses s andělem Rafael",
+            icon: "💚",
+            category: "andele",
+            rarity: "uncommon",
+            sceneId: "/assets/andele/geo_andele.html",
+            markerId: "andel_2",
+            image: "/img/achievements/rafael.png"
+        },
+
+        "andele_guardian_michael": {
+            name: "Setkání s Michaelem",
+            description: "Setkal ses s archandělem Michael",
+            icon: "⚔️",
+            category: "andele",
+            rarity: "uncommon",
+            sceneId: "/assets/andele/geo_andele.html",
+            markerId: "andel_3",
+            image: "/img/achievements/michael.png"
         },
 
         "andele_angel_collector": {
@@ -41,7 +74,7 @@ const ANDELE_EXPOSITION_CONFIG = {
             description: "Našel jsi všechny anděly na venkovní stezce",
             icon: "👼",
             category: "andele", 
-            rarity: "uncommon",
+            rarity: "rare",
             condition: "complete_scene",
             sceneId: "/assets/andele/geo_andele.html",
             image: "/img/achievements/angel_collector.png"
@@ -90,146 +123,32 @@ const ANDELE_EXPOSITION_CONFIG = {
             image: "/img/achievements/angel_pilgrim.png"
         },
 
-        // === SPECIÁLNÍ ACHIEVEMENTY ===
-
-        "andele_speed_walker": {
-            name: "Rychlý poutník",
-            description: "Dokončil jsi venkovní stezku za méně než 15 minut",
-            icon: "⚡",
+        // === ZÁKLADNÍ ACHIEVEMENTY PRO EXPOZICI ===
+        "andele_first_scene": {
+            name: "První krůčky mezi anděly",
+            description: "Dokončil jsi první scénu na Stezce andělů",
+            icon: "😇",
             category: "andele",
-            rarity: "uncommon",
-            condition: "time_limit",
-            timeLimit: 900, // 15 minut v sekundách
-            sceneId: "/assets/andele/geo_andele.html",
-            image: "/img/achievements/speed_walker.png"
+            rarity: "common",
+            image: "/img/achievements/andele_first_scene.png"
         },
 
-        "andele_contemplator": {
-            name: "Andělský rozjímač",
-            description: "Strávil jsi alespoň 5 minut u jedného anděla na stezce",
-            icon: "🧘‍♂️",
+        "andele_all_scenes": {
+            name: "Znalec andělů",
+            description: "Dokončil jsi všechny scény na Stezce andělů",
+            icon: "🎓",
             category: "andele",
             rarity: "rare",
-            condition: "time_spent_5min",
-            markerId: "andel_2", // prostřední anděl
-            image: "/img/achievements/contemplator.png"
+            image: "/img/achievements/andele_all_scenes.png"
         },
 
-        "andele_art_critic": {
-            name: "Andělský kritik",
-            description: "Strávil jsi více než 20 minut studiem výstavy v muzeu",
-            icon: "🔍",
-            category: "andele",
-            rarity: "uncommon",
-            condition: "time_spent_20min",
-            sceneId: "/assets/andele/vystava_andelu.html",
-            image: "/img/achievements/art_critic.png"
-        },
-
-        "andele_guardian": {
-            name: "Andělský strážce",
-            description: "Navštívil jsi všechny anděly ve správném pořadí",
-            icon: "🛡️",
-            category: "andele",
-            rarity: "rare",
-            condition: "sequential_completion",
-            sequence: ["andel_1", "andel_2", "andel_3"],
-            image: "/img/achievements/guardian.png"
-        },
-
-        "andele_photographer": {
-            name: "Andělský fotograf",
-            description: "Pořídil jsi fotku u každého anděla na stezce",
-            icon: "📸",
-            category: "andele",
-            rarity: "uncommon",
-            condition: "photo_at_markers",
-            markers: ["andel_1", "andel_2", "andel_3"],
-            image: "/img/achievements/photographer.png"
-        },
-
-        "andele_devotee": {
-            name: "Oddaný ctitel",
-            description: "Vrátil jsi se na stezku andělů vícekrát",
-            icon: "🙏",
-            category: "andele",
-            rarity: "rare",
-            condition: "repeat_visit",
-            minVisits: 3,
-            image: "/img/achievements/devotee.png"
-        },
-
-        "andele_night_visitor": {
-            name: "Noční návštěvník",
-            description: "Navštívil jsi stezku andělů po setmění",
-            icon: "🌙",
-            category: "andele",
-            rarity: "uncommon",
-            condition: "time_of_day",
-            startHour: 19,
-            endHour: 6,
-            image: "/img/achievements/night_visitor.png"
-        },
-
-        "andele_dawn_pilgrim": {
-            name: "Úsvitový poutník",
-            description: "Začal jsi stezku před východem slunce",
-            icon: "🌅",
-            category: "andele",
-            rarity: "rare",
-            condition: "time_of_day",
-            startHour: 5,
-            endHour: 7,
-            image: "/img/achievements/dawn_pilgrim.png"
-        },
-
-        "andele_weather_warrior": {
-            name: "Neporazitelný poutník",
-            description: "Dokončil jsi stezku za nepříznivého počasí",
-            icon: "🌧️",
-            category: "andele",
-            rarity: "uncommon",
-            condition: "weather_condition",
-            weatherTypes: ["rain", "snow", "storm"],
-            image: "/img/achievements/weather_warrior.png"
-        },
-
-        "andele_seasonal_visitor": {
-            name: "Sezónní návštěvník",
-            description: "Navštívil jsi stezku ve všech čtyřech ročních obdobích",
-            icon: "🍂",
+        "andele_perfectionist": {
+            name: "Mistr andělské stezky",
+            description: "Získal jsi zlaté hvězdy ve všech scénách Stezky andělů",
+            icon: "👑",
             category: "andele",
             rarity: "legendary",
-            condition: "seasonal_visits",
-            seasons: ["spring", "summer", "autumn", "winter"],
-            hidden: true,
-            image: "/img/achievements/seasonal_visitor.png"
-        },
-
-        // === SKRYTÉ/EASTER EGG ACHIEVEMENTY ===
-
-        "andele_secret_prayer": {
-            name: "Tajná modlitba",
-            description: "Objevil jsi skrytou zprávu u jedného z andělů",
-            icon: "🤫",
-            category: "andele",
-            rarity: "rare",
-            hidden: true,
-            condition: "discover_secret",
-            secretId: "hidden_prayer",
-            image: "/img/achievements/secret_prayer.png"
-        },
-
-        "andele_easter_egg": {
-            name: "Andělské překvapení",
-            description: "Našel jsi velikonoční vajíčko vývojářů",
-            icon: "🥚",
-            category: "andele",
-            rarity: "legendary",
-            hidden: true,
-            condition: "easter_egg",
-            easterEggId: "dev_surprise",
-            image: "/img/achievements/easter_egg.png"
+            image: "/img/achievements/andele_perfectionist.png"
         }
     },
 
@@ -260,7 +179,11 @@ const ANDELE_EXPOSITION_CONFIG = {
 // Automatická registrace při načtení skriptu
 document.addEventListener('DOMContentLoaded', () => {
     console.log("😇 Andělé config: DOM loaded, registering exposition...");
-    registerExposition('andele', ANDELE_EXPOSITION_CONFIG);
+    if (typeof registerExposition === 'function') {
+        registerExposition('andele', ANDELE_EXPOSITION_CONFIG);
+    } else {
+        console.error("❌ registerExposition function not available");
+    }
 });
 
 console.log("😇 Angels exposition config loaded");

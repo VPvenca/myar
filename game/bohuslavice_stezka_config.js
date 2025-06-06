@@ -1,5 +1,5 @@
 // game/bohuslavice_stezka_config.js
-// Konfigurace pro Včelařskou stezku
+// OPRAVENÁ Konfigurace pro Včelařskou stezku
 
 const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
     // === SCÉNY ===
@@ -13,17 +13,17 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
 
     // === ACHIEVEMENTY PRO VČELAŘSKOU STEZKU ===
     achievements: {
+        // === MARKER-SPECIFICKÉ ACHIEVEMENTY (OPRAVENO) ===
         "vcela_1_delnice": {
             name: "Pozorovatel dělnic",
             description: "Pochopil jsi život pracovitých dělnic",
             icon: "🐝",
             category: "vcelarstvi",
             rarity: "uncommon",
-            condition: "complete_marker",
-            sceneId: "vcela_1",
+            // OPRAVENO: Používáme sceneId místo condition
+            sceneId: "/assets/stezka_bohuslavice/vcela.html",
+            markerId: "vcela_1",
             image: "/img/achievements/delnice.png"
-            
-            
         },
 
         "vcela_2_trubec": {
@@ -32,8 +32,8 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             icon: "🐛",
             category: "vcelarstvi", 
             rarity: "uncommon",
-            condition: "complete_marker",
-            sceneId: "vcela_2",
+            sceneId: "/assets/stezka_bohuslavice/vcela.html",
+            markerId: "vcela_2",
             image: "/img/achievements/trubec.png"
         },
 
@@ -43,8 +43,8 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             icon: "👑",
             category: "vcelarstvi",
             rarity: "uncommon", 
-            condition: "complete_marker",
-            sceneId: "vcela_3",
+            sceneId: "/assets/stezka_bohuslavice/vcela.html",
+            markerId: "vcela_3",
             image: "/img/achievements/kralovna.png"
         },
 
@@ -54,8 +54,8 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             icon: "🍯",
             category: "vcelarstvi",
             rarity: "rare",
-            condition: "requires_achievements",
-            requiredAchievements: ["vcela_1_delnice", "vcela_2_trubec", "vcela_3_kralovna"],
+            condition: "complete_all_markers",
+            sceneId: "/assets/stezka_bohuslavice/vcela.html",
             image: "/img/achievements/znalec_vcelstva.png"
         },
 
@@ -110,7 +110,11 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
 // Automatická registrace při načtení skriptu
 document.addEventListener('DOMContentLoaded', () => {
     console.log("🐝 Bohuslavice včelařská stezka config: DOM loaded, registering exposition...");
-    registerExposition('vcelarstvi', BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG);
+    if (typeof registerExposition === 'function') {
+        registerExposition('vcelarstvi', BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG);
+    } else {
+        console.error("❌ registerExposition function not available");
+    }
 });
 
 console.log("🐝 Bohuslavice včelařská stezka exposition config loaded");
