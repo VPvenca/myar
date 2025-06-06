@@ -311,8 +311,32 @@
         }
 
         /* Aplikace korekce na video canvas */
-        .vertical-corrected {
+        .ar-background-video {
             transform-origin: center center;
+            position: absolute !important;
+            z-index: -10 !important;
+        }
+        
+        .ar-background-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -5;
+            pointer-events: none;
+            transform-origin: center center;
+        }
+        
+        /* Zajištění, že 3D modely nejsou ovlivněny */
+        a-gltf-model, a-entity[data-marker-id] {
+            transform: none !important;
+        }
+        
+        a-scene canvas {
+            position: relative;
+            z-index: 1;
+            background: transparent;
         }
     </style>
 </head>
@@ -584,41 +608,141 @@
                 console.log("Found A-Frame canvas element");
             }
             
-            // Pokusíme se najít video element
+            // Pokusíme se najít video element (kamera pozadí)
             const videos = document.getElementsByTagName('video');
             if (videos.length > 0) {
-                videoElement = videos[0];
-                console.log("Found video element");
+                // Najdeme video, které je používané pro AR pozadí
+                for (let video of videos) {
+                    if (video.srcObject || video.src || video.currentSrc) {
+                        videoElement = video;
+                        console.log("Found AR background video element");
+                        break;
+                    }
+                }
             }
             
             // Pokud nenajdeme ihned, zkusíme později
             if (!videoElement && !canvasElement) {
                 setTimeout(findVideoElements, 1000);
+            } else {
+                // Jakmile najdeme elementy, nastavíme separaci vrstev
+                setupVideoBackgroundSeparation();
             }
+        }
+        
+        function setupVideoBackgroundSeparation() {
+            console.log("Setting up video background separation...");
+            
+            // Najdeme všechna videa a označíme je jako pozadí
+            const allVideos = document.getElementsByTagName('video');
+            for (let video of allVideos) {
+                // Nastavíme video jako pozadí layer
+                video.style.position = 'absolute';
+                video.style.top = '0';
+                video.style.left = '0';
+                video.style.width = '100%';
+                video.style.height = '100%';
+                video.style.objectFit = 'cover';
+                video.style.zIndex = '-10'; // Velmi nízký z-index
+                video.className += ' ar-background-video';
+                console.log("Video marked as background layer");
+            }
+            
+            // Zajistíme, že A-Frame canvas má vyšší z-index než video
+            if (canvasElement) {
+                canvasElement.style.position = 'relative';
+                canvasElement.style.zIndex = '1';
+                canvasElement.style.backgroundColor = 'transparent';
+                console.log("Canvas set above video layer");
+            }
+            
+            console.log("✅ Video background separation complete");
         }
         
         function applyVerticalCorrection() {
             try {
-                // Aplikujeme korekci na canvas A-Frame scény
-                if (canvasElement) {
-                    canvasElement.style.transform = `scaleY(${verticalCorrectionValue})`;
-                    canvasElement.style.transformOrigin = 'center center';
-                    console.log(`Applied correction ${verticalCorrectionValue} to canvas`);
-                }
+                // Aplikujeme korekci POUZE na video pozadí, NE na 3D modely
                 
-                // Aplikujeme korekci na video element pokud existuje
+                // 1. Pokusíme se najít video element (kamera pozadí)
                 if (videoElement) {
                     videoElement.style.transform = `scaleY(${verticalCorrectionValue})`;
                     videoElement.style.transformOrigin = 'center center';
-                    console.log(`Applied correction ${verticalCorrectionValue} to video`);
+                    videoElement.style.zIndex = '-1'; // Zajistíme, že je pozadí
+                    console.log(`Applied correction ${verticalCorrectionValue} to video background only`);
+                    return;
                 }
                 
-                // Fallback - aplikujeme na celou scénu
-                const scene = document.querySelector('a-scene');
-                if (scene) {
-                    scene.style.transform = `scaleY(${verticalCorrectionValue})`;
-                    scene.style.transformOrigin = 'center center';
+                // 2. Pokud nemáme přímý přístup k video, pokusíme se o canvas layer separaci
+                if (canvasElement) {
+                    // Vytvoříme wrapper pro pozadí a modely
+                    const scene = document.querySelector('a-scene');
+                    if (scene && !scene.querySelector('.ar-background-layer')) {
+                        
+                        // Vytvoříme div pro pozadí s korekcí
+                        const backgroundLayer = document.createElement('div');
+                        backgroundLayer.className = 'ar-background-layer';
+                        backgroundLayer.style.cssText = `
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            z-index: -1;
+                            transform: scaleY(${verticalCorrectionValue});
+                            transform-origin: center center;
+                            pointer-events: none;
+                        `;
+                        
+                        // Vložíme před canvas
+                        scene.parentNode.insertBefore(backgroundLayer, scene);
+                        
+                        // Přesuneme video do background layer
+                        const allVideos = document.getElementsByTagName('video');
+                        for (let video of allVideos) {
+                            if (video.style.transform !== `scaleY(${verticalCorrectionValue})`) {
+                                video.style.transform = `scaleY(${verticalCorrectionValue})`;
+                                video.style.transformOrigin = 'center center';
+                            }
+                        }
+                        
+                        console.log(`Created separate background layer with correction ${verticalCorrectionValue}`);
+                    } else if (scene.querySelector('.ar-background-layer')) {
+                        // Aktualizujeme existující background layer
+                        const backgroundLayer = scene.querySelector('.ar-background-layer');
+                        backgroundLayer.style.transform = `scaleY(${verticalCorrectionValue})`;
+                        
+                        // Aktualizujeme všechna videa
+                        const allVideos = document.getElementsByTagName('video');
+                        for (let video of allVideos) {
+                            video.style.transform = `scaleY(${verticalCorrectionValue})`;
+                            video.style.transformOrigin = 'center center';
+                        }
+                        
+                        console.log(`Updated background layer correction to ${verticalCorrectionValue}`);
+                    }
                 }
+                
+                // 3. DŮLEŽITÉ: Zajistíme, že 3D modely NEJSOU ovlivněny
+                const allGltfModels = document.querySelectorAll('a-gltf-model');
+                allGltfModels.forEach(model => {
+                    // Resetujeme jakoukoliv transformaci na modelech
+                    const currentTransform = model.style.transform;
+                    if (currentTransform && currentTransform.includes('scaleY')) {
+                        // Odebereme scaleY z modelu pokud tam je
+                        model.style.transform = currentTransform.replace(/scaleY\([^)]+\)/g, '');
+                    }
+                });
+                
+                // 4. Stejně tak pro entity (kontejnery modelů)
+                const allEntities = document.querySelectorAll('a-entity[data-marker-id]');
+                allEntities.forEach(entity => {
+                    const currentTransform = entity.style.transform;
+                    if (currentTransform && currentTransform.includes('scaleY')) {
+                        entity.style.transform = currentTransform.replace(/scaleY\([^)]+\)/g, '');
+                    }
+                });
+                
+                console.log(`✅ Correction applied to background only, 3D models preserved`);
                 
             } catch (error) {
                 console.error("Error applying vertical correction:", error);
