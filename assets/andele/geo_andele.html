@@ -178,17 +178,30 @@
         
         .audio-info {
             position: fixed;
-            bottom: 60px;
+            top: 60px;
             left: 10px;
             background-color: rgba(255, 215, 0, 0.9);
             color: black;
-            padding: 8px 12px;
-            border-radius: 5px;
-            font-size: 12px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
             z-index: 1000;
             display: none;
             font-weight: bold;
             border: 2px solid #FFD700;
+            cursor: pointer;
+            user-select: none;
+            min-width: 160px;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+
+        .audio-info:hover {
+            background-color: rgba(255, 215, 0, 1);
+        }
+
+        .audio-info:active {
+            background-color: rgba(255, 170, 0, 1);
         }
         
         .rotation-hint {
@@ -204,40 +217,14 @@
             display: none;
         }
 
-        /* Gamifikační status */
+        /* Gamifikační status - SKRYTO */
         .gamification-status {
-            position: fixed;
-            top: 60px;
-            left: 10px;
-            background: rgba(255, 215, 0, 0.9);
-            color: black;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            z-index: 1000;
-            display: none;
-            font-weight: bold;
-            border: 2px solid #FFD700;
+            display: none !important;
         }
 
-        .gamification-status.active {
-            display: block;
-        }
-
-        /* Debug tlačítko */
+        /* Debug tlačítko - SKRYTO */
         .debug-button {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(255, 0, 0, 0.8);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            z-index: 1000;
-            cursor: pointer;
-            border: none;
-            font-weight: bold;
+            display: none !important;
         }
     </style>
 </head>
@@ -272,11 +259,11 @@
         </div>
     </div>
     
-    <!-- Gamifikační status -->
-    <div class="gamification-status" id="gamificationStatus">🎮 Gamifikace načítá...</div>
+    <!-- Gamifikační status - SKRYTO -->
+    <div class="gamification-status" id="gamificationStatus" style="display: none !important;">🎮 Gamifikace načítá...</div>
     
-    <!-- Debug tlačítko -->
-    <button class="debug-button" id="debugButton">🔧 Debug</button>
+    <!-- Debug tlačítko - SKRYTO -->
+    <button class="debug-button" id="debugButton" style="display: none !important;">🔧 Debug</button>
     
     <!-- AR scéna s geolokací -->
     <a-scene 
@@ -388,6 +375,7 @@
         let selectedTargetId = null;
         let currentlyPlayingAudio = null;
         let audioPlayingForMarker = null;
+        let audioIsPaused = false;
         let positionHistory = [];
         
         // Proměnné pro rotaci modelů
@@ -426,7 +414,7 @@
 
         // === GAMIFIKAČNÍ FUNKCE ===
         
-        // OPRAVENÁ inicializace gamifikace
+        // OPRAVENÁ inicializace gamifikace - TICHÁ VERZE
         function initializeGameification() {
             console.log("🎮 Initializing gamification for andělé...");
             
@@ -437,7 +425,7 @@
                 return;
             }
             
-            // Debug výpis konfigurací
+            // Debug výpis konfigurací (pouze do konzole)
             console.log("📊 Scene config:", SCENE_CONFIG);
             console.log("🏆 Achievements config:", ACHIEVEMENTS_CONFIG);
             console.log("🏛️ Exposition registry:", EXPOSITION_REGISTRY);
@@ -461,20 +449,9 @@
             }
             
             gamificationInitialized = true;
-            
-            // Aktualizuj status
-            const statusElement = document.getElementById('gamificationStatus');
-            if (statusElement) {
-                statusElement.textContent = '🎮 Gamifikace aktivní - Andělé';
-                statusElement.classList.add('active');
-                
-                // Skryj po 5 sekundách
-                setTimeout(() => {
-                    statusElement.classList.remove('active');
-                }, 5000);
-            }
-            
             console.log("✅ Gamification initialized successfully for andělé");
+            
+            // ODSTRANĚNO: Již se nezobrazuje žádná notifikace o aktivaci gamifikace
         }
 
         // OPRAVENÁ funkce pro záznam aktivace andělských markerů
@@ -489,14 +466,14 @@
             if (typeof recordMarkerActivation === 'function') {
                 recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
                 
-                // Přidej vizuální feedback
-                showMarkerActivationFeedback(markerId);
+                // ODSTRANĚNO: Vizuální feedback byl vypnut
+                // showMarkerActivationFeedback(markerId);
             } else {
                 console.error("❌ recordMarkerActivation function not found");
             }
         }
 
-        // NOVÁ funkce pro vizuální feedback aktivace markeru
+        // FUNKCE PONECHÁNA PRO PŘÍPADNÉ BUDOUCÍ POUŽITÍ, ALE NENÍ VOLÁNA
         function showMarkerActivationFeedback(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (!marker) return;
@@ -527,26 +504,6 @@
                     feedback.parentNode.removeChild(feedback);
                 }
             }, 2000);
-        }
-
-        // Debug funkce
-        function setupDebugButton() {
-            const debugButton = document.getElementById('debugButton');
-            if (debugButton) {
-                debugButton.addEventListener('click', () => {
-                    if (typeof debugGamificationState === 'function') {
-                        debugGamificationState();
-                    }
-                    
-                    console.log("=== ANDĚLÉ DEBUG ===");
-                    console.log("Current exposition ID:", currentExpositionId);
-                    console.log("Current scene ID:", currentSceneId);
-                    console.log("Gamification initialized:", gamificationInitialized);
-                    console.log("Available markers:", markers.map(m => m.id));
-                    console.log("Scene config for current scene:", SCENE_CONFIG[currentSceneId]);
-                    console.log("=== END ANDĚLÉ DEBUG ===");
-                });
-            }
         }
 
         // Page visibility API pro pozastavení gamifikace
@@ -587,9 +544,7 @@
                     currentlyPlayingAudio = audioElement;
                     audioPlayingForMarker = markerId;
                     
-                    const audioInfo = document.getElementById('audioInfo');
-                    audioInfo.textContent = `🎵 ${marker.name} - Audio přehrává...`;
-                    audioInfo.style.display = 'block';
+                    updateAudioDisplay(marker.name);
                     
                     audioElement.onended = () => {
                         console.log(`Audio ended for marker: ${markerId}`);
@@ -602,6 +557,34 @@
             }
         }
 
+        function toggleAudioPlayPause() {
+            if (!currentlyPlayingAudio) return;
+            
+            const marker = markers.find(m => m.id === audioPlayingForMarker);
+            if (!marker) return;
+            
+            if (audioIsPaused) {
+                currentlyPlayingAudio.play().then(() => {
+                    audioIsPaused = false;
+                    updateAudioDisplay(marker.name);
+                }).catch(console.error);
+            } else {
+                currentlyPlayingAudio.pause();
+                audioIsPaused = true;
+                updateAudioDisplay(marker.name);
+            }
+        }
+
+        function updateAudioDisplay(angelName) {
+            const audioInfo = document.getElementById('audioInfo');
+            if (audioIsPaused) {
+                audioInfo.innerHTML = `⏸️ ${angelName}<br><small>Klikni pro přehrání</small>`;
+            } else {
+                audioInfo.innerHTML = `🎵 ${angelName}<br><small>Klikni pro pauzu</small>`;
+            }
+            audioInfo.style.display = 'block';
+        }
+
         function stopCurrentAudio() {
             if (currentlyPlayingAudio) {
                 currentlyPlayingAudio.pause();
@@ -609,6 +592,7 @@
                 currentlyPlayingAudio.onended = null;
                 currentlyPlayingAudio = null;
                 audioPlayingForMarker = null;
+                audioIsPaused = false;
                 
                 document.getElementById('audioInfo').style.display = 'none';
                 console.log("Audio stopped");
@@ -795,9 +779,7 @@
                 '.clear-selection',
                 '.distance-info',
                 '.audio-info',
-                '.rotation-hint',
-                '.gamification-status',
-                '.debug-button'
+                '.rotation-hint'
             ];
             
             for (let selector of uiSelectors) {
@@ -1116,6 +1098,9 @@
             });
             
             document.getElementById('clearSelection').addEventListener('click', clearSelection);
+            
+            // Přidej event listener pro audio panel
+            document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
         }
 
         function setupCameraFix() {
@@ -1155,7 +1140,7 @@
 
         // Inicializace
         window.addEventListener('load', () => {
-            console.log("Starting geolocation AR scene with 3 GLB angel models, touch rotation and ENHANCED GAMIFICATION...");
+            console.log("Starting geolocation AR scene with 3 GLB angel models, touch rotation and gamification...");
             
             // Počkej na načtení gamifikačních skriptů a pak inicializuj
             setTimeout(() => {
@@ -1165,7 +1150,6 @@
             setupEventListeners();
             setupModelRotation();
             setupCameraFix();
-            setupDebugButton();
             getCurrentPosition();
             watchPosition();
             
@@ -1173,12 +1157,12 @@
             console.log(`AR visibility threshold set to: ${AR_VISIBILITY_THRESHOLD} meters`);
             console.log("Touch rotation enabled for all 3 angel GLB models");
             console.log("Camera fix applied for mobile devices");
-            console.log("ENHANCED GAMIFICATION system enabled for Angels");
+            console.log("Gamification system enabled for Angels");
         });
 
         // A-Frame scéna je připravena
         document.querySelector('a-scene').addEventListener('loaded', () => {
-            console.log("A-Frame scene loaded for geolocation AR with 3 GLB angel models and ENHANCED GAMIFICATION");
+            console.log("A-Frame scene loaded for geolocation AR with 3 GLB angel models and gamification");
             
             setupCameraFix();
             
@@ -1215,7 +1199,7 @@
             }
         });
 
-        console.log("😇 Angel AR script with 3D models, touch rotation and ENHANCED GAMIFICATION loaded successfully!");
+        console.log("😇 Angel AR script with 3D models, touch rotation and gamification loaded successfully!");
     </script>
 </body>
 </html>
