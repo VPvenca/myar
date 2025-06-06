@@ -290,7 +290,7 @@
     <script>
         // === GAMIFIKAČNÍ PROMĚNNÉ ===
         let gamificationInitialized = false;
-        let currentExpositionId = 'vcelarstvi';  // OPRAVENO: Správné ID
+        let currentExpositionId = 'stezka_bohuslavice';
         let currentSceneId = '/assets/stezka_bohuslavice/vcela.html';  // OPRAVENO: Správné ID scény
         
         // GPS a navigační proměnné
@@ -356,14 +356,14 @@
             console.log("🏛️ Exposition registry:", EXPOSITION_REGISTRY);
             
             // Zkontroluj, že je expozice registrovaná
-            if (typeof EXPOSITION_REGISTRY !== 'undefined' && EXPOSITION_REGISTRY['vcelarstvi']) {
-                console.log("✅ Včelařská stezka exposition is registered");
+            if (typeof EXPOSITION_REGISTRY !== 'undefined' && EXPOSITION_REGISTRY['stezka_bohuslavice']) {
+            console.log("✅ Včelařská stezka exposition is registered");
             } else {
-                console.warn("⚠️ Včelařská stezka exposition not found in registry");
-                // Zkus inicializovat znovu za chvíli
-                setTimeout(initializeGameification, 1000);
-                return;
-            }
+             console.warn("⚠️ Včelařská stezka exposition not found in registry");
+            // Zkus inicializovat znovu za chvíli
+            setTimeout(initializeGameification, 1000);
+            return;
+}
             
             // Inicializuj time tracking
             if (typeof initializeTimeTracking === 'function') {
