@@ -107,53 +107,22 @@
             border-left-color: #28a745;
         }
         
-        .audio-controls {
+        .audio-info {
             position: fixed;
             bottom: 80px;
             left: 10px;
             background: rgba(40, 167, 69, 0.9);
             color: white;
-            padding: 12px 15px;
-            border-radius: 8px;
+            padding: 8px 12px;
+            border-radius: 5px;
             font-size: 14px;
             z-index: 1000;
             display: none;
-            min-width: 200px;
-        }
-
-        .audio-controls .audio-title {
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .audio-buttons {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .audio-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: background 0.2s;
-        }
-
-        .audio-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .audio-btn:active {
-            background: rgba(255, 255, 255, 0.4);
         }
 
         .rotation-hint {
             position: fixed;
-            bottom: 160px;
+            bottom: 140px;
             left: 10px;
             background: rgba(0, 123, 255, 0.9);
             color: white;
@@ -185,24 +154,15 @@
         </div>
     </div>
     
-    <div class="audio-controls" id="audioControls">
-        <div class="audio-title" id="audioTitle">🎵 Audio přehrává...</div>
-        <div class="audio-buttons">
-            <button class="audio-btn" id="pauseBtn">⏸️ Pauza</button>
-            <button class="audio-btn" id="playBtn" style="display: none;">▶️ Přehrát</button>
-            <button class="audio-btn" id="stopBtn">⏹️ Stop</button>
-        </div>
-    </div>
-    
+    <div class="audio-info" id="audioInfo">🎵 Audio přehrává...</div>
     <div class="rotation-hint" id="rotationHint">🔄 Tažením otočíte včelu</div>
 
-    <!-- A-Frame AR scéna s povolenými stíny -->
+    <!-- A-Frame AR scéna s GPS pozicováním -->
     <a-scene 
         vr-mode-ui="enabled: false"
         arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
-        renderer="logarithmicDepthBuffer: true; antialias: true; shadowMap: true; shadowMapType: pcf;"
-        device-orientation-permission-ui="enabled: false"
-        shadow="type: pcf; autoUpdate: true">
+        renderer="logarithmicDepthBuffer: true; antialias: true;"
+        device-orientation-permission-ui="enabled: false">
 
         <a-assets>
             <!-- GLB modely včel - OPRAVENÉ CESTY -->
@@ -229,26 +189,13 @@
             data-marker-id="vcela_1"
             data-audio-id="audio1"
             visible="false">
-            
-            <!-- Kruhový stín pod včelou - posunut na -3 -->
-            <a-circle 
-                position="0 -3 0" 
-                radius="1.2" 
-                rotation="-90 0 0" 
-                color="#000000" 
-                opacity="0.3"
-                material="transparent: true; alphaTest: 0.1">
-            </a-circle>
-            
-            <!-- GLB model včely -->
             <a-gltf-model 
                 id="bee-model-1-gltf"
                 src="#bee-model-1"
-                position="0 -1 0"
+                position="0 0 0"
                 scale="3 3 3"
                 rotation="0 30 0"
-                animation-mixer
-                shadow="cast: true; receive: false">
+                animation-mixer>
             </a-gltf-model>
         </a-entity>
 
@@ -258,67 +205,35 @@
             data-marker-id="vcela_2"
             data-audio-id="audio2"
             visible="false">
-            
-            <!-- Kruhový stín pod včelou - posunut na -3 -->
-            <a-circle 
-                position="0 -3 0" 
-                radius="1.2" 
-                rotation="-90 0 0" 
-                color="#000000" 
-                opacity="0.3"
-                material="transparent: true; alphaTest: 0.1">
-            </a-circle>
-            
-            <!-- GLB model včely -->
             <a-gltf-model 
                 id="bee-model-2-gltf"
                 src="#bee-model-2"
-                position="0 -1 0"
+                position="0 0 0"
                 scale="3 3 3"
                 rotation="0 30 0"
-                animation-mixer
-                shadow="cast: true; receive: false">
+                animation-mixer>
             </a-gltf-model>
         </a-entity>
 
-        <!-- Včela 3 - Královna - UPRAVENÉ GPS SOUŘADNICE -->
+        <!-- Včela 3 - Královna -->
         <a-entity 
-            gps-entity-place="latitude: 49.009245; longitude: 17.128867"
+            gps-entity-place="latitude: 49.009057; longitude: 17.128693"
             data-marker-id="vcela_3"
             data-audio-id="audio3"
             visible="false">
-            
-            <!-- Kruhový stín pod včelou - posunut na -3 -->
-            <a-circle 
-                position="0 -3 0" 
-                radius="1.2" 
-                rotation="-90 0 0" 
-                color="#000000" 
-                opacity="0.3"
-                material="transparent: true; alphaTest: 0.1">
-            </a-circle>
-            
-            <!-- GLB model včely -->
             <a-gltf-model 
                 id="bee-model-3-gltf"
                 src="#bee-model-3"
-                position="0 -1 0"
+                position="0 0 0"
                 scale="3 3 3"
                 rotation="0 30 0"
-                animation-mixer
-                shadow="cast: true; receive: false">
+                animation-mixer>
             </a-gltf-model>
         </a-entity>
 
-        <!-- Základní osvětlení s povolenými stíny -->
+        <!-- Základní osvětlení -->
         <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
-        <a-light 
-            type="directional" 
-            color="#ffeb3b" 
-            intensity="0.8" 
-            position="0 10 5"
-            shadow="cast: true; type: pcf; autoUpdate: true; shadowMapHeight: 1024; shadowMapWidth: 1024">
-        </a-light>
+        <a-light type="directional" color="#ffeb3b" intensity="0.8" position="0 5 0"></a-light>
     </a-scene>
 
     <script>
@@ -330,7 +245,6 @@
         let selectedTargetId = null;
         let currentlyPlayingAudio = null;
         let audioPlayingForMarker = null;
-        let audioPaused = false;
         
         // Proměnné pro rotaci modelů
         let modelRotationY = 30; // Začínáme na 30 stupňů
@@ -338,7 +252,7 @@
         let startX = 0;
         let rotationHintShown = false;
         
-        // Definice včelích markerů s OPRAVENÝMI GPS souřadnicemi královny
+        // Definice včelích markerů s OPRAVENÝMI audio ID
         const markers = [
             { 
                 id: "vcela_1", 
@@ -358,8 +272,8 @@
             },
             { 
                 id: "vcela_3", 
-                lat: 49.009245, // NOVÉ GPS SOUŘADNICE
-                lng: 17.128867, // NOVÉ GPS SOUŘADNICE
+                lat: 49.009057, 
+                lng: 17.128693,
                 name: "👑 Královna",
                 description: "Matka úlu - vládkyně včelího státu",
                 audioId: "audio3"
@@ -535,7 +449,7 @@
             console.log(`${visibleCount}/${markers.length} bees are visible in AR`);
         }
 
-        // Audio funkce - VYLEPŠENÉ s ovládáním
+        // Audio funkce
         function playAudio(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (!marker || audioPlayingForMarker === markerId) return;
@@ -545,33 +459,15 @@
             const audioElement = document.getElementById(marker.audioId);
             if (audioElement) {
                 audioElement.currentTime = 0;
-                audioPaused = false;
                 audioElement.play().then(() => {
                     currentlyPlayingAudio = audioElement;
                     audioPlayingForMarker = markerId;
                     
-                    showAudioControls(marker.name);
+                    document.getElementById('audioInfo').textContent = `🎵 ${marker.name}`;
+                    document.getElementById('audioInfo').style.display = 'block';
                     
                     audioElement.onended = stopCurrentAudio;
                 }).catch(console.error);
-            }
-        }
-
-        function pauseAudio() {
-            if (currentlyPlayingAudio && !audioPaused) {
-                currentlyPlayingAudio.pause();
-                audioPaused = true;
-                document.getElementById('pauseBtn').style.display = 'none';
-                document.getElementById('playBtn').style.display = 'inline-block';
-            }
-        }
-
-        function resumeAudio() {
-            if (currentlyPlayingAudio && audioPaused) {
-                currentlyPlayingAudio.play();
-                audioPaused = false;
-                document.getElementById('pauseBtn').style.display = 'inline-block';
-                document.getElementById('playBtn').style.display = 'none';
             }
         }
 
@@ -581,25 +477,8 @@
                 currentlyPlayingAudio.currentTime = 0;
                 currentlyPlayingAudio = null;
                 audioPlayingForMarker = null;
-                audioPaused = false;
-                hideAudioControls();
+                document.getElementById('audioInfo').style.display = 'none';
             }
-        }
-
-        function showAudioControls(beeName) {
-            const audioControls = document.getElementById('audioControls');
-            const audioTitle = document.getElementById('audioTitle');
-            
-            audioTitle.textContent = `🎵 ${beeName}`;
-            audioControls.style.display = 'block';
-            
-            // Reset tlačítek
-            document.getElementById('pauseBtn').style.display = 'inline-block';
-            document.getElementById('playBtn').style.display = 'none';
-        }
-
-        function hideAudioControls() {
-            document.getElementById('audioControls').style.display = 'none';
         }
 
         // Navigace
@@ -804,4 +683,67 @@
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
                 return entity && entity.getAttribute('visible') === true;
             });
-        
+        }
+
+        function isTouchingUI(target) {
+            const uiSelectors = [
+                '.back-button',
+                '.navigation', 
+                '.nav-toggle',
+                '.nav-content',
+                '.target-item',
+                '.distance-info',
+                '.audio-info',
+                '.rotation-hint'
+            ];
+            
+            for (let selector of uiSelectors) {
+                const element = document.querySelector(selector);
+                if (element && (element === target || element.contains(target))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function showRotationHintOnce() {
+            if (rotationHintShown) return;
+            rotationHintShown = true;
+            const rotationHint = document.getElementById('rotationHint');
+            rotationHint.style.display = 'block';
+            setTimeout(() => {
+                rotationHint.style.display = 'none';
+            }, 3000);
+        }
+
+        // Event listenery
+        document.getElementById('navToggle').addEventListener('click', () => {
+            document.getElementById('navContent').classList.toggle('open');
+        });
+
+        document.getElementById('clearSelection').addEventListener('click', clearSelection);
+
+        document.addEventListener('click', (e) => {
+            const navPanel = document.querySelector('.navigation');
+            if (!navPanel.contains(e.target)) {
+                document.getElementById('navContent').classList.remove('open');
+            }
+        });
+
+        // Inicializace při načtení
+        window.addEventListener('load', () => {
+            console.log("Starting bee AR application with corrected paths...");
+            
+            // Počkáme na A-Frame
+            document.querySelector('a-scene').addEventListener('loaded', () => {
+                console.log("A-Frame scene loaded");
+                setupModelRotation(); // Nastavíme rotaci
+                getCurrentPosition();
+                watchPosition();
+            });
+        });
+
+        console.log("Bee AR script with corrected paths loaded successfully!");
+    </script>
+</body>
+</html>
