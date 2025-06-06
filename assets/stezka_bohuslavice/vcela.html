@@ -313,13 +313,7 @@
         let selectedTargetId = null;
         let currentlyPlayingAudio = null;
         let audioPlayingForMarker = null;
-        let audioIsPaused = false; // Nový stav pro pause/play
-        
-        // Proměnné pro snap to camera funkci
-        let snapMode = 'gps'; // 'gps' nebo 'camera' nebo 'fixed'
-        let snappedEntity = null;
-        let fixedPosition = null;
-        let cameraEntity = null;
+        let audioPaused = false;
         
         // Proměnné pro rotaci modelů
         let modelRotationY = 30; // Začínáme na 30 stupňů
@@ -523,9 +517,8 @@
             }).length;
             console.log(`${visibleCount}/${markers.length} bees are visible in AR`);
             
-            // Zobrazit/skrýt snap tlačítko podle viditelnosti modelů
+            // Zobrazení snap tlačítka
             updateSnapButtonVisibility();
-        }
         }
 
         // Audio funkce - UPRAVENÉ s pause/play funkcionalitou
@@ -538,7 +531,7 @@
             const audioElement = document.getElementById(marker.audioId);
             if (audioElement) {
                 audioElement.currentTime = 0;
-                audioIsPaused = false;
+                audioPaused = false;
                 audioElement.play().then(() => {
                     currentlyPlayingAudio = audioElement;
                     audioPlayingForMarker = markerId;
@@ -556,23 +549,23 @@
             const marker = markers.find(m => m.id === audioPlayingForMarker);
             if (!marker) return;
             
-            if (audioIsPaused) {
+            if (audioPaused) {
                 // Resume audio
                 currentlyPlayingAudio.play().then(() => {
-                    audioIsPaused = false;
+                    audioPaused = false;
                     updateAudioDisplay(marker.name);
                 }).catch(console.error);
             } else {
                 // Pause audio
                 currentlyPlayingAudio.pause();
-                audioIsPaused = true;
+                audioPaused = true;
                 updateAudioDisplay(marker.name);
             }
         }
 
         function updateAudioDisplay(beeName) {
             const audioInfo = document.getElementById('audioInfo');
-            if (audioIsPaused) {
+            if (audioPaused) {
                 audioInfo.innerHTML = `⏸️ ${beeName}<br><small>Klikni pro přehrání</small>`;
             } else {
                 audioInfo.innerHTML = `🎵 ${beeName}<br><small>Klikni pro pauzu</small>`;
@@ -586,9 +579,27 @@
                 currentlyPlayingAudio.currentTime = 0;
                 currentlyPlayingAudio = null;
                 audioPlayingForMarker = null;
-                audioIsPaused = false;
+                audioPaused = false;
                 document.getElementById('audioInfo').style.display = 'none';
             }
+        }
+
+        // Snap to camera funkcionalita - ZJEDNODUŠENÁ
+        function updateSnapButtonVisibility() {
+            const snapButton = document.getElementById('snapButton');
+            const anyVisible = isAnyModelVisible();
+            
+            if (anyVisible) {
+                snapButton.style.display = 'block';
+            } else {
+                snapButton.style.display = 'none';
+            }
+        }
+
+        function handleSnapButtonClick() {
+            console.log("Snap button clicked - basic version");
+            // Zatím jen základní funkce - rozšíříme později
+            alert("Snap funkce bude aktivní v příští verzi!");
         }
 
         // Navigace
@@ -698,174 +709,6 @@
             document.getElementById('clearSelection').style.display = 'block';
             updateNavigation();
             document.getElementById('navContent').classList.remove('open');
-        }
-
-        // Snap to camera funkcionalita
-        function updateSnapButtonVisibility() {
-            const snapButton = document.getElementById('snapButton');
-            const anyVisible = isAnyModelVisible();
-            
-            if (anyVisible) {
-                snapButton.style.display = 'block';
-                updateSnapButtonState();
-            } else {
-                snapButton.style.display = 'none';
-                // Reset na GPS mód když žádný model není viditelný
-                if (snapMode !== 'gps') {
-                    resetToGPSMode();
-                }
-            }
-        }
-
-        function updateSnapButtonState() {
-            const snapButton = document.getElementById('snapButton');
-            
-            switch(snapMode) {
-                case 'gps':
-                    snapButton.innerHTML = '📱';
-                    snapButton.className = 'snap-button ui-element';
-                    snapButton.title = 'Přichytit k pohledu';
-                    break;
-                case 'camera':
-                    snapButton.innerHTML = '👁️';
-                    snapButton.className = 'snap-button ui-element camera-mode';
-                    snapButton.title = 'Fixovat pozici';
-                    break;
-                case 'fixed':
-                    snapButton.innerHTML = '📍';
-                    snapButton.className = 'snap-button ui-element';
-                    snapButton.title = 'Zpět na GPS';
-                    break;
-            }
-        }
-
-        function handleSnapButtonClick() {
-            console.log(`Snap button clicked, current mode: ${snapMode}`);
-            
-            switch(snapMode) {
-                case 'gps':
-                    snapToCamera();
-                    break;
-                case 'camera':
-                    fixCurrentPosition();
-                    break;
-                case 'fixed':
-                    resetToGPSMode();
-                    break;
-            }
-        }
-
-        function snapToCamera() {
-            // Najdeme nejbližší viditelný model
-            const visibleEntity = findClosestVisibleEntity();
-            if (!visibleEntity) return;
-            
-            console.log("Snapping model to camera view");
-            
-            snappedEntity = visibleEntity;
-            snapMode = 'camera';
-            
-            // Skryjeme GPS entitu a vytvoříme camera-relative entitu
-            visibleEntity.setAttribute('visible', 'false');
-            
-            // Získáme camera element
-            cameraEntity = document.querySelector('a-camera');
-            if (!cameraEntity) return;
-            
-            // Vytvoříme novou entitu relativní ke kameře
-            const cameraRelativeEntity = document.createElement('a-entity');
-            cameraRelativeEntity.id = 'camera-relative-model';
-            
-            // Najdeme GLB model z původní entity
-            const originalGltf = visibleEntity.querySelector('a-gltf-model');
-            if (originalGltf) {
-                const newGltf = originalGltf.cloneNode(true);
-                newGltf.setAttribute('position', '0 -1 -3'); // Před kamerou
-                newGltf.setAttribute('scale', '2 2 2'); // Trochu menší pro lepší pohled
-                cameraRelativeEntity.appendChild(newGltf);
-            }
-            
-            // Přidáme entitu ke kameře
-            cameraEntity.appendChild(cameraRelativeEntity);
-            
-            updateSnapButtonState();
-            console.log("Model snapped to camera");
-        }
-
-        function fixCurrentPosition() {
-            console.log("Fixing model at current position");
-            
-            const cameraRelativeEntity = document.getElementById('camera-relative-model');
-            if (!cameraRelativeEntity) return;
-            
-            // Získáme world pozici kamery
-            const cameraWorldPosition = new THREE.Vector3();
-            cameraEntity.object3D.getWorldPosition(cameraWorldPosition);
-            
-            // Získáme world rotaci kamery
-            const cameraWorldQuaternion = new THREE.Quaternion();
-            cameraEntity.object3D.getWorldQuaternion(cameraWorldQuaternion);
-            
-            // Vypočítáme pozici před kamerou
-            const forward = new THREE.Vector3(0, 0, -3);
-            forward.applyQuaternion(cameraWorldQuaternion);
-            
-            fixedPosition = {
-                x: cameraWorldPosition.x + forward.x,
-                y: cameraWorldPosition.y + forward.y - 1,
-                z: cameraWorldPosition.z + forward.z
-            };
-            
-            // Odebereme entitu z kamery
-            cameraEntity.removeChild(cameraRelativeEntity);
-            
-            // Vytvoříme fixní entitu na scéně
-            const fixedEntity = document.createElement('a-entity');
-            fixedEntity.id = 'fixed-position-model';
-            fixedEntity.setAttribute('position', `${fixedPosition.x} ${fixedPosition.y} ${fixedPosition.z}`);
-            
-            const gltfModel = cameraRelativeEntity.querySelector('a-gltf-model');
-            if (gltfModel) {
-                const newGltf = gltfModel.cloneNode(true);
-                newGltf.setAttribute('position', '0 0 0');
-                fixedEntity.appendChild(newGltf);
-            }
-            
-            // Přidáme na scénu
-            document.querySelector('a-scene').appendChild(fixedEntity);
-            
-            snapMode = 'fixed';
-            updateSnapButtonState();
-            console.log("Model fixed at position:", fixedPosition);
-        }
-
-        function resetToGPSMode() {
-            console.log("Resetting to GPS mode");
-            
-            // Odebereme camera-relative model
-            const cameraRelativeEntity = document.getElementById('camera-relative-model');
-            if (cameraRelativeEntity && cameraEntity) {
-                cameraEntity.removeChild(cameraRelativeEntity);
-            }
-            
-            // Odebereme fixed model
-            const fixedEntity = document.getElementById('fixed-position-model');
-            if (fixedEntity) {
-                document.querySelector('a-scene').removeChild(fixedEntity);
-            }
-            
-            // Zobrazíme zpět GPS entitu
-            if (snappedEntity) {
-                snappedEntity.setAttribute('visible', 'true');
-            }
-            
-            // Reset proměnných
-            snapMode = 'gps';
-            snappedEntity = null;
-            fixedPosition = null;
-            
-            updateSnapButtonState();
-            console.log("Returned to GPS mode");
         }
 
         function clearSelection() {
@@ -985,32 +828,6 @@
             return false;
         }
 
-        function findClosestVisibleEntity() {
-            let closestEntity = null;
-            let minDistance = Infinity;
-            
-            markers.forEach(marker => {
-                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                if (entity && entity.getAttribute('visible') === true) {
-                    if (userPosition) {
-                        const distance = calculateDistance(
-                            userPosition.lat, userPosition.lng,
-                            marker.lat, marker.lng
-                        );
-                        if (distance < minDistance) {
-                            minDistance = distance;
-                            closestEntity = entity;
-                        }
-                    } else {
-                        // Pokud nemáme GPS, vezme první viditelný
-                        closestEntity = entity;
-                    }
-                }
-            });
-            
-            return closestEntity;
-        }
-
         function showRotationHintOnce() {
             if (rotationHintShown) return;
             rotationHintShown = true;
@@ -1020,46 +837,6 @@
                 rotationHint.style.display = 'none';
             }, 3000);
         }
-
-        // Event listenery
-        document.getElementById('navToggle').addEventListener('click', () => {
-            document.getElementById('navContent').classList.toggle('open');
-        });
-
-        document.getElementById('clearSelection').addEventListener('click', clearSelection);
-
-        // Audio ovládání kliknutím na audio info panel
-        document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
-
-        // Snap button event listener
-        document.getElementById('snapButton').addEventListener('click', handleSnapButtonClick);
-
-        document.addEventListener('click', (e) => {
-            const navPanel = document.querySelector('.navigation');
-            if (!navPanel.contains(e.target)) {
-                document.getElementById('navContent').classList.remove('open');
-            }
-        });
-
-        // Inicializace při načtení
-        window.addEventListener('load', () => {
-            console.log("Starting bee AR application with dynamic lighting...");
-            
-            // Počkáme na A-Frame
-            document.querySelector('a-scene').addEventListener('loaded', () => {
-                console.log("A-Frame scene loaded");
-                setupModelRotation(); // Nastavíme rotaci
-                getCurrentPosition();
-                watchPosition();
-                
-                // Spustíme dynamické osvětlení po načtení scény
-                setTimeout(() => {
-                    startLightingUpdate();
-                }, 1000);
-            });
-        });
-
-        console.log("Bee AR script with dynamic lighting loaded successfully!");
 
         // Dynamické osvětlení podle denní doby
         function setupDynamicLighting() {
@@ -1142,6 +919,46 @@
             setupDynamicLighting();
             setInterval(setupDynamicLighting, 5 * 60 * 1000); // Každých 5 minut
         }
+
+        // Event listenery
+        document.getElementById('navToggle').addEventListener('click', () => {
+            document.getElementById('navContent').classList.toggle('open');
+        });
+
+        document.getElementById('clearSelection').addEventListener('click', clearSelection);
+
+        // Audio ovládání kliknutím na audio info panel
+        document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
+
+        // Snap button event listener - zatím jen basic
+        document.getElementById('snapButton').addEventListener('click', handleSnapButtonClick);
+
+        document.addEventListener('click', (e) => {
+            const navPanel = document.querySelector('.navigation');
+            if (!navPanel.contains(e.target)) {
+                document.getElementById('navContent').classList.remove('open');
+            }
+        });
+
+        // Inicializace při načtení
+        window.addEventListener('load', () => {
+            console.log("Starting bee AR application with basic snap button...");
+            
+            // Počkáme na A-Frame
+            document.querySelector('a-scene').addEventListener('loaded', () => {
+                console.log("A-Frame scene loaded");
+                setupModelRotation(); // Nastavíme rotaci
+                getCurrentPosition();
+                watchPosition();
+                
+                // Spustíme dynamické osvětlení po načtení scény
+                setTimeout(() => {
+                    startLightingUpdate();
+                }, 1000);
+            });
+        });
+
+        console.log("Bee AR script with dynamic lighting and basic snap loaded successfully!");
     </script>
 </body>
 </html>
