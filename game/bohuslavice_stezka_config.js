@@ -53,7 +53,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             icon: "🍯",
             category: "stezka_bohuslavice",
             rarity: "rare",
-            condition: "complete_all_markers",
+            condition: "gold_star_in_scene",
             sceneId: "/assets/stezka_bohuslavice/vcela.html",
             image: "/img/achievements/znalec_vcelstva.png"
         },
