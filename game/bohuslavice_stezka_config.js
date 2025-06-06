@@ -15,33 +15,35 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
     achievements: {
         "vcela_1_delnice": {
             name: "Pozorovatel dělnic",
-            description: "Strávil jsi 30 sekund pozorováním pracovitých dělnic",
+            description: "Pochopil jsi život pracovitých dělnic",
             icon: "🐝",
             category: "vcelarstvi",
             rarity: "uncommon",
-            condition: "time_spent_30s",
+            condition: "complete_marker",
             sceneId: "vcela_1",
             image: "/img/achievements/delnice.png"
+            
+            
         },
 
         "vcela_2_trubec": {
             name: "Badatel trubců",
-            description: "Strávil jsi 30 sekund studiem života trubců",
+            description: "Se zájmem jsi prostudoval život trubců",
             icon: "🐛",
             category: "vcelarstvi", 
             rarity: "uncommon",
-            condition: "time_spent_30s",
+            condition: "complete_marker",
             sceneId: "vcela_2",
             image: "/img/achievements/trubec.png"
         },
 
         "vcela_3_kralovna": {
             name: "Ctitel královny",
-            description: "Strávil jsi 30 sekund obdivováním včelí královny",
+            description: "Nahlédl jsi do života včelí královny",
             icon: "👑",
             category: "vcelarstvi",
             rarity: "uncommon", 
-            condition: "time_spent_30s",
+            condition: "complete_marker",
             sceneId: "vcela_3",
             image: "/img/achievements/kralovna.png"
         },
