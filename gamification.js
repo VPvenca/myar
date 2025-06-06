@@ -1,17 +1,11 @@
-// gamification.js - Rozšířený o Achievement systém a Time Tracking
+// gamification.js - Vylepšený gamifikační systém s opravenými achievementy
 
 // Základní klíč pro ukládání všech gamifikačních dat
 const BASE_STORAGE_KEY = 'arGamificationData'; 
-
-// Klíč pro ukládání dat o achievementech
 const ACHIEVEMENTS_STORAGE_KEY = 'arAchievements';
-
-// Klíč pro ukládání time tracking dat
 const TIME_TRACKING_STORAGE_KEY = 'arTimeTracking';
 
 // === TIME TRACKING SYSTÉM ===
-
-// Globální proměnné pro time tracking
 let timeTrackingData = {
     expositionId: null,
     sceneId: null,
@@ -164,7 +158,6 @@ function checkTimeBasedAchievements(expositionId, sceneId) {
                 case 'time_spent_5min':
                     shouldUnlock = timeSpentSeconds >= 300;
                     break;
-                // Přidej další časové podmínky podle potřeby
             }
             
             if (shouldUnlock) {
@@ -278,7 +271,10 @@ function unlockAchievement(achievementId) {
 // Funkce pro zobrazení notifikace o novém achievementu
 function showAchievementNotification(achievementId) {
     const achievement = ACHIEVEMENTS_CONFIG[achievementId];
-    if (!achievement) return;
+    if (!achievement) {
+        console.warn(`⚠️ Achievement ${achievementId} not found in config`);
+        return;
+    }
     
     // Vytvoření notifikace
     const notification = document.createElement('div');
@@ -310,6 +306,7 @@ function showAchievementNotification(achievementId) {
                 z-index: 10000;
                 max-width: 300px;
                 animation: slideInRight 0.5s ease-out, fadeOut 0.5s ease-in 4s forwards;
+                border: 3px solid #ff6b35;
             }
             .achievement-notification-content {
                 display: flex;
@@ -349,16 +346,25 @@ function showAchievementNotification(achievementId) {
             notification.parentNode.removeChild(notification);
         }
     }, 5000);
+    
+    console.log(`🔔 Achievement notification shown: ${achievement.name}`);
 }
 
-// Funkce pro kontrolu achievementů pro konkrétní expozici
+// OPRAVENÁ FUNKCE: Kontrola achievementů pro konkrétní expozici
 function checkExpositionAchievements(expositionId) {
+    console.log(`🔍 Checking exposition achievements for: ${expositionId}`);
+    
     const expoData = getGamificationData(expositionId);
     const expositionConfig = Object.keys(SCENE_CONFIG).filter(sceneId => 
-        sceneId.includes(`/${expositionId}/`)
+        sceneId.includes(`/${expositionId}/`) || sceneId.includes(`_${expositionId}/`)
     );
     
-    if (expositionConfig.length === 0) return;
+    if (expositionConfig.length === 0) {
+        console.warn(`⚠️ No scenes found for exposition: ${expositionId}`);
+        return;
+    }
+    
+    console.log(`📋 Found ${expositionConfig.length} scenes for ${expositionId}:`, expositionConfig);
     
     // Počítání dokončených scén
     let completedScenes = 0;
@@ -376,6 +382,8 @@ function checkExpositionAchievements(expositionId) {
             else if (starLevel === 'bronze') totalBronzeStars++;
         }
     });
+    
+    console.log(`📊 Progress for ${expositionId}: ${completedScenes}/${totalScenes} scenes, ${totalGoldStars} gold stars`);
     
     // Kontrola různých typů achievementů
     
@@ -422,7 +430,7 @@ function checkGlobalAchievements() {
     expositions.forEach(expositionId => {
         const expoData = parsedData[expositionId];
         const expositionScenes = Object.keys(SCENE_CONFIG).filter(sceneId => 
-            sceneId.includes(`/${expositionId}/`)
+            sceneId.includes(`/${expositionId}/`) || sceneId.includes(`_${expositionId}/`)
         );
         
         let completedScenes = 0;
@@ -460,34 +468,60 @@ function checkGlobalAchievements() {
     }
 }
 
-// Upravená funkce pro záznam aktivace markeru - nyní s achievement kontrolou
+// UPRAVENÁ FUNKCE: Záznam aktivace markeru s vylepšenou logikou
 function recordMarkerActivation(expositionId, sceneId, markerId) {
+    console.log(`🎯 Recording marker activation: ${markerId} in scene ${sceneId} for exposition ${expositionId}`);
+    
     const expoData = getGamificationData(expositionId);
 
     if (!expoData[sceneId]) {
         expoData[sceneId] = {};
     }
 
+    // Zkontroluj, zda marker existuje v konfiguraci
     if (SCENE_CONFIG[sceneId] && SCENE_CONFIG[sceneId].markers && SCENE_CONFIG[sceneId].markers.includes(markerId)) {
         // Zkontroluj, zda je to první aktivace tohoto markeru
         const isFirstActivation = !expoData[sceneId][markerId];
         
-        expoData[sceneId][markerId] = true;
-        saveGamificationData(expositionId, expoData);
-        
-        console.log(`Marker ${markerId} activated in scene ${sceneId} for exposition ${expositionId}`);
-        
-        // Pokud je to první aktivace, spusť kontrolu achievementů
         if (isFirstActivation) {
-            checkExpositionAchievements(expositionId);
+            expoData[sceneId][markerId] = true;
+            saveGamificationData(expositionId, expoData);
+            
+            console.log(`✅ Marker ${markerId} activated for the first time in scene ${sceneId}`);
+            
+            // Kontrola marker-specifických achievementů
+            checkMarkerSpecificAchievements(expositionId, sceneId, markerId);
+            
+            // Kontrola scény-specifických achievementů
             checkSceneSpecificAchievements(expositionId, sceneId);
+            
+            // Kontrola expozice-specifických achievementů
+            checkExpositionAchievements(expositionId);
             
             // Speciální achievement pro první marker celkově
             checkFirstMarkerAchievement();
+        } else {
+            console.log(`ℹ️ Marker ${markerId} already activated previously`);
         }
     } else {
-        console.warn(`Marker ID "${markerId}" (in scene "${sceneId}", exposition "${expositionId}") not found in SCENE_CONFIG or SCENE_CONFIG.markers is undefined. Activation not recorded.`);
+        console.warn(`⚠️ Marker ID "${markerId}" not found in scene "${sceneId}" config for exposition "${expositionId}"`);
     }
+}
+
+// NOVÁ FUNKCE: Kontrola marker-specifických achievementů
+function checkMarkerSpecificAchievements(expositionId, sceneId, markerId) {
+    console.log(`🔍 Checking marker-specific achievements for ${markerId}`);
+    
+    // Najdi všechny achievementy pro tento konkrétní marker
+    Object.keys(ACHIEVEMENTS_CONFIG).forEach(achievementId => {
+        const achievement = ACHIEVEMENTS_CONFIG[achievementId];
+        
+        // Pokud je achievement vázaný na konkrétní marker
+        if (achievement.markerId === markerId && achievement.sceneId === sceneId) {
+            console.log(`🎯 Found marker achievement: ${achievementId} for marker ${markerId}`);
+            unlockAchievement(achievementId);
+        }
+    });
 }
 
 // Funkce pro kontrolu prvního markeru celkově
@@ -509,9 +543,19 @@ function checkFirstMarkerAchievement() {
     }
 }
 
-// Funkce pro kontrolu specifických achievementů pro scény (přesunutá z config)
+// UPRAVENÁ FUNKCE: Kontrola specifických achievementů pro scény
 function checkSceneSpecificAchievements(expositionId, sceneId) {
+    console.log(`🔍 Checking scene-specific achievements for ${sceneId}`);
+    
     const starLevel = getSceneStarLevel(expositionId, sceneId);
+    const expoData = getGamificationData(expositionId);
+    const sceneData = expoData[sceneId] || {};
+    const config = SCENE_CONFIG[sceneId];
+    
+    if (!config) return;
+    
+    const activatedMarkersCount = Object.keys(sceneData).filter(markerId => sceneData[markerId] === true).length;
+    const totalMarkersInScene = config.totalMarkers;
     
     // Najdi všechny achievementy pro tuto konkrétní scénu
     Object.keys(ACHIEVEMENTS_CONFIG).forEach(achievementId => {
@@ -534,10 +578,14 @@ function checkSceneSpecificAchievements(expositionId, sceneId) {
                 case 'bronze_star_in_scene':
                     shouldUnlock = starLevel === 'bronze' || starLevel === 'silver' || starLevel === 'gold';
                     break;
+                case 'complete_all_markers':
+                    shouldUnlock = activatedMarkersCount === totalMarkersInScene;
+                    break;
                 // Časové podmínky jsou řešeny v checkTimeBasedAchievements
             }
             
             if (shouldUnlock) {
+                console.log(`🏆 Scene achievement unlocked: ${achievementId}`);
                 unlockAchievement(achievementId);
             }
         }
@@ -556,7 +604,7 @@ function getSceneStarLevel(expositionId, sceneId) {
     }
     
     if (typeof config.totalMarkers !== 'number' || !Array.isArray(config.markers)) {
-        console.warn(`Configuration for scene ${sceneId} is incomplete or malformed (totalMarkers should be a number, markers should be an array).`);
+        console.warn(`Configuration for scene ${sceneId} is incomplete or malformed.`);
         return 'none';
     }
 
@@ -647,3 +695,32 @@ function getAchievementProgress(category) {
         percentage: Math.round((unlockedCount / categoryAchievements.length) * 100)
     };
 }
+
+// === DEBUGGING FUNKCE ===
+
+// Funkce pro debug výpis stavu gamifikace
+function debugGamificationState() {
+    console.log("=== GAMIFICATION DEBUG STATE ===");
+    console.log("Available expositions:", Object.keys(EXPOSITION_REGISTRY || {}));
+    console.log("Scene config keys:", Object.keys(SCENE_CONFIG || {}));
+    console.log("Achievement config keys:", Object.keys(ACHIEVEMENTS_CONFIG || {}));
+    console.log("Current data:", localStorage.getItem(BASE_STORAGE_KEY));
+    console.log("Current achievements:", localStorage.getItem(ACHIEVEMENTS_STORAGE_KEY));
+    console.log("=== END DEBUG STATE ===");
+}
+
+// Funkce pro vymazání všech gamifikačních dat (pro testování)
+function resetGamificationData() {
+    localStorage.removeItem(BASE_STORAGE_KEY);
+    localStorage.removeItem(ACHIEVEMENTS_STORAGE_KEY);
+    localStorage.removeItem(TIME_TRACKING_STORAGE_KEY);
+    console.log("🔄 All gamification data reset!");
+}
+
+// Globální dostupnost pro debugging
+if (typeof window !== 'undefined') {
+    window.debugGamificationState = debugGamificationState;
+    window.resetGamificationData = resetGamificationData;
+}
+
+console.log("🎮 Enhanced gamification system loaded with improved achievement detection");
