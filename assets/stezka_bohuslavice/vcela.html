@@ -9,7 +9,7 @@
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
 
-     <!-- Gamifikační skripty -->
+     <!-- Gamifikační skripty - OPRAVENÉ POŘADÍ -->
     <script src="/gamification-config.js"></script>
     <script src="/game/bohuslavice_stezka_config.js"></script>
     <script src="/gamification.js"></script>
@@ -199,7 +199,7 @@
             border-radius: 20px;
             padding: 15px 8px;
             height: 250px;
-            display: none; /* Skrytý ve výchozím stavu */
+            display: none;
             flex-direction: column;
             align-items: center;
             transition: opacity 0.3s;
@@ -223,8 +223,8 @@
         }
 
         .correction-slider {
-            writing-mode: bt-lr; /* IE */
-            writing-mode: vertical-lr; /* Standard */
+            writing-mode: bt-lr;
+            writing-mode: vertical-lr;
             -webkit-appearance: slider-vertical;
             width: 20px;
             height: 180px;
@@ -294,25 +294,25 @@
             background: rgba(255, 193, 7, 1);
         }
 
-        /* Toggle tlačítko pro korekci - PŘESUNUTO DOLŮ */
+        /* Toggle tlačítko pro korekci */
         .correction-toggle {
             position: fixed;
             left: 10px;
-            bottom: 20px; /* Přesunuto z bottom: 100px na bottom: 20px */
+            bottom: 20px;
             z-index: 1002;
-            width: 40px; /* Trochu větší pro lepší přístupnost */
+            width: 40px;
             height: 40px;
             background: rgba(0, 0, 0, 0.7);
             color: white;
             border: none;
             border-radius: 50%;
-            font-size: 18px; /* Větší ikona */
+            font-size: 18px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3); /* Přidán stín */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
         .correction-toggle:hover {
@@ -322,6 +322,24 @@
 
         .correction-toggle:active {
             transform: scale(0.95);
+        }
+
+        /* Gamifikační notifikace */
+        .gamification-status {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            background: rgba(0, 123, 255, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 1000;
+            display: none;
+        }
+
+        .gamification-status.active {
+            display: block;
         }
 
         /* Aplikace korekce na video canvas */
@@ -353,10 +371,13 @@
     <div class="audio-info ui-element" id="audioInfo">🎵 Audio přehrává...</div>
     <div class="rotation-hint" id="rotationHint">🔄 Tažením otočíte včelu</div>
     
+    <!-- Gamifikační status -->
+    <div class="gamification-status ui-element" id="gamificationStatus">🎮 Gamifikace načítá...</div>
+    
     <!-- Snap to camera tlačítko -->
     <button class="snap-button ui-element" id="snapButton" title="Přichytit k pohledu">📱</button>
 
-    <!-- Vertikální korekce posuvník - ve výchozím stavu skrytý -->
+    <!-- Vertikální korekce posuvník -->
     <div class="vertical-correction ui-element" id="verticalCorrection">
         <div class="correction-label">
             📐<br>
@@ -376,7 +397,7 @@
         <button class="correction-reset" id="correctionReset">Reset</button>
     </div>
 
-    <!-- Toggle tlačítko pro korekci - přesunuto vlevo dolů -->
+    <!-- Toggle tlačítko pro korekci -->
     <button class="correction-toggle ui-element" id="correctionToggle" title="Zobrazit/skrýt korekci obrazu">📐</button>
 
     <!-- A-Frame AR scéna s GPS pozicováním -->
@@ -388,12 +409,12 @@
         id="arScene">
 
         <a-assets>
-            <!-- GLB modely včel - OPRAVENÉ CESTY -->
+            <!-- GLB modely včel -->
             <a-asset-item id="bee-model-1" src="/assets/stezka_bohuslavice/3d/delnice.glb"></a-asset-item>
             <a-asset-item id="bee-model-2" src="/assets/stezka_bohuslavice/3d/trubec.glb"></a-asset-item>
             <a-asset-item id="bee-model-3" src="/assets/stezka_bohuslavice/3d/kralovna.glb"></a-asset-item>
             
-            <!-- Audio soubory - OPRAVENÉ CESTY -->
+            <!-- Audio soubory -->
             <audio id="audio1" src="/assets/stezka_bohuslavice/mp3/delnice.mp3" preload="auto"></audio>
             <audio id="audio2" src="/assets/stezka_bohuslavice/mp3/trubec.mp3" preload="auto"></audio>
             <audio id="audio3" src="/assets/stezka_bohuslavice/mp3/kralovna.mp3" preload="auto"></audio>
@@ -438,7 +459,7 @@
             </a-gltf-model>
         </a-entity>
 
-        <!-- Včela 3 - Královna - UPRAVENÉ GPS SOUŘADNICE -->
+        <!-- Včela 3 - Královna -->
         <a-entity 
             gps-entity-place="latitude: 49.009245; longitude: 17.128867"
             data-marker-id="vcela_3"
@@ -454,7 +475,7 @@
             </a-gltf-model>
         </a-entity>
 
-        <!-- Základní osvětlení - DYNAMICKÉ -->
+        <!-- Základní osvětlení -->
         <a-light type="ambient" color="#87CEEB" intensity="0.4" id="ambientLight"></a-light>
         <a-light 
             type="directional" 
@@ -474,35 +495,40 @@
     </a-scene>
 
     <script>
+        // === GAMIFIKAČNÍ PROMĚNNÉ ===
+        let gamificationInitialized = false;
+        let currentExpositionId = 'vcelarstvi';
+        let currentSceneId = '/assets/stezka_bohuslavice/vcela.html';
+        
         // GPS a navigační proměnné
         let userPosition = null;
         const PROXIMITY_THRESHOLD = 10;
-        const AR_VISIBILITY_THRESHOLD = 30; // Zvětšeno pro lepší testování
+        const AR_VISIBILITY_THRESHOLD = 30;
         const AUDIO_THRESHOLD = 15;
         let selectedTargetId = null;
         let currentlyPlayingAudio = null;
         let audioPlayingForMarker = null;
-        let audioIsPaused = false; // Nový stav pro pause/play
+        let audioIsPaused = false;
         
         // Proměnné pro snap to camera funkci
-        let snapMode = 'gps'; // 'gps' nebo 'camera' nebo 'fixed'
+        let snapMode = 'gps';
         let snappedEntity = null;
         let fixedPosition = null;
         let cameraEntity = null;
         
         // Proměnné pro rotaci modelů
-        let modelRotationY = 30; // Začínáme na 30 stupňů
+        let modelRotationY = 30;
         let isRotating = false;
         let startX = 0;
         let rotationHintShown = false;
         
         // Proměnné pro vertikální korekci
         let verticalCorrectionValue = 1.0;
-        let correctionSliderVisible = false; // ZMĚNA: výchozí stav je false (skrytý)
+        let correctionSliderVisible = false;
         let videoElement = null;
         let canvasElement = null;
         
-        // Definice včelích markerů s UPRAVENÝMI GPS souřadnicemi královny
+        // Definice včelích markerů
         const markers = [
             { 
                 id: "vcela_1", 
@@ -522,15 +548,96 @@
             },
             { 
                 id: "vcela_3", 
-                lat: 49.009245, // UPRAVENÉ GPS SOUŘADNICE
-                lng: 17.128867, // UPRAVENÉ GPS SOUŘADNICE
+                lat: 49.009245,
+                lng: 17.128867,
                 name: "👑 Královna",
                 description: "Matka úlu - vládkyně včelího státu",
                 audioId: "audio3"
             }
         ];
 
-        // Vertikální korekce funkcionalita - UPRAVENÁ
+        // === GAMIFIKAČNÍ FUNKCE ===
+        
+        // Inicializace gamifikace
+        function initializeGameification() {
+            console.log("🎮 Initializing gamification for včelařská stezka...");
+            
+            // Ujisti se, že jsou načtené všechny konfigurace
+            if (typeof SCENE_CONFIG === 'undefined' || typeof ACHIEVEMENTS_CONFIG === 'undefined') {
+                console.log("⏳ Waiting for gamification config...");
+                setTimeout(initializeGameification, 500);
+                return;
+            }
+            
+            // Zkontroluj, že je expozice registrovaná
+            if (typeof EXPOSITION_REGISTRY !== 'undefined' && EXPOSITION_REGISTRY['vcelarstvi']) {
+                console.log("✅ Včelařská stezka exposition is registered");
+            } else {
+                console.warn("⚠️ Včelařská stezka exposition not found in registry");
+            }
+            
+            // Inicializuj time tracking
+            if (typeof initializeTimeTracking === 'function') {
+                initializeTimeTracking(currentExpositionId, currentSceneId);
+                console.log("⏱️ Time tracking initialized");
+            } else {
+                console.error("❌ initializeTimeTracking function not found");
+            }
+            
+            gamificationInitialized = true;
+            
+            // Aktualizuj status
+            const statusElement = document.getElementById('gamificationStatus');
+            if (statusElement) {
+                statusElement.textContent = '🎮 Gamifikace aktivní';
+                statusElement.classList.add('active');
+                
+                // Skryj po 3 sekundách
+                setTimeout(() => {
+                    statusElement.classList.remove('active');
+                }, 3000);
+            }
+            
+            console.log("✅ Gamification initialized successfully");
+        }
+
+        // Funkce pro záznam aktivace včelích markerů
+        function recordBeeMarkerActivation(markerId) {
+            if (!gamificationInitialized) {
+                console.warn("⚠️ Gamification not initialized yet, skipping marker activation");
+                return;
+            }
+            
+            console.log(`🐝 Recording bee marker activation: ${markerId}`);
+            
+            if (typeof recordMarkerActivation === 'function') {
+                recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
+            } else {
+                console.error("❌ recordMarkerActivation function not found");
+            }
+        }
+
+        // Page visibility API pro pozastavení gamifikace
+        document.addEventListener('visibilitychange', () => {
+            if (typeof pauseTimeTracking === 'function' && typeof resumeTimeTracking === 'function') {
+                if (document.hidden) {
+                    pauseTimeTracking();
+                } else {
+                    resumeTimeTracking();
+                }
+            }
+        });
+
+        // Finalizace při odchodu ze stránky
+        window.addEventListener('beforeunload', () => {
+            if (typeof finalizeTimeTracking === 'function') {
+                finalizeTimeTracking(currentExpositionId, currentSceneId);
+            }
+        });
+
+        // === PŮVODNÍ FUNKCE S GAMIFIKAČNÍMI ROZŠÍŘENÍMI ===
+
+        // Vertikální korekce funkcionalita
         function setupVerticalCorrection() {
             console.log("Setting up vertical correction...");
             
@@ -540,52 +647,41 @@
             const correctionToggle = document.getElementById('correctionToggle');
             const correctionPanel = document.getElementById('verticalCorrection');
             
-            // Najdeme video element A-Frame scény
             setTimeout(() => {
                 findVideoElements();
             }, 2000);
             
-            // Event listener pro posuvník
             correctionSlider.addEventListener('input', (e) => {
                 verticalCorrectionValue = parseFloat(e.target.value);
                 correctionValue.textContent = verticalCorrectionValue.toFixed(2);
                 applyVerticalCorrection();
-                console.log(`Vertical correction changed to: ${verticalCorrectionValue}`);
             });
             
-            // Reset tlačítko
             correctionReset.addEventListener('click', () => {
                 verticalCorrectionValue = 1.0;
                 correctionSlider.value = 1.0;
                 correctionValue.textContent = '1.00';
                 applyVerticalCorrection();
-                console.log("Vertical correction reset to 1.0");
             });
             
-            // UPRAVENÁ logika toggle viditelnosti
             correctionToggle.addEventListener('click', () => {
                 correctionSliderVisible = !correctionSliderVisible;
                 if (correctionSliderVisible) {
                     correctionPanel.classList.add('visible');
-                    correctionToggle.innerHTML = '✖️'; // Změna ikony na zavření
+                    correctionToggle.innerHTML = '✖️';
                     correctionToggle.title = 'Skrýt korekci obrazu';
-                    console.log("Correction panel shown");
                 } else {
                     correctionPanel.classList.remove('visible');
-                    correctionToggle.innerHTML = '📐'; // Původní ikona
+                    correctionToggle.innerHTML = '📐';
                     correctionToggle.title = 'Zobrazit korekci obrazu';
-                    console.log("Correction panel hidden");
                 }
             });
             
-            // Auto-skrytí při rotaci telefonu na landscape
             window.addEventListener('orientationchange', () => {
                 setTimeout(() => {
                     if (window.innerWidth > window.innerHeight) {
-                        // Landscape - skryjeme posuvník
                         correctionPanel.classList.add('hidden');
                     } else {
-                        // Portrait - zobrazíme posuvník jen pokud je aktivní
                         if (correctionSliderVisible) {
                             correctionPanel.classList.remove('hidden');
                         }
@@ -595,21 +691,16 @@
         }
         
         function findVideoElements() {
-            // Pokusíme se najít video element A-Frame scény
             const scene = document.querySelector('a-scene');
             if (scene && scene.canvas) {
                 canvasElement = scene.canvas;
-                console.log("Found A-Frame canvas element");
             }
             
-            // Pokusíme se najít video element
             const videos = document.getElementsByTagName('video');
             if (videos.length > 0) {
                 videoElement = videos[0];
-                console.log("Found video element");
             }
             
-            // Pokud nenajdeme ihned, zkusíme později
             if (!videoElement && !canvasElement) {
                 setTimeout(findVideoElements, 1000);
             }
@@ -617,27 +708,21 @@
         
         function applyVerticalCorrection() {
             try {
-                // Aplikujeme korekci na canvas A-Frame scény
                 if (canvasElement) {
                     canvasElement.style.transform = `scaleY(${verticalCorrectionValue})`;
                     canvasElement.style.transformOrigin = 'center center';
-                    console.log(`Applied correction ${verticalCorrectionValue} to canvas`);
                 }
                 
-                // Aplikujeme korekci na video element pokud existuje
                 if (videoElement) {
                     videoElement.style.transform = `scaleY(${verticalCorrectionValue})`;
                     videoElement.style.transformOrigin = 'center center';
-                    console.log(`Applied correction ${verticalCorrectionValue} to video`);
                 }
                 
-                // Fallback - aplikujeme na celou scénu
                 const scene = document.querySelector('a-scene');
                 if (scene) {
                     scene.style.transform = `scaleY(${verticalCorrectionValue})`;
                     scene.style.transformOrigin = 'center center';
                 }
-                
             } catch (error) {
                 console.error("Error applying vertical correction:", error);
             }
@@ -645,7 +730,7 @@
 
         // Výpočet vzdálenosti mezi GPS body
         function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371000; // Poloměr Země v metrech
+            const R = 6371000;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -664,7 +749,7 @@
             }
         }
 
-        // Získání aktuální pozice - VYLEPŠENÁ s fallback
+        // Získání aktuální pozice
         function getCurrentPosition() {
             console.log("Requesting GPS position...");
             document.getElementById('distanceInfo').innerHTML = '📍 Hledám GPS signál...';
@@ -672,7 +757,6 @@
             if (!navigator.geolocation) {
                 console.error("Geolocation is not supported");
                 document.getElementById('distanceInfo').innerHTML = '❌ GPS není podporován';
-                // Fallback na pozici Dělnice
                 userPosition = {
                     lat: 49.090675,
                     lng: 17.132976,
@@ -692,17 +776,14 @@
                         accuracy: position.coords.accuracy
                     };
                     console.log("GPS position found:", userPosition);
-                    console.log(`GPS accuracy: ${position.coords.accuracy}m`);
                     checkProximityToMarkers();
                     updateNavigation();
                 },
                 (error) => {
                     console.error("Geolocation error:", error);
-                    console.log("Error code:", error.code, "Message:", error.message);
                     
-                    // Fallback na pozici Dělnice při chybě
                     userPosition = {
-                        lat: 49.090675, // Pozice Dělnice z vašeho kódu
+                        lat: 49.090675,
                         lng: 17.132976,
                         accuracy: 100
                     };
@@ -714,17 +795,16 @@
                 },
                 {
                     enableHighAccuracy: true,
-                    timeout: 15000, // Zvýšený timeout
+                    timeout: 15000,
                     maximumAge: 60000
                 }
             );
             
-            // Automatický fallback po 5 sekundách
             setTimeout(() => {
                 if (!userPosition) {
                     console.log("GPS timeout - activating fallback position");
                     userPosition = {
-                        lat: 49.090675, // Pozice Dělnice
+                        lat: 49.090675,
                         lng: 17.132976,
                         accuracy: 100
                     };
@@ -760,12 +840,13 @@
             }
         }
 
-        // Kontrola proximity k markerům - VYLEPŠENÁ s debugging
+        // HLAVNÍ FUNKCE - Kontrola proximity s gamifikací
         function checkProximityToMarkers() {
             if (!userPosition) return;
             
             console.log("Checking proximity with user position:", userPosition);
             let shouldStopAudio = true;
+            let markersActivatedThisCheck = [];
             
             markers.forEach(marker => {
                 const distance = calculateDistance(
@@ -792,11 +873,15 @@
                         shouldStopAudio = false;
                         console.log(`🎵 Audio playing for ${marker.id}`);
                     }
-                }
-                
-                // Gamifikace
-                if (distance <= PROXIMITY_THRESHOLD) {
-                    console.log(`🎯 Bee activated: ${marker.id}`);
+                    
+                    // GAMIFIKACE: Aktivace markeru při proximity
+                    if (distance <= PROXIMITY_THRESHOLD) {
+                        console.log(`🎯 Bee activated: ${marker.id}`);
+                        markersActivatedThisCheck.push(marker.id);
+                        
+                        // Zaznamenej aktivaci markeru
+                        recordBeeMarkerActivation(marker.id);
+                    }
                 }
             });
             
@@ -815,7 +900,7 @@
             updateSnapButtonVisibility();
         }
 
-        // Audio funkce - UPRAVENÉ s pause/play funkcionalitou
+        // Audio funkce
         function playAudio(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (!marker || audioPlayingForMarker === markerId) return;
@@ -844,13 +929,11 @@
             if (!marker) return;
             
             if (audioIsPaused) {
-                // Resume audio
                 currentlyPlayingAudio.play().then(() => {
                     audioIsPaused = false;
                     updateAudioDisplay(marker.name);
                 }).catch(console.error);
             } else {
-                // Pause audio
                 currentlyPlayingAudio.pause();
                 audioIsPaused = true;
                 updateAudioDisplay(marker.name);
@@ -911,7 +994,6 @@
             
             targetsList.innerHTML = html;
             
-            // Event listenery pro výběr
             document.querySelectorAll('.target-item').forEach(item => {
                 item.addEventListener('click', () => {
                     selectTarget(item.getAttribute('data-target-id'));
@@ -987,6 +1069,12 @@
             document.getElementById('navContent').classList.remove('open');
         }
 
+        function clearSelection() {
+            selectedTargetId = null;
+            document.getElementById('clearSelection').style.display = 'none';
+            updateNavigation();
+        }
+
         // Snap to camera funkcionalita
         function updateSnapButtonVisibility() {
             const snapButton = document.getElementById('snapButton');
@@ -997,7 +1085,6 @@
                 updateSnapButtonState();
             } else {
                 snapButton.style.display = 'none';
-                // Reset na GPS mód když žádný model není viditelný
                 if (snapMode !== 'gps') {
                     resetToGPSMode();
                 }
@@ -1043,7 +1130,6 @@
         }
 
         function snapToCamera() {
-            // Najdeme nejbližší viditelný model
             const visibleEntity = findClosestVisibleEntity();
             if (!visibleEntity) return;
             
@@ -1052,27 +1138,22 @@
             snappedEntity = visibleEntity;
             snapMode = 'camera';
             
-            // Skryjeme GPS entitu a vytvoříme camera-relative entitu
             visibleEntity.setAttribute('visible', 'false');
             
-            // Získáme camera element
             cameraEntity = document.querySelector('a-camera');
             if (!cameraEntity) return;
             
-            // Vytvoříme novou entitu relativní ke kameře
             const cameraRelativeEntity = document.createElement('a-entity');
             cameraRelativeEntity.id = 'camera-relative-model';
             
-            // Najdeme GLB model z původní entity
             const originalGltf = visibleEntity.querySelector('a-gltf-model');
             if (originalGltf) {
                 const newGltf = originalGltf.cloneNode(true);
-                newGltf.setAttribute('position', '0 -1 -3'); // Před kamerou
-                newGltf.setAttribute('scale', '2 2 2'); // Trochu menší pro lepší pohled
+                newGltf.setAttribute('position', '0 -1 -3');
+                newGltf.setAttribute('scale', '2 2 2');
                 cameraRelativeEntity.appendChild(newGltf);
             }
             
-            // Přidáme entitu ke kameře
             cameraEntity.appendChild(cameraRelativeEntity);
             
             updateSnapButtonState();
@@ -1085,15 +1166,12 @@
             const cameraRelativeEntity = document.getElementById('camera-relative-model');
             if (!cameraRelativeEntity) return;
             
-            // Získáme world pozici kamery
             const cameraWorldPosition = new THREE.Vector3();
             cameraEntity.object3D.getWorldPosition(cameraWorldPosition);
             
-            // Získáme world rotaci kamery
             const cameraWorldQuaternion = new THREE.Quaternion();
             cameraEntity.object3D.getWorldQuaternion(cameraWorldQuaternion);
             
-            // Vypočítáme pozici před kamerou
             const forward = new THREE.Vector3(0, 0, -3);
             forward.applyQuaternion(cameraWorldQuaternion);
             
@@ -1103,10 +1181,8 @@
                 z: cameraWorldPosition.z + forward.z
             };
             
-            // Odebereme entitu z kamery
             cameraEntity.removeChild(cameraRelativeEntity);
             
-            // Vytvoříme fixní entitu na scéně
             const fixedEntity = document.createElement('a-entity');
             fixedEntity.id = 'fixed-position-model';
             fixedEntity.setAttribute('position', `${fixedPosition.x} ${fixedPosition.y} ${fixedPosition.z}`);
@@ -1118,7 +1194,6 @@
                 fixedEntity.appendChild(newGltf);
             }
             
-            // Přidáme na scénu
             document.querySelector('a-scene').appendChild(fixedEntity);
             
             snapMode = 'fixed';
@@ -1129,24 +1204,20 @@
         function resetToGPSMode() {
             console.log("Resetting to GPS mode");
             
-            // Odebereme camera-relative model
             const cameraRelativeEntity = document.getElementById('camera-relative-model');
             if (cameraRelativeEntity && cameraEntity) {
                 cameraEntity.removeChild(cameraRelativeEntity);
             }
             
-            // Odebereme fixed model
             const fixedEntity = document.getElementById('fixed-position-model');
             if (fixedEntity) {
                 document.querySelector('a-scene').removeChild(fixedEntity);
             }
             
-            // Zobrazíme zpět GPS entitu
             if (snappedEntity) {
                 snappedEntity.setAttribute('visible', 'true');
             }
             
-            // Reset proměnných
             snapMode = 'gps';
             snappedEntity = null;
             fixedPosition = null;
@@ -1155,18 +1226,11 @@
             console.log("Returned to GPS mode");
         }
 
-        function clearSelection() {
-            selectedTargetId = null;
-            document.getElementById('clearSelection').style.display = 'none';
-            updateNavigation();
-        }
-
         // Rotace modelů dotykem
         function setupModelRotation() {
             let touchStarted = false;
             let rotationActive = false;
             
-            // Touch start
             document.addEventListener('touchstart', (e) => {
                 if (isTouchingUI(e.target)) return;
                 if (!isAnyModelVisible()) return;
@@ -1179,7 +1243,6 @@
                 e.preventDefault();
             }, { passive: false });
             
-            // Mouse start
             document.addEventListener('mousedown', (e) => {
                 if (isTouchingUI(e.target)) return;
                 if (!isAnyModelVisible()) return;
@@ -1191,18 +1254,16 @@
                 e.preventDefault();
             });
             
-            // Touch move
             document.addEventListener('touchmove', (e) => {
                 if (!isRotating || !touchStarted || !rotationActive) return;
                 const currentX = e.touches[0].clientX;
                 const deltaX = currentX - startX;
-                modelRotationY += deltaX * 0.3; // Citlivost rotace
+                modelRotationY += deltaX * 0.3;
                 updateModelRotation();
                 startX = currentX;
                 e.preventDefault();
             }, { passive: false });
             
-            // Mouse move
             document.addEventListener('mousemove', (e) => {
                 if (!isRotating || !rotationActive) return;
                 const deltaX = e.clientX - startX;
@@ -1212,14 +1273,12 @@
                 e.preventDefault();
             });
             
-            // Touch end
             document.addEventListener('touchend', () => {
                 isRotating = false;
                 touchStarted = false;
                 rotationActive = false;
             });
             
-            // Mouse end
             document.addEventListener('mouseup', () => {
                 isRotating = false;
                 rotationActive = false;
@@ -1227,7 +1286,6 @@
         }
 
         function updateModelRotation() {
-            // Rotace všech tří GLB modelů včel
             const beeModel1 = document.getElementById('bee-model-1-gltf');
             const beeModel2 = document.getElementById('bee-model-2-gltf');
             const beeModel3 = document.getElementById('bee-model-3-gltf');
@@ -1262,7 +1320,8 @@
                 '.rotation-hint',
                 '.snap-button',
                 '.vertical-correction',
-                '.correction-toggle'
+                '.correction-toggle',
+                '.gamification-status'
             ];
             
             for (let selector of uiSelectors) {
@@ -1291,7 +1350,6 @@
                             closestEntity = entity;
                         }
                     } else {
-                        // Pokud nemáme GPS, vezme první viditelný
                         closestEntity = entity;
                     }
                 }
@@ -1309,47 +1367,6 @@
                 rotationHint.style.display = 'none';
             }, 3000);
         }
-
-        // Event listenery
-        document.getElementById('navToggle').addEventListener('click', () => {
-            document.getElementById('navContent').classList.toggle('open');
-        });
-
-        document.getElementById('clearSelection').addEventListener('click', clearSelection);
-
-        // Audio ovládání kliknutím na audio info panel
-        document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
-
-        // Snap button event listener
-        document.getElementById('snapButton').addEventListener('click', handleSnapButtonClick);
-
-        document.addEventListener('click', (e) => {
-            const navPanel = document.querySelector('.navigation');
-            if (!navPanel.contains(e.target)) {
-                document.getElementById('navContent').classList.remove('open');
-            }
-        });
-
-        // Inicializace při načtení
-        window.addEventListener('load', () => {
-            console.log("Starting bee AR application with dynamic lighting and vertical correction...");
-            
-            // Počkáme na A-Frame
-            document.querySelector('a-scene').addEventListener('loaded', () => {
-                console.log("A-Frame scene loaded");
-                setupModelRotation(); // Nastavíme rotaci
-                setupVerticalCorrection(); // Nastavíme vertikální korekci
-                getCurrentPosition();
-                watchPosition();
-                
-                // Spustíme dynamické osvětlení po načtení scény
-                setTimeout(() => {
-                    startLightingUpdate();
-                }, 1000);
-            });
-        });
-
-        console.log("Bee AR script with dynamic lighting and vertical correction loaded successfully!");
 
         // Dynamické osvětlení podle denní doby
         function setupDynamicLighting() {
@@ -1372,7 +1389,6 @@
             let lightConfig;
             
             if (timeOfDay >= 6 && timeOfDay < 10) {
-                // Ráno (6-10h) - chladnější světlo
                 lightConfig = {
                     ambient: { color: '#B0E0E6', intensity: 0.5 },
                     sun: { color: '#FFE5B4', intensity: 1.2, position: '1 6 4' },
@@ -1380,7 +1396,6 @@
                 };
                 console.log("🌅 Morning lighting applied");
             } else if (timeOfDay >= 10 && timeOfDay < 16) {
-                // Den (10-16h) - jasné bílé světlo
                 lightConfig = {
                     ambient: { color: '#F0F8FF', intensity: 0.6 },
                     sun: { color: '#FFFFFF', intensity: 1.4, position: '0 8 2' },
@@ -1388,7 +1403,6 @@
                 };
                 console.log("☀️ Daytime lighting applied");
             } else if (timeOfDay >= 16 && timeOfDay < 19) {
-                // Odpoledne (16-19h) - teplé světlo
                 lightConfig = {
                     ambient: { color: '#FFE4B5', intensity: 0.5 },
                     sun: { color: '#FFA500', intensity: 1.1, position: '-1 5 3' },
@@ -1396,7 +1410,6 @@
                 };
                 console.log("🌇 Afternoon lighting applied");
             } else if (timeOfDay >= 19 && timeOfDay < 22) {
-                // Večer (19-22h) - zlaté světlo
                 lightConfig = {
                     ambient: { color: '#DDA0DD', intensity: 0.4 },
                     sun: { color: '#FF8C00', intensity: 0.9, position: '-2 3 2' },
@@ -1404,7 +1417,6 @@
                 };
                 console.log("🌆 Evening lighting applied");
             } else {
-                // Noc (22-6h) - modravé světlo
                 lightConfig = {
                     ambient: { color: '#191970', intensity: 0.3 },
                     sun: { color: '#4169E1', intensity: 0.6, position: '0 4 1' },
@@ -1413,7 +1425,6 @@
                 console.log("🌙 Night lighting applied");
             }
             
-            // Aplikace osvětlení
             ambientLight.setAttribute('color', lightConfig.ambient.color);
             ambientLight.setAttribute('intensity', lightConfig.ambient.intensity);
             
@@ -1427,11 +1438,53 @@
             console.log("✨ Dynamic lighting setup complete");
         }
 
-        // Aktualizace osvětlení každých 5 minut
         function startLightingUpdate() {
             setupDynamicLighting();
-            setInterval(setupDynamicLighting, 5 * 60 * 1000); // Každých 5 minut
+            setInterval(setupDynamicLighting, 5 * 60 * 1000);
         }
+
+        // === EVENT LISTENERY ===
+        
+        document.getElementById('navToggle').addEventListener('click', () => {
+            document.getElementById('navContent').classList.toggle('open');
+        });
+
+        document.getElementById('clearSelection').addEventListener('click', clearSelection);
+        document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
+        document.getElementById('snapButton').addEventListener('click', handleSnapButtonClick);
+
+        document.addEventListener('click', (e) => {
+            const navPanel = document.querySelector('.navigation');
+            if (!navPanel.contains(e.target)) {
+                document.getElementById('navContent').classList.remove('open');
+            }
+        });
+
+        // === HLAVNÍ INICIALIZACE ===
+        
+        window.addEventListener('load', () => {
+            console.log("Starting bee AR application with dynamic lighting, vertical correction and GAMIFICATION...");
+            
+            // Počkej na načtení gamifikačních skriptů
+            setTimeout(() => {
+                initializeGameification();
+            }, 1000);
+            
+            // Počkáme na A-Frame
+            document.querySelector('a-scene').addEventListener('loaded', () => {
+                console.log("A-Frame scene loaded");
+                setupModelRotation();
+                setupVerticalCorrection();
+                getCurrentPosition();
+                watchPosition();
+                
+                setTimeout(() => {
+                    startLightingUpdate();
+                }, 1000);
+            });
+        });
+
+        console.log("🐝 Bee AR script with dynamic lighting, vertical correction and GAMIFICATION loaded successfully!");
     </script>
 </body>
 </html>
