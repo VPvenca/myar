@@ -184,7 +184,7 @@
             background: rgba(40, 167, 69, 1);
         }
 
-        /* Vertikální korekce posuvník */
+        /* Vertikální korekce posuvník - SKRYTÝ ve výchozím stavu */
         .vertical-correction {
             position: fixed;
             left: 5px;
@@ -195,10 +195,14 @@
             border-radius: 20px;
             padding: 15px 8px;
             height: 250px;
-            display: flex;
+            display: none; /* Skrytý ve výchozím stavu */
             flex-direction: column;
             align-items: center;
             transition: opacity 0.3s;
+        }
+
+        .vertical-correction.visible {
+            display: flex;
         }
 
         .vertical-correction.hidden {
@@ -286,35 +290,39 @@
             background: rgba(255, 193, 7, 1);
         }
 
-        /* Toggle tlačítko pro skrytí/zobrazení posuvníku */
+        /* Toggle tlačítko pro korekci - PŘESUNUTO DOLŮ */
         .correction-toggle {
             position: fixed;
-            left: 5px;
-            bottom: 100px;
+            left: 10px;
+            bottom: 20px; /* Přesunuto z bottom: 100px na bottom: 20px */
             z-index: 1002;
-            width: 35px;
-            height: 35px;
+            width: 40px; /* Trochu větší pro lepší přístupnost */
+            height: 40px;
             background: rgba(0, 0, 0, 0.7);
             color: white;
             border: none;
             border-radius: 50%;
-            font-size: 16px;
+            font-size: 18px; /* Větší ikona */
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3); /* Přidán stín */
         }
 
         .correction-toggle:hover {
             background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.05);
         }
 
-        /* Zajištění, že 3D modely si zachovají správné proporce */
-        a-scene canvas {
-            position: relative;
-            z-index: 1;
-            background: transparent;
+        .correction-toggle:active {
+            transform: scale(0.95);
+        }
+
+        /* Aplikace korekce na video canvas */
+        .vertical-corrected {
+            transform-origin: center center;
         }
     </style>
 </head>
@@ -344,7 +352,7 @@
     <!-- Snap to camera tlačítko -->
     <button class="snap-button ui-element" id="snapButton" title="Přichytit k pohledu">📱</button>
 
-    <!-- Vertikální korekce posuvník -->
+    <!-- Vertikální korekce posuvník - ve výchozím stavu skrytý -->
     <div class="vertical-correction ui-element" id="verticalCorrection">
         <div class="correction-label">
             📐<br>
@@ -364,7 +372,7 @@
         <button class="correction-reset" id="correctionReset">Reset</button>
     </div>
 
-    <!-- Toggle tlačítko pro korekci -->
+    <!-- Toggle tlačítko pro korekci - přesunuto vlevo dolů -->
     <button class="correction-toggle ui-element" id="correctionToggle" title="Zobrazit/skrýt korekci obrazu">📐</button>
 
     <!-- A-Frame AR scéna s GPS pozicováním -->
@@ -486,7 +494,7 @@
         
         // Proměnné pro vertikální korekci
         let verticalCorrectionValue = 1.0;
-        let correctionSliderVisible = true;
+        let correctionSliderVisible = false; // ZMĚNA: výchozí stav je false (skrytý)
         let videoElement = null;
         let canvasElement = null;
         
@@ -518,7 +526,7 @@
             }
         ];
 
-        // Vertikální korekce funkcionalita
+        // Vertikální korekce funkcionalita - UPRAVENÁ
         function setupVerticalCorrection() {
             console.log("Setting up vertical correction...");
             
@@ -550,17 +558,19 @@
                 console.log("Vertical correction reset to 1.0");
             });
             
-            // Toggle viditelnosti
+            // UPRAVENÁ logika toggle viditelnosti
             correctionToggle.addEventListener('click', () => {
                 correctionSliderVisible = !correctionSliderVisible;
                 if (correctionSliderVisible) {
-                    correctionPanel.style.display = 'flex';
-                    correctionToggle.innerHTML = '📐';
+                    correctionPanel.classList.add('visible');
+                    correctionToggle.innerHTML = '✖️'; // Změna ikony na zavření
                     correctionToggle.title = 'Skrýt korekci obrazu';
+                    console.log("Correction panel shown");
                 } else {
-                    correctionPanel.style.display = 'none';
-                    correctionToggle.innerHTML = '👁️';
+                    correctionPanel.classList.remove('visible');
+                    correctionToggle.innerHTML = '📐'; // Původní ikona
                     correctionToggle.title = 'Zobrazit korekci obrazu';
+                    console.log("Correction panel hidden");
                 }
             });
             
@@ -571,84 +581,58 @@
                         // Landscape - skryjeme posuvník
                         correctionPanel.classList.add('hidden');
                     } else {
-                        // Portrait - zobrazíme posuvník
-                        correctionPanel.classList.remove('hidden');
+                        // Portrait - zobrazíme posuvník jen pokud je aktivní
+                        if (correctionSliderVisible) {
+                            correctionPanel.classList.remove('hidden');
+                        }
                     }
                 }, 500);
             });
         }
         
         function findVideoElements() {
-            // Jednodušší přístup - najdeme jen A-Frame scénu
+            // Pokusíme se najít video element A-Frame scény
             const scene = document.querySelector('a-scene');
-            if (scene) {
-                console.log("A-Frame scene found, ready for correction");
-                // Aplikujeme počáteční korekci
-                applyVerticalCorrection();
-            } else {
-                // Pokud scéna ještě není načtená, zkusíme později
-                setTimeout(findVideoElements, 500);
+            if (scene && scene.canvas) {
+                canvasElement = scene.canvas;
+                console.log("Found A-Frame canvas element");
+            }
+            
+            // Pokusíme se najít video element
+            const videos = document.getElementsByTagName('video');
+            if (videos.length > 0) {
+                videoElement = videos[0];
+                console.log("Found video element");
+            }
+            
+            // Pokud nenajdeme ihned, zkusíme později
+            if (!videoElement && !canvasElement) {
+                setTimeout(findVideoElements, 1000);
             }
         }
         
         function applyVerticalCorrection() {
             try {
-                console.log(`Applying vertical correction: ${verticalCorrectionValue}`);
+                // Aplikujeme korekci na canvas A-Frame scény
+                if (canvasElement) {
+                    canvasElement.style.transform = `scaleY(${verticalCorrectionValue})`;
+                    canvasElement.style.transformOrigin = 'center center';
+                    console.log(`Applied correction ${verticalCorrectionValue} to canvas`);
+                }
                 
-                // 1. Aplikujeme korekci na celou A-Frame scénu
+                // Aplikujeme korekci na video element pokud existuje
+                if (videoElement) {
+                    videoElement.style.transform = `scaleY(${verticalCorrectionValue})`;
+                    videoElement.style.transformOrigin = 'center center';
+                    console.log(`Applied correction ${verticalCorrectionValue} to video`);
+                }
+                
+                // Fallback - aplikujeme na celou scénu
                 const scene = document.querySelector('a-scene');
                 if (scene) {
                     scene.style.transform = `scaleY(${verticalCorrectionValue})`;
                     scene.style.transformOrigin = 'center center';
-                    console.log(`Applied scaleY(${verticalCorrectionValue}) to a-scene`);
                 }
-                
-                // 2. Kompenzujeme korekci u všech 3D modelů (inverzní škálování)
-                const compensationScale = 1 / verticalCorrectionValue;
-                
-                // Kompenzace pro všechny GLTF modely
-                const allGltfModels = document.querySelectorAll('a-gltf-model');
-                allGltfModels.forEach((model, index) => {
-                    // Získáme současné scale atributy
-                    const currentScale = model.getAttribute('scale') || '3 3 3';
-                    const scaleValues = currentScale.split(' ');
-                    
-                    // Aplikujeme kompenzaci jen na Y osu
-                    const newYScale = parseFloat(scaleValues[1]) * compensationScale;
-                    const newScale = `${scaleValues[0]} ${newYScale} ${scaleValues[2]}`;
-                    
-                    model.setAttribute('scale', newScale);
-                    console.log(`Model ${index}: compensated scale to ${newScale}`);
-                });
-                
-                // 3. Také pro camera-relative a fixed modely pokud existují
-                const cameraRelativeModel = document.getElementById('camera-relative-model');
-                if (cameraRelativeModel) {
-                    const gltfInCameraModel = cameraRelativeModel.querySelector('a-gltf-model');
-                    if (gltfInCameraModel) {
-                        const currentScale = gltfInCameraModel.getAttribute('scale') || '2 2 2';
-                        const scaleValues = currentScale.split(' ');
-                        const newYScale = parseFloat(scaleValues[1]) * compensationScale;
-                        const newScale = `${scaleValues[0]} ${newYScale} ${scaleValues[2]}`;
-                        gltfInCameraModel.setAttribute('scale', newScale);
-                        console.log(`Camera model: compensated scale to ${newScale}`);
-                    }
-                }
-                
-                const fixedModel = document.getElementById('fixed-position-model');
-                if (fixedModel) {
-                    const gltfInFixedModel = fixedModel.querySelector('a-gltf-model');
-                    if (gltfInFixedModel) {
-                        const currentScale = gltfInFixedModel.getAttribute('scale') || '2 2 2';
-                        const scaleValues = currentScale.split(' ');
-                        const newYScale = parseFloat(scaleValues[1]) * compensationScale;
-                        const newScale = `${scaleValues[0]} ${newYScale} ${scaleValues[2]}`;
-                        gltfInFixedModel.setAttribute('scale', newScale);
-                        console.log(`Fixed model: compensated scale to ${newScale}`);
-                    }
-                }
-                
-                console.log(`✅ Correction applied: scene scaleY(${verticalCorrectionValue}), models compensated with Y scale factor ${compensationScale.toFixed(3)}`);
                 
             } catch (error) {
                 console.error("Error applying vertical correction:", error);
