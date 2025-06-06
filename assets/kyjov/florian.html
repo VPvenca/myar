@@ -43,7 +43,7 @@
             border-radius: 5px;
             font-size: 12px;
             z-index: 1000;
-            display: none;
+            display: block; /* Změněno z none na block pro debugging */
         }
         .gamification-debug {
             position: absolute;
@@ -56,21 +56,21 @@
             font-size: 11px;
             z-index: 1000;
             max-width: 300px;
-            display: none;
+            display: block; /* Změněno z none na block pro debugging */
         }
-            /* Skrytí VR tlačítka - PŘIDEJTE TOTO */
-    .a-enter-vr-button,
-    .a-enter-vr,
-    [data-a-enter-vr-button],
-    .a-enter-vr-modal,
-    .a-orientation-modal {
-        display: none !important;
-        visibility: hidden !important;
-    }
-    
-    a-scene .a-enter-vr-button {
-        display: none !important;
-    }
+        /* Skrytí VR tlačítka */
+        .a-enter-vr-button,
+        .a-enter-vr,
+        [data-a-enter-vr-button],
+        .a-enter-vr-modal,
+        .a-orientation-modal {
+            display: none !important;
+            visibility: hidden !important;
+        }
+        
+        a-scene .a-enter-vr-button {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -84,6 +84,7 @@
     <div id="timeDebug" class="time-debug">
         <div>Čas strávený: <span id="timeSpent">0</span>s</div>
         <div>Status: <span id="timeStatus">Neaktivní</span></div>
+        <div>Achievements checked: <span id="achievementsChecked">0</span></div>
     </div>
 
     <!-- Debug panel pro gamifikaci -->
@@ -95,6 +96,7 @@
         <div>Total scenes: <span id="debugTotalScenes">0</span></div>
         <div>Total achievements: <span id="debugTotalAchievements">0</span></div>
         <div>Markers activated: <span id="debugMarkersActivated">0</span></div>
+        <div>Time tracking active: <span id="debugTimeTracking">❌</span></div>
     </div>
 
     <a-scene mindar-image="imageTargetSrc:/assets/kyjov/mind/florian.mind;
@@ -127,47 +129,64 @@
         let audioSource1 = null;
 
         // === GAMIFIKACE SETUP ===
-        let currentSceneId;
-        let currentExpositionId;
+        let currentSceneId = "/assets/kyjov/florian.html"; // Přímo definováno podle konfigurace
+        let currentExpositionId = "kyjov"; // Přímo definováno podle konfigurace
         let sceneConfigValid = false;
         let gamificationInitialized = false;
+        let timeTrackingInitialized = false;
+        let debugUpdateInterval;
+        let achievementCheckInterval;
+
+        // Dočasná implementace chybějících funkcí
+        function getCurrentSceneId() {
+            return "/assets/kyjov/florian.html";
+        }
+
+        function getCurrentExpositionId() {
+            return "kyjov";
+        }
 
         // Funkce pro inicializaci gamifikace s debug informacemi
         function initializeGamification() {
             console.log("🎮 Initializing gamification system...");
             
+            // Zkontroluj, zda jsou potřebné funkce k dispozici
+            if (typeof SCENE_CONFIG === 'undefined') {
+                console.error("❌ SCENE_CONFIG not loaded");
+                setTimeout(initializeGamification, 1000); // Zkus znovu za sekundu
+                return false;
+            }
+
+            if (typeof ACHIEVEMENTS_CONFIG === 'undefined') {
+                console.error("❌ ACHIEVEMENTS_CONFIG not loaded");
+                setTimeout(initializeGamification, 1000);
+                return false;
+            }
+
             // Zavolej inicializaci expozičního systému
             if (typeof initializeExpositions === 'function') {
                 initializeExpositions();
                 console.log("✅ Exposition system initialized");
             } else {
-                console.error("❌ initializeExpositions function not found");
+                console.warn("⚠️ initializeExpositions function not found");
             }
-
-            // Získej současné IDs
-            currentSceneId = getCurrentSceneId();
-            currentExpositionId = getCurrentExpositionId();
 
             console.log("📍 Current scene:", currentSceneId);
             console.log("📍 Current exposition:", currentExpositionId);
 
-            // Aktualizuj debug panel
-            updateDebugPanel();
-
             // Ověř konfiguraci
             if (!SCENE_CONFIG || !SCENE_CONFIG[currentSceneId]) {
                 console.error("❌ SCENE_CONFIG not found for:", currentSceneId);
-                return false;
-            }
-
-            if (!currentExpositionId || currentExpositionId === 'unknown') {
-                console.error("❌ Cannot determine current exposition ID");
+                console.log("Available scenes:", Object.keys(SCENE_CONFIG || {}));
                 return false;
             }
 
             sceneConfigValid = true;
             gamificationInitialized = true;
             console.log("✅ Gamification setup OK");
+            
+            // Ihned spusť time tracking
+            initializePageTimeTracking();
             
             updateDebugPanel();
             return true;
@@ -180,6 +199,7 @@
             document.getElementById('debugConfigLoaded').textContent = sceneConfigValid ? '✅' : '❌';
             document.getElementById('debugTotalScenes').textContent = SCENE_CONFIG ? Object.keys(SCENE_CONFIG).length : 0;
             document.getElementById('debugTotalAchievements').textContent = ACHIEVEMENTS_CONFIG ? Object.keys(ACHIEVEMENTS_CONFIG).length : 0;
+            document.getElementById('debugTimeTracking').textContent = timeTrackingInitialized ? '✅' : '❌';
             
             // Počet aktivovaných markerů pro tuto scénu
             if (sceneConfigValid && typeof getGamificationData === 'function') {
@@ -190,14 +210,12 @@
                     document.getElementById('debugMarkersActivated').textContent = activatedCount;
                 } catch (e) {
                     document.getElementById('debugMarkersActivated').textContent = 'Error';
+                    console.error("Error getting gamification data:", e);
                 }
             }
         }
 
         // === TIME TRACKING SETUP ===
-        let timeTrackingInitialized = false;
-        let debugUpdateInterval;
-
         function initializePageTimeTracking() {
             if (sceneConfigValid && !timeTrackingInitialized && typeof initializeTimeTracking === 'function') {
                 console.log("🕐 Initializing time tracking for scene");
@@ -206,6 +224,11 @@
                 
                 // Start debug updates
                 startDebugUpdates();
+                
+                // Start periodic achievement checking
+                startAchievementChecking();
+                
+                console.log("✅ Time tracking initialized successfully");
             } else {
                 console.error("❌ Cannot initialize time tracking:", {
                     sceneConfigValid,
@@ -224,7 +247,27 @@
                 if (debugUpdateInterval) {
                     clearInterval(debugUpdateInterval);
                 }
+                
+                // Stop achievement checking
+                if (achievementCheckInterval) {
+                    clearInterval(achievementCheckInterval);
+                }
             }
+        }
+
+        // Funkce pro pravidelnou kontrolu časových achievementů
+        function startAchievementChecking() {
+            let checkCount = 0;
+            
+            achievementCheckInterval = setInterval(() => {
+                if (typeof checkTimeBasedAchievements === 'function' && timeTrackingInitialized) {
+                    checkTimeBasedAchievements(currentExpositionId, currentSceneId);
+                    checkCount++;
+                    document.getElementById('achievementsChecked').textContent = checkCount;
+                }
+            }, 5000); // Kontroluj každých 5 sekund
+            
+            console.log("🏆 Achievement checking started");
         }
 
         // Debug funkce pro zobrazení aktuálního času
@@ -232,9 +275,6 @@
             const debugElement = document.getElementById('timeDebug');
             const timeSpentElement = document.getElementById('timeSpent');
             const timeStatusElement = document.getElementById('timeStatus');
-            
-            // Zobrazit debug info (můžete vypnout v produkci)
-            debugElement.style.display = 'block';
             
             debugUpdateInterval = setInterval(() => {
                 if (typeof getCurrentTimeSpent === 'function' && typeof timeTrackingData !== 'undefined') {
@@ -275,7 +315,7 @@
             setTimeout(() => {
                 console.log("🚀 Attempting gamification initialization...");
                 initializeGamification();
-            }, 500);
+            }, 1000); // Zvýšeno z 500ms na 1000ms
         });
 
         // === EVENT LISTENERS SETUP ===
@@ -297,9 +337,7 @@
                 console.error('Error loading audio:', error);
             }
 
-            // === SPUSTIT TIME TRACKING PO SPUŠTĚNÍ AR ===
-            console.log("🕐 Starting time tracking...");
-            initializePageTimeTracking();
+            console.log("🕐 AR started, time tracking should already be running");
         });
 
         // === TARGET EVENT LISTENERS ===
@@ -326,6 +364,11 @@
                     console.log("🏆 Recording activation for marker:", marker1Id);
                     recordMarkerActivation(currentExpositionId, currentSceneId, marker1Id); 
                     updateDebugPanel(); // Aktualizuj debug panel
+                    
+                    // Okamžitě zkontroluj časové achievementy
+                    if (typeof checkTimeBasedAchievements === 'function') {
+                        checkTimeBasedAchievements(currentExpositionId, currentSceneId);
+                    }
                 } else {
                     console.error("❌ Cannot record marker activation:", {
                         gamificationInitialized,
@@ -385,6 +428,26 @@
                 console.log("👁️ Window focus - time tracking resumed");
             }
         });
+
+        // Debug funkce dostupné globálně
+        window.debugGameState = function() {
+            console.log("=== FLORIAN DEBUG STATE ===");
+            console.log("Scene ID:", currentSceneId);
+            console.log("Exposition ID:", currentExpositionId);
+            console.log("Gamification initialized:", gamificationInitialized);
+            console.log("Time tracking initialized:", timeTrackingInitialized);
+            console.log("Scene config valid:", sceneConfigValid);
+            
+            if (typeof getCurrentTimeSpent === 'function') {
+                console.log("Current time spent:", Math.floor(getCurrentTimeSpent() / 1000), "seconds");
+            }
+            
+            if (typeof getTimeSpentInScene === 'function') {
+                console.log("Total time in scene:", Math.floor(getTimeSpentInScene(currentExpositionId, currentSceneId) / 1000), "seconds");
+            }
+            
+            console.log("=== END DEBUG STATE ===");
+        };
 
     </script>
 </body>
