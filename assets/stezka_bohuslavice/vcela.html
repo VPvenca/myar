@@ -587,54 +587,130 @@
             watchPosition();
         }
 
+        // Získání aktuální pozice - VYLEPŠENÁ VERZE s debuggingem
         function getCurrentPosition() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        userPosition = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                            accuracy: position.coords.accuracy
-                        };
-                        console.log("Position updated:", userPosition);
+            console.log("Requesting GPS position...");
+            document.getElementById('distanceInfo').innerHTML = '📍 Hledám GPS signál...';
+            
+            if (!navigator.geolocation) {
+                console.error("Geolocation is not supported");
+                document.getElementById('distanceInfo').innerHTML = '❌ GPS není podporován';
+                // Fallback - testovací pozice v Brně
+                userPosition = {
+                    lat: 49.195060,
+                    lng: 16.606836,
+                    accuracy: 50
+                };
+                console.log("Using fallback position:", userPosition);
+                checkProximityToMarkers();
+                updateNavigation();
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userPosition = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
+                    console.log("GPS position found:", userPosition);
+                    console.log(`GPS accuracy: ${position.coords.accuracy}m`);
+                    
+                    document.getElementById('distanceInfo').innerHTML = '🎯 GPS nalezen!';
+                    
+                    setTimeout(() => {
                         checkProximityToMarkers();
                         updateNavigation();
-                    },
-                    (error) => {
-                        console.error("Geolocation error:", error);
-                        document.getElementById('distanceInfo').innerHTML = '❌ GPS nedostupný';
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 10000,
-                        maximumAge: 30000
+                    }, 500);
+                },
+                (error) => {
+                    console.error("Geolocation error:", error);
+                    console.log("Error code:", error.code);
+                    console.log("Error message:", error.message);
+                    
+                    let errorMsg = '';
+                    switch(error.code) {
+                        case 1: // PERMISSION_DENIED
+                            errorMsg = '❌ GPS přístup zamítnut - povolte lokalizaci';
+                            break;
+                        case 2: // POSITION_UNAVAILABLE
+                            errorMsg = '❌ GPS nedostupný - zkuste venku';
+                            break;
+                        case 3: // TIMEOUT
+                            errorMsg = '⏱️ GPS timeout - zkouším fallback...';
+                            break;
+                        default:
+                            errorMsg = '❌ GPS chyba: ' + error.message;
                     }
-                );
-            }
+                    
+                    document.getElementById('distanceInfo').innerHTML = errorMsg;
+                    
+                    // Fallback po chybě - testovací pozice
+                    setTimeout(() => {
+                        console.log("Using fallback position due to GPS error");
+                        userPosition = {
+                            lat: 49.195060, // Brno centrum
+                            lng: 16.606836,
+                            accuracy: 100
+                        };
+                        document.getElementById('distanceInfo').innerHTML = '🔄 Používám testovací pozici';
+                        checkProximityToMarkers();
+                        updateNavigation();
+                    }, 2000);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000, // Zvýšíme timeout
+                    maximumAge: 60000 // Povolíme starší pozici
+                }
+            );
         }
 
+        // Sledování pozice - VYLEPŠENÁ VERZE
         function watchPosition() {
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(
-                    (position) => {
-                        userPosition = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                            accuracy: position.coords.accuracy
-                        };
-                        checkProximityToMarkers();
-                        updateNavigation();
-                    },
-                    (error) => {
-                        console.error("Watch position error:", error);
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 8000,
-                        maximumAge: 20000
-                    }
-                );
+            if (!navigator.geolocation) {
+                console.log("Geolocation not available for watching");
+                return;
             }
+
+            const watchId = navigator.geolocation.watchPosition(
+                (position) => {
+                    const newPosition = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
+                    
+                    // Kontrola, zda se pozice významně změnila
+                    if (userPosition) {
+                        const distance = calculateDistance(
+                            userPosition.lat, userPosition.lng,
+                            newPosition.lat, newPosition.lng
+                        );
+                        
+                        if (distance < 5) { // Méně než 5 metrů změny
+                            return; // Přeskočíme malé změny
+                        }
+                    }
+                    
+                    userPosition = newPosition;
+                    console.log("GPS position updated:", userPosition);
+                    checkProximityToMarkers();
+                    updateNavigation();
+                },
+                (error) => {
+                    console.error("GPS watch error:", error);
+                    // Neukončujeme watch kvůli jedné chybě
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 30000
+                }
+            );
+            
+            console.log("GPS watching started with ID:", watchId);
         }
 
         // Výpočet vzdálenosti
