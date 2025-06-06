@@ -273,10 +273,20 @@
     <div class="audio-info" id="audioInfo">🎵 Audio přehrává...</div>
     <div class="rotation-hint" id="rotationHint">🔄 Tažením otočíte včelu</div>
 
-    <!-- Audio soubory pro včely -->
-    <audio id="audio1" src="/assets/stezka_bohuslavice/mp3/vcela.mp3" preload="auto"></audio>
-    <audio id="audio2" src="/assets/stezka_bohuslavice/mp3/vcela.mp3" preload="auto"></audio>
-    <audio id="audio3" src="/assets/stezka_bohuslavice/mp3/vcela.mp3" preload="auto"></audio>
+        <a-assets>
+            <!-- GLB modely včel - opravené cesty -->
+            <a-asset-item id="bee-model-1" src="/assets/stezka_bohuslavice/3d/delnice.glb"></a-asset-item>
+            <a-asset-item id="bee-model-2" src="/assets/stezka_bohuslavice/3d/trubec.glb"></a-asset-item>
+            <a-asset-item id="bee-model-3" src="/assets/stezka_bohuslavice/3d/kralovna.glb"></a-asset-item>
+            
+            <!-- Audio soubory - opravené cesty -->
+            <audio id="audio1" src="/assets/stezka_bohuslavice/mp3/delnice.mp3" preload="auto"></audio>
+            <audio id="audio2" src="/assets/stezka_bohuslavice/mp3/trubec.mp3" preload="auto"></audio>
+            <audio id="audio3" src="/assets/stezka_bohuslavice/mp3/kralovna.mp3" preload="auto"></audio>
+    <!-- Audio soubory pro včely - opravené cesty -->
+    <audio id="audio1" src="/assets/stezka_bohuslavice/mp3/delnice.mp3" preload="auto"></audio>
+    <audio id="audio2" src="/assets/stezka_bohuslavice/mp3/trubec.mp3" preload="auto"></audio>
+    <audio id="audio3" src="/assets/stezka_bohuslavice/mp3/kralovna.mp3" preload="auto"></audio>
 
     <script>
         // Three.js proměnné
@@ -429,8 +439,14 @@
                 
                 try {
                     const gltf = await new Promise((resolve, reject) => {
+                        const modelPaths = [
+                            '/assets/stezka_bohuslavice/3d/delnice.glb',
+                            '/assets/stezka_bohuslavice/3d/trubec.glb',
+                            '/assets/stezka_bohuslavice/3d/kralovna.glb'
+                        ];
+                        
                         loader.load(
-                            '/assets/stezka_bohuslavice/3d/vcela.glb',
+                            modelPaths[i], // Používáme správnou cestu pro každý model
                             resolve,
                             (progress) => {
                                 const percentage = (progress.loaded / progress.total * 100);
