@@ -5,9 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Včelí AR Stezka - WebXR + Three.js</title>
     
-    <!-- Pouze Three.js - žádné externí AR knihovny -->
+    <!-- Three.js s opravenými odkazy pro GLTFLoader -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/loaders/GLTFLoader.js"></script>
+    
+    <!-- Alternativní způsob načtení GLTFLoader -->
+    <script>
+        // Fallback pro GLTFLoader pokud není dostupný
+        if (typeof THREE.GLTFLoader === 'undefined') {
+            console.log("Loading GLTFLoader via import...");
+            import('https://cdn.skypack.dev/three@0.158.0/examples/jsm/loaders/GLTFLoader.js')
+                .then(module => {
+                    THREE.GLTFLoader = module.GLTFLoader;
+                    console.log("GLTFLoader loaded successfully");
+                })
+                .catch(console.error);
+        }
+    </script>
     
     <style>
         body {
@@ -389,6 +403,23 @@
 
         // Načtení 3D modelů včel
         async function loadBeeModels() {
+            // Kontrola dostupnosti GLTFLoader
+            if (typeof THREE.GLTFLoader === 'undefined') {
+                console.error("GLTFLoader not available, trying alternative method...");
+                
+                // Pokus o načtení přes ES6 modules
+                try {
+                    const { GLTFLoader } = await import('https://cdn.skypack.dev/three@0.158.0/examples/jsm/loaders/GLTFLoader.js');
+                    THREE.GLTFLoader = GLTFLoader;
+                    console.log("GLTFLoader loaded via ES6 import");
+                } catch (error) {
+                    console.error("Failed to load GLTFLoader:", error);
+                    // Fallback - vytvoříme dummy modely
+                    createDummyBeeModels();
+                    return;
+                }
+            }
+            
             const loader = new THREE.GLTFLoader();
             
             console.log("Loading bee models...");
@@ -441,10 +472,87 @@
                     
                 } catch (error) {
                     console.error(`Error loading bee model ${i + 1}:`, error);
+                    // Vytvoříme dummy model pro tento marker
+                    createDummyModel(marker, i);
                 }
             }
             
             console.log(`${beeModels.length} bee models loaded successfully`);
+        }
+
+        // Fallback - vytvoření dummy modelů pokud GLB soubory nejsou dostupné
+        function createDummyBeeModels() {
+            console.log("Creating dummy bee models...");
+            
+            for (let i = 0; i < markers.length; i++) {
+                createDummyModel(markers[i], i);
+            }
+        }
+
+        function createDummyModel(marker, index) {
+            console.log(`Creating dummy model for ${marker.name}`);
+            
+            // Vytvoříme jednoduchý včelí model z základních geometrií
+            const group = new THREE.Group();
+            
+            // Tělo včely (žlutý elipsoid)
+            const bodyGeometry = new THREE.SphereGeometry(0.3, 8, 6);
+            const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0xFFD700 });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.scale.set(1, 0.8, 1.5);
+            group.add(body);
+            
+            // Černé pruhy
+            for (let i = 0; i < 3; i++) {
+                const stripeGeometry = new THREE.RingGeometry(0.25, 0.35, 8);
+                const stripeMaterial = new THREE.MeshPhongMaterial({ color: 0x000000 });
+                const stripe = new THREE.Mesh(stripeGeometry, stripeMaterial);
+                stripe.position.z = -0.2 + i * 0.2;
+                stripe.rotation.x = Math.PI / 2;
+                group.add(stripe);
+            }
+            
+            // Křídla (transparentní)
+            const wingGeometry = new THREE.PlaneGeometry(0.4, 0.6);
+            const wingMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xffffff, 
+                transparent: true, 
+                opacity: 0.3 
+            });
+            
+            const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
+            leftWing.position.set(-0.3, 0.2, 0);
+            leftWing.rotation.z = Math.PI / 6;
+            group.add(leftWing);
+            
+            const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
+            rightWing.position.set(0.3, 0.2, 0);
+            rightWing.rotation.z = -Math.PI / 6;
+            group.add(rightWing);
+            
+            // Pozice a nastavení
+            group.scale.set(2, 2, 2);
+            group.rotation.y = THREE.MathUtils.degToRad(30);
+            group.visible = false;
+            
+            // Pozice modelů v prostoru
+            const angle = (index / markers.length) * Math.PI * 2;
+            const radius = 2;
+            group.position.set(
+                Math.cos(angle) * radius,
+                0,
+                Math.sin(angle) * radius - 5
+            );
+            
+            // Jednoduchá animace (pohupování)
+            group.userData = {
+                originalY: group.position.y,
+                time: 0
+            };
+            
+            scene.add(group);
+            marker.model = group;
+            beeModels.push(group);
         }
 
         // Render loop
@@ -454,7 +562,12 @@
             // Update animací
             beeModels.forEach(model => {
                 if (model && model.mixer) {
-                    model.mixer.update(0.016); // ~60fps
+                    model.mixer.update(0.016); // GLB animace
+                } else if (model && model.userData && model.userData.time !== undefined) {
+                    // Dummy model animace (pohupování)
+                    model.userData.time += 0.016;
+                    model.position.y = model.userData.originalY + Math.sin(model.userData.time * 3) * 0.1;
+                    model.rotation.y += 0.01; // Pomalé otáčení
                 }
             });
             
