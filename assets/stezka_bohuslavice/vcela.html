@@ -183,6 +183,137 @@
         .snap-button.camera-mode:hover {
             background: rgba(40, 167, 69, 1);
         }
+
+        /* Vertikální korekce posuvník */
+        .vertical-correction {
+            position: fixed;
+            left: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1002;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 15px 8px;
+            height: 250px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 0.3s;
+        }
+
+        .vertical-correction.hidden {
+            opacity: 0.3;
+        }
+
+        .correction-label {
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .correction-slider {
+            writing-mode: bt-lr; /* IE */
+            writing-mode: vertical-lr; /* Standard */
+            -webkit-appearance: slider-vertical;
+            width: 20px;
+            height: 180px;
+            background: transparent;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .correction-slider::-webkit-slider-track {
+            width: 6px;
+            height: 180px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .correction-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #FFC107;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .correction-slider::-moz-range-track {
+            width: 6px;
+            height: 180px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            border: none;
+        }
+
+        .correction-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #FFC107;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .correction-value {
+            color: white;
+            font-size: 10px;
+            margin-top: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .correction-reset {
+            background: rgba(255, 193, 7, 0.9);
+            color: black;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 10px;
+            margin-top: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .correction-reset:hover {
+            background: rgba(255, 193, 7, 1);
+        }
+
+        /* Toggle tlačítko pro skrytí/zobrazení posuvníku */
+        .correction-toggle {
+            position: fixed;
+            left: 5px;
+            bottom: 100px;
+            z-index: 1002;
+            width: 35px;
+            height: 35px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .correction-toggle:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        /* Aplikace korekce na video canvas */
+        .vertical-corrected {
+            transform-origin: center center;
+        }
     </style>
 </head>
 <body>
@@ -211,12 +342,36 @@
     <!-- Snap to camera tlačítko -->
     <button class="snap-button ui-element" id="snapButton" title="Přichytit k pohledu">📱</button>
 
+    <!-- Vertikální korekce posuvník -->
+    <div class="vertical-correction ui-element" id="verticalCorrection">
+        <div class="correction-label">
+            📐<br>
+            Vertikální<br>
+            korekce
+        </div>
+        <input 
+            type="range" 
+            class="correction-slider" 
+            id="correctionSlider"
+            min="0.5" 
+            max="2.0" 
+            step="0.05" 
+            value="1.0"
+            orient="vertical">
+        <div class="correction-value" id="correctionValue">1.00</div>
+        <button class="correction-reset" id="correctionReset">Reset</button>
+    </div>
+
+    <!-- Toggle tlačítko pro korekci -->
+    <button class="correction-toggle ui-element" id="correctionToggle" title="Zobrazit/skrýt korekci obrazu">📐</button>
+
     <!-- A-Frame AR scéna s GPS pozicováním -->
     <a-scene 
         vr-mode-ui="enabled: false"
         arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
         renderer="logarithmicDepthBuffer: true; antialias: true;"
-        device-orientation-permission-ui="enabled: false">
+        device-orientation-permission-ui="enabled: false"
+        id="arScene">
 
         <a-assets>
             <!-- GLB modely včel - OPRAVENÉ CESTY -->
@@ -327,6 +482,12 @@
         let startX = 0;
         let rotationHintShown = false;
         
+        // Proměnné pro vertikální korekci
+        let verticalCorrectionValue = 1.0;
+        let correctionSliderVisible = true;
+        let videoElement = null;
+        let canvasElement = null;
+        
         // Definice včelích markerů s UPRAVENÝMI GPS souřadnicemi královny
         const markers = [
             { 
@@ -354,6 +515,115 @@
                 audioId: "audio3"
             }
         ];
+
+        // Vertikální korekce funkcionalita
+        function setupVerticalCorrection() {
+            console.log("Setting up vertical correction...");
+            
+            const correctionSlider = document.getElementById('correctionSlider');
+            const correctionValue = document.getElementById('correctionValue');
+            const correctionReset = document.getElementById('correctionReset');
+            const correctionToggle = document.getElementById('correctionToggle');
+            const correctionPanel = document.getElementById('verticalCorrection');
+            
+            // Najdeme video element A-Frame scény
+            setTimeout(() => {
+                findVideoElements();
+            }, 2000);
+            
+            // Event listener pro posuvník
+            correctionSlider.addEventListener('input', (e) => {
+                verticalCorrectionValue = parseFloat(e.target.value);
+                correctionValue.textContent = verticalCorrectionValue.toFixed(2);
+                applyVerticalCorrection();
+                console.log(`Vertical correction changed to: ${verticalCorrectionValue}`);
+            });
+            
+            // Reset tlačítko
+            correctionReset.addEventListener('click', () => {
+                verticalCorrectionValue = 1.0;
+                correctionSlider.value = 1.0;
+                correctionValue.textContent = '1.00';
+                applyVerticalCorrection();
+                console.log("Vertical correction reset to 1.0");
+            });
+            
+            // Toggle viditelnosti
+            correctionToggle.addEventListener('click', () => {
+                correctionSliderVisible = !correctionSliderVisible;
+                if (correctionSliderVisible) {
+                    correctionPanel.style.display = 'flex';
+                    correctionToggle.innerHTML = '📐';
+                    correctionToggle.title = 'Skrýt korekci obrazu';
+                } else {
+                    correctionPanel.style.display = 'none';
+                    correctionToggle.innerHTML = '👁️';
+                    correctionToggle.title = 'Zobrazit korekci obrazu';
+                }
+            });
+            
+            // Auto-skrytí při rotaci telefonu na landscape
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => {
+                    if (window.innerWidth > window.innerHeight) {
+                        // Landscape - skryjeme posuvník
+                        correctionPanel.classList.add('hidden');
+                    } else {
+                        // Portrait - zobrazíme posuvník
+                        correctionPanel.classList.remove('hidden');
+                    }
+                }, 500);
+            });
+        }
+        
+        function findVideoElements() {
+            // Pokusíme se najít video element A-Frame scény
+            const scene = document.querySelector('a-scene');
+            if (scene && scene.canvas) {
+                canvasElement = scene.canvas;
+                console.log("Found A-Frame canvas element");
+            }
+            
+            // Pokusíme se najít video element
+            const videos = document.getElementsByTagName('video');
+            if (videos.length > 0) {
+                videoElement = videos[0];
+                console.log("Found video element");
+            }
+            
+            // Pokud nenajdeme ihned, zkusíme později
+            if (!videoElement && !canvasElement) {
+                setTimeout(findVideoElements, 1000);
+            }
+        }
+        
+        function applyVerticalCorrection() {
+            try {
+                // Aplikujeme korekci na canvas A-Frame scény
+                if (canvasElement) {
+                    canvasElement.style.transform = `scaleY(${verticalCorrectionValue})`;
+                    canvasElement.style.transformOrigin = 'center center';
+                    console.log(`Applied correction ${verticalCorrectionValue} to canvas`);
+                }
+                
+                // Aplikujeme korekci na video element pokud existuje
+                if (videoElement) {
+                    videoElement.style.transform = `scaleY(${verticalCorrectionValue})`;
+                    videoElement.style.transformOrigin = 'center center';
+                    console.log(`Applied correction ${verticalCorrectionValue} to video`);
+                }
+                
+                // Fallback - aplikujeme na celou scénu
+                const scene = document.querySelector('a-scene');
+                if (scene) {
+                    scene.style.transform = `scaleY(${verticalCorrectionValue})`;
+                    scene.style.transformOrigin = 'center center';
+                }
+                
+            } catch (error) {
+                console.error("Error applying vertical correction:", error);
+            }
+        }
 
         // Výpočet vzdálenosti mezi GPS body
         function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -525,7 +795,6 @@
             
             // Zobrazit/skrýt snap tlačítko podle viditelnosti modelů
             updateSnapButtonVisibility();
-        }
         }
 
         // Audio funkce - UPRAVENÉ s pause/play funkcionalitou
@@ -973,7 +1242,9 @@
                 '.distance-info',
                 '.audio-info',
                 '.rotation-hint',
-                '.snap-button'
+                '.snap-button',
+                '.vertical-correction',
+                '.correction-toggle'
             ];
             
             for (let selector of uiSelectors) {
@@ -1043,12 +1314,13 @@
 
         // Inicializace při načtení
         window.addEventListener('load', () => {
-            console.log("Starting bee AR application with dynamic lighting...");
+            console.log("Starting bee AR application with dynamic lighting and vertical correction...");
             
             // Počkáme na A-Frame
             document.querySelector('a-scene').addEventListener('loaded', () => {
                 console.log("A-Frame scene loaded");
                 setupModelRotation(); // Nastavíme rotaci
+                setupVerticalCorrection(); // Nastavíme vertikální korekci
                 getCurrentPosition();
                 watchPosition();
                 
@@ -1059,7 +1331,7 @@
             });
         });
 
-        console.log("Bee AR script with dynamic lighting loaded successfully!");
+        console.log("Bee AR script with dynamic lighting and vertical correction loaded successfully!");
 
         // Dynamické osvětlení podle denní doby
         function setupDynamicLighting() {
