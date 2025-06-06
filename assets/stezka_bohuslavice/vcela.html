@@ -57,37 +57,14 @@
             z-index: 1000;
         }
         
-        /* Gamifikační status */
+        /* Gamifikační status - SKRYTO */
         .gamification-status {
-            position: fixed;
-            top: 60px;
-            right: 10px;
-            background: rgba(0, 123, 255, 0.9);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            z-index: 1000;
-            display: none;
+            display: none !important;
         }
 
-        .gamification-status.active {
-            display: block;
-        }
-
-        /* Debug tlačítko */
+        /* Debug tlačítko - SKRYTO */
         .debug-button {
-            position: fixed;
-            bottom: 80px;
-            right: 10px;
-            background: rgba(255, 0, 0, 0.8);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            z-index: 1000;
-            cursor: pointer;
-            border: none;
+            display: none !important;
         }
 
         /* Zbytek stylů zachován z původního kódu... */
@@ -210,11 +187,11 @@
     <div class="audio-info ui-element" id="audioInfo">🎵 Audio přehrává...</div>
     <div class="rotation-hint" id="rotationHint">🔄 Tažením otočíte včelu</div>
     
-    <!-- Gamifikační status -->
-    <div class="gamification-status ui-element" id="gamificationStatus">🎮 Gamifikace načítá...</div>
+    <!-- Gamifikační status - SKRYTO -->
+    <div class="gamification-status ui-element" id="gamificationStatus" style="display: none !important;">🎮 Gamifikace načítá...</div>
     
-    <!-- Debug tlačítko -->
-    <button class="debug-button ui-element" id="debugButton">🔧 Debug</button>
+    <!-- Debug tlačítko - SKRYTO -->
+    <button class="debug-button ui-element" id="debugButton" style="display: none !important;">🔧 Debug</button>
 
     <!-- A-Frame AR scéna s GPS pozicováním -->
     <a-scene 
@@ -362,7 +339,7 @@
 
         // === GAMIFIKAČNÍ FUNKCE ===
         
-        // OPRAVENÁ inicializace gamifikace
+        // OPRAVENÁ inicializace gamifikace - TICHÁ VERZE
         function initializeGameification() {
             console.log("🎮 Initializing gamification for včelařská stezka...");
             
@@ -373,7 +350,7 @@
                 return;
             }
             
-            // Debug výpis konfigurací
+            // Debug výpis konfigurací (pouze do konzole)
             console.log("📊 Scene config:", SCENE_CONFIG);
             console.log("🏆 Achievements config:", ACHIEVEMENTS_CONFIG);
             console.log("🏛️ Exposition registry:", EXPOSITION_REGISTRY);
@@ -397,20 +374,9 @@
             }
             
             gamificationInitialized = true;
-            
-            // Aktualizuj status
-            const statusElement = document.getElementById('gamificationStatus');
-            if (statusElement) {
-                statusElement.textContent = '🎮 Gamifikace aktivní - Včelařská stezka';
-                statusElement.classList.add('active');
-                
-                // Skryj po 5 sekundách
-                setTimeout(() => {
-                    statusElement.classList.remove('active');
-                }, 5000);
-            }
-            
             console.log("✅ Gamification initialized successfully for včelařská stezka");
+            
+            // ODSTRANĚNO: Již se nezobrazuje žádná notifikace o aktivaci gamifikace
         }
 
         // OPRAVENÁ funkce pro záznam aktivace včelích markerů
@@ -425,14 +391,14 @@
             if (typeof recordMarkerActivation === 'function') {
                 recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
                 
-                // Přidej vizuální feedback
-                showMarkerActivationFeedback(markerId);
+                // ODSTRANĚNO: Vizuální feedback byl vypnut
+                // showMarkerActivationFeedback(markerId);
             } else {
                 console.error("❌ recordMarkerActivation function not found");
             }
         }
 
-        // NOVÁ funkce pro vizuální feedback aktivace markeru
+        // FUNKCE PONECHÁNA PRO PŘÍPADNÉ BUDOUCÍ POUŽITÍ, ALE NENÍ VOLÁNA
         function showMarkerActivationFeedback(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (!marker) return;
@@ -463,26 +429,6 @@
                     feedback.parentNode.removeChild(feedback);
                 }
             }, 2000);
-        }
-
-        // Debug funkce
-        function setupDebugButton() {
-            const debugButton = document.getElementById('debugButton');
-            if (debugButton) {
-                debugButton.addEventListener('click', () => {
-                    if (typeof debugGamificationState === 'function') {
-                        debugGamificationState();
-                    }
-                    
-                    console.log("=== VČELAŘSKÁ STEZKA DEBUG ===");
-                    console.log("Current exposition ID:", currentExpositionId);
-                    console.log("Current scene ID:", currentSceneId);
-                    console.log("Gamification initialized:", gamificationInitialized);
-                    console.log("Available markers:", markers.map(m => m.id));
-                    console.log("Scene config for current scene:", SCENE_CONFIG[currentSceneId]);
-                    console.log("=== END VČELAŘSKÁ DEBUG ===");
-                });
-            }
         }
 
         // Page visibility API pro pozastavení gamifikace
@@ -940,9 +886,7 @@
                 '.target-item',
                 '.distance-info',
                 '.audio-info',
-                '.rotation-hint',
-                '.gamification-status',
-                '.debug-button'
+                '.rotation-hint'
             ];
             
             for (let selector of uiSelectors) {
@@ -983,7 +927,7 @@
         // === HLAVNÍ INICIALIZACE ===
         
         window.addEventListener('load', () => {
-            console.log("Starting bee AR application with ENHANCED GAMIFICATION...");
+            console.log("Starting bee AR application with gamification...");
             
             // Počkej na načtení gamifikačních skriptů a pak inicializuj
             setTimeout(() => {
@@ -994,13 +938,12 @@
             document.querySelector('a-scene').addEventListener('loaded', () => {
                 console.log("A-Frame scene loaded");
                 setupModelRotation();
-                setupDebugButton();
                 getCurrentPosition();
                 watchPosition();
             });
         });
 
-        console.log("🐝 Bee AR script with ENHANCED GAMIFICATION loaded successfully!");
+        console.log("🐝 Bee AR script with gamification loaded successfully!");
     </script>
 </body>
 </html>
