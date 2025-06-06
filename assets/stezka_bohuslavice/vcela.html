@@ -1126,7 +1126,7 @@
         // Audio ovládání kliknutím na audio info panel
         document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
 
-        // Snap button event listener - zatím jen basic
+        // Snap button event listener - FUNKČNÍ VERZE
         document.getElementById('snapButton').addEventListener('click', handleSnapButtonClick);
 
         document.addEventListener('click', (e) => {
@@ -1138,7 +1138,7 @@
 
         // Inicializace při načtení
         window.addEventListener('load', () => {
-            console.log("Starting bee AR application with basic snap button...");
+            console.log("Starting bee AR application with full snap functionality...");
             
             // Počkáme na A-Frame
             document.querySelector('a-scene').addEventListener('loaded', () => {
@@ -1154,7 +1154,7 @@
             });
         });
 
-        console.log("Bee AR script with dynamic lighting and basic snap loaded successfully!");
+        console.log("Bee AR script with full snap functionality loaded successfully!");
     </script>
 </body>
 </html>
