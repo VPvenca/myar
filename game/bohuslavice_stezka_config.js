@@ -59,33 +59,33 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             image: "/img/achievements/znalec_vcelstva.png"
         },
 
-        // === ZÁKLADNÍ ACHIEVEMENTY PRO EXPOZICI ===
-        "vcelarstvi_first_scene": {
-            name: "První krůčky ve včelařství",
-            description: "Dokončil jsi první scénu na Včelařské stezce",
-            icon: "🐝",
-            category: "stezka_bohuslavice",
-            rarity: "common",
-            image: "/img/achievements/vcelarstvi_first_scene.png"
-        },
+     // === ZÁKLADNÍ ACHIEVEMENTY PRO EXPOZICI ===
+"stezka_bohuslavice_first_scene": {  // ZMĚNĚNO z "vcelarstvi_first_scene"
+    name: "První krůčky ve včelařství",
+    description: "Dokončil jsi první scénu na Včelařské stezce",
+    icon: "🐝",
+    category: "stezka_bohuslavice",
+    rarity: "common",
+    image: "/img/achievements/vcelarstvi_first_scene.png"
+},
 
-        "vcelarstvi_all_scenes": {
-            name: "Znalec včelařství",
-            description: "Dokončil jsi všechny scény na Včelařské stezce",
-            icon: "🎓",
-            category: "stezka_bohuslavice",
-            rarity: "rare",
-            image: "/img/achievements/vcelarstvi_all_scenes.png"
-        },
+"stezka_bohuslavice_all_scenes": {  // ZMĚNĚNO z "vcelarstvi_all_scenes"
+    name: "Znalec včelařství",
+    description: "Dokončil jsi všechny scény na Včelařské stezce",
+    icon: "🎓",
+    category: "stezka_bohuslavice",
+    rarity: "rare",
+    image: "/img/achievements/vcelarstvi_all_scenes.png"
+},
 
-        "vcelarstvi_perfectionist": {
-            name: "Mistr včelařství",
-            description: "Získal jsi zlaté hvězdy ve všech scénách Včelařské stezky",
-            icon: "👑",
-            category: "stezka_bohuslavice",
-            rarity: "legendary",
-            image: "/img/achievements/vcelarstvi_perfectionist.png"
-        }
+"stezka_bohuslavice_perfectionist": {  // ZMĚNĚNO z "vcelarstvi_perfectionist"
+    name: "Mistr včelařství",
+    description: "Získal jsi zlaté hvězdy ve všech scénách Včelařské stezky",
+    icon: "👑",
+    category: "stezka_bohuslavice",
+    rarity: "legendary",
+    image: "/img/achievements/vcelarstvi_perfectionist.png"
+}
     },
 
     // === KATEGORIE ===
