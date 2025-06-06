@@ -246,9 +246,23 @@
             </a-gltf-model>
         </a-entity>
 
-        <!-- Základní osvětlení -->
-        <a-light type="ambient" color="#ffffff" intensity="0.6"></a-light>
-        <a-light type="directional" color="#ffeb3b" intensity="0.8" position="0 5 0"></a-light>
+        <!-- Základní osvětlení - DYNAMICKÉ -->
+        <a-light type="ambient" color="#87CEEB" intensity="0.4" id="ambientLight"></a-light>
+        <a-light 
+            type="directional" 
+            color="#ffffff" 
+            intensity="1.0" 
+            position="2 8 3"
+            id="sunLight">
+        </a-light>
+        <a-light 
+            type="point" 
+            color="#ffffff" 
+            intensity="0.3" 
+            position="-2 4 2"
+            distance="20"
+            id="fillLight">
+        </a-light>
     </a-scene>
 
     <script>
@@ -782,7 +796,7 @@
 
         // Inicializace při načtení
         window.addEventListener('load', () => {
-            console.log("Starting bee AR application with simple audio controls...");
+            console.log("Starting bee AR application with dynamic lighting...");
             
             // Počkáme na A-Frame
             document.querySelector('a-scene').addEventListener('loaded', () => {
@@ -790,10 +804,97 @@
                 setupModelRotation(); // Nastavíme rotaci
                 getCurrentPosition();
                 watchPosition();
+                
+                // Spustíme dynamické osvětlení po načtení scény
+                setTimeout(() => {
+                    startLightingUpdate();
+                }, 1000);
             });
         });
 
-        console.log("Bee AR script with simple audio controls loaded successfully!");
+        console.log("Bee AR script with dynamic lighting loaded successfully!");
+
+        // Dynamické osvětlení podle denní doby
+        function setupDynamicLighting() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const timeOfDay = hours + minutes / 60;
+            
+            console.log(`Setting up dynamic lighting for time: ${hours}:${minutes.toString().padStart(2, '0')}`);
+            
+            const ambientLight = document.getElementById('ambientLight');
+            const sunLight = document.getElementById('sunLight');
+            const fillLight = document.getElementById('fillLight');
+            
+            if (!ambientLight || !sunLight || !fillLight) {
+                console.log("Waiting for lights to load...");
+                return;
+            }
+            
+            let lightConfig;
+            
+            if (timeOfDay >= 6 && timeOfDay < 10) {
+                // Ráno (6-10h) - chladnější světlo
+                lightConfig = {
+                    ambient: { color: '#B0E0E6', intensity: 0.5 },
+                    sun: { color: '#FFE5B4', intensity: 1.2, position: '1 6 4' },
+                    fill: { color: '#E6F3FF', intensity: 0.4 }
+                };
+                console.log("🌅 Morning lighting applied");
+            } else if (timeOfDay >= 10 && timeOfDay < 16) {
+                // Den (10-16h) - jasné bílé světlo
+                lightConfig = {
+                    ambient: { color: '#F0F8FF', intensity: 0.6 },
+                    sun: { color: '#FFFFFF', intensity: 1.4, position: '0 8 2' },
+                    fill: { color: '#FFFFFF', intensity: 0.5 }
+                };
+                console.log("☀️ Daytime lighting applied");
+            } else if (timeOfDay >= 16 && timeOfDay < 19) {
+                // Odpoledne (16-19h) - teplé světlo
+                lightConfig = {
+                    ambient: { color: '#FFE4B5', intensity: 0.5 },
+                    sun: { color: '#FFA500', intensity: 1.1, position: '-1 5 3' },
+                    fill: { color: '#FFEAA7', intensity: 0.4 }
+                };
+                console.log("🌇 Afternoon lighting applied");
+            } else if (timeOfDay >= 19 && timeOfDay < 22) {
+                // Večer (19-22h) - zlaté světlo
+                lightConfig = {
+                    ambient: { color: '#DDA0DD', intensity: 0.4 },
+                    sun: { color: '#FF8C00', intensity: 0.9, position: '-2 3 2' },
+                    fill: { color: '#FFB347', intensity: 0.3 }
+                };
+                console.log("🌆 Evening lighting applied");
+            } else {
+                // Noc (22-6h) - modravé světlo
+                lightConfig = {
+                    ambient: { color: '#191970', intensity: 0.3 },
+                    sun: { color: '#4169E1', intensity: 0.6, position: '0 4 1' },
+                    fill: { color: '#6495ED', intensity: 0.2 }
+                };
+                console.log("🌙 Night lighting applied");
+            }
+            
+            // Aplikace osvětlení
+            ambientLight.setAttribute('color', lightConfig.ambient.color);
+            ambientLight.setAttribute('intensity', lightConfig.ambient.intensity);
+            
+            sunLight.setAttribute('color', lightConfig.sun.color);
+            sunLight.setAttribute('intensity', lightConfig.sun.intensity);
+            sunLight.setAttribute('position', lightConfig.sun.position);
+            
+            fillLight.setAttribute('color', lightConfig.fill.color);
+            fillLight.setAttribute('intensity', lightConfig.fill.intensity);
+            
+            console.log("✨ Dynamic lighting setup complete");
+        }
+
+        // Aktualizace osvětlení každých 5 minut
+        function startLightingUpdate() {
+            setupDynamicLighting();
+            setInterval(setupDynamicLighting, 5 * 60 * 1000); // Každých 5 minut
+        }
     </script>
 </body>
 </html>
