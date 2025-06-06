@@ -1,9 +1,13 @@
-// gamification.js - Vylepšený gamifikační systém s opravenými achievementy
+// gamification.js - Vylepšený gamifikační systém s frontou achievementů
 
-// Základní klíč pro ukládání všech gamifikačních dat
+// Základní klíče pro ukládání všech gamifikačních dat
 const BASE_STORAGE_KEY = 'arGamificationData'; 
 const ACHIEVEMENTS_STORAGE_KEY = 'arAchievements';
 const TIME_TRACKING_STORAGE_KEY = 'arTimeTracking';
+
+// === SYSTÉM FRONTY ACHIEVEMENTŮ ===
+let achievementQueue = [];
+let isShowingAchievement = false;
 
 // === TIME TRACKING SYSTÉM ===
 let timeTrackingData = {
@@ -210,7 +214,7 @@ setInterval(() => {
     }
 }, 10000);
 
-// === PŮVODNÍ GAMIFIKAČNÍ SYSTÉM ===
+// === GAMIFIKAČNÍ SYSTÉM ===
 
 // Funkce pro získání dat PRO KONKRÉTNÍ EXPOZICI
 function getGamificationData(expositionId) {
@@ -227,7 +231,7 @@ function saveGamificationData(expositionId, expositionData) {
     localStorage.setItem(BASE_STORAGE_KEY, JSON.stringify(parsedTotalData));
 }
 
-// === ACHIEVEMENT SYSTÉM ===
+// === ACHIEVEMENT SYSTÉM S FRONTOU ===
 
 // Funkce pro získání všech achievement dat
 function getAchievementData() {
@@ -246,7 +250,24 @@ function isAchievementUnlocked(achievementId) {
     return achievementData[achievementId] && achievementData[achievementId].unlocked;
 }
 
-// Funkce pro odemknutí achievementu
+// Funkce pro přidání achievementu do fronty
+function queueAchievementNotification(achievementId) {
+    achievementQueue.push(achievementId);
+    processAchievementQueue();
+}
+
+// Zpracování fronty achievementů
+function processAchievementQueue() {
+    if (isShowingAchievement || achievementQueue.length === 0) {
+        return;
+    }
+    
+    isShowingAchievement = true;
+    const achievementId = achievementQueue.shift();
+    showAchievementNotification(achievementId);
+}
+
+// HLAVNÍ funkce pro odemknutí achievementu s frontou
 function unlockAchievement(achievementId) {
     if (isAchievementUnlocked(achievementId)) {
         return false; // Už je odemčený
@@ -261,18 +282,20 @@ function unlockAchievement(achievementId) {
     
     saveAchievementData(achievementData);
     
-    // Zobrazit notifikaci o novém achievementu
-    showAchievementNotification(achievementId);
+    // Přidáme achievement do fronty místo okamžitého zobrazení
+    queueAchievementNotification(achievementId);
     
     console.log(`🏆 Achievement unlocked: ${achievementId}`);
     return true;
 }
 
-// Funkce pro zobrazení notifikace o novém achievementu
+// Funkce pro zobrazení notifikace achievementu
 function showAchievementNotification(achievementId) {
     const achievement = ACHIEVEMENTS_CONFIG[achievementId];
     if (!achievement) {
         console.warn(`⚠️ Achievement ${achievementId} not found in config`);
+        isShowingAchievement = false;
+        processAchievementQueue(); // Pokračuj s dalším
         return;
     }
     
@@ -305,9 +328,20 @@ function showAchievementNotification(achievementId) {
                 box-shadow: 0 10px 30px rgba(0,0,0,0.3);
                 z-index: 10000;
                 max-width: 300px;
-                animation: slideInRight 0.5s ease-out, fadeOut 0.5s ease-in 4s forwards;
+                animation: slideInRight 0.5s ease-out;
                 border: 3px solid #ff6b35;
+                cursor: pointer;
+                transition: transform 0.2s ease;
             }
+            
+            .achievement-notification:hover {
+                transform: scale(1.05);
+            }
+            
+            .achievement-notification.fade-out {
+                animation: fadeOut 0.5s ease-in forwards;
+            }
+            
             .achievement-notification-content {
                 display: flex;
                 align-items: center;
@@ -327,30 +361,93 @@ function showAchievementNotification(achievementId) {
                 color: #555;
                 font-size: 0.9em;
             }
+            
+            /* Animace */
             @keyframes slideInRight {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
+                from { 
+                    transform: translateX(100%); 
+                    opacity: 0; 
+                }
+                to { 
+                    transform: translateX(0); 
+                    opacity: 1; 
+                }
             }
             @keyframes fadeOut {
-                to { transform: translateX(100%); opacity: 0; }
+                to { 
+                    transform: translateX(100%); 
+                    opacity: 0; 
+                }
+            }
+            
+            /* Speciální efekt pro vzácné achievementy */
+            .achievement-notification.legendary {
+                border-color: #ffc107;
+                background: linear-gradient(135deg, #ffd700, #ffed4e, #ffc107);
+                animation: slideInRight 0.5s ease-out, pulse 0.3s ease-in-out 0.5s;
+            }
+            
+            .achievement-notification.rare {
+                border-color: #007bff;
+                background: linear-gradient(135deg, #4fc3f7, #29b6f6, #03a9f4);
+                color: white;
+            }
+            
+            .achievement-notification.rare .achievement-text h4,
+            .achievement-notification.rare .achievement-text p {
+                color: white;
+            }
+            
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
             }
         `;
         document.head.appendChild(styles);
     }
     
+    // Přidej speciální třídy podle rarity
+    if (achievement.rarity === 'legendary') {
+        notification.classList.add('legendary');
+    } else if (achievement.rarity === 'rare') {
+        notification.classList.add('rare');
+    }
+    
     document.body.appendChild(notification);
     
-    // Odstranění notifikace po 5 sekundách
+    // Možnost zavřít kliknutím
+    notification.addEventListener('click', () => {
+        hideNotification(notification);
+    });
+    
+    // Automatické zavření po 4 sekundách
     setTimeout(() => {
-        if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
-        }
-    }, 5000);
+        hideNotification(notification);
+    }, 4000);
     
     console.log(`🔔 Achievement notification shown: ${achievement.name}`);
 }
 
-// OPRAVENÁ FUNKCE: Kontrola achievementů pro konkrétní expozici
+// Funkce pro skrytí notifikace s callback
+function hideNotification(notification) {
+    if (!notification.parentNode) return;
+    
+    notification.classList.add('fade-out');
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+        
+        // Označ, že notifikace skončila a zpracuj další
+        isShowingAchievement = false;
+        processAchievementQueue();
+    }, 500); // Čas pro fade-out animaci
+}
+
+// === KONTROLA ACHIEVEMENTŮ ===
+
+// Kontrola achievementů pro konkrétní expozici
 function checkExpositionAchievements(expositionId) {
     console.log(`🔍 Checking exposition achievements for: ${expositionId}`);
     
@@ -468,7 +565,7 @@ function checkGlobalAchievements() {
     }
 }
 
-// UPRAVENÁ FUNKCE: Záznam aktivace markeru s vylepšenou logikou
+// Záznam aktivace markeru s vylepšenou logikou
 function recordMarkerActivation(expositionId, sceneId, markerId) {
     console.log(`🎯 Recording marker activation: ${markerId} in scene ${sceneId} for exposition ${expositionId}`);
     
@@ -508,7 +605,7 @@ function recordMarkerActivation(expositionId, sceneId, markerId) {
     }
 }
 
-// NOVÁ FUNKCE: Kontrola marker-specifických achievementů
+// Kontrola marker-specifických achievementů
 function checkMarkerSpecificAchievements(expositionId, sceneId, markerId) {
     console.log(`🔍 Checking marker-specific achievements for ${markerId}`);
     
@@ -543,7 +640,7 @@ function checkFirstMarkerAchievement() {
     }
 }
 
-// UPRAVENÁ FUNKCE: Kontrola specifických achievementů pro scény
+// Kontrola specifických achievementů pro scény
 function checkSceneSpecificAchievements(expositionId, sceneId) {
     console.log(`🔍 Checking scene-specific achievements for ${sceneId}`);
     
@@ -592,7 +689,9 @@ function checkSceneSpecificAchievements(expositionId, sceneId) {
     });
 }
 
-// Funkce pro získání úrovně hvězd - ZŮSTÁVÁ STEJNÁ
+// === HVĚZDNÝ SYSTÉM ===
+
+// Funkce pro získání úrovně hvězd
 function getSceneStarLevel(expositionId, sceneId) {
     const expoData = getGamificationData(expositionId);
     const sceneData = expoData[sceneId] || {};
@@ -633,7 +732,7 @@ function getSceneStarLevel(expositionId, sceneId) {
     return 'none';
 }
 
-// Funkce pro zobrazení hvězd - ZŮSTÁVÁ STEJNÁ
+// Funkce pro zobrazení hvězd
 function displayStars(starElement, level) {
     let starsHtml = '';
     switch (level) {
@@ -653,6 +752,8 @@ function displayStars(starElement, level) {
         starElement.innerHTML = starsHtml;
     }
 }
+
+// === UTILITY FUNKCE ===
 
 // Funkce pro získání všech odemčených achievementů pro inventář
 function getUnlockedAchievements() {
@@ -706,6 +807,8 @@ function debugGamificationState() {
     console.log("Achievement config keys:", Object.keys(ACHIEVEMENTS_CONFIG || {}));
     console.log("Current data:", localStorage.getItem(BASE_STORAGE_KEY));
     console.log("Current achievements:", localStorage.getItem(ACHIEVEMENTS_STORAGE_KEY));
+    console.log("Achievement queue:", achievementQueue);
+    console.log("Is showing achievement:", isShowingAchievement);
     console.log("=== END DEBUG STATE ===");
 }
 
@@ -717,10 +820,48 @@ function resetGamificationData() {
     console.log("🔄 All gamification data reset!");
 }
 
+// Funkce pro vymazání fronty achievementů (pro debugging)
+function clearAchievementQueue() {
+    achievementQueue = [];
+    isShowingAchievement = false;
+    console.log("🔄 Achievement queue cleared");
+}
+
+// Funkce pro zobrazení aktuální fronty (pro debugging)
+function showAchievementQueue() {
+    console.log("📋 Current achievement queue:", achievementQueue);
+    console.log("🎭 Is showing achievement:", isShowingAchievement);
+}
+
+// Funkce pro testování achievementů (pro debugging)
+function testAchievementQueue() {
+    console.log("🧪 Testing achievement queue with dummy achievements...");
+    
+    // Vytvoř testovací achievementy
+    const testAchievements = [
+        { id: 'test_1', name: 'Test Achievement 1', description: 'První testovací achievement', icon: '🎯', rarity: 'common' },
+        { id: 'test_2', name: 'Test Achievement 2', description: 'Druhý testovací achievement', icon: '🏆', rarity: 'rare' },
+        { id: 'test_3', name: 'Test Achievement 3', description: 'Třetí testovací achievement', icon: '👑', rarity: 'legendary' }
+    ];
+    
+    // Přidej je do konfigurace
+    testAchievements.forEach(achievement => {
+        ACHIEVEMENTS_CONFIG[achievement.id] = achievement;
+    });
+    
+    // Odemkni je postupně
+    testAchievements.forEach(achievement => {
+        unlockAchievement(achievement.id);
+    });
+}
+
 // Globální dostupnost pro debugging
 if (typeof window !== 'undefined') {
     window.debugGamificationState = debugGamificationState;
     window.resetGamificationData = resetGamificationData;
+    window.clearAchievementQueue = clearAchievementQueue;
+    window.showAchievementQueue = showAchievementQueue;
+    window.testAchievementQueue = testAchievementQueue;
 }
 
-console.log("🎮 Enhanced gamification system loaded with improved achievement detection");
+console.log("🎮 Enhanced gamification system loaded with achievement queue system");
