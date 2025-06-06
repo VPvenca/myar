@@ -58,6 +58,78 @@
             max-width: 300px;
             display: block; /* Změněno z none na block pro debugging */
         }
+        
+        /* Vylepšené styly pro achievement notifikace */
+        .achievement-notification {
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            background: linear-gradient(135deg, #ffd700, #ffed4e) !important;
+            padding: 20px !important;
+            border-radius: 15px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+            z-index: 99999 !important;
+            max-width: 350px !important;
+            border: 3px solid #ff6b35 !important;
+            font-family: Arial, sans-serif !important;
+            animation: slideInRight 0.5s ease-out, fadeOut 0.5s ease-in 4s forwards !important;
+        }
+        
+        .achievement-notification-content {
+            display: flex !important;
+            align-items: center !important;
+            gap: 15px !important;
+        }
+        
+        .achievement-icon {
+            font-size: 2.5em !important;
+            flex-shrink: 0 !important;
+        }
+        
+        .achievement-text h4 {
+            margin: 0 0 5px 0 !important;
+            color: #333 !important;
+            font-size: 1.1em !important;
+            font-weight: bold !important;
+        }
+        
+        .achievement-text p {
+            margin: 0 !important;
+            color: #555 !important;
+            font-size: 0.9em !important;
+        }
+        
+        @keyframes slideInRight {
+            from { 
+                transform: translateX(100%) !important; 
+                opacity: 0 !important; 
+            }
+            to { 
+                transform: translateX(0) !important; 
+                opacity: 1 !important; 
+            }
+        }
+        
+        @keyframes fadeOut {
+            to { 
+                transform: translateX(100%) !important; 
+                opacity: 0 !important; 
+            }
+        }
+        
+        /* Test notifikace styly */
+        .test-notification {
+            position: fixed !important;
+            top: 80px !important;
+            right: 20px !important;
+            background: #28a745 !important;
+            color: white !important;
+            padding: 15px !important;
+            border-radius: 8px !important;
+            z-index: 99998 !important;
+            font-family: Arial, sans-serif !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+        }
         /* Skrytí VR tlačítka */
         .a-enter-vr-button,
         .a-enter-vr,
@@ -85,6 +157,7 @@
         <div>Čas strávený: <span id="timeSpent">0</span>s</div>
         <div>Status: <span id="timeStatus">Neaktivní</span></div>
         <div>Achievements checked: <span id="achievementsChecked">0</span></div>
+        <button onclick="testNotification()" style="margin-top: 5px; padding: 5px; font-size: 10px;">Test Notifikace</button>
     </div>
 
     <!-- Debug panel pro gamifikaci -->
@@ -448,6 +521,113 @@
             
             console.log("=== END DEBUG STATE ===");
         };
+
+        // Test funkce pro notifikace
+        window.testNotification = function() {
+            console.log("🧪 Testing notification system...");
+            
+            // Vytvoř test notifikaci
+            const testNotification = document.createElement('div');
+            testNotification.className = 'test-notification';
+            testNotification.innerHTML = '🧪 Test notifikace funguje!';
+            document.body.appendChild(testNotification);
+            
+            setTimeout(() => {
+                if (testNotification.parentNode) {
+                    testNotification.parentNode.removeChild(testNotification);
+                }
+            }, 3000);
+            
+            // Zkus také achievement notifikaci
+            if (typeof showAchievementNotification === 'function') {
+                console.log("🏆 Testing achievement notification...");
+                showAchievementNotification('kyjov_saint_devotee');
+            } else {
+                console.error("❌ showAchievementNotification function not available");
+            }
+        };
+
+        // Přepsaná funkce showAchievementNotification pro lepší kompatibilitu s A-Frame
+        window.customShowAchievementNotification = function(achievementId) {
+            console.log("🔔 Custom achievement notification for:", achievementId);
+            
+            // Najdi achievement v konfiguraci
+            let achievement;
+            if (typeof ACHIEVEMENTS_CONFIG !== 'undefined' && ACHIEVEMENTS_CONFIG[achievementId]) {
+                achievement = ACHIEVEMENTS_CONFIG[achievementId];
+            } else {
+                // Fallback pro test
+                achievement = {
+                    name: "Test Achievement",
+                    description: "Toto je testovací achievement",
+                    icon: "🏆"
+                };
+            }
+            
+            // Vytvoření notifikace s vylepšenými styly
+            const notification = document.createElement('div');
+            notification.className = 'achievement-notification';
+            notification.style.cssText = `
+                position: fixed !important;
+                top: 20px !important;
+                right: 20px !important;
+                background: linear-gradient(135deg, #ffd700, #ffed4e) !important;
+                padding: 20px !important;
+                border-radius: 15px !important;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.8) !important;
+                z-index: 99999 !important;
+                max-width: 350px !important;
+                border: 3px solid #ff6b35 !important;
+                font-family: Arial, sans-serif !important;
+                animation: slideInRight 0.5s ease-out !important;
+            `;
+            
+            notification.innerHTML = `
+                <div style="display: flex !important; align-items: center !important; gap: 15px !important;">
+                    <div style="font-size: 2.5em !important; flex-shrink: 0 !important;">${achievement.icon}</div>
+                    <div>
+                        <h4 style="margin: 0 0 5px 0 !important; color: #333 !important; font-size: 1.1em !important; font-weight: bold !important;">🏆 Nový Achievement!</h4>
+                        <p style="margin: 0 !important; color: #555 !important; font-size: 0.9em !important; font-weight: bold !important;">${achievement.name}</p>
+                        <p style="margin: 0 !important; color: #555 !important; font-size: 0.9em !important;">${achievement.description}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Přidej do body (ne do a-scene)
+            document.body.appendChild(notification);
+            
+            // Odstranění notifikace po 5 sekundách
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'fadeOut 0.5s ease-in forwards';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 500);
+                }
+            }, 4500);
+            
+            console.log(`🔔 Custom achievement notification shown: ${achievement.name}`);
+        };
+
+        // Monkey patch původní funkce
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (typeof window.unlockAchievement === 'function') {
+                    const originalUnlockAchievement = window.unlockAchievement;
+                    window.unlockAchievement = function(achievementId) {
+                        const result = originalUnlockAchievement(achievementId);
+                        if (result) {
+                            // Použij naši custom notifikaci
+                            window.customShowAchievementNotification(achievementId);
+                        }
+                        return result;
+                    };
+                    console.log("✅ Achievement notification monkey-patched");
+                }
+            }, 2000);
+        });
 
     </script>
 </body>
