@@ -125,34 +125,44 @@
         </div>
     </div> <!-- Konec modal-overlay -->
     <script src="/gamification-config.js"></script>
-    <script src="/game/bohuslavice_stezka_config.js"></script>
-    <script src="/gamification.js"></script>
-    <script src="/script.js"></script>
+<script src="/gamification.js"></script>
+<script src="/game/bohuslavice_stezka_config.js"></script>
+<script src="/script.js"></script>
 
-    <!-- Skript pro zobrazení hvězd na této stránce -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const starDisplayElements = document.querySelectorAll('.star-display[data-scene-id]');
-            // *** NOVINKA: Získání ID aktuální expozice jednou na začátku ***
-            const currentExpositionId = getCurrentExpositionId(); 
-            
-            if (!currentExpositionId || currentExpositionId === 'unknown') {
-                 console.error("Cannot determine current exposition ID. Stars may not display correctly.");
-                 // Možná zde zobrazit nějakou chybovou zprávu uživateli, pokud je to kritické
+<!-- Skript pro zobrazení hvězd na této stránce -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("🌟 Star display script starting...");
+    
+    // Počkej, až bude vše načteno
+    setTimeout(() => {
+        const starDisplayElements = document.querySelectorAll('.star-display[data-scene-id]');
+        console.log("Found star display elements:", starDisplayElements.length);
+        
+        const currentExpositionId = getCurrentExpositionId(); 
+        console.log("Current exposition ID:", currentExpositionId);
+        
+        if (!currentExpositionId || currentExpositionId === 'unknown') {
+             console.error("Cannot determine current exposition ID. Stars may not display correctly.");
+             return;
+        }
+
+        starDisplayElements.forEach(starElement => {
+            const sceneId = starElement.dataset.sceneId;
+            console.log("Processing scene ID:", sceneId);
+
+            if (SCENE_CONFIG && SCENE_CONFIG[sceneId]) {
+                console.log("✅ Scene config found for:", sceneId);
+                const level = getSceneStarLevel(currentExpositionId, sceneId); 
+                console.log("Star level:", level);
+                displayStars(starElement, level);
+            } else {
+                console.warn(`Config for scene ID "${sceneId}" not found in SCENE_CONFIG.`);
+                console.log("Available scene configs:", Object.keys(SCENE_CONFIG || {}));
             }
-
-            starDisplayElements.forEach(starElement => {
-                const sceneId = starElement.dataset.sceneId;
-
-                if (SCENE_CONFIG && SCENE_CONFIG[sceneId]) {
-                    // *** UPRAVENO: Předání ID expozice funkci getSceneStarLevel ***
-                    const level = getSceneStarLevel(currentExpositionId, sceneId); 
-                    displayStars(starElement, level);
-                } else {
-                    console.warn(`Config for scene ID "${sceneId}" not found in SCENE_CONFIG. Cannot display stars.`);
-                }
-            });
         });
+    }, 500); // Počkáme 500ms, aby se vše stihlo načíst
+});
     </script>
    
 
