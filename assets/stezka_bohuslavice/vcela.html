@@ -113,11 +113,24 @@
             left: 10px;
             background: rgba(40, 167, 69, 0.9);
             color: white;
-            padding: 8px 12px;
-            border-radius: 5px;
+            padding: 10px 15px;
+            border-radius: 8px;
             font-size: 14px;
             z-index: 1000;
             display: none;
+            cursor: pointer;
+            user-select: none;
+            min-width: 160px;
+            text-align: center;
+            transition: background 0.2s;
+        }
+
+        .audio-info:hover {
+            background: rgba(40, 167, 69, 1);
+        }
+
+        .audio-info:active {
+            background: rgba(34, 142, 58, 1);
         }
 
         .rotation-hint {
@@ -154,7 +167,7 @@
         </div>
     </div>
     
-    <div class="audio-info" id="audioInfo">🎵 Audio přehrává...</div>
+    <div class="audio-info ui-element" id="audioInfo">🎵 Audio přehrává...</div>
     <div class="rotation-hint" id="rotationHint">🔄 Tažením otočíte včelu</div>
 
     <!-- A-Frame AR scéna s GPS pozicováním -->
@@ -215,9 +228,9 @@
             </a-gltf-model>
         </a-entity>
 
-        <!-- Včela 3 - Královna -->
+        <!-- Včela 3 - Královna - UPRAVENÉ GPS SOUŘADNICE -->
         <a-entity 
-            gps-entity-place="latitude: 49.009057; longitude: 17.128693"
+            gps-entity-place="latitude: 49.009245; longitude: 17.128867"
             data-marker-id="vcela_3"
             data-audio-id="audio3"
             visible="false">
@@ -245,6 +258,7 @@
         let selectedTargetId = null;
         let currentlyPlayingAudio = null;
         let audioPlayingForMarker = null;
+        let audioIsPaused = false; // Nový stav pro pause/play
         
         // Proměnné pro rotaci modelů
         let modelRotationY = 30; // Začínáme na 30 stupňů
@@ -252,7 +266,7 @@
         let startX = 0;
         let rotationHintShown = false;
         
-        // Definice včelích markerů s OPRAVENÝMI audio ID
+        // Definice včelích markerů s UPRAVENÝMI GPS souřadnicemi královny
         const markers = [
             { 
                 id: "vcela_1", 
@@ -272,8 +286,8 @@
             },
             { 
                 id: "vcela_3", 
-                lat: 49.009057, 
-                lng: 17.128693,
+                lat: 49.009245, // UPRAVENÉ GPS SOUŘADNICE
+                lng: 17.128867, // UPRAVENÉ GPS SOUŘADNICE
                 name: "👑 Královna",
                 description: "Matka úlu - vládkyně včelího státu",
                 audioId: "audio3"
@@ -449,7 +463,7 @@
             console.log(`${visibleCount}/${markers.length} bees are visible in AR`);
         }
 
-        // Audio funkce
+        // Audio funkce - UPRAVENÉ s pause/play funkcionalitou
         function playAudio(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (!marker || audioPlayingForMarker === markerId) return;
@@ -459,16 +473,46 @@
             const audioElement = document.getElementById(marker.audioId);
             if (audioElement) {
                 audioElement.currentTime = 0;
+                audioIsPaused = false;
                 audioElement.play().then(() => {
                     currentlyPlayingAudio = audioElement;
                     audioPlayingForMarker = markerId;
                     
-                    document.getElementById('audioInfo').textContent = `🎵 ${marker.name}`;
-                    document.getElementById('audioInfo').style.display = 'block';
+                    updateAudioDisplay(marker.name);
                     
                     audioElement.onended = stopCurrentAudio;
                 }).catch(console.error);
             }
+        }
+
+        function toggleAudioPlayPause() {
+            if (!currentlyPlayingAudio) return;
+            
+            const marker = markers.find(m => m.id === audioPlayingForMarker);
+            if (!marker) return;
+            
+            if (audioIsPaused) {
+                // Resume audio
+                currentlyPlayingAudio.play().then(() => {
+                    audioIsPaused = false;
+                    updateAudioDisplay(marker.name);
+                }).catch(console.error);
+            } else {
+                // Pause audio
+                currentlyPlayingAudio.pause();
+                audioIsPaused = true;
+                updateAudioDisplay(marker.name);
+            }
+        }
+
+        function updateAudioDisplay(beeName) {
+            const audioInfo = document.getElementById('audioInfo');
+            if (audioIsPaused) {
+                audioInfo.innerHTML = `⏸️ ${beeName}<br><small>Klikni pro přehrání</small>`;
+            } else {
+                audioInfo.innerHTML = `🎵 ${beeName}<br><small>Klikni pro pauzu</small>`;
+            }
+            audioInfo.style.display = 'block';
         }
 
         function stopCurrentAudio() {
@@ -477,6 +521,7 @@
                 currentlyPlayingAudio.currentTime = 0;
                 currentlyPlayingAudio = null;
                 audioPlayingForMarker = null;
+                audioIsPaused = false;
                 document.getElementById('audioInfo').style.display = 'none';
             }
         }
@@ -723,6 +768,9 @@
 
         document.getElementById('clearSelection').addEventListener('click', clearSelection);
 
+        // Audio ovládání kliknutím na audio info panel
+        document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
+
         document.addEventListener('click', (e) => {
             const navPanel = document.querySelector('.navigation');
             if (!navPanel.contains(e.target)) {
@@ -732,7 +780,7 @@
 
         // Inicializace při načtení
         window.addEventListener('load', () => {
-            console.log("Starting bee AR application with corrected paths...");
+            console.log("Starting bee AR application with simple audio controls...");
             
             // Počkáme na A-Frame
             document.querySelector('a-scene').addEventListener('loaded', () => {
@@ -743,7 +791,7 @@
             });
         });
 
-        console.log("Bee AR script with corrected paths loaded successfully!");
+        console.log("Bee AR script with simple audio controls loaded successfully!");
     </script>
 </body>
 </html>
