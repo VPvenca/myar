@@ -40,19 +40,20 @@
             height: 100vh;
         }
         
+        /* ZMĚNĚNO NA SVĚTLE MODRÉ */
         .back-button-ar {
             position: fixed;
             top: 10px;
             left: 10px;
             z-index: 1001;
             padding: 8px 15px;
-            background-color: rgba(255, 215, 0, 0.9);
+            background-color: rgba(135, 206, 235, 0.9);
             color: black;
             text-decoration: none;
             border-radius: 8px;
             font-size: 14px;
             font-weight: bold;
-            border: 2px solid #FFD700;
+            border: 2px solid #87CEEB;
         }
         
         .distance-info {
@@ -71,7 +72,7 @@
             border: 2px solid #FFD700;
         }
         
-        /* Navigační panel v pravém horním rohu */
+        /* Navigační panel v pravém horním rohu - ZMĚNĚNO NA SVĚTLE MODRÉ */
         .navigation-panel {
             position: fixed;
             top: 10px;
@@ -80,13 +81,13 @@
         }
         
         .navigation-toggle {
-            background-color: rgba(255, 215, 0, 0.9);
+            background-color: rgba(135, 206, 235, 0.9);
             color: black;
             padding: 12px 15px;
             border-radius: 8px;
             font-size: 14px;
             font-weight: bold;
-            border: 2px solid #FFD700;
+            border: 2px solid #87CEEB;
             cursor: pointer;
             user-select: none;
             text-align: center;
@@ -94,7 +95,7 @@
         }
         
         .navigation-toggle:hover {
-            background-color: rgba(255, 215, 0, 1);
+            background-color: rgba(135, 206, 235, 1);
         }
         
         .navigation-content {
@@ -103,7 +104,7 @@
             right: 0;
             margin-top: 5px;
             background-color: rgba(0, 0, 0, 0.9);
-            border: 2px solid #FFD700;
+            border: 2px solid #87CEEB;
             border-radius: 8px;
             padding: 10px;
             min-width: 200px;
@@ -130,8 +131,8 @@
         }
         
         .target-item.selected {
-            background-color: rgba(255, 215, 0, 0.3);
-            border-left-color: #FFD700;
+            background-color: rgba(135, 206, 235, 0.3);
+            border-left-color: #87CEEB;
         }
         
         .target-item.closest {
@@ -176,32 +177,37 @@
             background-color: rgba(255, 68, 68, 1);
         }
         
+        /* NOVÝ STYL PRO AUDIO TLAČÍTKO - POUZE IKONA JAKO U VČEL */
         .audio-info {
             position: fixed;
             top: 60px;
             left: 10px;
-            background-color: rgba(255, 215, 0, 0.9);
-            color: black;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 14px;
+            background: rgba(40, 167, 69, 0.9);
+            color: white;
+            padding: 12px;
+            border-radius: 50%;
+            font-size: 20px;
             z-index: 1000;
             display: none;
-            font-weight: bold;
-            border: 2px solid #FFD700;
             cursor: pointer;
             user-select: none;
-            min-width: 160px;
-            text-align: center;
-            transition: background-color 0.2s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            border: 2px solid rgba(40, 167, 69, 1);
         }
 
         .audio-info:hover {
-            background-color: rgba(255, 215, 0, 1);
+            background: rgba(40, 167, 69, 1);
+            transform: scale(1.05);
         }
 
         .audio-info:active {
-            background-color: rgba(255, 170, 0, 1);
+            background: rgba(34, 142, 58, 1);
+            transform: scale(0.95);
         }
         
         .rotation-hint {
@@ -233,9 +239,8 @@
         😇 Zpět do Menu
     </a>
     
-    <div class="audio-info" id="audioInfo">
-        🎵 Audio přehrává...
-    </div>
+    <!-- UPRAVENÉ AUDIO TLAČÍTKO - POUZE IKONA -->
+    <div class="audio-info" id="audioInfo">🔊</div>
     
     <div class="rotation-hint" id="rotationHint">
         🔄 Tažením otočíte anděla
@@ -450,8 +455,6 @@
             
             gamificationInitialized = true;
             console.log("✅ Gamification initialized successfully for andělé");
-            
-            // ODSTRANĚNO: Již se nezobrazuje žádná notifikace o aktivaci gamifikace
         }
 
         // OPRAVENÁ funkce pro záznam aktivace andělských markerů
@@ -465,45 +468,9 @@
             
             if (typeof recordMarkerActivation === 'function') {
                 recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
-                
-                // ODSTRANĚNO: Vizuální feedback byl vypnut
-                // showMarkerActivationFeedback(markerId);
             } else {
                 console.error("❌ recordMarkerActivation function not found");
             }
-        }
-
-        // FUNKCE PONECHÁNA PRO PŘÍPADNÉ BUDOUCÍ POUŽITÍ, ALE NENÍ VOLÁNA
-        function showMarkerActivationFeedback(markerId) {
-            const marker = markers.find(m => m.id === markerId);
-            if (!marker) return;
-            
-            const feedback = document.createElement('div');
-            feedback.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(255, 215, 0, 0.95);
-                color: black;
-                padding: 20px 30px;
-                border-radius: 15px;
-                font-size: 18px;
-                font-weight: bold;
-                z-index: 10001;
-                text-align: center;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                border: 3px solid #FFD700;
-            `;
-            feedback.innerHTML = `😇 ${marker.name}<br><small>Marker aktivován!</small>`;
-            
-            document.body.appendChild(feedback);
-            
-            setTimeout(() => {
-                if (feedback.parentNode) {
-                    feedback.parentNode.removeChild(feedback);
-                }
-            }, 2000);
         }
 
         // Page visibility API pro pozastavení gamifikace
@@ -526,7 +493,7 @@
 
         // === PŮVODNÍ FUNKCE S GAMIFIKAČNÍMI ROZŠÍŘENÍMI ===
 
-        // Funkce pro spuštění audio
+        // UPRAVENÉ AUDIO FUNKCE - POUZE IKONY JAKO U VČEL
         function playAudio(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (!marker) return;
@@ -540,11 +507,12 @@
                 console.log(`Playing audio for marker: ${markerId}`);
                 
                 audioElement.currentTime = 0;
+                audioIsPaused = false;
                 audioElement.play().then(() => {
                     currentlyPlayingAudio = audioElement;
                     audioPlayingForMarker = markerId;
                     
-                    updateAudioDisplay(marker.name);
+                    updateAudioDisplay();
                     
                     audioElement.onended = () => {
                         console.log(`Audio ended for marker: ${markerId}`);
@@ -560,29 +528,31 @@
         function toggleAudioPlayPause() {
             if (!currentlyPlayingAudio) return;
             
-            const marker = markers.find(m => m.id === audioPlayingForMarker);
-            if (!marker) return;
-            
             if (audioIsPaused) {
                 currentlyPlayingAudio.play().then(() => {
                     audioIsPaused = false;
-                    updateAudioDisplay(marker.name);
+                    updateAudioDisplay();
                 }).catch(console.error);
             } else {
                 currentlyPlayingAudio.pause();
                 audioIsPaused = true;
-                updateAudioDisplay(marker.name);
+                updateAudioDisplay();
             }
         }
 
-        function updateAudioDisplay(angelName) {
+        // NOVÁ FUNKCE - ZJEDNODUŠENÉ ZOBRAZENÍ AUDIO - POUZE IKONA
+        function updateAudioDisplay() {
             const audioInfo = document.getElementById('audioInfo');
             if (audioIsPaused) {
-                audioInfo.innerHTML = `⏸️ ${angelName}<br><small>Klikni pro přehrání</small>`;
+                audioInfo.innerHTML = '▶️';
+                audioInfo.style.background = 'rgba(135, 206, 235, 0.9)';
+                audioInfo.style.borderColor = 'rgba(135, 206, 235, 1)';
             } else {
-                audioInfo.innerHTML = `🎵 ${angelName}<br><small>Klikni pro pauzu</small>`;
+                audioInfo.innerHTML = '⏸️';
+                audioInfo.style.background = 'rgba(40, 167, 69, 0.9)';
+                audioInfo.style.borderColor = 'rgba(40, 167, 69, 1)';
             }
-            audioInfo.style.display = 'block';
+            audioInfo.style.display = 'flex';
         }
 
         function stopCurrentAudio() {
