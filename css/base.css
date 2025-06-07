@@ -10,11 +10,10 @@
 }
 
 html {
-    height: 100%;
-    /* ZDE změňte gradient */
+    height: 100%; /* HTML element zabere celou výšku okna prohlížeče */
+    /* Aplikujeme gradientní pozadí na celou stránku */
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) no-repeat;
-    /* ZMĚŇTE NA: */
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) no-repeat;
+    /* Fixujeme pozadí, aby se nerolovalo s obsahem stránky */
     background-attachment: fixed;
 }
 
