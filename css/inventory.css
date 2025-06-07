@@ -158,9 +158,10 @@
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
+    pointer-events: none; /* Kontejner nebude zachytávat kliky */
 }
 
-.fixed-back-button .menu-button {
+.fixed-back-button .back-btn {
     padding: 15px 25px;
     background: #667eea;
     color: white;
@@ -173,11 +174,10 @@
     text-decoration: none;
     display: inline-block;
     white-space: nowrap;
-    width: auto;
-    max-width: 200px;
+    pointer-events: auto; /* Tlačítko bude zachytávat kliky */
 }
 
-.fixed-back-button .menu-button:hover {
+.fixed-back-button .back-btn:hover {
     background: #5a6fd8;
     transform: translateY(-2px);
     box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
@@ -472,11 +472,9 @@
         transform: translateX(-50%);
     }
 
-    .fixed-back-button .menu-button {
-        width: auto;
-        max-width: 250px;
-        text-align: center;
+    .fixed-back-button .back-btn {
         padding: 18px 25px;
+        font-size: 1em;
     }
 
     .achievement-modal-content {
