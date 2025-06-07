@@ -122,30 +122,37 @@
             border-left-color: #28a745;
         }
         
+        /* UPRAVENÝ STYL PRO AUDIO TLAČÍTKO - POUZE IKONA */
         .audio-info {
             position: fixed;
             top: 60px;
             left: 10px;
             background: rgba(40, 167, 69, 0.9);
             color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 12px;
+            border-radius: 50%;
+            font-size: 20px;
             z-index: 1000;
             display: none;
             cursor: pointer;
             user-select: none;
-            min-width: 160px;
-            text-align: center;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: background 0.2s;
+            border: 2px solid rgba(40, 167, 69, 1);
         }
 
         .audio-info:hover {
             background: rgba(40, 167, 69, 1);
+            transform: scale(1.05);
         }
 
         .audio-info:active {
             background: rgba(34, 142, 58, 1);
+            transform: scale(0.95);
         }
 
         .rotation-hint {
@@ -184,7 +191,8 @@
         </div>
     </div>
     
-    <div class="audio-info ui-element" id="audioInfo">🎵 Audio přehrává...</div>
+    <!-- UPRAVENÉ AUDIO TLAČÍTKO - POUZE IKONA -->
+    <div class="audio-info ui-element" id="audioInfo">🔊</div>
     <div class="rotation-hint" id="rotationHint">🔄 Tažením otočíte včelu</div>
     
     <!-- Gamifikační status - SKRYTO -->
@@ -375,8 +383,6 @@
             
             gamificationInitialized = true;
             console.log("✅ Gamification initialized successfully for včelařská stezka");
-            
-            // ODSTRANĚNO: Již se nezobrazuje žádná notifikace o aktivaci gamifikace
         }
 
         // OPRAVENÁ funkce pro záznam aktivace včelích markerů
@@ -390,45 +396,9 @@
             
             if (typeof recordMarkerActivation === 'function') {
                 recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
-                
-                // ODSTRANĚNO: Vizuální feedback byl vypnut
-                // showMarkerActivationFeedback(markerId);
             } else {
                 console.error("❌ recordMarkerActivation function not found");
             }
-        }
-
-        // FUNKCE PONECHÁNA PRO PŘÍPADNÉ BUDOUCÍ POUŽITÍ, ALE NENÍ VOLÁNA
-        function showMarkerActivationFeedback(markerId) {
-            const marker = markers.find(m => m.id === markerId);
-            if (!marker) return;
-            
-            const feedback = document.createElement('div');
-            feedback.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: rgba(40, 167, 69, 0.95);
-                color: white;
-                padding: 20px 30px;
-                border-radius: 15px;
-                font-size: 18px;
-                font-weight: bold;
-                z-index: 10001;
-                text-align: center;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                border: 3px solid #28a745;
-            `;
-            feedback.innerHTML = `🐝 ${marker.name}<br><small>Marker aktivován!</small>`;
-            
-            document.body.appendChild(feedback);
-            
-            setTimeout(() => {
-                if (feedback.parentNode) {
-                    feedback.parentNode.removeChild(feedback);
-                }
-            }, 2000);
         }
 
         // Page visibility API pro pozastavení gamifikace
@@ -601,8 +571,6 @@
                     if (distance <= PROXIMITY_THRESHOLD) {
                         console.log(`🎯 Bee activated: ${marker.id}`);
                         markersActivatedThisCheck.push(marker.id);
-                        
-                        // Zaznamenej aktivaci markeru
                         recordBeeMarkerActivation(marker.id);
                     }
                 }
@@ -620,7 +588,7 @@
             console.log(`${visibleCount}/${markers.length} bees are visible in AR`);
         }
 
-        // Audio funkce
+        // UPRAVENÉ AUDIO FUNKCE - POUZE IKONY
         function playAudio(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (!marker || audioPlayingForMarker === markerId) return;
@@ -635,7 +603,7 @@
                     currentlyPlayingAudio = audioElement;
                     audioPlayingForMarker = markerId;
                     
-                    updateAudioDisplay(marker.name);
+                    updateAudioDisplay();
                     
                     audioElement.onended = stopCurrentAudio;
                 }).catch(console.error);
@@ -645,29 +613,31 @@
         function toggleAudioPlayPause() {
             if (!currentlyPlayingAudio) return;
             
-            const marker = markers.find(m => m.id === audioPlayingForMarker);
-            if (!marker) return;
-            
             if (audioIsPaused) {
                 currentlyPlayingAudio.play().then(() => {
                     audioIsPaused = false;
-                    updateAudioDisplay(marker.name);
+                    updateAudioDisplay();
                 }).catch(console.error);
             } else {
                 currentlyPlayingAudio.pause();
                 audioIsPaused = true;
-                updateAudioDisplay(marker.name);
+                updateAudioDisplay();
             }
         }
 
-        function updateAudioDisplay(beeName) {
+        // ZJEDNODUŠENÉ ZOBRAZENÍ AUDIO - POUZE IKONA
+        function updateAudioDisplay() {
             const audioInfo = document.getElementById('audioInfo');
             if (audioIsPaused) {
-                audioInfo.innerHTML = `⏸️ ${beeName}<br><small>Klikni pro přehrání</small>`;
+                audioInfo.innerHTML = '▶️';
+                audioInfo.style.background = 'rgba(255, 193, 7, 0.9)';
+                audioInfo.style.borderColor = 'rgba(255, 193, 7, 1)';
             } else {
-                audioInfo.innerHTML = `🎵 ${beeName}<br><small>Klikni pro pauzu</small>`;
+                audioInfo.innerHTML = '⏸️';
+                audioInfo.style.background = 'rgba(40, 167, 69, 0.9)';
+                audioInfo.style.borderColor = 'rgba(40, 167, 69, 1)';
             }
-            audioInfo.style.display = 'block';
+            audioInfo.style.display = 'flex';
         }
 
         function stopCurrentAudio() {
@@ -947,3 +917,4 @@
     </script>
 </body>
 </html>
+                
