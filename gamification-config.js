@@ -60,7 +60,7 @@ const GLOBAL_ACHIEVEMENTS = {
 
     "global_first_exposition": {
         name: "Průkopník",
-        description: "Dokončil jsi svou první kompletní expozici",
+        description: "Proletěl jsi první expozici a nakoukl do všech scén",
         icon: "🚀",
         category: "global",
         rarity: "uncommon",
