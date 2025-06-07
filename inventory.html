@@ -11,6 +11,173 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Dropdown Menu Styles */
+        .category-dropdown {
+            position: relative;
+            margin-bottom: 25px;
+            z-index: 100;
+        }
+
+        .dropdown-button {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            font-weight: 500;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .dropdown-button:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .dropdown-button.active {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .dropdown-arrow {
+            transition: transform 0.3s ease;
+            font-size: 1.2em;
+            color: #667eea;
+        }
+
+        .dropdown-button.active .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            min-width: 280px;
+            max-width: 400px;
+            width: max-content;
+            margin-top: 5px;
+        }
+
+        .dropdown-menu.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9ff;
+        }
+
+        .dropdown-item.active {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .dropdown-item.active:hover {
+            background-color: #5a6fd8;
+        }
+
+        /* Fixed Back Button */
+        .fixed-back-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .fixed-back-button .menu-button {
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .fixed-back-button .menu-button:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Adjustments for mobile */
+        @media (max-width: 768px) {
+            .dropdown-button {
+                max-width: 100%;
+                padding: 12px 15px;
+            }
+
+            .dropdown-menu {
+                min-width: 100%;
+                left: 0;
+                transform: none;
+                margin-top: 5px;
+            }
+
+            .dropdown-menu.visible {
+                transform: none;
+            }
+
+            .fixed-back-button {
+                bottom: 15px;
+                left: 15px;
+                right: 15px;
+                transform: none;
+            }
+
+            .fixed-back-button .menu-button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        /* Add some bottom padding to prevent content from being hidden behind fixed button */
+        .achievements-container {
+            margin-bottom: 100px;
+        }
+
+        /* Hide original back button */
+        .back-button-container {
+            display: none;
+        }
+    </style>
 </head>
 <body class="inventory-page">
 
@@ -39,10 +206,19 @@
                 </div>
             </div>
 
-            <!-- Category Filter -->
-            <div class="category-filter" id="categoryFilter">
-                <button class="filter-btn active" data-category="all">Všechny</button>
-                <!-- Kategorie se načtou dynamicky -->
+            <!-- Category Dropdown -->
+            <div class="category-dropdown">
+                <button class="dropdown-button" id="categoryDropdownButton">
+                    <span id="currentCategoryText">Všechny kategorie</span>
+                    <span class="dropdown-arrow">▼</span>
+                </button>
+                <div class="dropdown-menu" id="categoryDropdownMenu">
+                    <div class="dropdown-item active" data-category="all">
+                        <span>🏆</span>
+                        <span>Všechny kategorie</span>
+                    </div>
+                    <!-- Kategorie se načtou dynamicky -->
+                </div>
             </div>
 
             <!-- Achievements Grid -->
@@ -51,16 +227,16 @@
                     <!-- Achievements will be dynamically loaded here -->
                 </div>
             </div>
-
-            <!-- Back Button -->
-            <div class="back-button-container">
-                <a href="index.html" class="menu-button back-button">Zpět na Menu</a>
-            </div>
         </main>
 
         <footer class="app-footer">
             <p>© 2025 Vytvořil Václav Pěnčík</p>
         </footer>
+    </div>
+
+    <!-- Fixed Back Button -->
+    <div class="fixed-back-button">
+        <a href="index.html" class="menu-button">← Zpět na Menu</a>
     </div>
 
     <!-- Achievement Detail Modal -->
@@ -165,13 +341,13 @@
             updateDebugInfo();
         }
 
-        // Funkce pro načtení kategorií
+        // Funkce pro načtení kategorií do dropdown menu
         function loadCategories() {
-            const filterContainer = document.getElementById('categoryFilter');
+            const dropdownMenu = document.getElementById('categoryDropdownMenu');
             
             // Odstraň existující kategorie (kromě "Všechny")
-            const existingButtons = filterContainer.querySelectorAll('[data-category]:not([data-category="all"])');
-            existingButtons.forEach(btn => btn.remove());
+            const existingItems = dropdownMenu.querySelectorAll('[data-category]:not([data-category="all"])');
+            existingItems.forEach(item => item.remove());
 
             // Přidej kategorie
             Object.keys(ACHIEVEMENT_CATEGORIES).forEach(categoryId => {
@@ -184,12 +360,15 @@
                 
                 if (categoryAchievements.length === 0) return; // Přeskoč prázdné kategorie
 
-                const button = document.createElement('button');
-                button.className = 'filter-btn';
-                button.dataset.category = categoryId;
-                button.innerHTML = `${category.icon || ''} ${category.name} (${categoryAchievements.length})`;
+                const item = document.createElement('div');
+                item.className = 'dropdown-item';
+                item.dataset.category = categoryId;
+                item.innerHTML = `
+                    <span>${category.icon || '📁'}</span>
+                    <span>${category.name} (${categoryAchievements.length})</span>
+                `;
                 
-                filterContainer.appendChild(button);
+                dropdownMenu.appendChild(item);
             });
         }
 
@@ -323,22 +502,48 @@
             document.getElementById('completion-percentage').textContent = `${completionPercentage}%`;
         }
 
-        function setupFilterButtons() {
-            const filterContainer = document.getElementById('categoryFilter');
+        function setupDropdown() {
+            const dropdownButton = document.getElementById('categoryDropdownButton');
+            const dropdownMenu = document.getElementById('categoryDropdownMenu');
+            const currentCategoryText = document.getElementById('currentCategoryText');
             
-            filterContainer.addEventListener('click', (e) => {
-                if (e.target.classList.contains('filter-btn')) {
-                    // Remove active class from all buttons
-                    filterContainer.querySelectorAll('.filter-btn').forEach(btn => 
-                        btn.classList.remove('active')
-                    );
-                    
-                    // Add active class to clicked button
-                    e.target.classList.add('active');
-                    
-                    // Filter achievements
-                    currentFilter = e.target.dataset.category;
-                    loadAchievements(currentFilter);
+            // Toggle dropdown
+            dropdownButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                dropdownButton.classList.toggle('active');
+                dropdownMenu.classList.toggle('visible');
+            });
+
+            // Handle category selection
+            dropdownMenu.addEventListener('click', (e) => {
+                const dropdownItem = e.target.closest('.dropdown-item');
+                if (!dropdownItem) return;
+
+                // Update active state
+                dropdownMenu.querySelectorAll('.dropdown-item').forEach(item => 
+                    item.classList.remove('active')
+                );
+                dropdownItem.classList.add('active');
+
+                // Update current category text
+                const categoryId = dropdownItem.dataset.category;
+                const categoryText = dropdownItem.textContent.trim();
+                currentCategoryText.textContent = categoryText;
+
+                // Filter achievements
+                currentFilter = categoryId;
+                loadAchievements(currentFilter);
+
+                // Close dropdown
+                dropdownButton.classList.remove('active');
+                dropdownMenu.classList.remove('visible');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!dropdownButton.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    dropdownButton.classList.remove('active');
+                    dropdownMenu.classList.remove('visible');
                 }
             });
         }
@@ -411,7 +616,7 @@
                     // Počkáme ještě chvilku a pak inicializujeme inventář
                     setTimeout(() => {
                         initializeInventory();
-                        setupFilterButtons();
+                        setupDropdown();
                         setupModal();
                     }, 200);
                 } else {
@@ -425,7 +630,7 @@
                         if (retrySuccess) {
                             setTimeout(() => {
                                 initializeInventory();
-                                setupFilterButtons();
+                                setupDropdown();
                                 setupModal();
                             }, 200);
                         } else {
