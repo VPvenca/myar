@@ -157,7 +157,7 @@
 
         .rotation-hint {
             position: fixed;
-            bottom: 90px;
+            bottom: 110px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 123, 255, 0.9);
@@ -277,7 +277,7 @@
         </a-entity>
 
         <!-- Základní osvětlení -->
-        <a-light type="ambient" color="#87CEEB" intensity="0.4" id="ambientLight"></a-light>
+        <a-light type="ambient" color="#ffffff" intensity="0.7" id="ambientLight"></a-light>
         <a-light 
             type="directional" 
             color="#ffffff" 
@@ -288,7 +288,7 @@
         <a-light 
             type="point" 
             color="#ffffff" 
-            intensity="0.3" 
+            intensity="0.5" 
             position="-2 4 2"
             distance="20"
             id="fillLight">
@@ -303,7 +303,7 @@
         
         // GPS a navigační proměnné
         let userPosition = null;
-        const PROXIMITY_THRESHOLD = 10;
+        const PROXIMITY_THRESHOLD = 15;
         const AR_VISIBILITY_THRESHOLD = 30;
         const AUDIO_THRESHOLD = 15;
         let selectedTargetId = null;
