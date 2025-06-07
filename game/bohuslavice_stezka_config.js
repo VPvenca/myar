@@ -67,7 +67,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             rarity: "common",
             image: "/img/achievements/vcelarstvi_first_scene.png"
         },
-
+/*
         "stezka_bohuslavice_all_scenes": {
             name: "Znalec včelařství",
             description: "Dokončil jsi všechny scény na Včelařské stezce",
@@ -84,7 +84,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             category: "stezka_bohuslavice",
             rarity: "legendary",
             image: "/img/achievements/vcelarstvi_perfectionist.png"
-        }
+        } */
     },
 
     // === KATEGORIE ===
