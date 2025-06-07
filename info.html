@@ -3,354 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="img/favicon.png" />
     <title>Vítejte - AR Aplikace</title>
-
-    <!-- ZACHOVÁNO: Váš Google Analytics kód -->
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('consent', 'default', {
-            'ad_storage': 'denied',
-            'ad_user_data': 'denied',
-            'ad_personalization': 'denied',
-            'analytics_storage': 'denied'
-        });
-        const savedConsent = localStorage.getItem('ga_consent_status');
-        if (savedConsent) {
-            try {
-                const consentState = JSON.parse(savedConsent);
-                gtag('consent', 'update', consentState);
-            } catch (e) {
-                console.error('Error parsing saved consent:', e);
-                localStorage.removeItem('ga_consent_status');
-            }
-        }
-    </script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NRST1685GR"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-    </script>
-
-    <!-- ZACHOVÁNO: Vaše CSS linky -->
-    <link rel="stylesheet" href="/css/base.css">
-    <link rel="stylesheet" href="/css/layout.css">
-    <link rel="stylesheet" href="/css/buttons.css">
-    <link rel="stylesheet" href="/css/modal.css">
-    <link rel="stylesheet" href="/css/text-block.css">
-    <link rel="stylesheet" href="/css/links.css">
-    <link rel="stylesheet" href="/css/pages.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/img/apple_touch_icon_192x192.png">
-
-    <!-- NOVÉ: Moderní styly kompatibilní s vašimi CSS -->
     <style>
-        /* === RESET PRO MODERNÍ WELCOME SCREEN === */
-        body.modern-welcome {
-            /* Přepíšeme vaše base.css styly pouze pro welcome screen */
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-            background-attachment: fixed !important;
-            min-height: 100vh !important;
-            height: 100vh !important;
-            overflow: hidden !important;
-            display: block !important; /* Reset flex z vašeho base.css */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        /* Skryjeme původní layout pro moderní verzi */
-        body.modern-welcome .page-wrapper {
-            display: none !important;
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh; /* OPRAVA: Fixní výška místo min-height */
+            overflow: hidden; /* OPRAVA: Zabráníme scrollování */
         }
 
-        /* === MODERNÍ WELCOME CONTAINER === */
-        .modern-welcome-container {
+        .welcome-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            height: 100vh; /* OPRAVA: Fixní výška místo min-height */
             padding: 2rem 1rem;
             position: relative;
-            z-index: 1;
         }
 
-        .modern-logo-section {
+        .logo-section {
             text-align: center;
             margin-bottom: 2rem;
             animation: fadeInDown 1s ease-out;
-            position: relative;
-            z-index: 50;
         }
 
-        .modern-logo-section .app-logo {
-            width: 120px !important;
-            height: auto !important;
-            margin-bottom: 1rem !important;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2)) !important;
-            display: block !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
+        .app-logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         }
 
-        .modern-main-title {
-            color: white !important;
-            font-size: 2.5rem !important;
-            font-weight: 700 !important;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
-            margin-bottom: 0.5rem !important;
-            font-family: 'Roboto', sans-serif !important;
-            margin-top: 0 !important;
+        .main-title {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 0.5rem;
         }
 
-        .modern-subtitle {
-            color: rgba(255,255,255,0.9) !important;
-            font-size: 1.1rem !important;
-            font-weight: 400 !important;
-            font-family: 'Roboto', sans-serif !important;
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+            font-weight: 400;
         }
 
-        /* === STEP CONTAINERS === */
-        .modern-step-container {
+        /* OPRAVA: Všechny step-container na stejném místě */
+        .step-container {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) translateY(20px);
-            background: rgba(255,255,255,0.95) !important;
-            border-radius: 20px !important;
-            padding: 2rem !important;
-            max-width: 400px !important;
-            width: calc(100% - 2rem) !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 400px;
+            width: calc(100% - 2rem);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             backdrop-filter: blur(10px);
             opacity: 0;
             transition: all 0.5s ease;
-            z-index: 10;
-            font-family: 'Roboto', sans-serif !important;
         }
 
-        .modern-step-container.active {
+        .step-container.active {
             transform: translate(-50%, -50%) translateY(0);
             opacity: 1;
         }
 
-        .modern-step-header {
-            display: flex !important;
-            align-items: center !important;
-            margin-bottom: 1.5rem !important;
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
         }
 
-        .modern-step-emoji {
-            font-size: 3rem !important;
-            margin-right: 1rem !important;
+        .step-emoji {
+            font-size: 3rem;
+            margin-right: 1rem;
         }
 
-        .modern-step-title {
-            font-size: 1.4rem !important;
-            font-weight: 700 !important;
-            color: #333 !important;
-            font-family: 'Roboto', sans-serif !important;
-            margin: 0 !important;
+        .step-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #333;
         }
 
-        .modern-step-content {
-            color: #666 !important;
-            line-height: 1.6 !important;
-            margin-bottom: 1.5rem !important;
-            font-family: 'Roboto', sans-serif !important;
+        .step-content {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
         }
 
-        .modern-step-content p {
-            margin-bottom: 1rem !important;
-            color: #666 !important;
-            font-size: 16px !important;
+        .action-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        /* === ACTION BUTTON === */
-        .modern-action-button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-            color: white !important;
-            border: none !important;
-            padding: 1rem 2rem !important;
-            border-radius: 50px !important;
-            font-size: 1.1rem !important;
-            font-weight: 600 !important;
-            cursor: pointer !important;
-            transition: all 0.3s ease !important;
-            width: 100% !important;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
-            font-family: 'Roboto', sans-serif !important;
-            display: block !important;
-            text-align: center !important;
-            text-decoration: none !important;
-            margin: 0 !important;
-            box-sizing: border-box !important;
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
         }
 
-        .modern-action-button:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
-            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%) !important;
+        .action-button:active {
+            transform: translateY(0);
         }
 
-        .modern-action-button:active {
-            transform: translateY(0) !important;
+        .help-button-demo {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            z-index: 1000;
+            animation: pulse 2s infinite;
         }
 
-        /* === HELP BUTTON === */
-        .modern-help-button {
-            position: fixed !important;
-            bottom: 2rem !important;
-            right: 2rem !important;
-            width: 60px !important;
-            height: 60px !important;
-            background: #ff6b6b !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 50% !important;
-            font-size: 1.5rem !important;
-            font-weight: bold !important;
-            cursor: pointer !important;
-            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4) !important;
-            z-index: 1000 !important;
-            animation: pulse 2s infinite !important;
-            font-family: 'Roboto', sans-serif !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
+        .help-button-demo.highlighted {
+            animation: bounce 1s infinite, glow 2s infinite;
         }
 
-        .modern-help-button.highlighted {
-            animation: bounce 1s infinite, glow 2s infinite !important;
+        /* OPRAVA: Progress dots fixně na spodku */
+        .progress-dots {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            z-index: 100;
         }
 
-        .modern-help-button:hover {
-            background: #ff5252 !important;
-            transform: translateY(-2px) !important;
-            animation: none !important;
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            transition: all 0.3s ease;
         }
 
-        /* === PROGRESS DOTS === */
-        .modern-progress-dots {
-            position: fixed !important;
-            bottom: 2rem !important;
-            left: 50% !important;
-            transform: translateX(-50%) !important;
-            display: flex !important;
-            justify-content: center !important;
-            gap: 0.5rem !important;
-            z-index: 20 !important;
+        .dot.active {
+            background: white;
+            transform: scale(1.2);
         }
 
-        .modern-dot {
-            width: 12px !important;
-            height: 12px !important;
-            border-radius: 50% !important;
-            background: rgba(255,255,255,0.4) !important;
-            transition: all 0.3s ease !important;
+        .skip-button {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
         }
 
-        .modern-dot.active {
-            background: white !important;
-            transform: scale(1.2) !important;
+        .skip-button:hover {
+            background: rgba(255,255,255,0.3);
         }
 
-        /* === SKIP BUTTON === */
-        .modern-skip-button {
-            position: absolute !important;
-            top: 2rem !important;
-            right: 2rem !important;
-            background: rgba(255,255,255,0.2) !important;
-            color: white !important;
-            border: none !important;
-            padding: 0.5rem 1rem !important;
-            border-radius: 20px !important;
-            cursor: pointer !important;
-            font-size: 0.9rem !important;
-            transition: all 0.3s ease !important;
-            z-index: 30 !important;
-            font-family: 'Roboto', sans-serif !important;
+        /* Cookie banner úpravy */
+        #consent-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 1rem;
+            z-index: 1001;
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.1);
         }
 
-        .modern-skip-button:hover {
-            background: rgba(255,255,255,0.3) !important;
+        #consent-banner p {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
 
-        /* === COOKIE BANNER OVERRIDE === */
-        body.modern-welcome #consent-banner {
-            position: fixed !important;
-            bottom: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            background: rgba(0,0,0,0.9) !important;
-            color: white !important;
-            padding: 1rem !important;
-            z-index: 1001 !important;
-            backdrop-filter: blur(10px) !important;
-            border-top: 1px solid rgba(255,255,255,0.1) !important;
-            font-family: 'Roboto', sans-serif !important;
-            display: none !important;
+        .consent-buttons {
+            display: flex;
+            gap: 1rem;
         }
 
-        body.modern-welcome #consent-banner.show {
-            display: block !important;
+        .consent-buttons button {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        body.modern-welcome #consent-banner p {
-            margin-bottom: 1rem !important;
-            font-size: 0.9rem !important;
-            line-height: 1.4 !important;
-            color: white !important;
+        #consent-accept {
+            background: #4CAF50;
+            color: white;
         }
 
-        body.modern-welcome #consent-banner a {
-            color: #64B5F6 !important;
-            text-decoration: underline !important;
+        #consent-deny {
+            background: #f44336;
+            color: white;
         }
 
-        body.modern-welcome .consent-buttons {
-            display: flex !important;
-            gap: 1rem !important;
-        }
-
-        body.modern-welcome .consent-buttons button {
-            flex: 1 !important;
-            padding: 0.75rem !important;
-            border: none !important;
-            border-radius: 8px !important;
-            font-weight: 600 !important;
-            cursor: pointer !important;
-            transition: all 0.3s ease !important;
-            font-family: 'Roboto', sans-serif !important;
-        }
-
-        body.modern-welcome #consent-accept {
-            background: #4CAF50 !important;
-            color: white !important;
-        }
-
-        body.modern-welcome #consent-accept:hover {
-            background: #45a049 !important;
-            transform: translateY(-1px) !important;
-        }
-
-        body.modern-welcome #consent-deny {
-            background: #f44336 !important;
-            color: white !important;
-        }
-
-        body.modern-welcome #consent-deny:hover {
-            background: #da190b !important;
-            transform: translateY(-1px) !important;
-        }
-
-        /* === ANIMACE === */
+        /* Animace */
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @keyframes pulse {
@@ -369,175 +261,162 @@
             50% { box-shadow: 0 4px 25px rgba(255, 107, 107, 0.8); }
         }
 
-        /* === RESPONSIVE === */
+        /* Responsive úpravy */
         @media (max-width: 480px) {
-            .modern-main-title { font-size: 2rem !important; }
-            .modern-step-container { 
-                width: calc(100% - 1rem) !important;
-                padding: 1.5rem !important; 
+            .main-title {
+                font-size: 2rem;
             }
-            .modern-help-button { 
-                width: 50px !important; 
-                height: 50px !important; 
-                font-size: 1.2rem !important; 
-                bottom: 1.5rem !important;
-                right: 1.5rem !important;
+            
+            .step-container {
+                width: calc(100% - 1rem);
+                padding: 1.5rem;
             }
-            .modern-progress-dots {
-                bottom: 1rem !important;
+            
+            .help-button-demo {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+                bottom: 1.5rem;
+                right: 1.5rem;
             }
-            .modern-skip-button {
-                top: 1rem !important;
-                right: 1rem !important;
-                padding: 0.4rem 0.8rem !important;
-                font-size: 0.8rem !important;
+            
+            .progress-dots {
+                bottom: 1rem;
             }
         }
     </style>
 </head>
-<body class="modern-welcome">
-    <!-- MODERNÍ WELCOME SCREEN -->
-    <div class="modern-welcome-container">
-        <button class="modern-skip-button" onclick="skipTutorial()">Přeskočit</button>
+<body>
+    <div class="welcome-container">
+        <button class="skip-button" onclick="skipTutorial()">Přeskočit</button>
         
-        <div class="modern-logo-section">
+        <div class="logo-section">
             <img src="img/augview.png" alt="Logo AR Aplikace" class="app-logo">
-            <h1 class="modern-main-title">AugView</h1>
-            <p class="modern-subtitle">Rozšířená realita ve vašich rukou</p>
+            <h1 class="main-title">AugView</h1>
+            <p class="subtitle">Rozšířená realita ve vašich rukou</p>
         </div>
 
         <!-- Krok 1: Uvítání -->
-        <div class="modern-step-container active" id="step-1">
-            <div class="modern-step-header">
-                <div class="modern-step-emoji">👋</div>
-                <div class="modern-step-title">Vítejte!</div>
+        <div class="step-container active" id="step-1">
+            <div class="step-header">
+                <div class="step-emoji">👋</div>
+                <div class="step-title">Vítejte!</div>
             </div>
-            <div class="modern-step-content">
+            <div class="step-content">
                 <p>Připravte se na úžasný zážitek! Obrazy začnou mluvit, ilustrace se rozhýbou a svět kolem vás ožije díky rozšířené realitě.</p>
             </div>
-            <button class="modern-action-button" onclick="nextStep()">Pokračovat</button>
+            <button class="action-button" onclick="nextStep()">Pokračovat</button>
         </div>
 
         <!-- Krok 2: Nápověda -->
-        <div class="modern-step-container" id="step-2">
-            <div class="modern-step-header">
-                <div class="modern-step-emoji">❓</div>
-                <div class="modern-step-title">Vždy po ruce</div>
+        <div class="step-container" id="step-2">
+            <div class="step-header">
+                <div class="step-emoji">❓</div>
+                <div class="step-title">Vždy po ruce</div>
             </div>
-            <div class="modern-step-content">
+            <div class="step-content">
                 <p>Vidíte červené tlačítko s otazníkem? To je vaše nápověda! Kdykoliv si nebudete vědět rady, stačí na něj kliknout.</p>
                 <p><strong>Zkuste to hned teď! ⬇️</strong></p>
             </div>
-            <button class="modern-action-button" onclick="highlightHelpButton()">Ukázat mi to</button>
+            <button class="action-button" onclick="highlightHelpButton()">Ukázat mi to</button>
         </div>
 
         <!-- Krok 3: Instalace -->
-        <div class="modern-step-container" id="step-3">
-            <div class="modern-step-header">
-                <div class="modern-step-emoji">📱</div>
-                <div class="modern-step-title">Přidejte si aplikaci</div>
+        <div class="step-container" id="step-3">
+            <div class="step-header">
+                <div class="step-emoji">📱</div>
+                <div class="step-title">Přidejte si aplikaci</div>
             </div>
-            <div class="modern-step-content">
+            <div class="step-content">
                 <p>Pro nejlepší zážitek si aplikaci přidejte na plochu telefonu. Bude se chovat jako skutečná aplikace!</p>
                 <p><strong>Android:</strong> Menu (⋮) → "Přidat na plochu"<br>
                 <strong>iOS:</strong> Sdílet → "Přidat na plochu"</p>
             </div>
-            <button class="modern-action-button" onclick="nextStep()">Rozumím</button>
+            <button class="action-button" onclick="nextStep()">Rozumím</button>
         </div>
 
         <!-- Krok 4: Start -->
-        <div class="modern-step-container" id="step-4">
-            <div class="modern-step-header">
-                <div class="modern-step-emoji">🚀</div>
-                <div class="modern-step-title">Můžeme začít!</div>
+        <div class="step-container" id="step-4">
+            <div class="step-header">
+                <div class="step-emoji">🚀</div>
+                <div class="step-title">Můžeme začít!</div>
             </div>
-            <div class="modern-step-content">
+            <div class="step-content">
                 <p>Vše je připraveno! Prozkoumejte naše AR scény a objevte kouzelný svět rozšířené reality.</p>
                 <p><em>Tip: Nezapomeňte na tlačítko nápovědy! 😉</em></p>
             </div>
-            <button class="modern-action-button" onclick="goToMainMenu()">Vstoupit do aplikace</button>
+            <button class="action-button" onclick="goToMainMenu()">Vstoupit do aplikace</button>
         </div>
 
-        <div class="modern-progress-dots">
-            <div class="modern-dot active" id="dot-1"></div>
-            <div class="modern-dot" id="dot-2"></div>
-            <div class="modern-dot" id="dot-3"></div>
-            <div class="modern-dot" id="dot-4"></div>
-        </div>
+        <!-- OPRAVA: Progress dots přesunuty ven z container, budou na spodku -->
+    </div>
+    
+    <div class="progress-dots">
+        <div class="dot active" id="dot-1"></div>
+        <div class="dot" id="dot-2"></div>
+        <div class="dot" id="dot-3"></div>
+        <div class="dot" id="dot-4"></div>
     </div>
 
-    <button class="modern-help-button" id="help-demo" onclick="openHelpFromDemo()">?</button>
-
-    <!-- ZACHOVÁNO: Původní page-wrapper skrytý -->
-    <div class="page-wrapper" style="display: none;">
-        <header class="app-header">
-            <img src="img/augview.png" alt="Logo AR Aplikace" id="app-logo">
-        </header>
-        <main class="menu-content">
-            <!-- Původní obsah -->
-        </main>
-        <footer class="app-footer">
-            <p>© 2025 Vytvořil Václav Pěnčík</p>
-        </footer>
-    </div>
+    <button class="help-button-demo" id="help-demo" onclick="openHelpFromDemo()">?</button>
 
     <!-- Cookie banner -->
-    <div id="consent-banner">
+    <div id="consent-banner" style="display: none;">
         <p>🍪 Pro zlepšování aplikace používáme Google Analytics. Pomozte nám s anonymními daty! 
-        <a href="/privacy-policy.html" target="_blank">Více info</a></p>
+        <a href="/privacy-policy.html" target="_blank" style="color: #64B5F6;">Více info</a></p>
         <div class="consent-buttons">
             <button id="consent-accept">✅ Souhlasím</button>
             <button id="consent-deny">❌ Odmítám</button>
         </div>
     </div>
 
-    <!-- ZACHOVÁNO: Původní modální okno s vašimi styly -->
-    <div id="help-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h2>🎯 Nápověda a první kroky</h2>
-            <p>Pro nejlepší zážitek si přidejte aplikaci na plochu:</p>
+    <!-- OPRAVA: Modální okno s kompletní strukturou a funkčním video -->
+    <div id="help-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1002; overflow-y: auto;">
+        <div style="background: white; margin: 2rem auto; border-radius: 20px; padding: 2rem; max-width: 500px; width: calc(100% - 4rem); max-height: calc(100vh - 4rem); overflow-y: auto;">
+            <h2 style="color: #333; margin-bottom: 1rem;">🎯 Nápověda a první kroky</h2>
+            <p style="color: #666; line-height: 1.6; margin-bottom: 1rem;">Pro nejlepší zážitek si přidejte aplikaci na plochu:</p>
             
-            <div class="add-to-home-section">
-                <h3>Android (Chrome)</h3>
-                <p>Klepněte na ikonu tří teček (⋮) vpravo nahoře v prohlížeči Chrome, poté zvolte "Přidat na plochu" nebo "Instalovat aplikaci".</p>
+            <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f9f9f9; border-radius: 10px;">
+                <h3 style="color: #666; margin-bottom: 0.5rem;">Android (Chrome)</h3>
+                <p style="color: #666; line-height: 1.6; margin-bottom: 0;">Klepněte na ikonu tří teček (⋮) vpravo nahoře v prohlížeči Chrome, poté zvolte "Přidat na plochu" nebo "Instalovat aplikaci".</p>
             </div>
             
-            <div class="add-to-home-section">
-                <h3>iOS (Safari)</h3>
-                <ol>
-                    <li>Klepněte na ikonu Sdílet <img src="/img/ios_share_icon.png" alt="Ikona Sdílet na iOS" class="inline-icon ios-icon">.</li>
-                    <li>Sjeďte dolů a vyberte "Přidat na plochu" <img src="/img/ios_add_icon.png" alt="Ikona Přidat na plochu na iOS" class="inline-icon ios-icon">.</li>
+            <div style="margin-bottom: 1.5rem; padding: 1rem; background: #f9f9f9; border-radius: 10px;">
+                <h3 style="color: #666; margin-bottom: 0.5rem;">iOS (Safari)</h3>
+                <ol style="margin-left: 1.5rem; color: #666;">
+                    <li style="margin-bottom: 0.5rem;">Klepněte na ikonu Sdílet.</li>
+                    <li style="margin-bottom: 0.5rem;">Sjeďte dolů a vyberte "Přidat na plochu".</li>
                 </ol>
             </div>
             
-            <section class="help-section">
-                <h3>Důležité tipy</h3>
-                <ul>
-                    <li>Pokud jste si přidali aplikaci na plochu, doporučujeme toto okno zavřít a pokračovat spuštěním přidané aplikace z plochy.</li>
-                    <li>Pro správnou funkci aplikace je nutné aktivní internetové připojení.</li>
+            <div style="margin-bottom: 1.5rem;">
+                <h3 style="color: #666; margin-bottom: 0.5rem;">Důležité tipy</h3>
+                <ul style="margin-left: 1.5rem; color: #666;">
+                    <li style="margin-bottom: 0.5rem;">Pokud jste si přidali aplikaci na plochu, doporučujeme toto okno zavřít a pokračovat spuštěním přidané aplikace z plochy.</li>
+                    <li style="margin-bottom: 0.5rem;">Pro správnou funkci aplikace je nutné aktivní internetové připojení.</li>
                 </ul>
-            </section>
+            </div>
             
-            <section class="help-section">
-                <h3>Ukázka použití</h3>
-                <p>Podívejte se na krátké video, jak aplikace funguje:</p>
-                <div class="modal-video-container">
-                    <video controls preload="metadata" playsinline poster="/img/video_poster_nahled.jpg">
+            <div style="margin-bottom: 1.5rem;">
+                <h3 style="color: #666; margin-bottom: 0.5rem;">🎥 Ukázka použití</h3>
+                <p style="color: #666; line-height: 1.6; margin-bottom: 1rem;">Podívejte se na krátké video, jak aplikace funguje:</p>
+                <div style="background: #f5f5f5; border-radius: 10px; padding: 1rem; text-align: center; margin: 1rem 0;">
+                    <video controls preload="metadata" playsinline poster="/img/video_poster_nahled.jpg" style="width: 100%; max-width: 400px; height: auto; border-radius: 8px;">
                         <source src="video/nahled_ar.mp4" type="video/mp4">
                         Váš prohlížeč nepodporuje přehrávání HTML5 videa. Video si můžete <a href="video/nahled_ar.mp4" download>stáhnout zde</a>.
                     </video>
                 </div>
-                <p>Pokračovat můžete z hlavního menu výběrem kategorie scén.</p>
-            </section>
+                <p style="color: #666; line-height: 1.6; margin-bottom: 0;">Pokračovat můžete z hlavního menu výběrem kategorie scén.</p>
+            </div>
             
-            <h2>Technologie</h2>
-            <p>Aplikace využívá technologie MindAR a A-Frame.</p>
-            <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
+            <div style="margin-bottom: 1.5rem;">
+                <h2 style="color: #333; margin-bottom: 0.5rem;">Technologie</h2>
+                <p style="color: #666; line-height: 1.6; margin-bottom: 0;">Aplikace využívá technologie MindAR a A-Frame.</p>
+            </div>
+            
+            <button onclick="closeHelpModal()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 1rem 2rem; border-radius: 50px; font-weight: 600; cursor: pointer; width: 100%; transition: all 0.3s ease;">Zavřít</button>
         </div>
     </div>
-
-    <!-- ZACHOVÁNO: Váš script.js -->
-    <script src="script.js"></script>
 
     <script>
         let currentStep = 1;
@@ -545,9 +424,11 @@
 
         function nextStep() {
             if (currentStep < totalSteps) {
+                // Skrýt současný krok
                 document.getElementById(`step-${currentStep}`).classList.remove('active');
                 document.getElementById(`dot-${currentStep}`).classList.remove('active');
                 
+                // Zobrazit další krok
                 currentStep++;
                 setTimeout(() => {
                     document.getElementById(`step-${currentStep}`).classList.add('active');
@@ -560,6 +441,7 @@
             const helpButton = document.getElementById('help-demo');
             helpButton.classList.add('highlighted');
             
+            // Automaticky pokračovat po 3 sekundách
             setTimeout(() => {
                 helpButton.classList.remove('highlighted');
                 nextStep();
@@ -568,16 +450,15 @@
 
         function skipTutorial() {
             currentStep = totalSteps;
-            document.querySelectorAll('.modern-step-container').forEach(step => step.classList.remove('active'));
-            document.querySelectorAll('.modern-dot').forEach(dot => dot.classList.remove('active'));
+            document.querySelectorAll('.step-container').forEach(step => step.classList.remove('active'));
+            document.querySelectorAll('.dot').forEach(dot => dot.classList.remove('active'));
             document.getElementById(`step-${totalSteps}`).classList.add('active');
             document.getElementById(`dot-${totalSteps}`).classList.add('active');
         }
 
+        // OPRAVA: Přímé přesměrování bez alertu
         function goToMainMenu() {
-            if (currentStep === totalSteps) {
-                window.location.href = 'index.html';
-            }
+            window.location.href = 'index.html';
         }
 
         function openHelpFromDemo() {
@@ -591,39 +472,32 @@
         // Cookie banner logic
         document.addEventListener('DOMContentLoaded', function() {
             const banner = document.getElementById('consent-banner');
-            const acceptButton = document.getElementById('consent-accept');
-            const denyButton = document.getElementById('consent-deny');
-
             const currentConsent = localStorage.getItem('ga_consent_status');
 
             if (!currentConsent) {
-                banner.classList.add('show');
+                banner.style.display = 'block';
             }
 
-            function handleConsent(consentGranted) {
-                const consentState = {
-                    'analytics_storage': consentGranted ? 'granted' : 'denied',
-                    'ad_storage': consentGranted ? 'granted' : 'denied',
-                    'ad_user_data': consentGranted ? 'granted' : 'denied',
-                    'ad_personalization': consentGranted ? 'granted' : 'denied',
-                };
-
-                if (typeof gtag === 'function') {
-                    gtag('consent', 'update', consentState);
-                    console.log('Consent updated:', consentState);
-                }
-
-                localStorage.setItem('ga_consent_status', JSON.stringify(consentState));
-                banner.classList.remove('show');
-            }
-
-            acceptButton.addEventListener('click', function() {
+            document.getElementById('consent-accept').addEventListener('click', function() {
                 handleConsent(true);
             });
 
-            denyButton.addEventListener('click', function() {
+            document.getElementById('consent-deny').addEventListener('click', function() {
                 handleConsent(false);
             });
+
+            function handleConsent(granted) {
+                const consentState = {
+                    'analytics_storage': granted ? 'granted' : 'denied',
+                    'ad_storage': granted ? 'granted' : 'denied'
+                };
+                
+                localStorage.setItem('ga_consent_status', JSON.stringify(consentState));
+                banner.style.display = 'none';
+                
+                // Zde by byla integrace s Google Analytics
+                console.log('Consent:', granted ? 'granted' : 'denied');
+            }
         });
     </script>
 </body>
