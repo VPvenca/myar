@@ -75,11 +75,11 @@ const ANDELE_EXPOSITION_CONFIG = {
             icon: "👼",
             category: "andele", 
             rarity: "rare",
-            condition: "complete_scene",
+            condition: "gold_star_in_scene",
             sceneId: "/assets/andele/geo_andele.html",
             image: "/img/achievements/angel_collector.png"
         },
-
+/*
         "andele_pathfinder": {
             name: "Průvodce stezkou",
             description: "Úspěšně jsi doshel až k muzeu",
@@ -122,7 +122,7 @@ const ANDELE_EXPOSITION_CONFIG = {
             condition: "complete_all_scenes",
             image: "/img/achievements/angel_pilgrim.png"
         },
-
+*/
         // === ZÁKLADNÍ ACHIEVEMENTY PRO EXPOZICI ===
         "andele_first_scene": {
             name: "První krůčky mezi anděly",
@@ -149,7 +149,7 @@ const ANDELE_EXPOSITION_CONFIG = {
             category: "andele",
             rarity: "legendary",
             image: "/img/achievements/andele_perfectionist.png"
-        }
+        } 
     },
 
     // === KATEGORIE ===
