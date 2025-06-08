@@ -37,8 +37,8 @@
 /* --- Styly pro hvězdu --- */
 .menu-button .star-display { /* Specifičtější selektor, aby se aplikovalo jen na hvězdy uvnitř menu-button */
     position: absolute;
-    top: -5px;       /* Posun od horního okraje tlačítka (záporná hodnota pro překrytí) */
-    right: -5px;     /* Posun od pravého okraje tlačítka (záporná hodnota pro překrytí) */
+    top: 0px;       /* Posun od horního okraje tlačítka (záporná hodnota pro překrytí) */
+    right: 0px;     /* Posun od pravého okraje tlačítka (záporná hodnota pro překrytí) */
     font-size: 1.5em; /* Velikost hvězdy - upravte podle potřeby */
     line-height: 1;   /* Aby emoji nemělo zbytečnou výšku navíc */
     z-index: 1;       /* Aby byla hvězda nad obsahem tlačítka, pokud by se překrývaly */
