@@ -1,70 +1,206 @@
 /* ==========================================================================
-   4. Specifické Styly pro Stránky (např. Domovská stránka)
+   VYLEPŠENÉ STYLY PRO HOMEPAGE MENU - MODERNIZACE
    ========================================================================== */
 
-/* --- SPECIFICKÉ STYLY PRO DOMOVSKOU STRÁNKU --- */
-/* Tyto styly se aplikují POUZE pokud má <body> tag třídu "home-page" */
-/* Přepisují nebo doplňují obecná pravidla pro prvky na domovské stránce */
-
-/* Úprava kontejneru obsahu na domovské stránce pro zobrazení ikon vedle sebe */
+/* --- VYLEPŠENÝ KONTEJNER PRO DOMOVSKOU STRÁNKU --- */
 .home-page .menu-content {
-    /* Přepisujeme výchozí flex-direction a align-items */
-    flex-direction: row;    /* Hlavní osa je řádek (tlačítka budou vedle sebe) */
-    flex-wrap: wrap;        /* Povolí zalamování tlačítek na další řádek, pokud se nevejdou */
-    justify-content: center;/* Centruje řádky tlačítek horizontálně v kontejneru */
-    align-items: center;    /* Zarovnává tlačítka vertikálně V RÁMCI jednoho řádku */
-                            /* Pokud mají tlačítka různou výšku, budou vertikálně centrována */
-    /* === Zarovnání celého bloku řádků === */
-    align-content: flex-start; /* Zarovná všechny řádky (jako celek) nahoru v kontejneru */
-                               /* Pokud je jen jeden řádek, nemá efekt */
-                               /* Další možnosti: center, space-between, space-around */
-    gap: 10px 16px;         /* Mezery mezi tlačítky (10px vertikálně, 16px horizontálně) */
-                            /* Nahrazuje potřebu margin na tlačítkách v tomto kontextu */
-    /* Ostatní vlastnosti jako flex-grow, padding, overflow-y jsou zděděny z obecného .menu-content */
-    /* Specificky odstraníme margin z tlačítek, protože používáme gap */
-    & > .menu-button { /* Cílíme přímo na .menu-button uvnitř .home-page .menu-content */
-      margin: 0; /* Odstraníme margin, spoléháme na gap */
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch; /* ZMĚNA: Všechna tlačítka budou stejně vysoká */
+    align-content: flex-start;
+    gap: 20px; /* ZVĚTŠENO: Více prostoru mezi tlačítky */
+    padding: 20px 15px; /* ZVĚTŠENO: Více paddingu pro lepší vzhled */
+    max-width: 1000px; /* PŘIDÁNO: Maximální šířka pro velké obrazovky */
+    margin: 0 auto; /* PŘIDÁNO: Centrování kontejneru */
+}
+
+/* Odstranění marginu z tlačítek - používáme gap */
+.home-page .menu-content > .menu-button {
+    margin: 0;
+}
+
+/* --- VYLEPŠENÁ TLAČÍTKA S IKONAMI --- */
+.home-page .menu-button.icon-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    
+    /* ROZMĚRY A SPACING */
+    width: 160px; /* ZVĚTŠENO: Z 150px na 160px */
+    min-height: 140px; /* ZVĚTŠENO: Z 120px na 140px */
+    padding: 15px 12px; /* UPRAVENO: Více prostoru */
+    
+    /* VIZUÁLNÍ VYLEPŠENÍ */
+    background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%); /* PŘIDÁNO: Gradientní pozadí */
+    color: #2c3e50; /* UPRAVENO: Tmavší text pro lepší kontrast */
+    border: 2px solid #e9ecef; /* ZPEVNĚNO: Silnější border */
+    border-radius: 16px; /* ZVĚTŠENO: Více zaoblené rohy */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* VYLEPŠENO: Větší a jemnější stín */
+    
+    /* ANIMACE A PŘECHODY */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* VYLEPŠENO: Lepší easing */
+    transform: translateY(0); /* PŘIDÁNO: Výchozí pozice pro animaci */
+    
+    /* EFEKTY */
+    backdrop-filter: blur(10px); /* PŘIDÁNO: Blur efekt pro moderní vzhled */
+    position: relative; /* PŘIDÁNO: Pro pseudo-elementy */
+    overflow: hidden; /* PŘIDÁNO: Pro animační efekty */
+}
+
+/* HOVER EFEKTY - VÝRAZNĚ VYLEPŠENÉ */
+.home-page .menu-button.icon-button:hover {
+    transform: translateY(-8px) scale(1.02); /* VYLEPŠENO: Kombinace posunu a škálování */
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15); /* DRAMATIČTĚJŠÍ: Větší stín */
+    border-color: #667eea; /* PŘIDÁNO: Změna barvy borderu */
+    background: linear-gradient(145deg, #ffffff 0%, #f1f3f4 100%); /* JEMNĚJŠÍ: Změna gradientu */
+}
+
+/* ACTIVE STAV */
+.home-page .menu-button.icon-button:active {
+    transform: translateY(-4px) scale(0.98); /* JEMNĚJŠÍ: Menší posun při kliknutí */
+    transition: all 0.1s ease; /* RYCHLEJŠÍ: Okamžitá odezva */
+}
+
+/* --- VYLEPŠENÉ IKONY --- */
+.home-page .icon-button .button-icon {
+    width: 72px; /* ZVĚTŠENO: Z 64px na 72px */
+    height: 72px; /* ZVĚTŠENO: Z 64px na 72px */
+    margin-bottom: 12px; /* ZVĚTŠENO: Více prostoru pod ikonou */
+    object-fit: contain;
+    
+    /* NOVÉ EFEKTY PRO IKONY */
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)); /* PŘIDÁNO: Jemný stín ikony */
+}
+
+/* HOVER EFEKT PRO IKONY */
+.home-page .menu-button.icon-button:hover .button-icon {
+    transform: scale(1.1) rotate(2deg); /* PŘIDÁNO: Jemné zvětšení a rotace */
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15)); /* INTENZIVNĚJŠÍ: Větší stín */
+}
+
+/* --- VYLEPŠENÝ TEXT --- */
+.home-page .icon-button .button-text {
+    font-size: 15px; /* ZVĚTŠENO: Z 14px na 15px */
+    font-weight: 600; /* ZPEVNĚNO: Z 500 na 600 */
+    color: #2c3e50; /* JEDNOTNÉ: Stejná barva jako tlačítko */
+    text-align: center;
+    display: block;
+    line-height: 1.3; /* VYLEPŠENO: Lepší řádkování */
+    letter-spacing: 0.5px; /* PŘIDÁNO: Rozestup písmen pro lepší čitelnost */
+    text-transform: uppercase; /* PŘIDÁNO: Velká písmena pro důraz */
+    margin-top: auto; /* PŘIDÁNO: Tlačí text dolů */
+}
+
+/* HOVER EFEKT PRO TEXT */
+.home-page .menu-button.icon-button:hover .button-text {
+    color: #667eea; /* PŘIDÁNO: Změna barvy textu při hoveru */
+}
+
+/* --- RESPONZIVNÍ DESIGN --- */
+@media (max-width: 768px) {
+    .home-page .menu-content {
+        gap: 15px; /* MENŠÍ: Gap na tabletech */
+        padding: 15px 10px;
+    }
+    
+    .home-page .menu-button.icon-button {
+        width: 140px; /* ZMENŠENO: Pro tablety */
+        min-height: 120px;
+        padding: 12px 10px;
+    }
+    
+    .home-page .icon-button .button-icon {
+        width: 60px; /* ZMENŠENO: Pro tablety */
+        height: 60px;
+    }
+    
+    .home-page .icon-button .button-text {
+        font-size: 13px; /* ZMENŠENO: Pro tablety */
     }
 }
 
-/* Specifické styly pro tlačítka s ikonou na domovské stránce */
+@media (max-width: 480px) {
+    .home-page .menu-content {
+        gap: 12px; /* NEJMENŠÍ: Gap na mobilech */
+        padding: 15px 5px;
+        flex-direction: column; /* ZMĚNA: Na mobilu pod sebou */
+        align-items: center;
+    }
+    
+    .home-page .menu-button.icon-button {
+        width: 280px; /* ŠIRŠÍ: Na mobilu přes celou šířku */
+        min-height: 100px; /* NIŽŠÍ: Na mobilu */
+        flex-direction: row; /* ZMĚNA: Ikona vedle textu na mobilu */
+        justify-content: flex-start;
+        padding: 15px 20px;
+        text-align: left;
+    }
+    
+    .home-page .icon-button .button-icon {
+        width: 50px; /* MENŠÍ: Na mobilu */
+        height: 50px;
+        margin-bottom: 0; /* ODSTRANĚNO: Margin na mobilu */
+        margin-right: 15px; /* PŘIDÁNO: Mezera vpravo od ikony */
+    }
+    
+    .home-page .icon-button .button-text {
+        font-size: 14px; /* NORMÁLNÍ: Velikost na mobilu */
+        text-align: left; /* ZMĚNA: Zarovnání vlevo na mobilu */
+        margin-top: 0; /* RESETOVÁNO: Na mobilu */
+    }
+    
+    /* HOVER EFEKTY NA MOBILU - ZMÍRNĚNÉ */
+    .home-page .menu-button.icon-button:hover {
+        transform: translateY(-4px); /* MENŠÍ: Posun na mobilu */
+    }
+    
+    .home-page .menu-button.icon-button:hover .button-icon {
+        transform: scale(1.05); /* MENŠÍ: Škálování na mobilu */
+    }
+}
+
+/* --- SPECIÁLNÍ EFEKTY PRO MODERNÍ VZHLED --- */
+
+/* Glowing efekt při focus (pro přístupnost) */
+.home-page .menu-button.icon-button:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3), 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Animace při načtení stránky */
 .home-page .menu-button.icon-button {
-    /* Přepisuje některé obecné .menu-button styly + přidává nové */
-    display: flex;          /* Použije flex pro vnitřní layout (ikona, text) */
-    flex-direction: column; /* Ikona bude nad textem */
-    align-items: center;    /* Centruje ikonu a text horizontálně uvnitř tlačítka */
-    /* justify-content: center; <= PŮVODNÍ HODNOTA */
-    justify-content: space-between; /* <<< ZMĚNA: Umístí ikonu nahoru, text dolů */
-    width: 150px;           /* Šířka tlačítka ZŮSTÁVÁ */
-    min-height: 120px;      /* Minimální výška ZŮSTÁVÁ */
-    /* padding: 15px 10px; <= PŮVODNÍ HODNOTA */
-    padding: 10px 10px;     /* <<< ZMĚNA: Snížený horní/dolní padding pro přiblížení k okrajům */
-                            /* Můžete experimentovat s hodnotou (např. 5px nebo 15px, pokud chcete více místa) */
-    background-color: #f8f9fa;
-    color: #343a40;
-    border: 1px solid #dee2e6;
-    /* Ostatní vlastnosti zůstávají zděděné nebo stejné */
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
 }
 
-/* Styly pro samotnou ikonu (<img>) uvnitř tlačítka .icon-button */
-.home-page .icon-button .button-icon {
-    /* width: 48px; <= PŮVODNÍ HODNOTA */
-    /* height: 48px; <= PŮVODNÍ HODNOTA */
-    width: 64px;            /* <<< ZMĚNA: Větší šířka ikony */
-    height: 64px;           /* <<< ZMĚNA: Větší výška ikony */
-    /* margin-bottom: 8px; <= PŮVODNÍ HODNOTA */
-    margin-bottom: 5px;     /* <<< ZMĚNA (volitelná): Mírně snížíme mezeru, protože space-between už rozděluje prostor */
-                            /* Můžete nechat i 8px nebo upravit podle potřeby */
-    object-fit: contain;    /* Zachová poměr stran ikony */
+/* Postupné objevování tlačítek */
+.home-page .menu-button.icon-button:nth-child(1) { animation-delay: 0.1s; }
+.home-page .menu-button.icon-button:nth-child(2) { animation-delay: 0.2s; }
+.home-page .menu-button.icon-button:nth-child(3) { animation-delay: 0.3s; }
+.home-page .menu-button.icon-button:nth-child(4) { animation-delay: 0.4s; }
+.home-page .menu-button.icon-button:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-/* Styly pro text (např. <span>) uvnitř tlačítka .icon-button */
-.home-page .icon-button .button-text {
-    font-size: 14px;        /* Velikost písma zůstává */
-    font-weight: 500;       /* Tloušťka písma zůstává */
-    color: inherit;
-    text-align: center;     /* Horizontální centrování textu zůstává */
-    display: block;
-    line-height: 1.2;
-    /* Není potřeba měnit, text se automaticky posune dolů díky justify-content: space-between */
+/* Pulse efekt pro důležitá tlačítka (volitelné) */
+.home-page .menu-button.icon-button.highlight {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+    50% {
+        box-shadow: 0 6px 30px rgba(102, 126, 234, 0.2);
+    }
 }
