@@ -76,6 +76,7 @@
             align-items: center;
             padding: 20px;
             background: linear-gradient(135deg, #a8b8f5 0%, #b599d1 100%);
+            position: relative;
         }
 
         .welcome-container {
@@ -86,13 +87,16 @@
             max-width: 500px;
             width: 100%;
             position: relative;
-            
         }
 
+        /* KLÍČOVÁ ZMĚNA: Logo sekce bude fixní a nezávislá na modal oknech */
         .logo-section {
             text-align: center;
             margin-bottom: 3rem;
             animation: fadeInDown 1s ease-out;
+            /* DŮLEŽITÉ: Zajistíme, že logo zůstane na místě */
+            position: relative;
+            z-index: 10; /* Vyšší než modální okna */
         }
 
         .app-logo {
@@ -110,33 +114,56 @@
             margin-bottom: 0.5rem;
         }
 
-       .subtitle {
+        .subtitle {
             color: #2c3e50;
             font-size: 24px;
             font-weight: 400;
         }
 
+        /* KLÍČOVÁ ZMĚNA: Kontejner pro modální okna */
+        .step-modals-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            min-height: 320px; /* Zajistí minimální výšku pro stabilitu */
+            margin: 1rem;
+        }
+
+        /* VYLEPŠENÉ MODÁLNÍ OKNO: Plynulé přechody */
         .step-modal {
-            
+            position: absolute; /* ZMĚNA: Absolutní pozicování pro překrývání */
+            top: 0;
+            left: 0;
+            width: 100%;
             background: rgba(255,255,255,0.95);
             border-radius: 20px;
             padding: 2.5rem;
-            margin: 1rem;
-            width: 100%;
-            max-width: 450px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
             backdrop-filter: blur(10px);
             text-align: center;
-            display: none;
+            
+            /* VYLEPŠENÉ ANIMACE */
             opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.4s ease;
+            visibility: hidden;
+            transform: translateY(30px) scale(0.95);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
         }
 
         .step-modal.active {
-            display: block;
             opacity: 1;
-            transform: translateY(0);
+            visibility: visible;
+            transform: translateY(0) scale(1);
+            z-index: 2; /* Aktivní okno bude nad ostatními */
+        }
+
+        /* Odcházející okno - fade out efekt */
+        .step-modal.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-20px) scale(0.98);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
         }
 
         .step-header {
@@ -206,6 +233,7 @@
             cursor: pointer;
             font-size: 0.9rem;
             transition: all 0.3s ease;
+            z-index: 20; /* Nad vším ostatním */
         }
 
         .skip-button:hover {
@@ -221,6 +249,7 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
+            z-index: 20; /* Nad modálními okny */
         }
 
         .dot {
@@ -308,6 +337,11 @@
             .progress-dots {
                 bottom: 20px;
             }
+
+            .step-modals-container {
+                margin: 0.5rem;
+                min-height: 280px;
+            }
         }
     </style>
 </head>
@@ -316,62 +350,65 @@
     <div class="welcome-container">
         <button class="skip-button" onclick="skipTutorial()">Přeskočit</button>
         
+        <!-- PEVNÁ LOGO SEKCE - ZŮSTANE VŽDY NA MÍSTĚ -->
         <div class="logo-section">
             <img src="img/augview.png" alt="Logo AR Aplikace" class="app-logo">
             <p class="subtitle">AR Aplikace</p>
-            
         </div>
 
-        <!-- Krok 1: Uvítání -->
-        <div class="step-modal active" id="step-1">
-            <div class="step-header">
-                <div class="step-emoji">👋</div>
-                <h2 class="step-title">Vítejte!</h2>
+        <!-- KONTEJNER PRO MODÁLNÍ OKNA - PŘEKRÝVAJÍ SE -->
+        <div class="step-modals-container">
+            <!-- Krok 1: Uvítání -->
+            <div class="step-modal active" id="step-1">
+                <div class="step-header">
+                    <div class="step-emoji">👋</div>
+                    <h2 class="step-title">Vítejte!</h2>
+                </div>
+                <div class="step-content">
+                    <p>Připravte se na úžasný zážitek! Obrazy začnou mluvit, ilustrace se rozhýbou a svět kolem vás ožije díky rozšířené realitě.</p>
+                </div>
+                <button class="action-button" onclick="nextStep()">Pokračovat</button>
             </div>
-            <div class="step-content">
-                <p>Připravte se na úžasný zážitek! Obrazy začnou mluvit, ilustrace se rozhýbou a svět kolem vás ožije díky rozšířené realitě.</p>
-            </div>
-            <button class="action-button" onclick="nextStep()">Pokračovat</button>
-        </div>
 
-        <!-- Krok 2: Nápověda -->
-        <div class="step-modal" id="step-2">
-            <div class="step-header">
-                <div class="step-emoji">❓</div>
-                <h2 class="step-title">Vždy po ruce</h2>
+            <!-- Krok 2: Nápověda -->
+            <div class="step-modal" id="step-2">
+                <div class="step-header">
+                    <div class="step-emoji">❓</div>
+                    <h2 class="step-title">Vždy po ruce</h2>
+                </div>
+                <div class="step-content">
+                    <p>Vidíte červené tlačítko s otazníkem? To je vaše nápověda! Kdykoliv si nebudete vědět rady, stačí na něj kliknout.</p>
+                    <p><strong>Zkuste to hned teď! ⬇️</strong></p>
+                </div>
+                <button class="action-button" onclick="highlightHelpButton()">Ukázat mi to</button>
             </div>
-            <div class="step-content">
-                <p>Vidíte červené tlačítko s otazníkem? To je vaše nápověda! Kdykoliv si nebudete vědět rady, stačí na něj kliknout.</p>
-                <p><strong>Zkuste to hned teď! ⬇️</strong></p>
-            </div>
-            <button class="action-button" onclick="highlightHelpButton()">Ukázat mi to</button>
-        </div>
 
-        <!-- Krok 3: Instalace -->
-        <div class="step-modal" id="step-3">
-            <div class="step-header">
-                <div class="step-emoji">📱</div>
-                <h2 class="step-title">Přidejte si aplikaci</h2>
+            <!-- Krok 3: Instalace -->
+            <div class="step-modal" id="step-3">
+                <div class="step-header">
+                    <div class="step-emoji">📱</div>
+                    <h2 class="step-title">Přidejte si aplikaci</h2>
+                </div>
+                <div class="step-content">
+                    <p>Pro nejlepší zážitek si aplikaci přidejte na plochu telefonu. Bude se chovat jako skutečná aplikace!</p>
+                    <p><strong>Android:</strong> Menu (⋮) → "Přidat na plochu"<br>
+                    <strong>iOS:</strong> Sdílet → "Přidat na plochu"</p>
+                </div>
+                <button class="action-button" onclick="nextStep()">Rozumím</button>
             </div>
-            <div class="step-content">
-                <p>Pro nejlepší zážitek si aplikaci přidejte na plochu telefonu. Bude se chovat jako skutečná aplikace!</p>
-                <p><strong>Android:</strong> Menu (⋮) → "Přidat na plochu"<br>
-                <strong>iOS:</strong> Sdílet → "Přidat na plochu"</p>
-            </div>
-            <button class="action-button" onclick="nextStep()">Rozumím</button>
-        </div>
 
-        <!-- Krok 4: Start -->
-        <div class="step-modal" id="step-4">
-            <div class="step-header">
-                <div class="step-emoji">🚀</div>
-                <h2 class="step-title">Můžeme začít!</h2>
+            <!-- Krok 4: Start -->
+            <div class="step-modal" id="step-4">
+                <div class="step-header">
+                    <div class="step-emoji">🚀</div>
+                    <h2 class="step-title">Můžeme začít!</h2>
+                </div>
+                <div class="step-content">
+                    <p>Vše je připraveno! Prozkoumejte naše AR scény a objevte kouzelný svět rozšířené reality.</p>
+                    <p><em>Tip: Nezapomeňte na tlačítko nápovědy! 😉</em></p>
+                </div>
+                <button class="action-button" onclick="goToMainMenu()">Vstoupit do aplikace</button>
             </div>
-            <div class="step-content">
-                <p>Vše je připraveno! Prozkoumejte naše AR scény a objevte kouzelný svět rozšířené reality.</p>
-                <p><em>Tip: Nezapomeňte na tlačítko nápovědy! 😉</em></p>
-            </div>
-            <button class="action-button" onclick="goToMainMenu()">Vstoupit do aplikace</button>
         </div>
     </div>
 
@@ -422,25 +459,38 @@
     <script>
         let currentStep = 1;
         const totalSteps = 4;
+        let isTransitioning = false; // Zabránění dvojitému kliknutí během přechodu
 
         function nextStep() {
-            if (currentStep < totalSteps) {
-                // Skrýt současný krok
+            if (currentStep < totalSteps && !isTransitioning) {
+                isTransitioning = true;
+                
+                // Aktuální krok
                 const currentModal = document.getElementById(`step-${currentStep}`);
                 const currentDot = document.getElementById(`dot-${currentStep}`);
                 
-                currentModal.classList.remove('active');
+                // Další krok
+                const nextStepNumber = currentStep + 1;
+                const nextModal = document.getElementById(`step-${nextStepNumber}`);
+                const nextDot = document.getElementById(`dot-${nextStepNumber}`);
+                
+                // Fade out aktuální krok
+                currentModal.classList.add('fade-out');
                 currentDot.classList.remove('active');
                 
-                // Zobrazit další krok
-                currentStep++;
+                // Po dokončení fade out, fade in další krok
                 setTimeout(() => {
-                    const nextModal = document.getElementById(`step-${currentStep}`);
-                    const nextDot = document.getElementById(`dot-${currentStep}`);
-                    
+                    currentModal.classList.remove('active', 'fade-out');
                     nextModal.classList.add('active');
                     nextDot.classList.add('active');
-                }, 150);
+                    
+                    currentStep = nextStepNumber;
+                    
+                    // Povolit další přechod po dokončení animace
+                    setTimeout(() => {
+                        isTransitioning = false;
+                    }, 100);
+                }, 400); // Doba odpovídající CSS transition
             }
         }
 
@@ -456,14 +506,36 @@
         }
 
         function skipTutorial() {
-            // Skrýt všechny kroky
-            document.querySelectorAll('.step-modal').forEach(step => step.classList.remove('active'));
-            document.querySelectorAll('.dot').forEach(dot => dot.classList.remove('active'));
+            if (isTransitioning) return;
             
-            // Zobrazit poslední krok
-            currentStep = totalSteps;
-            document.getElementById(`step-${totalSteps}`).classList.add('active');
-            document.getElementById(`dot-${totalSteps}`).classList.add('active');
+            isTransitioning = true;
+            
+            // Fade out aktuální krok
+            const currentModal = document.getElementById(`step-${currentStep}`);
+            const currentDot = document.getElementById(`dot-${currentStep}`);
+            
+            currentModal.classList.add('fade-out');
+            currentDot.classList.remove('active');
+            
+            // Přejít na poslední krok
+            setTimeout(() => {
+                // Skrýt všechny kroky
+                document.querySelectorAll('.step-modal').forEach(step => {
+                    step.classList.remove('active', 'fade-out');
+                });
+                document.querySelectorAll('.dot').forEach(dot => {
+                    dot.classList.remove('active');
+                });
+                
+                // Zobrazit poslední krok
+                currentStep = totalSteps;
+                document.getElementById(`step-${totalSteps}`).classList.add('active');
+                document.getElementById(`dot-${totalSteps}`).classList.add('active');
+                
+                setTimeout(() => {
+                    isTransitioning = false;
+                }, 100);
+            }, 400);
         }
 
         function goToMainMenu() {
@@ -541,17 +613,36 @@
 
         // Klavesové zkratky
         document.addEventListener('keydown', function(e) {
+            if (isTransitioning) return; // Zabránit ovládání během přechodu
+            
             if (e.key === 'ArrowRight' || e.key === ' ') {
                 e.preventDefault();
                 nextStep();
             } else if (e.key === 'ArrowLeft') {
                 e.preventDefault();
                 if (currentStep > 1) {
-                    currentStep--;
-                    document.querySelectorAll('.step-modal').forEach(step => step.classList.remove('active'));
-                    document.querySelectorAll('.dot').forEach(dot => dot.classList.remove('active'));
-                    document.getElementById(`step-${currentStep}`).classList.add('active');
-                    document.getElementById(`dot-${currentStep}`).classList.add('active');
+                    isTransitioning = true;
+                    
+                    const currentModal = document.getElementById(`step-${currentStep}`);
+                    const currentDot = document.getElementById(`dot-${currentStep}`);
+                    
+                    currentModal.classList.add('fade-out');
+                    currentDot.classList.remove('active');
+                    
+                    setTimeout(() => {
+                        currentModal.classList.remove('active', 'fade-out');
+                        currentStep--;
+                        
+                        const prevModal = document.getElementById(`step-${currentStep}`);
+                        const prevDot = document.getElementById(`dot-${currentStep}`);
+                        
+                        prevModal.classList.add('active');
+                        prevDot.classList.add('active');
+                        
+                        setTimeout(() => {
+                            isTransitioning = false;
+                        }, 100);
+                    }, 400);
                 }
             } else if (e.key === 'Escape') {
                 closeHelpModal();
