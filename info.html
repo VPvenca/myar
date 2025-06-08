@@ -75,7 +75,7 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            background: linear-gradient(135deg, #a8b8f5 0%, #b599d1 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
         .welcome-container {
@@ -86,7 +86,6 @@
             max-width: 500px;
             width: 100%;
             position: relative;
-            min-height: 600px; /* Fixní výška kontejneru */
         }
 
         .logo-section {
@@ -96,7 +95,7 @@
         }
 
         .app-logo {
-            width: 250px;
+            width: 120px;
             height: auto;
             margin-bottom: 1rem;
             filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
@@ -110,20 +109,17 @@
             margin-bottom: 0.5rem;
         }
 
-       .subtitle {
-            color: #2c3e50;
-            font-size: 24px;
+        .subtitle {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
             font-weight: 400;
         }
 
         .step-modal {
-            position: absolute; /* Absolutní pozice */
-            top: 50%;          /* Vycentrování */
-            left: 50%;
-            transform: translate(-50%, -50%);  
             background: rgba(255,255,255,0.95);
             border-radius: 20px;
             padding: 2.5rem;
+            margin: 1rem;
             width: 100%;
             max-width: 450px;
             box-shadow: 0 15px 35px rgba(0,0,0,0.2);
@@ -131,14 +127,14 @@
             text-align: center;
             display: none;
             opacity: 0;
-            visibility: hidden;
-            transition: all 0.4s ease;
+            transform: translateY(30px);
+            transition: all 0.5s ease;
         }
 
         .step-modal.active {
-            
+            display: block;
             opacity: 1;
-            visibility: visible;
+            transform: translateY(0);
         }
 
         .step-header {
@@ -198,9 +194,9 @@
 
         .skip-button {
             position: absolute;
-            top: -30px;
+            top: -60px;
             right: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: rgba(255,255,255,0.2);
             color: white;
             border: none;
             padding: 0.5rem 1rem;
@@ -320,8 +316,8 @@
         
         <div class="logo-section">
             <img src="img/augview.png" alt="Logo AR Aplikace" class="app-logo">
-            <p class="subtitle">AR Aplikace</p>
-            
+            <h1 class="main-title">AugView</h1>
+            <p class="subtitle">Rozšířená realita, která má co říct</p>
         </div>
 
         <!-- Krok 1: Uvítání -->
@@ -442,7 +438,7 @@
                     
                     nextModal.classList.add('active');
                     nextDot.classList.add('active');
-                }, 150);
+                }, 300);
             }
         }
 
