@@ -92,7 +92,7 @@
         /* KLÍČOVÁ ZMĚNA: Logo sekce bude fixní a nezávislá na modal oknech */
         .logo-section {
             text-align: center;
-            margin-bottom: 3rem;
+            margin-bottom: 1.5rem; /* ZMĚNA: Zmenšeno z 3rem na 1.5rem pro těsnější umístění */
             animation: fadeInDown 1s ease-out;
             /* DŮLEŽITÉ: Zajistíme, že logo zůstane na místě */
             position: relative;
@@ -126,15 +126,20 @@
             width: 100%;
             max-width: 450px;
             min-height: 320px; /* Zajistí minimální výšku pro stabilitu */
-            margin: 1rem;
+            margin: 0 auto; /* OPRAVA: Explicitní centrování kontejneru */
+            display: flex; /* PŘIDÁNO: Flex pro lepší centrování */
+            justify-content: center; /* PŘIDÁNO: Horizontální centrování */
+            align-items: flex-start; /* PŘIDÁNO: Zarovnání k hornímu okraji */
         }
 
         /* VYLEPŠENÉ MODÁLNÍ OKNO: Plynulé přechody */
         .step-modal {
             position: absolute; /* ZMĚNA: Absolutní pozicování pro překrývání */
             top: 0;
-            left: 0;
+            left: 50%; /* OPRAVA: Pozicování od středu */
+            transform: translateX(-50%) translateY(30px) scale(0.95); /* OPRAVA: Centrování + animace */
             width: 100%;
+            max-width: 450px; /* PŘIDÁNO: Explicitní max-width */
             background: rgba(255,255,255,0.95);
             border-radius: 20px;
             padding: 2.5rem;
@@ -145,15 +150,15 @@
             /* VYLEPŠENÉ ANIMACE */
             opacity: 0;
             visibility: hidden;
-            transform: translateY(30px) scale(0.95);
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1;
+            box-sizing: border-box; /* PŘIDÁNO: Pro správné rozměry s paddingem */
         }
 
         .step-modal.active {
             opacity: 1;
             visibility: visible;
-            transform: translateY(0) scale(1);
+            transform: translateX(-50%) translateY(0) scale(1); /* OPRAVA: Zachování centrování */
             z-index: 2; /* Aktivní okno bude nad ostatními */
         }
 
@@ -161,7 +166,7 @@
         .step-modal.fade-out {
             opacity: 0;
             visibility: hidden;
-            transform: translateY(-20px) scale(0.98);
+            transform: translateX(-50%) translateY(-20px) scale(0.98); /* OPRAVA: Zachování centrování */
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 1;
         }
@@ -339,7 +344,7 @@
             }
 
             .step-modals-container {
-                margin: 0.5rem;
+                margin: 0 auto; /* OPRAVA: Zachování centrování na mobilu */
                 min-height: 280px;
             }
         }
