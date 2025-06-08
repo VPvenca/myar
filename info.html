@@ -72,21 +72,24 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start; /* ZMĚNA: Z center na flex-start */
             align-items: center;
             padding: 20px;
+            padding-top: 60px; /* PŘIDÁNO: Horní padding pro správné umístění */
             background: linear-gradient(135deg, #a8b8f5 0%, #b599d1 100%);
             position: relative;
+            overflow-x: hidden; /* PŘIDÁNO: Zabrání horizontálnímu scrollování */
         }
 
         .welcome-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* ZMĚNA: Z center na flex-start */
             max-width: 500px;
             width: 100%;
             position: relative;
+            margin-top: 0; /* PŘIDÁNO: Zajistí umístění od horního okraje */
         }
 
         /* KLÍČOVÁ ZMĚNA: Logo sekce bude fixní a nezávislá na modal oknech */
@@ -228,7 +231,7 @@
 
         .skip-button {
             position: absolute;
-            top: -90px;
+            top: -90px; /* AKTUALIZOVÁNO: Dle vaší úpravy */
             right: 0;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -322,6 +325,10 @@
 
         /* Responzivní úpravy */
         @media (max-width: 480px) {
+            .welcome-page {
+                padding-top: 40px; /* PŘIDÁNO: Menší horní padding na mobilu */
+            }
+            
             .main-title {
                 font-size: 2rem;
             }
