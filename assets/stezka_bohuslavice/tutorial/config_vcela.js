@@ -12,7 +12,7 @@ const tutorialConfig = {
     
     steps: [
         {
-            title: '🔙 Zpět do Menu',
+            title: '⬅️ Zpět do Menu',
             content: '<p>Tímto tlačítkem se vrátíte do hlavního menu aplikace</p>',
             arrow: {
                 direction: 'right',
@@ -35,12 +35,12 @@ const tutorialConfig = {
         },
         {
             title: '🧭 Navigace',
-            content: '<p>Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
+            content: '<p>↗️Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
             center: true  // ZMĚNA: Centrováno na střed
         },
         {
             title: '📍 Informace o vzdálenosti',
-            content: '<p>Ukazuje vzdálenost k nejbližšímu nebo vybranému bodu zájmu</p>',
+            content: '<p>⬇️Ukazuje vzdálenost k nejbližšímu nebo vybranému bodu zájmu</p>',
             center: true  // ZMĚNA: Centrováno na střed
         },
         {
