@@ -310,19 +310,18 @@
         const AR_VISIBILITY_THRESHOLD = 30;
         const AUDIO_THRESHOLD = 15;
         
-        // OPRAVENÉ: Medové indikace s přesnější logikou
-        const HONEY_STEP_DISTANCE = 15; // metrů
-        const HONEY_MIN_DISTANCE = 30;  // minimální vzdálenost pro zobrazení
-        const HONEY_MAX_DISTANCE = 300; // maximální vzdálenost pro zobrazení
-        const HONEY_TOLERANCE = 8;      // tolerance pro detekci příchodu k medové skvrně
+        // OPRAVENÉ: Jednoduché medové indikace - pouze jeden bod
+        const HONEY_STEP_DISTANCE = 18; // metrů - vzdálenost medového bodu od uživatele
+        const HONEY_MIN_DISTANCE = 25;  // minimální vzdálenost k cíli pro zobrazení
+        const HONEY_MAX_DISTANCE = 500; // maximální vzdálenost k cíli pro zobrazení
+        const HONEY_RESET_THRESHOLD = 15; // když se přiblížíte na tuto vzdálenost, bod se resetuje
         
         let selectedTargetId = null;
         let currentlyPlayingAudio = null;
         let audioPlayingForMarker = null;
         let audioIsPaused = false;
         let currentHoneySpot = null;
-        let currentHoneyStepDistance = -1; // Aktuální krok medové skvrny
-        let allHoneySpots = []; // NOVÉ: Uchovává všechny vytvořené medové skvrny
+        let lastHoneyResetDistance = -1; // Vzdálenost k cíli při posledním resetu
         
         // Proměnné pro rotaci modelů
         let modelRotationY = 30;
@@ -358,133 +357,89 @@
             }
         ];
 
-        // === OPRAVENÉ: MEDOVÉ INDIKACE ===
+        // === OPRAVENÉ: JEDNODUCHÉ MEDOVÉ INDIKACE - POUZE JEDEN BOD ===
         
-        function createHoneySpot(position, stepDistance) {
+        function createSingleHoneySpot(position) {
             const honeySpot = document.createElement('a-entity');
             
-            // Jednoduchá kulatá skvrna s unikátním ID podle indexu
-            honeySpot.setAttribute('geometry', 'primitive: cylinder; height: 0.05; radius: 0.2;');
-            honeySpot.setAttribute('material', 'color: #FFD700; opacity: 0.8; transparent: true; shader: standard; metalness: 0.3; roughness: 0.2;');
+            // Kulatá zlatá skvrna
+            honeySpot.setAttribute('geometry', 'primitive: cylinder; height: 0.05; radius: 0.25;');
+            honeySpot.setAttribute('material', 'color: #FFD700; opacity: 0.9; transparent: true; shader: standard; metalness: 0.4; roughness: 0.1;');
             honeySpot.setAttribute('position', position);
             honeySpot.setAttribute('scale', '1 1 1');
-            honeySpot.setAttribute('id', `honey-spot-${Date.now()}-${Math.random()}`); // Unikátní ID
-            honeySpot.setAttribute('data-step-distance', stepDistance);
+            honeySpot.setAttribute('id', 'single-honey-spot');
             
-            // Jemná animace pulsování
-            honeySpot.setAttribute('animation', 'property: scale; from: 1 1 1; to: 1.2 1 1.2; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine;');
+            // Animace pulsování
+            honeySpot.setAttribute('animation', 'property: scale; from: 1 1 1; to: 1.3 1 1.3; dir: alternate; loop: true; dur: 1500; easing: easeInOutSine;');
             
             return honeySpot;
         }
         
-        function updateHoneyIndicators() {
-            // Najdi nejbližší cíl
+        function updateSingleHoneyIndicator() {
+            // Najdi cílový marker
             const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
             if (!targetMarker || !userPosition) {
-                clearAllHoneySpots();
+                clearCurrentHoneySpot();
                 return;
             }
             
             const distanceToTarget = targetMarker.distance;
-            console.log(`🍯 Checking honey indicators for distance: ${distanceToTarget.toFixed(1)}m`);
+            console.log(`🍯 Single honey check: distance to target = ${distanceToTarget.toFixed(1)}m, last reset = ${lastHoneyResetDistance.toFixed(1)}m`);
             
-            // Kontrola, zda je vzdálenost v rozsahu pro zobrazení medových skvrn
+            // Pokud je cíl příliš blízko nebo daleko, skryj medový bod
             if (distanceToTarget < HONEY_MIN_DISTANCE || distanceToTarget > HONEY_MAX_DISTANCE) {
-                console.log(`🍯 Distance ${distanceToTarget.toFixed(1)}m is outside honey range (${HONEY_MIN_DISTANCE}-${HONEY_MAX_DISTANCE}m)`);
-                clearAllHoneySpots();
+                console.log(`🍯 Distance ${distanceToTarget.toFixed(1)}m is outside honey range`);
+                clearCurrentHoneySpot();
+                lastHoneyResetDistance = -1;
                 return;
             }
             
-            // OPRAVENO: Vždy vyčisti a znovu vytvoř všechny skvrny podle aktuální pozice
-            clearAllHoneySpots();
+            // Zkontroluj, zda je potřeba resetovat medový bod
+            const shouldReset = lastHoneyResetDistance === -1 || // První zobrazení
+                               (lastHoneyResetDistance - distanceToTarget) >= HONEY_RESET_THRESHOLD; // Uživatel se přiblížil o 15m
             
-            // Vypočítej směr k cíli
-            const bearingToTarget = calculateBearing(
-                userPosition.lat, userPosition.lng,
-                targetMarker.lat, targetMarker.lng
-            );
-            
-            // Vytvoř medové skvrny každých HONEY_STEP_DISTANCE metrů směrem k cíli
-            // Začni od HONEY_MIN_DISTANCE a pokračuj až k cíli
-            let currentDistance = HONEY_MIN_DISTANCE;
-            let spotIndex = 0;
-            
-            while (currentDistance < distanceToTarget && currentDistance <= HONEY_MAX_DISTANCE) {
-                console.log(`🍯 Creating honey spot at ${currentDistance}m from user`);
+            if (shouldReset) {
+                console.log(`🍯 Resetting honey spot! Previous: ${lastHoneyResetDistance}m, Current: ${distanceToTarget.toFixed(1)}m`);
                 
-                // Vypočítej GPS pozici pro tuto medovou skvrnu
+                // Vymaž starý bod
+                clearCurrentHoneySpot();
+                
+                // Vypočítej směr k cíli
+                const bearingToTarget = calculateBearing(
+                    userPosition.lat, userPosition.lng,
+                    targetMarker.lat, targetMarker.lng
+                );
+                
+                // Vypočítej pozici nového medového bodu (HONEY_STEP_DISTANCE metrů směrem k cíli)
                 const honeySpotGPS = calculateIntermediatePoint(
                     userPosition.lat, userPosition.lng,
-                    bearingToTarget, currentDistance
+                    bearingToTarget, 
+                    HONEY_STEP_DISTANCE
                 );
                 
                 // Konverze na AR pozici
                 const arPosition = gpsToARPosition(honeySpotGPS.lat, honeySpotGPS.lng);
                 
-                // Vytvoř medovou skvrnu
-                const newHoneySpot = createHoneySpot(
-                    `${arPosition.x} ${arPosition.y} ${arPosition.z}`, 
-                    currentDistance
-                );
+                // Vytvoř nový medový bod
+                currentHoneySpot = createSingleHoneySpot(`${arPosition.x} ${arPosition.y} ${arPosition.z}`);
                 
                 const container = document.getElementById('honeyIndicators');
                 if (container) {
-                    container.appendChild(newHoneySpot);
-                    allHoneySpots.push({
-                        element: newHoneySpot,
-                        stepDistance: currentDistance,
-                        gps: honeySpotGPS,
-                        index: spotIndex
-                    });
-                    console.log(`🍯 Honey spot #${spotIndex} created at ${currentDistance}m from user`);
+                    container.appendChild(currentHoneySpot);
+                    lastHoneyResetDistance = distanceToTarget; // Zapamatuj si vzdálenost při resetu
+                    console.log(`🍯 New honey spot created ${HONEY_STEP_DISTANCE}m ahead, reset at distance ${distanceToTarget.toFixed(1)}m`);
                 } else {
                     console.error("🍯 Honey indicators container not found!");
-                    break;
                 }
-                
-                currentDistance += HONEY_STEP_DISTANCE;
-                spotIndex++;
             }
-            
-            console.log(`🍯 Total honey spots created: ${allHoneySpots.length}`);
         }
         
-        function removeNearbyHoneySpots() {
-            if (!userPosition || allHoneySpots.length === 0) return;
-            
-            // Projdi všechny medové skvrny a odstraň ty, ke kterým se uživatel přiblížil
-            allHoneySpots.forEach((honeySpot, index) => {
-                const distanceToSpot = calculateDistance(
-                    userPosition.lat, userPosition.lng,
-                    honeySpot.gps.lat, honeySpot.gps.lng
-                );
-                
-                if (distanceToSpot <= HONEY_TOLERANCE) {
-                    console.log(`🍯 Removing honey spot at ${honeySpot.stepDistance}m (user distance: ${distanceToSpot.toFixed(1)}m)`);
-                    
-                    // Odstraň ze scény
-                    if (honeySpot.element && honeySpot.element.parentNode) {
-                        honeySpot.element.parentNode.removeChild(honeySpot.element);
-                    }
-                    
-                    // Odstraň z pole
-                    allHoneySpots.splice(index, 1);
-                }
-            });
-        }
-        
-        function clearAllHoneySpots() {
-            console.log(`🍯 Clearing all honey spots (${allHoneySpots.length} spots)`);
-            
-            allHoneySpots.forEach(honeySpot => {
-                if (honeySpot.element && honeySpot.element.parentNode) {
-                    honeySpot.element.parentNode.removeChild(honeySpot.element);
-                }
-            });
-            
-            allHoneySpots = [];
+        function clearCurrentHoneySpot() {
+            if (currentHoneySpot && currentHoneySpot.parentNode) {
+                console.log(`🍯 Clearing current honey spot`);
+                currentHoneySpot.parentNode.removeChild(currentHoneySpot);
+            }
             currentHoneySpot = null;
-            currentHoneyStepDistance = -1;
         }
         
         function calculateBearing(lat1, lng1, lat2, lng2) {
@@ -700,7 +655,7 @@
                         };
                         checkProximityToMarkers();
                         updateNavigation();
-                        updateHoneyIndicators(); // OPRAVENÉ: Aktualizuj medové indikátory při každé změně pozice
+                        updateSingleHoneyIndicator(); // OPRAVENÉ: Použij jednoduchou medovou indikaci
                     },
                     (error) => {
                         console.error("Watch position error:", error);
@@ -891,7 +846,7 @@
                 let indicators = '';
                 if (distance <= AUDIO_THRESHOLD) indicators += ' 🎵';
                 if (distance <= AR_VISIBILITY_THRESHOLD) indicators += ' 👁️';
-                if (allHoneySpots.length > 0) indicators += ' 🍯'; // OPRAVENÉ: Zobraz ikonu pouze když existují medové skvrny
+                if (currentHoneySpot) indicators += ' 🍯'; // OPRAVENÉ: Zobraz ikonu pouze když existuje jeden medový bod
                 
                 distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${indicators}<br><strong>${distance}m</strong><br><small>GPS: ±${Math.round(userPosition.accuracy)}m</small>`;
             } else {
@@ -939,17 +894,19 @@
             document.getElementById('clearSelection').style.display = 'block';
             
             // Vynuluj medové indikace při změně cíle
-            clearAllHoneySpots();
+            clearCurrentHoneySpot();
+            lastHoneyResetDistance = -1; // Reset logiky
             
             updateNavigation();
-            updateHoneyIndicators(); // OPRAVENÉ: Aktualizuj medové indikátory pro nový cíl
+            updateSingleHoneyIndicator(); // OPRAVENÉ: Aktualizuj jednoduchou medovou indikaci pro nový cíl
             document.getElementById('navContent').classList.remove('open');
         }
 
         function clearSelection() {
             selectedTargetId = null;
             document.getElementById('clearSelection').style.display = 'none';
-            clearAllHoneySpots(); // OPRAVENÉ: Vyčisti všechny medové skvrny
+            clearCurrentHoneySpot(); // OPRAVENÉ: Vyčisti medový bod
+            lastHoneyResetDistance = -1; // Reset logiky
             updateNavigation();
         }
 
@@ -1099,12 +1056,12 @@
                 getCurrentPosition();
                 watchPosition();
                 
-                // OPRAVENÉ: Spusť častější aktualizaci medových indikací
-                setInterval(updateHoneyIndicators, 2000); // Aktualizace každé 2 sekundy
+                // OPRAVENÉ: Spusť jednoduchou aktualizaci medového bodu
+                setInterval(updateSingleHoneyIndicator, 3000); // Aktualizace každé 3 sekundy
             });
         });
 
-        console.log("🐝 Bee AR script with improved honey indicators and gamification loaded successfully!");
+        console.log("🐝 Bee AR script with simple single honey indicator and gamification loaded successfully!");
     </script>
 </body>
 </html>
