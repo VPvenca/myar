@@ -27,7 +27,7 @@ const tutorialConfig = {
             content: '<p>Ovládá přehrávání zvuku, který se spustí při přiblížení k bodu zájmu</p>',
             arrow: {
                 direction: 'right',
-                style: 'top: 75px; left: 70px;'
+                style: 'top: 25px; left: 120px;'
             },
             bubble: {
                 style: 'top: 60px; left: 90px;'
@@ -38,7 +38,7 @@ const tutorialConfig = {
             content: '<p>Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
             arrow: {
                 direction: 'left',
-                style: 'top: 25px; right: 160px;'
+                style: 'top: 25px; right: 120px;'
             },
             bubble: {
                 style: 'top: 10px; right: 180px;'
