@@ -9,11 +9,12 @@
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
    
-
-     <!-- Gamifikační skripty - OPRAVENÉ POŘADÍ -->
+    <!-- Gamifikační skripty - OPRAVENÉ POŘADÍ -->
     <script src="/gamification-config.js"></script>
     <script src="/gamification.js"></script>
     <script src="/game/bohuslavice_stezka_config.js"></script>
+    
+    <!-- Tutorial systém - OPRAVENÉ NAČTENÍ -->
     <link rel="stylesheet" href="/css/tutorial.css">
     <script src="/tutorial.js"></script>
     
@@ -273,6 +274,35 @@
             from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
             to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
+
+        /* DEBUG PANEL PRO TUTORIAL */
+        .debug-panel {
+            position: fixed;
+            top: 50%;
+            right: 10px;
+            z-index: 99999;
+            background: rgba(255, 0, 0, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            transform: translateY(-50%);
+        }
+
+        .debug-panel button {
+            display: block;
+            margin: 5px 0;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .debug-panel .reset-btn { background: #ff8c00; }
+        .debug-panel .next-btn { background: #007bff; }
+        .debug-panel .step-btn { background: #28a745; }
+        .debug-panel .debug-btn { background: #6f42c1; }
     </style>
 </head>
 <body>
@@ -313,6 +343,16 @@
     
     <!-- Debug tlačítko - SKRYTO -->
     <button class="debug-button ui-element" id="debugButton" style="display: none !important;">🔧 Debug</button>
+
+    <!-- DEBUG PANEL PRO TUTORIAL -->
+    <div class="debug-panel">
+        <button class="reset-btn" onclick="resetAndStart()">🔄 Reset Tutorial</button>
+        <button class="next-btn" onclick="manualNext()">➡️ Next Step</button>
+        <button class="step-btn" onclick="manualShowStep(1)">1️⃣ Step 1</button>
+        <button class="step-btn" onclick="manualShowStep(5)">5️⃣ Step 5</button>
+        <button class="debug-btn" onclick="debugSteps()">🔍 Debug Info</button>
+        <button class="debug-btn" onclick="forceTutorialStart()">🚀 Force Start</button>
+    </div>
 
     <!-- A-Frame AR scéna s GPS pozicováním -->
     <a-scene 
@@ -408,11 +448,220 @@
         </a-light>
     </a-scene>
 
-    <script>
+<script>
+// === TUTORIAL CONFIG INLINE ===
+const tutorialConfig = {
+    id: 'vcela-stezka',
+    storageKey: 'ar-tutorial-completed',
+    autoStart: false, // Manuální start pro debugging
+    autoStartDelay: 1500,
+    
+    steps: [
+        {
+            title: '🔙 Zpět do Menu',
+            content: '<p>Tímto tlačítkem se vrátíte do hlavního menu aplikace</p>',
+            arrow: {
+                direction: 'right',
+                style: 'top: 25px; left: 120px;'
+            },
+            bubble: {
+                style: 'top: 10px; left: 140px;'
+            }
+        },
+        {
+            title: '🔊 Audio ovládání',
+            content: '<p>Ovládá přehrávání zvuku, který se spustí při přiblížení k bodu zájmu</p>',
+            arrow: {
+                direction: 'right',
+                style: 'top: 75px; left: 70px;'
+            },
+            bubble: {
+                style: 'top: 60px; left: 90px;'
+            }
+        },
+        {
+            title: '🧭 Navigace',
+            content: '<p>Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
+            arrow: {
+                direction: 'left',
+                style: 'top: 25px; right: 160px;'
+            },
+            bubble: {
+                style: 'top: 10px; right: 180px;'
+            }
+        },
+        {
+            title: '📍 Informace o vzdálenosti',
+            content: '<p>Ukazuje vzdálenost k nejbližšímu nebo vybranému bodu zájmu</p>',
+            arrow: {
+                direction: 'up',
+                style: 'bottom: 100px; left: 50%; transform: translateX(-50%);'
+            },
+            bubble: {
+                style: 'bottom: 120px; left: 50%; transform: translateX(-50%);'
+            }
+        },
+        {
+            title: '👁️ Rozšířená realita',
+            content: `
+                <ul>
+                    <li>🎯 Na <strong>30m</strong> se objekt zobrazí v AR</li>
+                    <li>🎵 Na <strong>15m</strong> se spustí zvukový doprovod</li>
+                    <li>🔄 Dotykem můžete objekt otáčet</li>
+                    <li>📱 Pohybujte telefonem pro lepší zobrazení</li>
+                </ul>
+            `,
+            center: true
+        },
+        {
+            title: '⚠️ Bezpečnost na prvním místě',
+            content: `
+                <div style="background: rgba(255, 69, 58, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #ff453a; margin-bottom: 10px;">
+                    <p style="margin: 5px 0; font-weight: bold; color: #ff453a;">Důležité upozornění:</p>
+                    <ul style="margin: 8px 0;">
+                        <li>👀 <strong>Vždy sledujte okolí</strong> a cestu před sebou</li>
+                        <li>🚶 Při pohledu do telefonu se <strong>zastavte</strong></li>
+                        <li>🛣️ Dávejte pozor na <strong>vozovky a překážky</strong></li>
+                        <li>👥 Buďte ohleduplní k <strong>ostatním návštěvníkům</strong></li>
+                    </ul>
+                    <p style="margin: 5px 0; font-size: 13px; color: #ff8a80;">Bezpečná cesta je nejlepší cesta! 🙏</p>
+                </div>
+            `,
+            center: true,
+            finalButton: 'Rozumím, začít bezpečně! 🚀'
+        }
+    ],
+    
+    onComplete: function() {
+        console.log('Tutorial completed for včelí stezka');
+    }
+};
+
+// === TUTORIAL INICIALIZACE - OPRAVENÁ ===
+let tutorialInstance = null;
+
+function initializeTutorialSystem() {
+    console.log("🎓 Initializing tutorial system...");
+    
+    // Čekej na ARTutorial class
+    if (typeof ARTutorial === 'undefined') {
+        console.log("⏳ Waiting for ARTutorial class...");
+        setTimeout(initializeTutorialSystem, 500);
+        return;
+    }
+    
+    try {
+        // Vytvoř tutorial instanci
+        tutorialInstance = ARTutorial.create(tutorialConfig);
+        console.log("✅ Tutorial instance created successfully");
+        
+        // Pro debugging - automaticky spusť tutorial
+        setTimeout(() => {
+            console.log("🚀 Auto-starting tutorial for debugging...");
+            if (tutorialInstance) {
+                tutorialInstance.reset(); // Reset pro debugging
+                tutorialInstance.start();
+            }
+        }, 2000);
+        
+    } catch (error) {
+        console.error("❌ Tutorial initialization failed:", error);
+    }
+}
+
+// === DEBUG FUNKCE ===
+function debugSteps() {
+    console.log("=== TUTORIAL DEBUG INFO ===");
+    
+    // Základní informace
+    console.log("ARTutorial class:", typeof ARTutorial);
+    console.log("tutorialInstance:", tutorialInstance);
+    
+    if (tutorialInstance) {
+        console.log("Tutorial state:", {
+            currentStep: tutorialInstance.currentStep,
+            totalSteps: tutorialInstance.totalSteps,
+            isActive: tutorialInstance.isActive
+        });
+    }
+    
+    // Kontrola DOM elementů
+    const overlay = document.getElementById('tutorialOverlay');
+    console.log("Tutorial overlay:", overlay);
+    if (overlay) {
+        console.log("Overlay display:", overlay.style.display);
+    }
+    
+    // Kontrola všech kroků
+    for (let i = 1; i <= 6; i++) {
+        const step = document.getElementById(`tutorialStep${i}`);
+        console.log(`Step ${i}:`, {
+            element: step ? 'found' : 'missing',
+            display: step ? step.style.display : 'n/a',
+            visibility: step ? step.style.visibility : 'n/a'
+        });
+    }
+}
+
+function manualNext() {
+    if (tutorialInstance) {
+        console.log("🔧 Manual next step");
+        tutorialInstance.next();
+        setTimeout(debugSteps, 100);
+    } else {
+        console.error("❌ No tutorial instance found");
+    }
+}
+
+function manualShowStep(stepNum) {
+    if (tutorialInstance) {
+        console.log(`🔧 Manual show step ${stepNum}`);
+        tutorialInstance.showStep(stepNum);
+        setTimeout(debugSteps, 100);
+    } else {
+        console.error("❌ No tutorial instance found");
+    }
+}
+
+function resetAndStart() {
+    if (tutorialInstance) {
+        console.log("🔧 Reset and restart tutorial");
+        tutorialInstance.reset();
+        tutorialInstance.start();
+        setTimeout(debugSteps, 100);
+    } else {
+        console.error("❌ No tutorial instance found");
+        initializeTutorialSystem();
+    }
+}
+
+function forceTutorialStart() {
+    console.log("🚀 Force tutorial start...");
+    if (!tutorialInstance) {
+        initializeTutorialSystem();
+        setTimeout(() => {
+            if (tutorialInstance) {
+                tutorialInstance.reset();
+                tutorialInstance.start();
+            }
+        }, 1000);
+    } else {
+        tutorialInstance.reset();
+        tutorialInstance.start();
+    }
+}
+
+// Expose functions globally
+window.debugSteps = debugSteps;
+window.manualNext = manualNext;
+window.manualShowStep = manualShowStep;
+window.resetAndStart = resetAndStart;
+window.forceTutorialStart = forceTutorialStart;
+
         // === GAMIFIKAČNÍ PROMĚNNÉ ===
         let gamificationInitialized = false;
         let currentExpositionId = 'stezka_bohuslavice';
-        let currentSceneId = '/assets/stezka_bohuslavice/vcela.html';  // OPRAVENO: Správné ID scény
+        let currentSceneId = '/assets/stezka_bohuslavice/vcela.html';
         
         // GPS a navigační proměnné
         let userPosition = null;
@@ -497,96 +746,6 @@
                 answers: ["A) Červenou", "B) Modrou", "C) Žlutou"],
                 correct: 0,
                 explanation: "Včely nevidí červenou barvu, místo ní vidí ultrafialové záření. Červené květy pro ně vypadají černě."
-            },
-            {
-                question: "🏃‍♀️ Jak rychle dokáže létat včela?",
-                answers: ["A) 15 km/h", "B) 25 km/h", "C) 35 km/h"],
-                correct: 1,
-                explanation: "Včela dokáže létat rychlostí až 25 km/h! To jí umožňuje efektivně prozkoumávat velká území."
-            },
-            {
-                question: "🏠 Z kolika šestihranných buněk se skládá plást?",
-                answers: ["A) 1000 buněk", "B) 3000 buněk", "C) 7000 buněk"],
-                correct: 2,
-                explanation: "Jeden plást obsahuje až 7000 šestihranných buněk! Šestihrany jsou nejefektivnější tvar pro skladování."
-            },
-            {
-                question: "🌍 Jak daleko může včela létat od úlu?",
-                answers: ["A) 2 km", "B) 5 km", "C) 8 km"],
-                correct: 2,
-                explanation: "Včela může létat až 8 km od úlu! Obvykle však zůstává v okruhu 2-3 km, kde najde dostatek potravy."
-            },
-            {
-                question: "🕐 Jak dlouho žije včela dělnice v létě?",
-                answers: ["A) 2 týdny", "B) 6 týdnů", "C) 3 měsíce"],
-                correct: 1,
-                explanation: "Včela dělnice žije v létě pouze 6 týdnů. V zimě žijí déle - až 6 měsíců kvůli menší aktivitě."
-            },
-            {
-                question: "💃 Jak včely komunikují směr ke zdroji potravy?",
-                answers: ["A) Bzučením", "B) Tancem", "C) Vůní"],
-                correct: 1,
-                explanation: "Včely komunikují tancem! Kruhový tanec znamená blízký zdroj, osmičkový tanec ukazuje směr a vzdálenost."
-            },
-            {
-                question: "🌡️ Jakou teplotu udržují včely v úlu?",
-                answers: ["A) 25°C", "B) 35°C", "C) 45°C"],
-                correct: 1,
-                explanation: "Včely udržují v úlu konstantní teplotu 35°C! To je ideální teplota pro vývoj larev a zpracování medu."
-            },
-            {
-                question: "🧠 Kolik očí má včela?",
-                answers: ["A) 2 oči", "B) 5 očí", "C) 8 očí"],
-                correct: 1,
-                explanation: "Včela má 5 očí - 2 složené oči a 3 jednoduché oči na vrcholu hlavy! Složené oči mají až 7000 facetek."
-            },
-            {
-                question: "🔢 Kolik včel žije v silném úlu?",
-                answers: ["A) 20 000", "B) 60 000", "C) 100 000"],
-                correct: 1,
-                explanation: "V silném úlu může žít až 60 000 včel! V zimě jich zůstává jen 10-20 000."
-            },
-            {
-                question: "🌸 Kolik květů potřebuje včela pro 1 kg medu?",
-                answers: ["A) 500 000", "B) 2 miliony", "C) 4 miliony"],
-                correct: 2,
-                explanation: "Pro 1 kg medu musí včely navštívit až 4 miliony květů! A nalétat vzdálenost 3x kolem Země."
-            },
-            {
-                question: "👃 Jak daleko cítí včela aroma květů?",
-                answers: ["A) 2 m", "B) 50 m", "C) 2 km"],
-                correct: 2,
-                explanation: "Včela dokáže cítit aroma květů až na vzdálenost 2 km! Má mimořádně vyvinutý čich."
-            },
-            {
-                question: "🏗️ Z čeho včely stavějí plásty?",
-                answers: ["A) Propolisu", "B) Vosku", "C) Medu"],
-                correct: 1,
-                explanation: "Plásty stavějí z vosku, který si samy vyrábějí ve speciálních žlázách na břiše!"
-            },
-            {
-                question: "💪 Kolikrát své váhy unese včela?",
-                answers: ["A) Polovinu", "B) Stejnou váhu", "C) Dvojnásobek"],
-                correct: 2,
-                explanation: "Včela dokáže unést až dvojnásobek své vlastní váhy! To odpovídá 70 mg nektaru nebo pylu."
-            },
-            {
-                question: "🛡️ Co je propolis?",
-                answers: ["A) Včelí lepidlo", "B) Druh medu", "C) Včelí jed"],
-                correct: 0,
-                explanation: "Propolis je přírodní 'lepidlo' které včely vyrábějí ze stromových pryskyřic. Má antibiotické účinky!"
-            },
-            {
-                question: "⏰ V kolik hodin jsou včely nejaktivnější?",
-                answers: ["A) 6-8 hodin", "B) 10-14 hodin", "C) 16-18 hodin"],
-                correct: 1,
-                explanation: "Včely jsou nejaktivnější mezi 10-14 hodinou, kdy je nejvíce květů otevřených a slunce nejsilnější."
-            },
-            {
-                question: "🌙 Co dělají včely v noci?",
-                answers: ["A) Spí", "B) Zpracovávají med", "C) Hlídají úl"],
-                correct: 1,
-                explanation: "Včely v noci nezahálí! Zpracovávají nektar na med, větrají úl a mladé včely pokračují ve stavbě plástů."
             }
         ];
         
@@ -602,14 +761,6 @@
                 completed.push(quizIndex);
                 localStorage.setItem('beeQuizzesCompleted', JSON.stringify(completed));
                 console.log(`🐝 Quiz ${quizIndex} completed. Total: ${completed.length}/${BEE_QUIZZES.length}`);
-                
-                // Pokud jsou všechny kvízy dokončené, aktivuj gamifikační odznak
-                if (completed.length === BEE_QUIZZES.length) {
-                    console.log('🏆 All bee quizzes completed! Activating achievement...');
-                    if (typeof recordMarkerActivation === 'function') {
-                        recordMarkerActivation(currentExpositionId, currentSceneId, 'bee_quiz_master');
-                    }
-                }
             }
         }
         
@@ -1247,7 +1398,8 @@
                 '.distance-info',
                 '.audio-info',
                 '.rotation-hint',
-                '.bee-quiz' // NOVÉ: Přidáno kvíz mezi UI elementy
+                '.bee-quiz',
+                '.debug-panel' // NOVÉ: Přidáno debug panel mezi UI elementy
             ];
             
             for (let selector of uiSelectors) {
@@ -1277,7 +1429,7 @@
 
         document.getElementById('clearSelection').addEventListener('click', clearSelection);
         document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
-        document.getElementById('quizClose').addEventListener('click', closeQuiz); // NOVÉ: Event listener pro zavření kvízu
+        document.getElementById('quizClose').addEventListener('click', closeQuiz);
 
         document.addEventListener('click', (e) => {
             const navPanel = document.querySelector('.navigation');
@@ -1291,10 +1443,15 @@
         window.addEventListener('load', () => {
             console.log("Starting bee AR application with quiz system and gamification...");
             
+            // OPRAVENÁ INICIALIZACE TUTORIALU
+            setTimeout(() => {
+                initializeTutorialSystem();
+            }, 1000);
+            
             // Počkej na načtení gamifikačních skriptů a pak inicializuj
             setTimeout(() => {
                 initializeGameification();
-            }, 2000);  // Prodloužený timeout pro jistotu
+            }, 2000);
             
             // Počkáme na A-Frame
             document.querySelector('a-scene').addEventListener('loaded', () => {
@@ -1302,7 +1459,7 @@
                 setupModelRotation();
                 getCurrentPosition();
                 watchPosition();
-                startTutorialWhenReady();
+                
                 // NOVÉ: Pravidelná kontrola kvízů
                 setInterval(() => {
                     checkDistanceForQuiz();
@@ -1310,126 +1467,7 @@
             });
         });
 
-        console.log("🐝 Bee AR script with quiz system and gamification loaded successfully!");
-        // === TUTORIAL INICIALIZACE ===
-let tutorialInitialized = false;
-
-async function initializeTutorial() {
-    if (tutorialInitialized) return;
-    
-    try {
-        console.log("🎓 Loading tutorial config...");
-        
-        // Dynamicky načti config
-        const script = document.createElement('script');
-        script.src = '/assets/stezka_bohuslavice/tutorial/config_vcela.js';
-        
-        await new Promise((resolve, reject) => {
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
-        
-        // Počkej chvilku na vykonání
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        console.log("✅ Tutorial config loaded, creating instance...");
-        
-        // Vytvoř tutorial instanci
-        if (typeof ARTutorial !== 'undefined' && typeof tutorialConfig !== 'undefined') {
-            window.arTutorial = ARTutorial.create(tutorialConfig);
-            tutorialInitialized = true;
-            console.log("✅ Tutorial initialized successfully");
-            return true;
-        } else {
-            console.error("❌ Tutorial dependencies not loaded");
-            return false;
-        }
-        
-    } catch (error) {
-        console.error("❌ Tutorial initialization failed:", error);
-        return false;
-    }
-}
-
-function startTutorialWhenReady() {
-    // Spusť tutorial až když je všechno připraveno
-    setTimeout(async () => {
-        console.log("🎓 Starting tutorial initialization...");
-        
-        const success = await initializeTutorial();
-        if (success && window.arTutorial) {
-            // Malé zpoždění pro plynulý přechod
-            setTimeout(() => {
-                console.log("🎓 Starting tutorial...");
-                window.arTutorial.start();
-            }, 1000);
-        }
-    }, 3000); // 3 sekundy po načtení A-Frame
-}
-
-        // DEBUG: Funkce pro kontrolu kroků
-function debugSteps() {
-    console.log("=== TUTORIAL STEPS DEBUG ===");
-    for (let i = 1; i <= 6; i++) {
-        const step = document.getElementById(`tutorialStep${i}`);
-        if (step) {
-            const bubble = step.querySelector('.tutorial-bubble, .tutorial-bubble-center');
-            console.log(`Step ${i}:`, {
-                display: step.style.display,
-                visible: step.style.display === 'block',
-                bubble: bubble ? 'found' : 'missing',
-                bubbleClass: bubble ? bubble.className : 'none',
-                position: bubble ? getComputedStyle(bubble).position : 'none'
-            });
-        } else {
-            console.log(`Step ${i}: MISSING ELEMENT`);
-        }
-    }
-    
-    if (window.arTutorial) {
-        console.log("Tutorial state:", {
-            currentStep: window.arTutorial.currentStep,
-            totalSteps: window.arTutorial.totalSteps,
-            isActive: window.arTutorial.isActive
-        });
-    }
-}
-<div style="position: fixed; top: 50%; right: 10px; z-index: 99999; background: red; padding: 10px; border-radius: 5px;">
-    <button onclick="resetAndStart()" style="display: block; margin: 5px 0; padding: 5px; background: orange; color: white; border: none; border-radius: 3px;">🔄 Reset</button>
-    <button onclick="manualNext()" style="display: block; margin: 5px 0; padding: 5px; background: blue; color: white; border: none; border-radius: 3px;">➡️ Next</button>
-    <button onclick="manualShowStep(5)" style="display: block; margin: 5px 0; padding: 5px; background: green; color: white; border: none; border-radius: 3px;">5️⃣ Step 5</button>
-    <button onclick="debugSteps()" style="display: block; margin: 5px 0; padding: 5px; background: purple; color: white; border: none; border-radius: 3px;">🔍 Debug</button>
-</div>
-// Spusť debug po 5 sekundách
-setTimeout(() => {
-    debugSteps();
-}, 5000);
-
-        window.manualNext = function() {
-    if (window.arTutorial) {
-        console.log("🔧 Manual next step");
-        window.arTutorial.next();
-        setTimeout(debugSteps, 100);
-    }
-};
-
-window.manualShowStep = function(stepNum) {
-    if (window.arTutorial) {
-        console.log(`🔧 Manual show step ${stepNum}`);
-        window.arTutorial.showStep(stepNum);
-        setTimeout(debugSteps, 100);
-    }
-};
-
-window.resetAndStart = function() {
-    if (window.arTutorial) {
-        console.log("🔧 Reset and restart tutorial");
-        window.arTutorial.reset();
-        window.arTutorial.start();
-        setTimeout(debugSteps, 100);
-    }
-};
-    </script>
+        console.log("🐝 Bee AR script with quiz system, gamification, and tutorial loaded successfully!");
+</script>
 </body>
 </html>
