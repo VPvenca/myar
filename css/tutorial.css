@@ -10,7 +10,9 @@
     font-family: Arial, sans-serif;
     display: none;
 }
-
+.tutorial-skip {
+    display: none !important;
+}
 .tutorial-backdrop {
     position: absolute;
     top: 0;
