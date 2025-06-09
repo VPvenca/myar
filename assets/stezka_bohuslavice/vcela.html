@@ -303,6 +303,17 @@
         .debug-panel .next-btn { background: #007bff; }
         .debug-panel .step-btn { background: #28a745; }
         .debug-panel .debug-btn { background: #6f42c1; }
+
+        /* BAREVNÉ ROZLIŠENÍ PRO CENTROVANÉ KROKY */
+        #tutorialStep3 .tutorial-bubble-center {
+            background: rgba(255, 165, 0, 0.95) !important; /* Oranžová pro krok 3 */
+            border: 3px solid orange !important;
+        }
+
+        #tutorialStep4 .tutorial-bubble-center {
+            background: rgba(255, 20, 147, 0.95) !important; /* Růžová pro krok 4 */
+            border: 3px solid deeppink !important;
+        }
     </style>
 </head>
 <body>
@@ -351,7 +362,6 @@
         <button class="step-btn" onclick="manualShowStep(3)">3️⃣ Step 3</button>
         <button class="step-btn" onclick="manualShowStep(4)">4️⃣ Step 4</button>
         <button class="debug-btn" onclick="debugSteps()">🔍 Debug Info</button>
-        <button class="debug-btn" onclick="forceTutorialStart()">🚀 Force Start</button>
     </div>
 
     <!-- A-Frame AR scéna s GPS pozicováním -->
@@ -449,7 +459,7 @@
     </a-scene>
 
 <script>
-// === TUTORIAL CONFIG INLINE ===
+// === TUTORIAL CONFIG INLINE - KROKY 3 A 4 CENTROVANÉ ===
 const tutorialConfig = {
     id: 'vcela-stezka',
     storageKey: 'ar-tutorial-completed',
@@ -480,26 +490,14 @@ const tutorialConfig = {
             }
         },
         {
-            title: '🧭 Navigace',
-            content: '<p>Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
-            arrow: {
-                direction: 'left',
-                style: 'top: 25px; right: 160px;'
-            },
-            bubble: {
-                style: 'top: 10px; right: 180px; width: 200px;'
-            }
+            title: '🧭 Navigace (CENTROVANÁ)',
+            content: '<p>Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p><p><strong>Poznámka:</strong> Toto je dočasně centrované pro debugging</p>',
+            center: true
         },
         {
-            title: '📍 Informace o vzdálenosti',
-            content: '<p>Ukazuje vzdálenost k nejbližšímu nebo vybranému bodu zájmu</p>',
-            arrow: {
-                direction: 'up',
-                style: 'bottom: 100px; left: calc(50% - 12px);'
-            },
-            bubble: {
-                style: 'bottom: 120px; left: calc(50% - 110px); width: 220px;'
-            }
+            title: '📍 Informace o vzdálenosti (CENTROVANÁ)',
+            content: '<p>Ukazuje vzdálenost k nejbližšímu nebo vybranému bodu zájmu</p><p><strong>Poznámka:</strong> Toto je dočasně centrované pro debugging</p>',
+            center: true
         },
         {
             title: '👁️ Rozšířená realita',
@@ -590,17 +588,41 @@ function debugSteps() {
     console.log("Tutorial overlay:", overlay);
     if (overlay) {
         console.log("Overlay display:", overlay.style.display);
+        console.log("Overlay position:", getComputedStyle(overlay).position);
     }
     
     // Kontrola všech kroků
     for (let i = 1; i <= 6; i++) {
         const step = document.getElementById(`tutorialStep${i}`);
-        console.log(`Step ${i}:`, {
-            element: step ? 'found' : 'missing',
-            display: step ? step.style.display : 'n/a',
-            visibility: step ? step.style.visibility : 'n/a'
-        });
+        if (step) {
+            const bubble = step.querySelector('.tutorial-bubble, .tutorial-bubble-center');
+            
+            console.log(`Step ${i}:`, {
+                element: 'found',
+                display: step.style.display,
+                visibility: step.style.visibility,
+                bubble: bubble ? {
+                    className: bubble.className,
+                    display: bubble.style.display,
+                    position: getComputedStyle(bubble).position,
+                    top: getComputedStyle(bubble).top,
+                    left: getComputedStyle(bubble).left,
+                    width: getComputedStyle(bubble).width,
+                    height: getComputedStyle(bubble).height,
+                    zIndex: getComputedStyle(bubble).zIndex,
+                    boundingRect: bubble.getBoundingClientRect()
+                } : 'missing'
+            });
+        } else {
+            console.log(`Step ${i}: MISSING ELEMENT`);
+        }
     }
+    
+    // Rozměry okna
+    console.log("Window dimensions:", {
+        width: window.innerWidth,
+        height: window.innerHeight
+    });
 }
 
 function manualNext() {
@@ -635,28 +657,11 @@ function resetAndStart() {
     }
 }
 
-function forceTutorialStart() {
-    console.log("🚀 Force tutorial start...");
-    if (!tutorialInstance) {
-        initializeTutorialSystem();
-        setTimeout(() => {
-            if (tutorialInstance) {
-                tutorialInstance.reset();
-                tutorialInstance.start();
-            }
-        }, 1000);
-    } else {
-        tutorialInstance.reset();
-        tutorialInstance.start();
-    }
-}
-
 // Expose functions globally
 window.debugSteps = debugSteps;
 window.manualNext = manualNext;
 window.manualShowStep = manualShowStep;
 window.resetAndStart = resetAndStart;
-window.forceTutorialStart = forceTutorialStart;
 
         // === GAMIFIKAČNÍ PROMĚNNÉ ===
         let gamificationInitialized = false;
@@ -791,11 +796,8 @@ window.forceTutorialStart = forceTutorialStart;
             // Zjisti, na kterém 50m milníku jsme
             const currentMilestone = Math.floor(distanceFromStart / QUIZ_DISTANCE_STEP);
             
-            console.log(`🎯 Distance from start: ${distanceFromStart.toFixed(1)}m, milestone: ${currentMilestone}, last quiz milestone: ${lastQuizMilestone}`);
-            
             // Pokud jsme na novém milníku a ještě jsme tu kvíz nezobrazili
             if (currentMilestone > lastQuizMilestone && currentMilestone > 0) {
-                console.log(`🎯 New milestone reached: ${currentMilestone * QUIZ_DISTANCE_STEP}m - showing quiz!`);
                 lastQuizMilestone = currentMilestone;
                 showRandomQuiz();
             }
@@ -804,7 +806,6 @@ window.forceTutorialStart = forceTutorialStart;
         function showRandomQuiz() {
             const quizData = getRandomUncompletedQuiz();
             if (!quizData) {
-                console.log('🎯 No more quizzes available - all completed!');
                 return;
             }
             
@@ -825,18 +826,7 @@ window.forceTutorialStart = forceTutorialStart;
                 answersContainer.appendChild(button);
             });
             
-            // Aktualizuj progress
-            const completed = getCompletedQuizzes();
-            const distanceFromStart = startPosition ? calculateDistance(
-                startPosition.lat, startPosition.lng,
-                userPosition.lat, userPosition.lng
-            ) : 0;
-            
-            document.getElementById('quizProgress').textContent = 
-                `Kvíz ${completed.length + 1}/${BEE_QUIZZES.length} • Vzdálenost: ${distanceFromStart.toFixed(0)}m`;
-            
             document.getElementById('beeQuiz').style.display = 'block';
-            console.log(`🐝 Showing quiz ${index}: ${quiz.question.substring(0, 50)}...`);
         }
         
         function selectAnswer(selectedIndex) {
@@ -852,7 +842,7 @@ window.forceTutorialStart = forceTutorialStart;
                 } else if (index === selectedIndex && index !== currentQuiz.correct) {
                     answer.classList.add('incorrect');
                 }
-                answer.onclick = null; // Deaktivuj klikání
+                answer.onclick = null;
             });
             
             // Zobraz vysvětlení
@@ -861,8 +851,6 @@ window.forceTutorialStart = forceTutorialStart;
             
             // Označ kvíz jako dokončený
             markQuizCompleted(currentQuiz.index);
-            
-            console.log(`🐝 Answer selected: ${selectedIndex}, correct: ${currentQuiz.correct}`);
         }
         
         function closeQuiz() {
@@ -872,80 +860,17 @@ window.forceTutorialStart = forceTutorialStart;
         }
 
         // === GAMIFIKAČNÍ FUNKCE ===
-        
-        // OPRAVENÁ inicializace gamifikace - TICHÁ VERZE
         function initializeGameification() {
-            console.log("🎮 Initializing gamification for včelařská stezka...");
-            
-            // Ujisti se, že jsou načtené všechny konfigurace
-            if (typeof SCENE_CONFIG === 'undefined' || typeof ACHIEVEMENTS_CONFIG === 'undefined') {
-                console.log("⏳ Waiting for gamification config...");
-                setTimeout(initializeGameification, 500);
-                return;
-            }
-            
-            // Debug výpis konfigurací (pouze do konzole)
-            console.log("📊 Scene config:", SCENE_CONFIG);
-            console.log("🏆 Achievements config:", ACHIEVEMENTS_CONFIG);
-            console.log("🏛️ Exposition registry:", EXPOSITION_REGISTRY);
-            
-            // Zkontroluj, že je expozice registrovaná
-            if (typeof EXPOSITION_REGISTRY !== 'undefined' && EXPOSITION_REGISTRY['stezka_bohuslavice']) {
-            console.log("✅ Včelařská stezka exposition is registered");
-            } else {
-             console.warn("⚠️ Včelařská stezka exposition not found in registry");
-            // Zkus inicializovat znovu za chvíli
-            setTimeout(initializeGameification, 1000);
-            return;
-}
-            
-            // Inicializuj time tracking
-            if (typeof initializeTimeTracking === 'function') {
-                initializeTimeTracking(currentExpositionId, currentSceneId);
-                console.log("⏱️ Time tracking initialized");
-            } else {
-                console.error("❌ initializeTimeTracking function not found");
-            }
-            
+            console.log("🎮 Initializing gamification...");
             gamificationInitialized = true;
-            console.log("✅ Gamification initialized successfully for včelařská stezka");
         }
 
-        // OPRAVENÁ funkce pro záznam aktivace včelích markerů
         function recordBeeMarkerActivation(markerId) {
-            if (!gamificationInitialized) {
-                console.warn("⚠️ Gamification not initialized yet, skipping marker activation");
-                return;
-            }
-            
-            console.log(`🐝 Recording bee marker activation: ${markerId} in exposition ${currentExpositionId}, scene ${currentSceneId}`);
-            
-            if (typeof recordMarkerActivation === 'function') {
-                recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
-            } else {
-                console.error("❌ recordMarkerActivation function not found");
-            }
+            if (!gamificationInitialized) return;
+            console.log(`🐝 Recording bee marker activation: ${markerId}`);
         }
 
-        // Page visibility API pro pozastavení gamifikace
-        document.addEventListener('visibilitychange', () => {
-            if (typeof pauseTimeTracking === 'function' && typeof resumeTimeTracking === 'function') {
-                if (document.hidden) {
-                    pauseTimeTracking();
-                } else {
-                    resumeTimeTracking();
-                }
-            }
-        });
-
-        // Finalizace při odchodu ze stránky
-        window.addEventListener('beforeunload', () => {
-            if (typeof finalizeTimeTracking === 'function') {
-                finalizeTimeTracking(currentExpositionId, currentSceneId);
-            }
-        });
-
-        // === PŮVODNÍ FUNKCE S GAMIFIKAČNÍMI ROZŠÍŘENÍMI ===
+        // === PŮVODNÍ FUNKCE ===
 
         // Výpočet vzdálenosti mezi GPS body
         function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -974,15 +899,8 @@ window.forceTutorialStart = forceTutorialStart;
             document.getElementById('distanceInfo').innerHTML = '📍 Hledám GPS signál...';
             
             if (!navigator.geolocation) {
-                console.error("Geolocation is not supported");
-                document.getElementById('distanceInfo').innerHTML = '❌ GPS není podporován';
-                userPosition = {
-                    lat: 49.090675,
-                    lng: 17.132976,
-                    accuracy: 50
-                };
-                startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
-                console.log("Using fallback position:", userPosition);
+                userPosition = { lat: 49.090675, lng: 17.132976, accuracy: 50 };
+                startPosition = { ...userPosition };
                 checkProximityToMarkers();
                 updateNavigation();
                 return;
@@ -996,49 +914,19 @@ window.forceTutorialStart = forceTutorialStart;
                         accuracy: position.coords.accuracy
                     };
                     if (!startPosition) {
-                        startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici pouze při prvním GPS fix
-                        console.log("🎯 Start position set:", startPosition);
+                        startPosition = { ...userPosition };
                     }
-                    console.log("GPS position found:", userPosition);
                     checkProximityToMarkers();
                     updateNavigation();
                 },
                 (error) => {
-                    console.error("Geolocation error:", error);
-                    
-                    userPosition = {
-                        lat: 49.090675,
-                        lng: 17.132976,
-                        accuracy: 100
-                    };
-                    startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
-                    
-                    document.getElementById('distanceInfo').innerHTML = '🔄 Používám testovací pozici';
-                    console.log("Using fallback position due to GPS error:", userPosition);
+                    userPosition = { lat: 49.090675, lng: 17.132976, accuracy: 100 };
+                    startPosition = { ...userPosition };
                     checkProximityToMarkers();
                     updateNavigation();
                 },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 15000,
-                    maximumAge: 60000
-                }
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 }
             );
-            
-            setTimeout(() => {
-                if (!userPosition) {
-                    console.log("GPS timeout - activating fallback position");
-                    userPosition = {
-                        lat: 49.090675,
-                        lng: 17.132976,
-                        accuracy: 100
-                    };
-                    startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
-                    document.getElementById('distanceInfo').innerHTML = '🔄 Testovací pozice aktivní';
-                    checkProximityToMarkers();
-                    updateNavigation();
-                }
-            }, 5000);
         }
 
         // Sledování pozice
@@ -1053,27 +941,19 @@ window.forceTutorialStart = forceTutorialStart;
                         };
                         checkProximityToMarkers();
                         updateNavigation();
-                        checkDistanceForQuiz(); // NOVÉ: Kontrola kvízů
+                        checkDistanceForQuiz();
                     },
                     (error) => {
                         console.error("Watch position error:", error);
                     },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 8000,
-                        maximumAge: 20000
-                    }
+                    { enableHighAccuracy: true, timeout: 8000, maximumAge: 20000 }
                 );
             }
         }
 
-        // HLAVNÍ FUNKCE - Kontrola proximity s gamifikací
+        // Kontrola proximity
         function checkProximityToMarkers() {
             if (!userPosition) return;
-            
-            console.log("Checking proximity with user position:", userPosition);
-            let shouldStopAudio = true;
-            let markersActivatedThisCheck = [];
             
             markers.forEach(marker => {
                 const distance = calculateDistance(
@@ -1081,48 +961,26 @@ window.forceTutorialStart = forceTutorialStart;
                     marker.lat, marker.lng
                 );
                 
-                console.log(`${marker.id}: distance = ${distance.toFixed(1)}m, visibility threshold = ${AR_VISIBILITY_THRESHOLD}m`);
-                
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
                 if (entity) {
-                    // Zobrazení AR objektu
                     if (distance <= AR_VISIBILITY_THRESHOLD) {
                         entity.setAttribute('visible', 'true');
-                        console.log(`✅ ${marker.id} VISIBLE at ${distance.toFixed(1)}m`);
                     } else {
                         entity.setAttribute('visible', 'false');
-                        console.log(`❌ ${marker.id} too far: ${distance.toFixed(1)}m`);
                     }
                     
-                    // Audio přehrávání
                     if (distance <= AUDIO_THRESHOLD) {
                         playAudio(marker.id);
-                        shouldStopAudio = false;
-                        console.log(`🎵 Audio playing for ${marker.id}`);
                     }
                     
-                    // GAMIFIKACE: Aktivace markeru při proximity
                     if (distance <= PROXIMITY_THRESHOLD) {
-                        console.log(`🎯 Bee activated: ${marker.id}`);
-                        markersActivatedThisCheck.push(marker.id);
                         recordBeeMarkerActivation(marker.id);
                     }
                 }
             });
-            
-            if (shouldStopAudio && currentlyPlayingAudio) {
-                stopCurrentAudio();
-            }
-            
-            // Počet viditelných včel
-            const visibleCount = markers.filter(marker => {
-                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                return entity && entity.getAttribute('visible') === true;
-            }).length;
-            console.log(`${visibleCount}/${markers.length} bees are visible in AR`);
         }
 
-        // UPRAVENÉ AUDIO FUNKCE - POUZE IKONY
+        // Audio funkce
         function playAudio(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (!marker || audioPlayingForMarker === markerId) return;
@@ -1136,9 +994,7 @@ window.forceTutorialStart = forceTutorialStart;
                 audioElement.play().then(() => {
                     currentlyPlayingAudio = audioElement;
                     audioPlayingForMarker = markerId;
-                    
                     updateAudioDisplay();
-                    
                     audioElement.onended = stopCurrentAudio;
                 }).catch(console.error);
             }
@@ -1159,17 +1015,14 @@ window.forceTutorialStart = forceTutorialStart;
             }
         }
 
-        // ZJEDNODUŠENÉ ZOBRAZENÍ AUDIO - POUZE IKONA
         function updateAudioDisplay() {
             const audioInfo = document.getElementById('audioInfo');
             if (audioIsPaused) {
                 audioInfo.innerHTML = '▶️';
                 audioInfo.style.background = 'rgba(255, 193, 7, 0.9)';
-                audioInfo.style.borderColor = 'rgba(255, 193, 7, 1)';
             } else {
                 audioInfo.innerHTML = '⏸️';
                 audioInfo.style.background = 'rgba(40, 167, 69, 0.9)';
-                audioInfo.style.borderColor = 'rgba(40, 167, 69, 1)';
             }
             audioInfo.style.display = 'flex';
         }
@@ -1236,13 +1089,6 @@ window.forceTutorialStart = forceTutorialStart;
             }
             
             const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
-            const completed = getCompletedQuizzes();
-            
-            // Vypočítej vzdálenost od startu
-            const distanceFromStart = startPosition ? calculateDistance(
-                startPosition.lat, startPosition.lng,
-                userPosition.lat, userPosition.lng
-            ) : 0;
             
             if (targetMarker) {
                 const distance = Math.round(targetMarker.distance);
@@ -1252,9 +1098,9 @@ window.forceTutorialStart = forceTutorialStart;
                 if (distance <= AUDIO_THRESHOLD) indicators += ' 🎵';
                 if (distance <= AR_VISIBILITY_THRESHOLD) indicators += ' 👁️';
                 
-                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${indicators}<br><strong>${distance}m</strong><br><small>📚 Kvízy: ${completed.length}/${BEE_QUIZZES.length} • Vzdálenost: ${distanceFromStart.toFixed(0)}m</small>`;
+                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${indicators}<br><strong>${distance}m</strong>`;
             } else {
-                distanceInfo.innerHTML = `🐝 GPS aktivní<br><small>📚 Kvízy: ${completed.length}/${BEE_QUIZZES.length} • Vzdálenost: ${distanceFromStart.toFixed(0)}m</small>`;
+                distanceInfo.innerHTML = '🐝 GPS aktivní';
             }
         }
 
@@ -1306,121 +1152,6 @@ window.forceTutorialStart = forceTutorialStart;
             updateNavigation();
         }
 
-        // Rotace modelů dotykem
-        function setupModelRotation() {
-            let touchStarted = false;
-            let rotationActive = false;
-            
-            document.addEventListener('touchstart', (e) => {
-                if (isTouchingUI(e.target)) return;
-                if (!isAnyModelVisible()) return;
-                
-                touchStarted = true;
-                rotationActive = true;
-                isRotating = true;
-                startX = e.touches[0].clientX;
-                showRotationHintOnce();
-                e.preventDefault();
-            }, { passive: false });
-            
-            document.addEventListener('mousedown', (e) => {
-                if (isTouchingUI(e.target)) return;
-                if (!isAnyModelVisible()) return;
-                
-                rotationActive = true;
-                isRotating = true;
-                startX = e.clientX;
-                showRotationHintOnce();
-                e.preventDefault();
-            });
-            
-            document.addEventListener('touchmove', (e) => {
-                if (!isRotating || !touchStarted || !rotationActive) return;
-                const currentX = e.touches[0].clientX;
-                const deltaX = currentX - startX;
-                modelRotationY += deltaX * 0.3;
-                updateModelRotation();
-                startX = currentX;
-                e.preventDefault();
-            }, { passive: false });
-            
-            document.addEventListener('mousemove', (e) => {
-                if (!isRotating || !rotationActive) return;
-                const deltaX = e.clientX - startX;
-                modelRotationY += deltaX * 0.3;
-                updateModelRotation();
-                startX = e.clientX;
-                e.preventDefault();
-            });
-            
-            document.addEventListener('touchend', () => {
-                isRotating = false;
-                touchStarted = false;
-                rotationActive = false;
-            });
-            
-            document.addEventListener('mouseup', () => {
-                isRotating = false;
-                rotationActive = false;
-            });
-        }
-
-        function updateModelRotation() {
-            const beeModel1 = document.getElementById('bee-model-1-gltf');
-            const beeModel2 = document.getElementById('bee-model-2-gltf');
-            const beeModel3 = document.getElementById('bee-model-3-gltf');
-            
-            if (beeModel1) {
-                beeModel1.setAttribute('rotation', `0 ${modelRotationY} 0`);
-            }
-            if (beeModel2) {
-                beeModel2.setAttribute('rotation', `0 ${modelRotationY} 0`);
-            }
-            if (beeModel3) {
-                beeModel3.setAttribute('rotation', `0 ${modelRotationY} 0`);
-            }
-        }
-
-        function isAnyModelVisible() {
-            return markers.some(marker => {
-                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                return entity && entity.getAttribute('visible') === true;
-            });
-        }
-
-        function isTouchingUI(target) {
-            const uiSelectors = [
-                '.back-button',
-                '.navigation', 
-                '.nav-toggle',
-                '.nav-content',
-                '.target-item',
-                '.distance-info',
-                '.audio-info',
-                '.rotation-hint',
-                '.bee-quiz',
-                '.debug-panel' // NOVÉ: Přidáno debug panel mezi UI elementy
-            ];
-            
-            for (let selector of uiSelectors) {
-                const element = document.querySelector(selector);
-                if (element && (element === target || element.contains(target))) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        function showRotationHintOnce() {
-            if (rotationHintShown) return;
-            rotationHintShown = true;
-            const rotationHint = document.getElementById('rotationHint');
-            rotationHint.style.display = 'block';
-            setTimeout(() => {
-                rotationHint.style.display = 'none';
-            }, 3000);
-        }
-
         // === EVENT LISTENERY ===
         
         document.getElementById('navToggle').addEventListener('click', () => {
@@ -1441,33 +1172,31 @@ window.forceTutorialStart = forceTutorialStart;
         // === HLAVNÍ INICIALIZACE ===
         
         window.addEventListener('load', () => {
-            console.log("Starting bee AR application with quiz system and gamification...");
+            console.log("Starting bee AR application with tutorial...");
             
-            // OPRAVENÁ INICIALIZACE TUTORIALU
+            // Inicializace tutorialu
             setTimeout(() => {
                 initializeTutorialSystem();
             }, 1000);
             
-            // Počkej na načtení gamifikačních skriptů a pak inicializuj
+            // Inicializace gamifikace
             setTimeout(() => {
                 initializeGameification();
             }, 2000);
             
-            // Počkáme na A-Frame
+            // A-Frame
             document.querySelector('a-scene').addEventListener('loaded', () => {
                 console.log("A-Frame scene loaded");
-                setupModelRotation();
                 getCurrentPosition();
                 watchPosition();
                 
-                // NOVÉ: Pravidelná kontrola kvízů
                 setInterval(() => {
                     checkDistanceForQuiz();
-                }, 3000); // Kontrola každé 3 sekundy
+                }, 3000);
             });
         });
 
-        console.log("🐝 Bee AR script with quiz system, gamification, and tutorial loaded successfully!");
+        console.log("🐝 Bee AR script loaded successfully!");
 </script>
 </body>
 </html>
