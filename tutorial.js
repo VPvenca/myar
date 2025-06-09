@@ -83,14 +83,14 @@ class ARTutorial {
             bubble.style.cssText = step.bubble.style;
         }
         
-        // Content
-        bubble.innerHTML = `
-            <h3>${step.title}</h3>
-            ${step.content}
-            <button class="tutorial-next" onclick="arTutorial.next()">
-                ${stepNumber === this.config.steps.length ? (step.finalButton || 'Začít!') : 'Pokračovat'}
-            </button>
-        `;
+      // Content
+bubble.innerHTML = `
+    <h3>${step.title}</h3>
+    ${step.content}
+    <button class="tutorial-next" onclick="window.arTutorial.next()">
+        ${stepNumber === this.config.steps.length ? (step.finalButton || 'Začít!') : 'Pokračovat'}
+    </button>
+`;
         
         stepDiv.appendChild(bubble);
         return stepDiv;
