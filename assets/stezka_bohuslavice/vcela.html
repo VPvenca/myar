@@ -1367,6 +1367,39 @@ function startTutorialWhenReady() {
         }
     }, 3000); // 3 sekundy po načtení A-Frame
 }
+
+        // DEBUG: Funkce pro kontrolu kroků
+function debugSteps() {
+    console.log("=== TUTORIAL STEPS DEBUG ===");
+    for (let i = 1; i <= 6; i++) {
+        const step = document.getElementById(`tutorialStep${i}`);
+        if (step) {
+            const bubble = step.querySelector('.tutorial-bubble, .tutorial-bubble-center');
+            console.log(`Step ${i}:`, {
+                display: step.style.display,
+                visible: step.style.display === 'block',
+                bubble: bubble ? 'found' : 'missing',
+                bubbleClass: bubble ? bubble.className : 'none',
+                position: bubble ? getComputedStyle(bubble).position : 'none'
+            });
+        } else {
+            console.log(`Step ${i}: MISSING ELEMENT`);
+        }
+    }
+    
+    if (window.arTutorial) {
+        console.log("Tutorial state:", {
+            currentStep: window.arTutorial.currentStep,
+            totalSteps: window.arTutorial.totalSteps,
+            isActive: window.arTutorial.isActive
+        });
+    }
+}
+
+// Spusť debug po 5 sekundách
+setTimeout(() => {
+    debugSteps();
+}, 5000);
     </script>
 </body>
 </html>
