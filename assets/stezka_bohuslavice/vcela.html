@@ -420,19 +420,15 @@
         const AR_VISIBILITY_THRESHOLD = 30;
         const AUDIO_THRESHOLD = 15;
         
-        // NOVÉ: Včelí kvízy místo medových skvrn
-        const QUIZ_TRIGGER_DISTANCE = 45; // metrů - každých 45m se zobrazí kvíz
-        const QUIZ_VARIANCE = 10; // náhodná variance ±10m (35-55m)
+        // ZJEDNODUŠENÉ: Kvízy každých 50m od startu
+        const QUIZ_DISTANCE_STEP = 50; // každých 50m
+        let startPosition = null; // pozice při spuštění AR
+        let lastQuizMilestone = -1; // poslední milestone kdy se zobrazil kvíz
         
         let selectedTargetId = null;
         let currentlyPlayingAudio = null;
         let audioPlayingForMarker = null;
         let audioIsPaused = false;
-        
-        // Sledování ujeté vzdálenosti
-        let totalDistanceWalked = 0;
-        let lastPosition = null;
-        let nextQuizDistance = QUIZ_TRIGGER_DISTANCE + (Math.random() * QUIZ_VARIANCE * 2 - QUIZ_VARIANCE);
         let currentQuiz = null;
         
         // Proměnné pro rotaci modelů
@@ -631,40 +627,42 @@
             return { quiz: BEE_QUIZZES[randomIndex], index: randomIndex };
         }
         
-        function trackWalkingDistance() {
-            if (!userPosition || !lastPosition) {
-                if (userPosition) lastPosition = { ...userPosition };
+        // === ZJEDNODUŠENÝ KVÍZOVÝ SYSTÉM ===
+        
+        function checkDistanceForQuiz() {
+            if (!userPosition || !startPosition) {
+                console.log("🎯 No position data for quiz check");
                 return;
             }
             
-            const distance = calculateDistance(
-                lastPosition.lat, lastPosition.lng,
+            // Vypočítej vzdálenost od startu
+            const distanceFromStart = calculateDistance(
+                startPosition.lat, startPosition.lng,
                 userPosition.lat, userPosition.lng
             );
             
-            // Přidej pouze rozumné vzdálenosti (méně než 100m za update)
-            if (distance < 100) {
-                totalDistanceWalked += distance;
-                console.log(`🚶 Total distance walked: ${totalDistanceWalked.toFixed(1)}m, next quiz at: ${nextQuizDistance.toFixed(1)}m`);
-                
-                // Zkontroluj, zda je čas na kvíz
-                if (totalDistanceWalked >= nextQuizDistance) {
-                    showRandomQuiz();
-                }
-            }
+            // Zjisti, na kterém 50m milníku jsme
+            const currentMilestone = Math.floor(distanceFromStart / QUIZ_DISTANCE_STEP);
             
-            lastPosition = { ...userPosition };
+            console.log(`🎯 Distance from start: ${distanceFromStart.toFixed(1)}m, milestone: ${currentMilestone}, last quiz milestone: ${lastQuizMilestone}`);
+            
+            // Pokud jsme na novém milníku a ještě jsme tu kvíz nezobrazili
+            if (currentMilestone > lastQuizMilestone && currentMilestone > 0) {
+                console.log(`🎯 New milestone reached: ${currentMilestone * QUIZ_DISTANCE_STEP}m - showing quiz!`);
+                lastQuizMilestone = currentMilestone;
+                showRandomQuiz();
+            }
         }
         
         function showRandomQuiz() {
             const quizData = getRandomUncompletedQuiz();
-            if (!quizData) return;
+            if (!quizData) {
+                console.log('🎯 No more quizzes available - all completed!');
+                return;
+            }
             
             const { quiz, index } = quizData;
             currentQuiz = { ...quiz, index };
-            
-            // Nastav další kvíz
-            nextQuizDistance = totalDistanceWalked + QUIZ_TRIGGER_DISTANCE + (Math.random() * QUIZ_VARIANCE * 2 - QUIZ_VARIANCE);
             
             // Zobraz kvíz
             document.getElementById('quizQuestion').textContent = quiz.question;
@@ -682,11 +680,16 @@
             
             // Aktualizuj progress
             const completed = getCompletedQuizzes();
+            const distanceFromStart = startPosition ? calculateDistance(
+                startPosition.lat, startPosition.lng,
+                userPosition.lat, userPosition.lng
+            ) : 0;
+            
             document.getElementById('quizProgress').textContent = 
-                `Kvíz ${completed.length + 1}/${BEE_QUIZZES.length} • Ujito: ${totalDistanceWalked.toFixed(0)}m`;
+                `Kvíz ${completed.length + 1}/${BEE_QUIZZES.length} • Vzdálenost: ${distanceFromStart.toFixed(0)}m`;
             
             document.getElementById('beeQuiz').style.display = 'block';
-            console.log(`🐝 Showing quiz ${index}: ${quiz.question}`);
+            console.log(`🐝 Showing quiz ${index}: ${quiz.question.substring(0, 50)}...`);
         }
         
         function selectAnswer(selectedIndex) {
@@ -866,7 +869,8 @@
                     lng: 17.132976,
                     accuracy: 50
                 };
-                console.log("Using fallback position (Dělnice):", userPosition);
+                startPosition = { ...userPosition }; // ZJEDNODUŠENO: Nastav start pozici
+                console.log("Using fallback position:", userPosition);
                 checkProximityToMarkers();
                 updateNavigation();
                 return;
@@ -879,6 +883,10 @@
                         lng: position.coords.longitude,
                         accuracy: position.coords.accuracy
                     };
+                    if (!startPosition) {
+                        startPosition = { ...userPosition }; // ZJEDNODUŠENO: Nastav start pozici pouze při prvním GPS fix
+                        console.log("🎯 Start position set:", startPosition);
+                    }
                     console.log("GPS position found:", userPosition);
                     checkProximityToMarkers();
                     updateNavigation();
@@ -891,8 +899,9 @@
                         lng: 17.132976,
                         accuracy: 100
                     };
+                    startPosition = { ...userPosition }; // ZJEDNODUŠENO: Nastav start pozici
                     
-                    document.getElementById('distanceInfo').innerHTML = '🔄 Používám testovací pozici (Dělnice)';
+                    document.getElementById('distanceInfo').innerHTML = '🔄 Používám testovací pozici';
                     console.log("Using fallback position due to GPS error:", userPosition);
                     checkProximityToMarkers();
                     updateNavigation();
@@ -912,7 +921,8 @@
                         lng: 17.132976,
                         accuracy: 100
                     };
-                    document.getElementById('distanceInfo').innerHTML = '🔄 Testovací pozice aktivní (Dělnice)';
+                    startPosition = { ...userPosition }; // ZJEDNODUŠENO: Nastav start pozici
+                    document.getElementById('distanceInfo').innerHTML = '🔄 Testovací pozice aktivní';
                     checkProximityToMarkers();
                     updateNavigation();
                 }
@@ -931,7 +941,7 @@
                         };
                         checkProximityToMarkers();
                         updateNavigation();
-                        trackWalkingDistance(); // NOVÉ: Sleduj ujitou vzdálenost pro kvízy
+                        checkDistanceForQuiz(); // ZJEDNODUŠENO: Kontrola kvízů
                     },
                     (error) => {
                         console.error("Watch position error:", error);
@@ -939,7 +949,7 @@
                     {
                         enableHighAccuracy: true,
                         timeout: 8000,
-                        maximumAge: 5000 // Častější aktualizace pro přesné sledování vzdálenosti
+                        maximumAge: 5000
                     }
                 );
             }
@@ -1116,6 +1126,12 @@
             const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
             const completed = getCompletedQuizzes();
             
+            // Vypočítej vzdálenost od startu
+            const distanceFromStart = startPosition ? calculateDistance(
+                startPosition.lat, startPosition.lng,
+                userPosition.lat, userPosition.lng
+            ) : 0;
+            
             if (targetMarker) {
                 const distance = Math.round(targetMarker.distance);
                 const prefix = selectedTargetId ? '🎯' : '🐝';
@@ -1124,9 +1140,9 @@
                 if (distance <= AUDIO_THRESHOLD) indicators += ' 🎵';
                 if (distance <= AR_VISIBILITY_THRESHOLD) indicators += ' 👁️';
                 
-                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${indicators}<br><strong>${distance}m</strong><br><small>📚 Kvízy: ${completed.length}/${BEE_QUIZZES.length} • Ujito: ${totalDistanceWalked.toFixed(0)}m</small>`;
+                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${indicators}<br><strong>${distance}m</strong><br><small>📚 Kvízy: ${completed.length}/${BEE_QUIZZES.length} • Vzdálenost: ${distanceFromStart.toFixed(0)}m</small>`;
             } else {
-                distanceInfo.innerHTML = `🐝 GPS aktivní<br><small>📚 Kvízy: ${completed.length}/${BEE_QUIZZES.length} • Ujito: ${totalDistanceWalked.toFixed(0)}m</small>`;
+                distanceInfo.innerHTML = `🐝 GPS aktivní<br><small>📚 Kvízy: ${completed.length}/${BEE_QUIZZES.length} • Vzdálenost: ${distanceFromStart.toFixed(0)}m</small>`;
             }
         }
 
@@ -1332,7 +1348,7 @@
             });
         });
 
-        console.log("🐝 Bee AR script with interactive bee quizzes and gamification loaded successfully!");
+        console.log("🐝 Bee AR script with simple quiz system loaded successfully!");
     </script>
 </body>
 </html>
