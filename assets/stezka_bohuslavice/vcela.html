@@ -173,7 +173,7 @@
         /* NOVÉ: Styl pro včelí kvíz */
         .bee-quiz {
             position: fixed;
-            top: 20%;
+            top: 15%;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(255, 248, 220, 0.98);
@@ -330,17 +330,16 @@
             <audio id="audio3" src="/assets/stezka_bohuslavice/mp3/kralovna.mp3" preload="auto"></audio>
         </a-assets>
 
-        <!-- Kamera s geolokací a cursor pro klikání -->
+        <!-- Kamera s geolokací -->
         <a-camera 
             gps-camera
-            rotation-reader
-            cursor="rayOrigin: mouse">
+            rotation-reader>
         </a-camera>
 
         <!-- AR objekty na GPS souřadnicích -->
         <!-- Včela 1 - Dělnice -->
         <a-entity 
-            gps-entity-place="latitude: 49.009326; longitude: 17.127042" 
+            gps-entity-place="latitude: 49.207759; longitude: 16.690971" 
             data-marker-id="vcela_1"
             data-audio-id="audio1"
             visible="false">
@@ -356,7 +355,7 @@
 
         <!-- Včela 2 - Trubec -->
         <a-entity 
-            gps-entity-place="latitude: 49.007559; longitude: 17.125258" 
+            gps-entity-place="latitude: 49.208602; longitude: 16.686679" 
             data-marker-id="vcela_2"
             data-audio-id="audio2"
             visible="false">
@@ -372,7 +371,7 @@
 
         <!-- Včela 3 - Královna -->
         <a-entity 
-            gps-entity-place="latitude: 49.007463; longitude: 17.123234" 
+            gps-entity-place="latitude: 49.210291; longitude: 16.686112" 
             data-marker-id="vcela_3"
             data-audio-id="audio3"
             visible="false">
@@ -385,9 +384,6 @@
                 animation-mixer>
             </a-gltf-model>
         </a-entity>
-
-        <!-- OPRAVENÝ: Kontejner pro medové indikace - ODSTRANĚN -->
-        <!-- <a-entity id="honeyIndicators"></a-entity> -->
 
         <!-- Základní osvětlení -->
         <a-light type="ambient" color="#ffffff" intensity="1.0" id="ambientLight"></a-light>
@@ -412,23 +408,22 @@
         // === GAMIFIKAČNÍ PROMĚNNÉ ===
         let gamificationInitialized = false;
         let currentExpositionId = 'stezka_bohuslavice';
-        let currentSceneId = '/assets/stezka_bohuslavice/vcela.html';
+        let currentSceneId = '/assets/stezka_bohuslavice/vcela.html';  // OPRAVENO: Správné ID scény
         
         // GPS a navigační proměnné
         let userPosition = null;
         const PROXIMITY_THRESHOLD = 15;
         const AR_VISIBILITY_THRESHOLD = 30;
         const AUDIO_THRESHOLD = 15;
-        
-        // ZJEDNODUŠENÉ: Kvízy každých 50m od startu
-        const QUIZ_DISTANCE_STEP = 50; // každých 50m
-        let startPosition = null; // pozice při spuštění AR
-        let lastQuizMilestone = -1; // poslední milestone kdy se zobrazil kvíz
-        
         let selectedTargetId = null;
         let currentlyPlayingAudio = null;
         let audioPlayingForMarker = null;
         let audioIsPaused = false;
+        
+        // NOVÉ: Kvízový systém
+        const QUIZ_DISTANCE_STEP = 50; // každých 50m
+        let startPosition = null;
+        let lastQuizMilestone = -1;
         let currentQuiz = null;
         
         // Proměnné pro rotaci modelů
@@ -441,24 +436,24 @@
         const markers = [
             { 
                 id: "vcela_1", 
-                lat: 49.009326, 
-                lng: 17.127042,
+                lat: 49.207759, 
+                lng: 16.690971,
                 name: "🐝 Dělnice",
                 description: "Pracovitá včela dělnice - základ úlu",
                 audioId: "audio1"
             },
             { 
                 id: "vcela_2", 
-                lat: 49.007559, 
-                lng: 17.125258,
+                lat: 49.208602, 
+                lng: 16.686679,
                 name: "🐝 Trubec", 
                 description: "Samec včely - zodpovědný za rozmnožování",
                 audioId: "audio2"
             },
             { 
                 id: "vcela_3", 
-                lat: 49.007463, 
-                lng: 17.123234,
+                lat: 49.210291,
+                lng: 16.686112,
                 name: "👑 Královna",
                 description: "Matka úlu - vládkyně včelího státu",
                 audioId: "audio3"
@@ -627,11 +622,8 @@
             return { quiz: BEE_QUIZZES[randomIndex], index: randomIndex };
         }
         
-        // === ZJEDNODUŠENÝ KVÍZOVÝ SYSTÉM ===
-        
         function checkDistanceForQuiz() {
             if (!userPosition || !startPosition) {
-                console.log("🎯 No position data for quiz check");
                 return;
             }
             
@@ -722,41 +714,6 @@
             document.getElementById('beeQuiz').style.display = 'none';
             document.getElementById('quizExplanation').style.display = 'none';
             currentQuiz = null;
-        } 180;
-            const φ2 = lat2 * Math.PI / 180;
-            const Δλ = (lng2 - lng1) * Math.PI / 180;
-            
-            const y = Math.sin(Δλ) * Math.cos(φ2);
-            const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
-            
-            return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-        }
-        
-        function calculateIntermediatePoint(lat1, lng1, bearing, distance) {
-            const φ1 = lat1 * Math.PI / 180;
-            const λ1 = lng1 * Math.PI / 180;
-            const δ = distance / 6371000; // distance/radius of earth
-            const θ = bearing * Math.PI / 180;
-            
-            const φ2 = Math.asin(Math.sin(φ1) * Math.cos(δ) + Math.cos(φ1) * Math.sin(δ) * Math.cos(θ));
-            const λ2 = λ1 + Math.atan2(Math.sin(θ) * Math.sin(δ) * Math.cos(φ1), Math.cos(δ) - Math.sin(φ1) * Math.sin(φ2));
-            
-            return {
-                lat: φ2 * 180 / Math.PI,
-                lng: λ2 * 180 / Math.PI
-            };
-        }
-        
-        function gpsToARPosition(lat, lng) {
-            // Zjednodušená konverze GPS na AR souřadnice
-            const deltaLat = (lat - userPosition.lat) * 111320; // metrů na stupěň
-            const deltaLng = (lng - userPosition.lng) * 111320 * Math.cos(userPosition.lat * Math.PI / 180);
-            
-            return {
-                x: deltaLng / 10, // škálování pro AR
-                y: 0,
-                z: -deltaLat / 10
-            };
         }
 
         // === GAMIFIKAČNÍ FUNKCE ===
@@ -869,7 +826,7 @@
                     lng: 17.132976,
                     accuracy: 50
                 };
-                startPosition = { ...userPosition }; // ZJEDNODUŠENO: Nastav start pozici
+                startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
                 console.log("Using fallback position:", userPosition);
                 checkProximityToMarkers();
                 updateNavigation();
@@ -884,7 +841,7 @@
                         accuracy: position.coords.accuracy
                     };
                     if (!startPosition) {
-                        startPosition = { ...userPosition }; // ZJEDNODUŠENO: Nastav start pozici pouze při prvním GPS fix
+                        startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici pouze při prvním GPS fix
                         console.log("🎯 Start position set:", startPosition);
                     }
                     console.log("GPS position found:", userPosition);
@@ -899,7 +856,7 @@
                         lng: 17.132976,
                         accuracy: 100
                     };
-                    startPosition = { ...userPosition }; // ZJEDNODUŠENO: Nastav start pozici
+                    startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
                     
                     document.getElementById('distanceInfo').innerHTML = '🔄 Používám testovací pozici';
                     console.log("Using fallback position due to GPS error:", userPosition);
@@ -921,7 +878,7 @@
                         lng: 17.132976,
                         accuracy: 100
                     };
-                    startPosition = { ...userPosition }; // ZJEDNODUŠENO: Nastav start pozici
+                    startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
                     document.getElementById('distanceInfo').innerHTML = '🔄 Testovací pozice aktivní';
                     checkProximityToMarkers();
                     updateNavigation();
@@ -941,7 +898,7 @@
                         };
                         checkProximityToMarkers();
                         updateNavigation();
-                        checkDistanceForQuiz(); // ZJEDNODUŠENO: Kontrola kvízů
+                        checkDistanceForQuiz(); // NOVÉ: Kontrola kvízů
                     },
                     (error) => {
                         console.error("Watch position error:", error);
@@ -949,7 +906,7 @@
                     {
                         enableHighAccuracy: true,
                         timeout: 8000,
-                        maximumAge: 5000
+                        maximumAge: 20000
                     }
                 );
             }
@@ -1184,7 +1141,6 @@
         function selectTarget(targetId) {
             selectedTargetId = targetId;
             document.getElementById('clearSelection').style.display = 'block';
-            
             updateNavigation();
             document.getElementById('navContent').classList.remove('open');
         }
@@ -1287,7 +1243,7 @@
                 '.distance-info',
                 '.audio-info',
                 '.rotation-hint',
-                '.bee-quiz' // NOVÉ: Přidáno včelí kvíz mezi UI elementy
+                '.bee-quiz' // NOVÉ: Přidáno kvíz mezi UI elementy
             ];
             
             for (let selector of uiSelectors) {
@@ -1329,7 +1285,7 @@
         // === HLAVNÍ INICIALIZACE ===
         
         window.addEventListener('load', () => {
-            console.log("Starting bee AR application with improved honey indicators and gamification...");
+            console.log("Starting bee AR application with quiz system and gamification...");
             
             // Počkej na načtení gamifikačních skriptů a pak inicializuj
             setTimeout(() => {
@@ -1343,12 +1299,14 @@
                 getCurrentPosition();
                 watchPosition();
                 
-                // NOVÉ: Spusť sledování chůze pro kvízy
-                setInterval(trackWalkingDistance, 2000); // Kontrola vzdálenosti každé 2 sekundy
+                // NOVÉ: Pravidelná kontrola kvízů
+                setInterval(() => {
+                    checkDistanceForQuiz();
+                }, 3000); // Kontrola každé 3 sekundy
             });
         });
 
-        console.log("🐝 Bee AR script with simple quiz system loaded successfully!");
+        console.log("🐝 Bee AR script with quiz system and gamification loaded successfully!");
     </script>
 </body>
 </html>
