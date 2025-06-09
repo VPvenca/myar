@@ -57,8 +57,8 @@
             z-index: 1000;
         }
         
-        /* NOVÉ: Proximity indikátor */
-        .proximity-indicator {
+        /* NOVÉ: Proximity indikátor - ODSTRANĚN */
+        /* .proximity-indicator {
             position: fixed;
             top: 100px;
             left: 50%;
@@ -72,7 +72,7 @@
             z-index: 1000;
             display: none;
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        }
+        } */
         
         /* Gamifikační status - SKRYTO */
         .gamification-status {
@@ -198,10 +198,10 @@
         🐝 Hledám nejbližší včelu...
     </div>
     
-    <!-- NOVÝ: Proximity indikátor -->
-    <div class="proximity-indicator ui-element" id="proximityIndicator">
+    <!-- NOVÝ: Proximity indikátor - ODSTRANĚN -->
+    <!-- <div class="proximity-indicator ui-element" id="proximityIndicator">
         🍯 Medové stopy se objevují...
-    </div>
+    </div> -->
     
     <div class="navigation ui-element">
         <div class="nav-toggle" id="navToggle">🐝 Včelí Navigace</div>
@@ -252,7 +252,7 @@
         <!-- AR objekty na GPS souřadnicích -->
         <!-- Včela 1 - Dělnice -->
         <a-entity 
-            gps-entity-place="latitude: 49.009331; longitude: 17.126973" 
+            gps-entity-place="latitude: 49.207759; longitude: 16.690971" 
             data-marker-id="vcela_1"
             data-audio-id="audio1"
             visible="false">
@@ -268,7 +268,7 @@
 
         <!-- Včela 2 - Trubec -->
         <a-entity 
-            gps-entity-place="latitude: 49.007526; longitude: 17.125253" 
+            gps-entity-place="latitude: 49.208602; longitude: 16.686679" 
             data-marker-id="vcela_2"
             data-audio-id="audio2"
             visible="false">
@@ -284,7 +284,7 @@
 
         <!-- Včela 3 - Královna -->
         <a-entity 
-            gps-entity-place="latitude: 49.007472; longitude: 17.123237" 
+            gps-entity-place="latitude: 49.210291; longitude: 16.686112" 
             data-marker-id="vcela_3"
             data-audio-id="audio3"
             visible="false">
@@ -332,22 +332,18 @@
         const AR_VISIBILITY_THRESHOLD = 30;
         const AUDIO_THRESHOLD = 15;
         
-        // NOVÉ: Medové indikace thresholdy
-        const HONEY_THRESHOLDS = {
-            VERY_FAR: 350,      // 350m+ nic
-            FAR: 300,           // 300-350m malé skvrny každých 30m
-            MEDIUM_FAR: 200,    // 200-300m střední skvrny každých 20m
-            MEDIUM: 100,        // 100-200m velké skvrny každých 15m
-            CLOSE: 50,          // 50-100m medové cestičky každých 10m
-            VERY_CLOSE: 20      // 20-50m medový proud každých 5m
-        };
+        // NOVÉ: Jednoduché medové indikace - jedna skvrna každých 15m
+        const HONEY_STEP_DISTANCE = 15; // metrů
+        const HONEY_MIN_DISTANCE = 30;  // minimální vzdálenost pro zobrazení
+        const HONEY_MAX_DISTANCE = 300; // maximální vzdálenost pro zobrazení
         
         let selectedTargetId = null;
         let currentlyPlayingAudio = null;
         let audioPlayingForMarker = null;
         let audioIsPaused = false;
         let lastHoneyUpdate = 0;
-        let honeyIndicatorsVisible = [];
+        let currentHoneySpot = null; // NOVÁ: Aktuální medová skvrna
+        let lastHoneyDistance = -1;  // NOVÁ: Poslední vzdálenost pro kterou byla vytvořena skvrna
         
         // Proměnné pro rotaci modelů
         let modelRotationY = 30;
@@ -359,148 +355,105 @@
         const markers = [
             { 
                 id: "vcela_1", 
-                lat: 49.009331, 
-                lng: 17.126973,
+                lat: 49.207759, 
+                lng: 16.690971,
                 name: "🐝 Dělnice",
                 description: "Pracovitá včela dělnice - základ úlu",
                 audioId: "audio1"
             },
             { 
                 id: "vcela_2", 
-                lat: 49.007526, 
-                lng: 17.125253,
+                lat: 49.208602, 
+                lng: 16.686679,
                 name: "🐝 Trubec", 
                 description: "Samec včely - zodpovědný za rozmnožování",
                 audioId: "audio2"
             },
             { 
                 id: "vcela_3", 
-                lat: 49.007472,
-                lng: 17.123237,
+                lat: 49.210291,
+                lng: 16.686112,
                 name: "👑 Královna",
                 description: "Matka úlu - vládkyně včelího státu",
                 audioId: "audio3"
             }
         ];
 
-        // === NOVÉ: MEDOVÉ INDIKACE FUNKCE ===
+        // === NOVÉ: ZJEDNODUŠENÉ MEDOVÉ INDIKACE ===
         
-        function createHoneySpot(size, position, intensity = 1.0) {
+        function createSimpleHoneySpot(position) {
             const honeySpot = document.createElement('a-entity');
             
-            // Geometrie podle velikosti
-            let geometry, scale, color;
-            switch(size) {
-                case 'small':
-                    geometry = 'primitive: sphere; radius: 0.1;';
-                    scale = '0.5 0.2 0.5';
-                    color = '#FFB84D';
-                    break;
-                case 'medium':
-                    geometry = 'primitive: cylinder; height: 0.1; radius: 0.15;';
-                    scale = '1 0.5 1';
-                    color = '#FFA500';
-                    break;
-                case 'large':
-                    geometry = 'primitive: cylinder; height: 0.15; radius: 0.25;';
-                    scale = '1.5 0.7 1.5';
-                    color = '#FF8C00';
-                    break;
-                case 'trail':
-                    geometry = 'primitive: cylinder; height: 0.05; radius: 0.3;';
-                    scale = '2 0.3 2';
-                    color = '#FFD700';
-                    break;
-                case 'stream':
-                    geometry = 'primitive: cylinder; height: 0.02; radius: 0.4;';
-                    scale = '3 0.2 3';
-                    color = '#FFED4E';
-                    break;
-            }
-            
-            honeySpot.setAttribute('geometry', geometry);
-            honeySpot.setAttribute('material', `color: ${color}; opacity: ${0.6 * intensity}; transparent: true; shader: standard; metalness: 0.3; roughness: 0.2;`);
+            // Jednoduchá kulatá skvrna
+            honeySpot.setAttribute('geometry', 'primitive: cylinder; height: 0.05; radius: 0.2;');
+            honeySpot.setAttribute('material', 'color: #FFD700; opacity: 0.8; transparent: true; shader: standard; metalness: 0.3; roughness: 0.2;');
             honeySpot.setAttribute('position', position);
-            honeySpot.setAttribute('scale', scale);
+            honeySpot.setAttribute('scale', '1 1 1');
             
-            // Animace pro větší indikace
-            if (size === 'large' || size === 'trail' || size === 'stream') {
-                honeySpot.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear;');
-                honeySpot.setAttribute('animation__scale', 'property: scale; from: ' + scale + '; to: 1.2 ' + scale.split(' ')[1] + ' 1.2; dir: alternate; loop: true; dur: 3000; easing: easeInOutSine;');
-            }
-            
-            // Particles pro nejbližší indikace
-            if (size === 'stream') {
-                const particles = document.createElement('a-entity');
-                particles.setAttribute('position', '0 0.5 0');
-                particles.setAttribute('particle-system', 'preset: dust; particleCount: 50; color: #FFD700, #FFA500; size: 0.1; maxAge: 2;');
-                honeySpot.appendChild(particles);
-            }
+            // Jemná animace pulsování
+            honeySpot.setAttribute('animation', 'property: scale; from: 1 1 1; to: 1.2 1 1.2; dir: alternate; loop: true; dur: 2000; easing: easeInOutSine;');
             
             return honeySpot;
         }
         
-        function calculateHoneyIndicators(targetMarker) {
-            if (!targetMarker || !userPosition) return [];
+        function updateSimpleHoneyIndicator() {
+            // Najdi nejbližší cíl
+            const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
+            if (!targetMarker || !userPosition) {
+                clearCurrentHoneySpot();
+                return;
+            }
             
             const distance = targetMarker.distance;
-            const indicators = [];
             
-            // Urči typ a interval podle vzdálenosti
-            let indicatorType, interval, maxCount;
-            
-            if (distance > HONEY_THRESHOLDS.VERY_FAR) {
-                return []; // Nic nezobrazovat
-            } else if (distance > HONEY_THRESHOLDS.FAR) {
-                indicatorType = 'small';
-                interval = 30;
-                maxCount = 3;
-            } else if (distance > HONEY_THRESHOLDS.MEDIUM_FAR) {
-                indicatorType = 'medium';
-                interval = 20;
-                maxCount = 5;
-            } else if (distance > HONEY_THRESHOLDS.MEDIUM) {
-                indicatorType = 'large';
-                interval = 15;
-                maxCount = 7;
-            } else if (distance > HONEY_THRESHOLDS.CLOSE) {
-                indicatorType = 'trail';
-                interval = 10;
-                maxCount = 8;
-            } else if (distance > HONEY_THRESHOLDS.VERY_CLOSE) {
-                indicatorType = 'stream';
-                interval = 5;
-                maxCount = 10;
-            } else {
-                return []; // Příliš blízko
+            // Kontrola, zda je vzdálenost v rozsahu pro zobrazení medových skvrn
+            if (distance < HONEY_MIN_DISTANCE || distance > HONEY_MAX_DISTANCE) {
+                clearCurrentHoneySpot();
+                return;
             }
             
-            // Vypočítej pozice indikátorů mezi uživatelem a cílem
-            const bearingToTarget = calculateBearing(
-                userPosition.lat, userPosition.lng,
-                targetMarker.lat, targetMarker.lng
-            );
+            // Vypočítej, kterou "medovou zastávku" by měl uživatel vidět
+            const honeyStepNumber = Math.floor(distance / HONEY_STEP_DISTANCE);
+            const targetHoneyDistance = honeyStepNumber * HONEY_STEP_DISTANCE;
             
-            for (let i = 1; i <= maxCount; i++) {
-                const distanceStep = interval * i;
-                if (distanceStep >= distance) break;
+            // Zobraz novou skvrnu pouze pokud se změnila vzdálenost o dostatečný krok
+            if (targetHoneyDistance !== lastHoneyDistance) {
+                clearCurrentHoneySpot();
                 
-                const intermediatePoint = calculateIntermediatePoint(
-                    userPosition.lat, userPosition.lng,
-                    bearingToTarget, distanceStep
-                );
-                
-                // Převod GPS na AR pozici (zjednodušený)
-                const arPosition = gpsToARPosition(intermediatePoint.lat, intermediatePoint.lng);
-                
-                indicators.push({
-                    type: indicatorType,
-                    position: `${arPosition.x} ${arPosition.y} ${arPosition.z}`,
-                    intensity: Math.max(0.3, 1 - (i / maxCount))
-                });
+                if (targetHoneyDistance > 0 && targetHoneyDistance <= distance) {
+                    // Vypočítej pozici skvrny směrem k cíli
+                    const bearingToTarget = calculateBearing(
+                        userPosition.lat, userPosition.lng,
+                        targetMarker.lat, targetMarker.lng
+                    );
+                    
+                    const honeySpotGPS = calculateIntermediatePoint(
+                        userPosition.lat, userPosition.lng,
+                        bearingToTarget, targetHoneyDistance
+                    );
+                    
+                    const arPosition = gpsToARPosition(honeySpotGPS.lat, honeySpotGPS.lng);
+                    
+                    // Vytvoř novou medovou skvrnu
+                    currentHoneySpot = createSimpleHoneySpot(`${arPosition.x} ${arPosition.y} ${arPosition.z}`);
+                    currentHoneySpot.setAttribute('id', 'current-honey-spot');
+                    
+                    const container = document.getElementById('honeyIndicators');
+                    container.appendChild(currentHoneySpot);
+                    
+                    lastHoneyDistance = targetHoneyDistance;
+                    
+                    console.log(`🍯 Honey spot created at ${targetHoneyDistance}m from user, total distance to target: ${distance.toFixed(1)}m`);
+                }
             }
-            
-            return indicators;
+        }
+        
+        function clearCurrentHoneySpot() {
+            if (currentHoneySpot && currentHoneySpot.parentNode) {
+                currentHoneySpot.parentNode.removeChild(currentHoneySpot);
+                currentHoneySpot = null;
+                lastHoneyDistance = -1;
+            }
         }
         
         function calculateBearing(lat1, lng1, lat2, lng2) {
@@ -542,75 +495,48 @@
             };
         }
         
-        function updateHoneyIndicators() {
-            // Aktualizuj pouze každé 2 sekundy pro výkon
-            const now = Date.now();
-            if (now - lastHoneyUpdate < 2000) return;
-            lastHoneyUpdate = now;
+        // === DUMMY OBJEKT PRO TESTOVÁNÍ ===
+        function createDummyTarget() {
+            // Vytvoř dummy včelu 50m severně od uživatele pro testování
+            if (!userPosition) return;
             
-            // Najdi nejbližší cíl
-            const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
-            if (!targetMarker) return;
+            const dummyLat = userPosition.lat + (50 / 111320); // 50m severně
+            const dummyLng = userPosition.lng;
             
-            // Vypočítej nové indikátory
-            const newIndicators = calculateHoneyIndicators(targetMarker);
+            // Přidej dummy marker do seznamu
+            const dummyMarker = {
+                id: "dummy_bee",
+                lat: dummyLat,
+                lng: dummyLng,
+                name: "🧪 Test Včela",
+                description: "Dummy objekt pro testování",
+                audioId: "audio1" // Použije stejné audio jako dělnice
+            };
             
-            // Vyčisti staré indikátory
-            clearHoneyIndicators();
-            
-            // Vytvoř nové indikátory
-            const container = document.getElementById('honeyIndicators');
-            newIndicators.forEach((indicator, index) => {
-                const honeySpot = createHoneySpot(indicator.type, indicator.position, indicator.intensity);
-                honeySpot.setAttribute('id', `honey-${index}`);
-                container.appendChild(honeySpot);
-                honeyIndicatorsVisible.push(honeySpot);
-            });
-            
-            // Aktualizuj UI indikátor
-            updateProximityIndicator(targetMarker.distance, newIndicators.length);
-        }
-        
-        function clearHoneyIndicators() {
-            honeyIndicatorsVisible.forEach(indicator => {
-                if (indicator.parentNode) {
-                    indicator.parentNode.removeChild(indicator);
-                }
-            });
-            honeyIndicatorsVisible = [];
-        }
-        
-        function updateProximityIndicator(distance, indicatorCount) {
-            const proximityIndicator = document.getElementById('proximityIndicator');
-            
-            if (indicatorCount === 0) {
-                proximityIndicator.style.display = 'none';
-                return;
+            // Přidej do markerů pokud tam ještě není
+            if (!markers.find(m => m.id === "dummy_bee")) {
+                markers.push(dummyMarker);
+                
+                // Vytvoř AR entitu pro dummy
+                const scene = document.querySelector('a-scene');
+                const dummyEntity = document.createElement('a-entity');
+                dummyEntity.setAttribute('gps-entity-place', `latitude: ${dummyLat}; longitude: ${dummyLng}`);
+                dummyEntity.setAttribute('data-marker-id', 'dummy_bee');
+                dummyEntity.setAttribute('data-audio-id', 'audio1');
+                dummyEntity.setAttribute('visible', 'false');
+                
+                // Jednoduchý box místo GLB modelu
+                const dummyModel = document.createElement('a-box');
+                dummyModel.setAttribute('position', '0 0 0');
+                dummyModel.setAttribute('scale', '2 2 2');
+                dummyModel.setAttribute('color', '#FFD700');
+                dummyModel.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear;');
+                
+                dummyEntity.appendChild(dummyModel);
+                scene.appendChild(dummyEntity);
+                
+                console.log("🧪 Dummy bee created 50m north of user position");
             }
-            
-            let message = '';
-            let color = '';
-            
-            if (distance > HONEY_THRESHOLDS.FAR) {
-                message = '🍯 Jemné medové stopy';
-                color = 'rgba(255, 180, 77, 0.9)';
-            } else if (distance > HONEY_THRESHOLDS.MEDIUM_FAR) {
-                message = '🍯 Medové skvrny se zintenzivňují';
-                color = 'rgba(255, 165, 0, 0.9)';
-            } else if (distance > HONEY_THRESHOLDS.MEDIUM) {
-                message = '🍯 Silné medové stopy!';
-                color = 'rgba(255, 140, 0, 0.9)';
-            } else if (distance > HONEY_THRESHOLDS.CLOSE) {
-                message = '🍯 Medová cesta se objevuje!';
-                color = 'rgba(255, 215, 0, 0.9)';
-            } else if (distance > HONEY_THRESHOLDS.VERY_CLOSE) {
-                message = '🍯 Medový proud směřuje k cíli!';
-                color = 'rgba(255, 237, 78, 0.9)';
-            }
-            
-            proximityIndicator.innerHTML = message;
-            proximityIndicator.style.background = color;
-            proximityIndicator.style.display = 'block';
         }
 
         // === GAMIFIKAČNÍ FUNKCE ===
@@ -788,7 +714,7 @@
                         };
                         checkProximityToMarkers();
                         updateNavigation();
-                        updateHoneyIndicators(); // NOVÉ: Aktualizuj medové indikace
+                        updateSimpleHoneyIndicator(); // NOVÉ: Aktualizuj jednoduchou medovou indikaci
                     },
                     (error) => {
                         console.error("Watch position error:", error);
@@ -979,7 +905,7 @@
                 let indicators = '';
                 if (distance <= AUDIO_THRESHOLD) indicators += ' 🎵';
                 if (distance <= AR_VISIBILITY_THRESHOLD) indicators += ' 👁️';
-                if (distance > HONEY_THRESHOLDS.VERY_CLOSE && distance <= HONEY_THRESHOLDS.VERY_FAR) indicators += ' 🍯';
+                if (currentHoneySpot) indicators += ' 🍯'; // NOVÉ: Zobraz ikonu pouze když je aktivní medová skvrna
                 
                 distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${indicators}<br><strong>${distance}m</strong><br><small>GPS: ±${Math.round(userPosition.accuracy)}m</small>`;
             } else {
@@ -1026,14 +952,14 @@
             selectedTargetId = targetId;
             document.getElementById('clearSelection').style.display = 'block';
             updateNavigation();
-            updateHoneyIndicators(); // NOVÉ: Aktualizuj medové indikace pro nový cíl
+            updateSimpleHoneyIndicator(); // NOVÉ: Aktualizuj medovou indikaci pro nový cíl
             document.getElementById('navContent').classList.remove('open');
         }
 
         function clearSelection() {
             selectedTargetId = null;
             document.getElementById('clearSelection').style.display = 'none';
-            clearHoneyIndicators(); // NOVÉ: Vyčisti medové indikace
+            clearCurrentHoneySpot(); // NOVÉ: Vyčisti medovou skvrnu
             updateNavigation();
         }
 
@@ -1128,8 +1054,7 @@
                 '.target-item',
                 '.distance-info',
                 '.audio-info',
-                '.rotation-hint',
-                '.proximity-indicator' // NOVÉ: Přidáno do UI elementů
+                '.rotation-hint' // NOVÉ: Odstraněn proximity-indicator z UI elementů
             ];
             
             for (let selector of uiSelectors) {
@@ -1184,12 +1109,17 @@
                 getCurrentPosition();
                 watchPosition();
                 
+                // NOVÉ: Vytvoř dummy objekt pro testování (odkomentuj podle potřeby)
+                // setTimeout(() => {
+                //     createDummyTarget();
+                // }, 3000);
+                
                 // NOVÉ: Spusť pravidelnou aktualizaci medových indikací
-                setInterval(updateHoneyIndicators, 3000);
+                setInterval(updateSimpleHoneyIndicator, 2000);
             });
         });
 
-        console.log("🐝 Bee AR script with honey indicators and gamification loaded successfully!");
+        console.log("🐝 Bee AR script with simple honey indicators and gamification loaded successfully!");
     </script>
 </body>
 </html>
