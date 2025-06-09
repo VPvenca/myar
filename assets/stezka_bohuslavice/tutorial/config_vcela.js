@@ -37,7 +37,7 @@ const tutorialConfig = {
             title: '🧭 Navigace',
             content: '<p>Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
             arrow: {
-                direction: 'left',
+                direction: 'right',
                 style: 'top: 25px; right: 120px;'
             },
             bubble: {
