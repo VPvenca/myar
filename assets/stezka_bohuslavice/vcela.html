@@ -1395,7 +1395,12 @@ function debugSteps() {
         });
     }
 }
-
+<div style="position: fixed; top: 50%; right: 10px; z-index: 99999; background: red; padding: 10px; border-radius: 5px;">
+    <button onclick="resetAndStart()" style="display: block; margin: 5px 0; padding: 5px; background: orange; color: white; border: none; border-radius: 3px;">🔄 Reset</button>
+    <button onclick="manualNext()" style="display: block; margin: 5px 0; padding: 5px; background: blue; color: white; border: none; border-radius: 3px;">➡️ Next</button>
+    <button onclick="manualShowStep(5)" style="display: block; margin: 5px 0; padding: 5px; background: green; color: white; border: none; border-radius: 3px;">5️⃣ Step 5</button>
+    <button onclick="debugSteps()" style="display: block; margin: 5px 0; padding: 5px; background: purple; color: white; border: none; border-radius: 3px;">🔍 Debug</button>
+</div>
 // Spusť debug po 5 sekundách
 setTimeout(() => {
     debugSteps();
