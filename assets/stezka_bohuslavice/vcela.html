@@ -170,41 +170,104 @@
             text-align: center;
         }
 
-        /* NOVÉ: Styl pro tlačítko "Mám stopu" */
-        .honey-button {
+        /* NOVÉ: Styl pro včelí kvíz */
+        .bee-quiz {
             position: fixed;
-            bottom: 80px;
+            top: 20%;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(255, 193, 7, 0.95);
-            color: black;
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 1000;
+            background: rgba(255, 248, 220, 0.98);
+            color: #333;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: normal;
+            z-index: 1001;
             display: none;
-            cursor: pointer;
-            border: 3px solid #FFA500;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            animation: honeyPulse 2s infinite;
-            user-select: none;
-            max-width: 300px;
+            max-width: 350px;
+            width: 90%;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+            border: 3px solid #FFD700;
             text-align: center;
+            animation: quizAppear 0.5s ease-out;
         }
 
-        .honey-button:hover {
+        .quiz-question {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #8B4513;
+        }
+
+        .quiz-answers {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .quiz-answer {
+            background: rgba(255, 193, 7, 0.8);
+            color: black;
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid #FFA500;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .quiz-answer:hover {
             background: rgba(255, 193, 7, 1);
-            transform: translateX(-50%) scale(1.05);
+            transform: scale(1.02);
         }
 
-        .honey-button:active {
-            transform: translateX(-50%) scale(0.95);
+        .quiz-answer.correct {
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+            border-color: #4CAF50;
         }
 
-        @keyframes honeyPulse {
-            0%, 100% { box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4); }
-            50% { box-shadow: 0 4px 25px rgba(255, 193, 7, 0.8); }
+        .quiz-answer.incorrect {
+            background: rgba(244, 67, 54, 0.7);
+            color: white;
+            border-color: #F44336;
+        }
+
+        .quiz-explanation {
+            background: rgba(173, 216, 230, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-style: italic;
+            border-left: 4px solid #4682B4;
+            display: none;
+        }
+
+        .quiz-close {
+            background: rgba(108, 117, 125, 0.9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            border: none;
+            font-weight: bold;
+        }
+
+        .quiz-close:hover {
+            background: rgba(108, 117, 125, 1);
+        }
+
+        .quiz-progress {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        @keyframes quizAppear {
+            from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
     </style>
 </head>
@@ -232,8 +295,14 @@
     <div class="audio-info ui-element" id="audioInfo">🔊</div>
     <div class="rotation-hint" id="rotationHint">🔄 Tažením otočíte včelu</div>
     
-    <!-- NOVÉ: Tlačítko "Mám stopu" -->
-    <div class="honey-button ui-element" id="honeyButton">🍯 Mám stopu!</div>
+    <!-- NOVÉ: Včelí kvíz -->
+    <div class="bee-quiz ui-element" id="beeQuiz">
+        <div class="quiz-question" id="quizQuestion"></div>
+        <div class="quiz-answers" id="quizAnswers"></div>
+        <div class="quiz-explanation" id="quizExplanation"></div>
+        <button class="quiz-close" id="quizClose">Pokračovat v cestě 🐝</button>
+        <div class="quiz-progress" id="quizProgress"></div>
+    </div>
     
     <!-- Gamifikační status - SKRYTO -->
     <div class="gamification-status ui-element" id="gamificationStatus" style="display: none !important;">🎮 Gamifikace načítá...</div>
@@ -317,8 +386,8 @@
             </a-gltf-model>
         </a-entity>
 
-        <!-- OPRAVENÝ: Kontejner pro medové indikace -->
-        <a-entity id="honeyIndicators"></a-entity>
+        <!-- OPRAVENÝ: Kontejner pro medové indikace - ODSTRANĚN -->
+        <!-- <a-entity id="honeyIndicators"></a-entity> -->
 
         <!-- Základní osvětlení -->
         <a-light type="ambient" color="#ffffff" intensity="1.0" id="ambientLight"></a-light>
@@ -351,19 +420,20 @@
         const AR_VISIBILITY_THRESHOLD = 30;
         const AUDIO_THRESHOLD = 15;
         
-        // NOVÉ: Interaktivní medové indikace s tlačítkem a možností kliknutí
-        const HONEY_STEP_DISTANCE = 25; // metrů - vzdálenost medového bodu od uživatele
-        const HONEY_MIN_DISTANCE = 30;  // minimální vzdálenost k cíli pro zobrazení
-        const HONEY_MAX_DISTANCE = 500; // maximální vzdálenost k cíli pro zobrazení
-        const HONEY_BUTTON_DISTANCE = 10; // ZVÝŠENO: vzdálenost pro zobrazení tlačítka od medového bodu
+        // NOVÉ: Včelí kvízy místo medových skvrn
+        const QUIZ_TRIGGER_DISTANCE = 45; // metrů - každých 45m se zobrazí kvíz
+        const QUIZ_VARIANCE = 10; // náhodná variance ±10m (35-55m)
         
         let selectedTargetId = null;
         let currentlyPlayingAudio = null;
         let audioPlayingForMarker = null;
         let audioIsPaused = false;
-        let currentHoneySpot = null;
-        let currentHoneySpotGPS = null; // GPS pozice aktuálního medového bodu
-        let honeyButton = null; // Tlačítko "Mám stopu"
+        
+        // Sledování ujeté vzdálenosti
+        let totalDistanceWalked = 0;
+        let lastPosition = null;
+        let nextQuizDistance = QUIZ_TRIGGER_DISTANCE + (Math.random() * QUIZ_VARIANCE * 2 - QUIZ_VARIANCE);
+        let currentQuiz = null;
         
         // Proměnné pro rotaci modelů
         let modelRotationY = 30;
@@ -399,162 +469,257 @@
             }
         ];
 
-        // === NOVÉ: INTERAKTIVNÍ MEDOVÉ INDIKACE S TLAČÍTKEM ===
+        // === NOVÉ: VČELÍ KVÍZOVÝ SYSTÉM ===
         
-        function createInteractiveHoneySpot(position) {
-            const honeySpot = document.createElement('a-entity');
-            
-            // Větší a výraznější medová skvrna s možností kliknutí
-            honeySpot.setAttribute('geometry', 'primitive: cylinder; height: 0.08; radius: 0.3;');
-            honeySpot.setAttribute('material', 'color: #FFD700; opacity: 0.9; transparent: true; shader: standard; metalness: 0.5; roughness: 0.1;');
-            honeySpot.setAttribute('position', position);
-            honeySpot.setAttribute('scale', '1 1 1');
-            honeySpot.setAttribute('id', 'interactive-honey-spot');
-            
-            // NOVÉ: Přidej možnost kliknutí na medový bod
-            honeySpot.setAttribute('cursor', 'rayOrigin: mouse');
-            honeySpot.setAttribute('class', 'clickable');
-            
-            // Výrazná animace pulsování
-            honeySpot.setAttribute('animation', 'property: scale; from: 1 1 1; to: 1.4 1 1.4; dir: alternate; loop: true; dur: 1000; easing: easeInOutSine;');
-            
-            // NOVÉ: Přidej event listener pro kliknutí na medový bod
-            honeySpot.addEventListener('click', () => {
-                console.log('🍯 Honey spot clicked!');
-                resetHoneySpot();
-            });
-            
-            return honeySpot;
+        // 20 včelích kvízů s fakty
+        const BEE_QUIZZES = [
+            {
+                question: "🐝 Kolik květů navštíví jedna včela za den?",
+                answers: ["A) 500 květů", "B) 2000 květů", "C) 5000 květů"],
+                correct: 2,
+                explanation: "Včela navštíví až 5000 květů denně! To je neuvěřitelný výkon při hledání nektaru a pylu."
+            },
+            {
+                question: "👑 Kolik vajíček snese včelí královna za den?",
+                answers: ["A) 500 vajíček", "B) 1500 vajíček", "C) 3000 vajíček"],
+                correct: 2,
+                explanation: "Královna může snést až 3000 vajíček denně během sezóny! To je více než její vlastní váha."
+            },
+            {
+                question: "🍯 Kolik medu spotřebuje včela za svůj život?",
+                answers: ["A) 1 lžičku", "B) 1/12 lžičky", "C) 3 lžičky"],
+                correct: 1,
+                explanation: "Včela za celý svůj život vyprodukuje pouze 1/12 lžičky medu. Proto je med tak cenný!"
+            },
+            {
+                question: "⚡ Kolikrát za sekundu rozhýbe včela křídla?",
+                answers: ["A) 50krát", "B) 230krát", "C) 400krát"],
+                correct: 1,
+                explanation: "Včela rozhýbe křídla až 230krát za sekundu! Proto vydává charakteristické bzučení."
+            },
+            {
+                question: "🌈 Kterou barvu včely nevidí?",
+                answers: ["A) Červenou", "B) Modrou", "C) Žlutou"],
+                correct: 0,
+                explanation: "Včely nevidí červenou barvu, místo ní vidí ultrafialové záření. Červené květy pro ně vypadají černě."
+            },
+            {
+                question: "🏃‍♀️ Jak rychle dokáže létat včela?",
+                answers: ["A) 15 km/h", "B) 25 km/h", "C) 35 km/h"],
+                correct: 1,
+                explanation: "Včela dokáže létat rychlostí až 25 km/h! To jí umožňuje efektivně prozkoumávat velká území."
+            },
+            {
+                question: "🏠 Z kolika šestihranných buněk se skládá plást?",
+                answers: ["A) 1000 buněk", "B) 3000 buněk", "C) 7000 buněk"],
+                correct: 2,
+                explanation: "Jeden plást obsahuje až 7000 šestihranných buněk! Šestihrany jsou nejefektivnější tvar pro skladování."
+            },
+            {
+                question: "🌍 Jak daleko může včela létat od úlu?",
+                answers: ["A) 2 km", "B) 5 km", "C) 8 km"],
+                correct: 2,
+                explanation: "Včela může létat až 8 km od úlu! Obvykle však zůstává v okruhu 2-3 km, kde najde dostatek potravy."
+            },
+            {
+                question: "🕐 Jak dlouho žije včela dělnice v létě?",
+                answers: ["A) 2 týdny", "B) 6 týdnů", "C) 3 měsíce"],
+                correct: 1,
+                explanation: "Včela dělnice žije v létě pouze 6 týdnů. V zimě žijí déle - až 6 měsíců kvůli menší aktivitě."
+            },
+            {
+                question: "💃 Jak včely komunikují směr ke zdroji potravy?",
+                answers: ["A) Bzučením", "B) Tancem", "C) Vůní"],
+                correct: 1,
+                explanation: "Včely komunikují tancem! Kruhový tanec znamená blízký zdroj, osmičkový tanec ukazuje směr a vzdálenost."
+            },
+            {
+                question: "🌡️ Jakou teplotu udržují včely v úlu?",
+                answers: ["A) 25°C", "B) 35°C", "C) 45°C"],
+                correct: 1,
+                explanation: "Včely udržují v úlu konstantní teplotu 35°C! To je ideální teplota pro vývoj larev a zpracování medu."
+            },
+            {
+                question: "🧠 Kolik očí má včela?",
+                answers: ["A) 2 oči", "B) 5 očí", "C) 8 očí"],
+                correct: 1,
+                explanation: "Včela má 5 očí - 2 složené oči a 3 jednoduché oči na vrcholu hlavy! Složené oči mají až 7000 facetek."
+            },
+            {
+                question: "🔢 Kolik včel žije v silném úlu?",
+                answers: ["A) 20 000", "B) 60 000", "C) 100 000"],
+                correct: 1,
+                explanation: "V silném úlu může žít až 60 000 včel! V zimě jich zůstává jen 10-20 000."
+            },
+            {
+                question: "🌸 Kolik květů potřebuje včela pro 1 kg medu?",
+                answers: ["A) 500 000", "B) 2 miliony", "C) 4 miliony"],
+                correct: 2,
+                explanation: "Pro 1 kg medu musí včely navštívit až 4 miliony květů! A nalétat vzdálenost 3x kolem Země."
+            },
+            {
+                question: "👃 Jak daleko cítí včela aroma květů?",
+                answers: ["A) 2 m", "B) 50 m", "C) 2 km"],
+                correct: 2,
+                explanation: "Včela dokáže cítit aroma květů až na vzdálenost 2 km! Má mimořádně vyvinutý čich."
+            },
+            {
+                question: "🏗️ Z čeho včely stavějí plásty?",
+                answers: ["A) Propolisu", "B) Vosku", "C) Medu"],
+                correct: 1,
+                explanation: "Plásty stavějí z vosku, který si samy vyrábějí ve speciálních žlázách na břiše!"
+            },
+            {
+                question: "💪 Kolikrát své váhy unese včela?",
+                answers: ["A) Polovinu", "B) Stejnou váhu", "C) Dvojnásobek"],
+                correct: 2,
+                explanation: "Včela dokáže unést až dvojnásobek své vlastní váhy! To odpovídá 70 mg nektaru nebo pylu."
+            },
+            {
+                question: "🛡️ Co je propolis?",
+                answers: ["A) Včelí lepidlo", "B) Druh medu", "C) Včelí jed"],
+                correct: 0,
+                explanation: "Propolis je přírodní 'lepidlo' které včely vyrábějí ze stromových pryskyřic. Má antibiotické účinky!"
+            },
+            {
+                question: "⏰ V kolik hodin jsou včely nejaktivnější?",
+                answers: ["A) 6-8 hodin", "B) 10-14 hodin", "C) 16-18 hodin"],
+                correct: 1,
+                explanation: "Včely jsou nejaktivnější mezi 10-14 hodinou, kdy je nejvíce květů otevřených a slunce nejsilnější."
+            },
+            {
+                question: "🌙 Co dělají včely v noci?",
+                answers: ["A) Spí", "B) Zpracovávají med", "C) Hlídají úl"],
+                correct: 1,
+                explanation: "Včely v noci nezahálí! Zpracovávají nektar na med, větrají úl a mladé včely pokračují ve stavbě plástů."
+            }
+        ];
+        
+        // Systém pro správu kvízů
+        function getCompletedQuizzes() {
+            const completed = localStorage.getItem('beeQuizzesCompleted');
+            return completed ? JSON.parse(completed) : [];
         }
         
-        function updateInteractiveHoneyIndicator() {
-            // Najdi cílový marker
-            const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
-            if (!targetMarker || !userPosition) {
-                clearHoneySpotAndButton();
-                return;
-            }
-            
-            const distanceToTarget = targetMarker.distance;
-            console.log(`🍯 Interactive honey check: distance to target = ${distanceToTarget.toFixed(1)}m`);
-            
-            // Pokud je cíl příliš blízko nebo daleko, skryj medový bod
-            if (distanceToTarget < HONEY_MIN_DISTANCE || distanceToTarget > HONEY_MAX_DISTANCE) {
-                console.log(`🍯 Distance ${distanceToTarget.toFixed(1)}m is outside honey range`);
-                clearHoneySpotAndButton();
-                return;
-            }
-            
-            // Pokud medový bod neexistuje, vytvoř ho
-            if (!currentHoneySpot) {
-                createNewHoneySpot(targetMarker);
-            }
-            
-            // OPRAVENO: Lepší kontrola vzdálenosti k medovému bodu
-            if (currentHoneySpotGPS) {
-                const distanceToHoneySpot = calculateDistance(
-                    userPosition.lat, userPosition.lng,
-                    currentHoneySpotGPS.lat, currentHoneySpotGPS.lng
-                );
+        function markQuizCompleted(quizIndex) {
+            const completed = getCompletedQuizzes();
+            if (!completed.includes(quizIndex)) {
+                completed.push(quizIndex);
+                localStorage.setItem('beeQuizzesCompleted', JSON.stringify(completed));
+                console.log(`🐝 Quiz ${quizIndex} completed. Total: ${completed.length}/${BEE_QUIZZES.length}`);
                 
-                console.log(`🍯 Distance to honey spot: ${distanceToHoneySpot.toFixed(1)}m (threshold: ${HONEY_BUTTON_DISTANCE}m)`);
-                
-                if (distanceToHoneySpot <= HONEY_BUTTON_DISTANCE) {
-                    showHoneyButton();
-                    console.log(`🍯 Button should be visible - user is ${distanceToHoneySpot.toFixed(1)}m from honey spot`);
-                } else {
-                    hideHoneyButton();
+                // Pokud jsou všechny kvízy dokončené, aktivuj gamifikační odznak
+                if (completed.length === BEE_QUIZZES.length) {
+                    console.log('🏆 All bee quizzes completed! Activating achievement...');
+                    if (typeof recordMarkerActivation === 'function') {
+                        recordMarkerActivation(currentExpositionId, currentSceneId, 'bee_quiz_master');
+                    }
                 }
             }
         }
         
-        function createNewHoneySpot(targetMarker) {
-            console.log(`🍯 Creating new interactive honey spot`);
+        function getRandomUncompletedQuiz() {
+            const completed = getCompletedQuizzes();
+            const available = BEE_QUIZZES.map((_, index) => index).filter(index => !completed.includes(index));
             
-            // Vypočítej směr k cíli
-            const bearingToTarget = calculateBearing(
-                userPosition.lat, userPosition.lng,
-                targetMarker.lat, targetMarker.lng
+            if (available.length === 0) {
+                console.log('🐝 All quizzes completed!');
+                return null;
+            }
+            
+            const randomIndex = available[Math.floor(Math.random() * available.length)];
+            return { quiz: BEE_QUIZZES[randomIndex], index: randomIndex };
+        }
+        
+        function trackWalkingDistance() {
+            if (!userPosition || !lastPosition) {
+                if (userPosition) lastPosition = { ...userPosition };
+                return;
+            }
+            
+            const distance = calculateDistance(
+                lastPosition.lat, lastPosition.lng,
+                userPosition.lat, userPosition.lng
             );
             
-            // Vypočítej pozici nového medového bodu (HONEY_STEP_DISTANCE metrů směrem k cíli)
-            currentHoneySpotGPS = calculateIntermediatePoint(
-                userPosition.lat, userPosition.lng,
-                bearingToTarget, 
-                HONEY_STEP_DISTANCE
-            );
-            
-            // Konverze na AR pozici
-            const arPosition = gpsToARPosition(currentHoneySpotGPS.lat, currentHoneySpotGPS.lng);
-            
-            // Vytvoř nový medový bod
-            currentHoneySpot = createInteractiveHoneySpot(`${arPosition.x} ${arPosition.y} ${arPosition.z}`);
-            
-            const container = document.getElementById('honeyIndicators');
-            if (container) {
-                container.appendChild(currentHoneySpot);
-                console.log(`🍯 New interactive honey spot created ${HONEY_STEP_DISTANCE}m ahead`);
-            } else {
-                console.error("🍯 Honey indicators container not found!");
-            }
-        }
-        
-        function showHoneyButton() {
-            const button = document.getElementById('honeyButton');
-            if (button && button.style.display !== 'block') {
-                console.log(`🍯 SHOWING honey button`);
-                button.style.display = 'block';
-                button.innerHTML = '🍯 Mám stopu! (Klikni zde nebo na medový bod)';
-            }
-        }
-        
-        function hideHoneyButton() {
-            const button = document.getElementById('honeyButton');
-            if (button && button.style.display !== 'none') {
-                console.log(`🍯 HIDING honey button`);
-                button.style.display = 'none';
-            }
-        }
-        
-        function resetHoneySpot() {
-            console.log(`🍯 RESET: User activated honey spot reset`);
-            
-            // Vymaž současný medový bod a skryj tlačítko
-            clearHoneySpotAndButton();
-            
-            // Přidej krátké zpožděni a pak vytvoř nový medový bod
-            setTimeout(() => {
-                updateInteractiveHoneyIndicator();
+            // Přidej pouze rozumné vzdálenosti (méně než 100m za update)
+            if (distance < 100) {
+                totalDistanceWalked += distance;
+                console.log(`🚶 Total distance walked: ${totalDistanceWalked.toFixed(1)}m, next quiz at: ${nextQuizDistance.toFixed(1)}m`);
                 
-                // Debug výpis pro ověření
-                console.log(`🍯 Reset completed - new honey spot should be created`);
-            }, 200);
-            
-            // Vizuální feedback
-            const button = document.getElementById('honeyButton');
-            if (button) {
-                button.innerHTML = '✅ Resetováno!';
-                setTimeout(() => {
-                    button.innerHTML = '🍯 Mám stopu!';
-                }, 1000);
+                // Zkontroluj, zda je čas na kvíz
+                if (totalDistanceWalked >= nextQuizDistance) {
+                    showRandomQuiz();
+                }
             }
+            
+            lastPosition = { ...userPosition };
         }
         
-        function clearHoneySpotAndButton() {
-            // Vymaž medový bod
-            if (currentHoneySpot && currentHoneySpot.parentNode) {
-                console.log(`🍯 Clearing current honey spot`);
-                currentHoneySpot.parentNode.removeChild(currentHoneySpot);
-            }
-            currentHoneySpot = null;
-            currentHoneySpotGPS = null;
+        function showRandomQuiz() {
+            const quizData = getRandomUncompletedQuiz();
+            if (!quizData) return;
             
-            // Skryj tlačítko
-            hideHoneyButton();
+            const { quiz, index } = quizData;
+            currentQuiz = { ...quiz, index };
+            
+            // Nastav další kvíz
+            nextQuizDistance = totalDistanceWalked + QUIZ_TRIGGER_DISTANCE + (Math.random() * QUIZ_VARIANCE * 2 - QUIZ_VARIANCE);
+            
+            // Zobraz kvíz
+            document.getElementById('quizQuestion').textContent = quiz.question;
+            
+            const answersContainer = document.getElementById('quizAnswers');
+            answersContainer.innerHTML = '';
+            
+            quiz.answers.forEach((answer, answerIndex) => {
+                const button = document.createElement('div');
+                button.className = 'quiz-answer';
+                button.textContent = answer;
+                button.onclick = () => selectAnswer(answerIndex);
+                answersContainer.appendChild(button);
+            });
+            
+            // Aktualizuj progress
+            const completed = getCompletedQuizzes();
+            document.getElementById('quizProgress').textContent = 
+                `Kvíz ${completed.length + 1}/${BEE_QUIZZES.length} • Ujito: ${totalDistanceWalked.toFixed(0)}m`;
+            
+            document.getElementById('beeQuiz').style.display = 'block';
+            console.log(`🐝 Showing quiz ${index}: ${quiz.question}`);
         }
         
-        function calculateBearing(lat1, lng1, lat2, lng2) {
-            const φ1 = lat1 * Math.PI / 180;
+        function selectAnswer(selectedIndex) {
+            if (!currentQuiz) return;
+            
+            const answers = document.querySelectorAll('.quiz-answer');
+            const explanationDiv = document.getElementById('quizExplanation');
+            
+            // Označ odpovědi
+            answers.forEach((answer, index) => {
+                if (index === currentQuiz.correct) {
+                    answer.classList.add('correct');
+                } else if (index === selectedIndex && index !== currentQuiz.correct) {
+                    answer.classList.add('incorrect');
+                }
+                answer.onclick = null; // Deaktivuj klikání
+            });
+            
+            // Zobraz vysvětlení
+            explanationDiv.textContent = currentQuiz.explanation;
+            explanationDiv.style.display = 'block';
+            
+            // Označ kvíz jako dokončený
+            markQuizCompleted(currentQuiz.index);
+            
+            console.log(`🐝 Answer selected: ${selectedIndex}, correct: ${currentQuiz.correct}`);
+        }
+        
+        function closeQuiz() {
+            document.getElementById('beeQuiz').style.display = 'none';
+            document.getElementById('quizExplanation').style.display = 'none';
+            currentQuiz = null;
+        } 180;
             const φ2 = lat2 * Math.PI / 180;
             const Δλ = (lng2 - lng1) * Math.PI / 180;
             
@@ -766,7 +931,7 @@
                         };
                         checkProximityToMarkers();
                         updateNavigation();
-                        updateInteractiveHoneyIndicator(); // NOVÉ: Použij interaktivní medovou indikaci
+                        trackWalkingDistance(); // NOVÉ: Sleduj ujitou vzdálenost pro kvízy
                     },
                     (error) => {
                         console.error("Watch position error:", error);
@@ -774,7 +939,7 @@
                     {
                         enableHighAccuracy: true,
                         timeout: 8000,
-                        maximumAge: 5000 // ZKRÁCENO: Ještě častější aktualizace pozice pro lepší detekci
+                        maximumAge: 5000 // Častější aktualizace pro přesné sledování vzdálenosti
                     }
                 );
             }
@@ -949,6 +1114,7 @@
             }
             
             const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
+            const completed = getCompletedQuizzes();
             
             if (targetMarker) {
                 const distance = Math.round(targetMarker.distance);
@@ -957,11 +1123,10 @@
                 let indicators = '';
                 if (distance <= AUDIO_THRESHOLD) indicators += ' 🎵';
                 if (distance <= AR_VISIBILITY_THRESHOLD) indicators += ' 👁️';
-                if (currentHoneySpot) indicators += ' 🍯'; // OPRAVENÉ: Zobraz ikonu pouze když existuje jeden medový bod
                 
-                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${indicators}<br><strong>${distance}m</strong><br><small>GPS: ±${Math.round(userPosition.accuracy)}m</small>`;
+                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${indicators}<br><strong>${distance}m</strong><br><small>📚 Kvízy: ${completed.length}/${BEE_QUIZZES.length} • Ujito: ${totalDistanceWalked.toFixed(0)}m</small>`;
             } else {
-                distanceInfo.innerHTML = `🐝 GPS aktivní<br><small>Lat: ${userPosition.lat.toFixed(6)}<br>Lng: ${userPosition.lng.toFixed(6)}</small>`;
+                distanceInfo.innerHTML = `🐝 GPS aktivní<br><small>📚 Kvízy: ${completed.length}/${BEE_QUIZZES.length} • Ujito: ${totalDistanceWalked.toFixed(0)}m</small>`;
             }
         }
 
@@ -1004,18 +1169,13 @@
             selectedTargetId = targetId;
             document.getElementById('clearSelection').style.display = 'block';
             
-            // Vynuluj medové indikace při změně cíle
-            clearHoneySpotAndButton();
-            
             updateNavigation();
-            updateInteractiveHoneyIndicator(); // NOVÉ: Aktualizuj interaktivní medovou indikaci pro nový cíl
             document.getElementById('navContent').classList.remove('open');
         }
 
         function clearSelection() {
             selectedTargetId = null;
             document.getElementById('clearSelection').style.display = 'none';
-            clearHoneySpotAndButton(); // NOVÉ: Vyčisti medový bod a tlačítko
             updateNavigation();
         }
 
@@ -1111,7 +1271,7 @@
                 '.distance-info',
                 '.audio-info',
                 '.rotation-hint',
-                '.honey-button' // NOVÉ: Přidáno tlačítko medové stopy
+                '.bee-quiz' // NOVÉ: Přidáno včelí kvíz mezi UI elementy
             ];
             
             for (let selector of uiSelectors) {
@@ -1141,7 +1301,7 @@
 
         document.getElementById('clearSelection').addEventListener('click', clearSelection);
         document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
-        document.getElementById('honeyButton').addEventListener('click', resetHoneySpot); // NOVÉ: Event listener pro tlačítko medové stopy
+        document.getElementById('quizClose').addEventListener('click', closeQuiz); // NOVÉ: Event listener pro zavření kvízu
 
         document.addEventListener('click', (e) => {
             const navPanel = document.querySelector('.navigation');
@@ -1167,12 +1327,12 @@
                 getCurrentPosition();
                 watchPosition();
                 
-                // NOVÉ: Spusť interaktivní aktualizaci medového bodu
-                setInterval(updateInteractiveHoneyIndicator, 2000); // Aktualizace každé 2 sekundy
+                // NOVÉ: Spusť sledování chůze pro kvízy
+                setInterval(trackWalkingDistance, 2000); // Kontrola vzdálenosti každé 2 sekundy
             });
         });
 
-        console.log("🐝 Bee AR script with interactive honey indicator and gamification loaded successfully!");
+        console.log("🐝 Bee AR script with interactive bee quizzes and gamification loaded successfully!");
     </script>
 </body>
 </html>
