@@ -252,7 +252,7 @@
         <!-- AR objekty na GPS souřadnicích -->
         <!-- Včela 1 - Dělnice -->
         <a-entity 
-            gps-entity-place="latitude: 49.009326; longitude: 17.127042" 
+            gps-entity-place="latitude: 49.207759; longitude: 16.690971" 
             data-marker-id="vcela_1"
             data-audio-id="audio1"
             visible="false">
@@ -268,7 +268,7 @@
 
         <!-- Včela 2 - Trubec -->
         <a-entity 
-            gps-entity-place="latitude: 49.007559; longitude: 17.125258" 
+            gps-entity-place="latitude: 49.208602; longitude: 16.686679" 
             data-marker-id="vcela_2"
             data-audio-id="audio2"
             visible="false">
@@ -284,7 +284,7 @@
 
         <!-- Včela 3 - Královna -->
         <a-entity 
-            gps-entity-place="latitude: 49.007463; longitude: 17.123234" 
+            gps-entity-place="latitude: 49.210291; longitude: 16.686112" 
             data-marker-id="vcela_3"
             data-audio-id="audio3"
             visible="false">
@@ -355,24 +355,24 @@
         const markers = [
             { 
                 id: "vcela_1", 
-                lat: 49.009326, 
-                lng: 17.127042,
+                lat: 49.207759, 
+                lng: 16.690971,
                 name: "🐝 Dělnice",
                 description: "Pracovitá včela dělnice - základ úlu",
                 audioId: "audio1"
             },
             { 
                 id: "vcela_2", 
-                lat: 49.007559, 
-                lng: 17.125258,
+                lat: 49.208602, 
+                lng: 16.686679,
                 name: "🐝 Trubec", 
                 description: "Samec včely - zodpovědný za rozmnožování",
                 audioId: "audio2"
             },
             { 
                 id: "vcela_3", 
-                lat: 49.007463,
-                lng: 17.123234,
+                lat: 49.210291,
+                lng: 16.686112,
                 name: "👑 Královna",
                 description: "Matka úlu - vládkyně včelího státu",
                 audioId: "audio3"
@@ -405,55 +405,61 @@
             }
             
             const distance = targetMarker.distance;
+            console.log(`🍯 Checking honey indicator for distance: ${distance.toFixed(1)}m`);
             
             // Kontrola, zda je vzdálenost v rozsahu pro zobrazení medových skvrn
             if (distance < HONEY_MIN_DISTANCE || distance > HONEY_MAX_DISTANCE) {
+                console.log(`🍯 Distance ${distance.toFixed(1)}m is outside honey range (${HONEY_MIN_DISTANCE}-${HONEY_MAX_DISTANCE}m)`);
                 clearCurrentHoneySpot();
                 return;
             }
             
             // Vypočítej, kterou "medovou zastávku" by měl uživatel vidět
-            const honeyStepNumber = Math.floor(distance / HONEY_STEP_DISTANCE);
-            const targetHoneyDistance = honeyStepNumber * HONEY_STEP_DISTANCE;
+            // Zaokrouhlíme nahoru na nejbližší násobek HONEY_STEP_DISTANCE
+            const targetHoneyDistance = Math.ceil(distance / HONEY_STEP_DISTANCE) * HONEY_STEP_DISTANCE;
+            
+            console.log(`🍯 Target honey distance: ${targetHoneyDistance}m, last honey distance: ${lastHoneyDistance}m`);
             
             // Zobraz novou skvrnu pouze pokud se změnila vzdálenost o dostatečný krok
-            if (targetHoneyDistance !== lastHoneyDistance) {
+            if (targetHoneyDistance !== lastHoneyDistance && targetHoneyDistance >= HONEY_MIN_DISTANCE) {
+                console.log(`🍯 Creating new honey spot at ${targetHoneyDistance}m`);
                 clearCurrentHoneySpot();
                 
-                if (targetHoneyDistance > 0 && targetHoneyDistance <= distance) {
-                    // Vypočítej pozici skvrny směrem k cíli
-                    const bearingToTarget = calculateBearing(
-                        userPosition.lat, userPosition.lng,
-                        targetMarker.lat, targetMarker.lng
-                    );
-                    
-                    const honeySpotGPS = calculateIntermediatePoint(
-                        userPosition.lat, userPosition.lng,
-                        bearingToTarget, targetHoneyDistance
-                    );
-                    
-                    const arPosition = gpsToARPosition(honeySpotGPS.lat, honeySpotGPS.lng);
-                    
-                    // Vytvoř novou medovou skvrnu
-                    currentHoneySpot = createSimpleHoneySpot(`${arPosition.x} ${arPosition.y} ${arPosition.z}`);
-                    currentHoneySpot.setAttribute('id', 'current-honey-spot');
-                    
-                    const container = document.getElementById('honeyIndicators');
+                // Vypočítej pozici skvrny směrem k cíli
+                const bearingToTarget = calculateBearing(
+                    userPosition.lat, userPosition.lng,
+                    targetMarker.lat, targetMarker.lng
+                );
+                
+                const honeySpotGPS = calculateIntermediatePoint(
+                    userPosition.lat, userPosition.lng,
+                    bearingToTarget, targetHoneyDistance
+                );
+                
+                const arPosition = gpsToARPosition(honeySpotGPS.lat, honeySpotGPS.lng);
+                
+                // Vytvoř novou medovou skvrnu
+                currentHoneySpot = createSimpleHoneySpot(`${arPosition.x} ${arPosition.y} ${arPosition.z}`);
+                currentHoneySpot.setAttribute('id', 'current-honey-spot');
+                
+                const container = document.getElementById('honeyIndicators');
+                if (container) {
                     container.appendChild(currentHoneySpot);
-                    
                     lastHoneyDistance = targetHoneyDistance;
-                    
                     console.log(`🍯 Honey spot created at ${targetHoneyDistance}m from user, total distance to target: ${distance.toFixed(1)}m`);
+                } else {
+                    console.error("🍯 Honey indicators container not found!");
                 }
             }
         }
         
         function clearCurrentHoneySpot() {
             if (currentHoneySpot && currentHoneySpot.parentNode) {
+                console.log(`🍯 Clearing honey spot at distance: ${lastHoneyDistance}m`);
                 currentHoneySpot.parentNode.removeChild(currentHoneySpot);
-                currentHoneySpot = null;
-                lastHoneyDistance = -1;
             }
+            currentHoneySpot = null;
+            lastHoneyDistance = -1;
         }
         
         function calculateBearing(lat1, lng1, lat2, lng2) {
@@ -495,49 +501,8 @@
             };
         }
         
-        // === DUMMY OBJEKT PRO TESTOVÁNÍ ===
-        function createDummyTarget() {
-            // Vytvoř dummy včelu 50m severně od uživatele pro testování
-            if (!userPosition) return;
-            
-            const dummyLat = userPosition.lat + (50 / 111320); // 50m severně
-            const dummyLng = userPosition.lng;
-            
-            // Přidej dummy marker do seznamu
-            const dummyMarker = {
-                id: "dummy_bee",
-                lat: dummyLat,
-                lng: dummyLng,
-                name: "🧪 Test Včela",
-                description: "Dummy objekt pro testování",
-                audioId: "audio1" // Použije stejné audio jako dělnice
-            };
-            
-            // Přidej do markerů pokud tam ještě není
-            if (!markers.find(m => m.id === "dummy_bee")) {
-                markers.push(dummyMarker);
-                
-                // Vytvoř AR entitu pro dummy
-                const scene = document.querySelector('a-scene');
-                const dummyEntity = document.createElement('a-entity');
-                dummyEntity.setAttribute('gps-entity-place', `latitude: ${dummyLat}; longitude: ${dummyLng}`);
-                dummyEntity.setAttribute('data-marker-id', 'dummy_bee');
-                dummyEntity.setAttribute('data-audio-id', 'audio1');
-                dummyEntity.setAttribute('visible', 'false');
-                
-                // Jednoduchý box místo GLB modelu
-                const dummyModel = document.createElement('a-box');
-                dummyModel.setAttribute('position', '0 0 0');
-                dummyModel.setAttribute('scale', '2 2 2');
-                dummyModel.setAttribute('color', '#FFD700');
-                dummyModel.setAttribute('animation', 'property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear;');
-                
-                dummyEntity.appendChild(dummyModel);
-                scene.appendChild(dummyEntity);
-                
-                console.log("🧪 Dummy bee created 50m north of user position");
-            }
-        }
+        // === DUMMY OBJEKT ODSTRANĚN ===
+        // Dummy objekt byl odstraněn podle požadavku uživatele
 
         // === GAMIFIKAČNÍ FUNKCE ===
         
@@ -951,6 +916,10 @@
         function selectTarget(targetId) {
             selectedTargetId = targetId;
             document.getElementById('clearSelection').style.display = 'block';
+            
+            // Vynuluj medové indikace při změně cíle
+            clearCurrentHoneySpot();
+            
             updateNavigation();
             updateSimpleHoneyIndicator(); // NOVÉ: Aktualizuj medovou indikaci pro nový cíl
             document.getElementById('navContent').classList.remove('open');
@@ -1108,11 +1077,6 @@
                 setupModelRotation();
                 getCurrentPosition();
                 watchPosition();
-                
-                // NOVÉ: Vytvoř dummy objekt pro testování (odkomentuj podle potřeby)
-                // setTimeout(() => {
-                //     createDummyTarget();
-                // }, 3000);
                 
                 // NOVÉ: Spusť pravidelnou aktualizaci medových indikací
                 setInterval(updateSimpleHoneyIndicator, 2000);
