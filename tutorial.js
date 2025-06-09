@@ -245,53 +245,64 @@ class ARTutorial {
     }
     
     showStep(stepNumber) {
-        console.log(`🎓 Showing step ${stepNumber}/${this.totalSteps}`);
-        
-        if (stepNumber < 1 || stepNumber > this.totalSteps) {
-            console.error(`❌ Invalid step number: ${stepNumber}`);
-            return;
+    console.log(`🎓 Showing step ${stepNumber}/${this.totalSteps}`);
+    
+    if (stepNumber < 1 || stepNumber > this.totalSteps) {
+        console.error(`❌ Invalid step number: ${stepNumber}`);
+        return;
+    }
+    
+    // OPRAVENO: Skryj všechny kroky důkladně
+    for (let i = 1; i <= this.totalSteps; i++) {
+        const step = document.getElementById(`tutorialStep${i}`);
+        if (step) {
+            step.style.display = 'none';
+            step.style.visibility = 'hidden';
+            console.log(`🔄 Hiding step ${i}`);
         }
         
-        // Hide all steps
-        for (let i = 1; i <= this.totalSteps; i++) {
-            const step = document.getElementById(`tutorialStep${i}`);
-            if (step) {
-                step.style.display = 'none';
-            }
-            
-            // Update progress dots
-            const dot = document.getElementById(`tutorialDot${i}`);
-            if (dot) {
-                dot.classList.remove('active', 'completed');
-                if (i < stepNumber) {
-                    dot.classList.add('completed');
-                } else if (i === stepNumber) {
-                    dot.classList.add('active');
-                }
-            }
-        }
-        
-        // Show current step
-        const currentStepElement = document.getElementById(`tutorialStep${stepNumber}`);
-        if (currentStepElement) {
-            currentStepElement.style.display = 'block';
-            console.log(`✅ Step ${stepNumber} displayed`);
-        } else {
-            console.error(`❌ Step element not found: tutorialStep${stepNumber}`);
-        }
-        
-        this.currentStep = stepNumber;
-        
-        // Call step callback if provided
-        const stepConfig = this.config.steps[stepNumber - 1];
-        if (stepConfig && stepConfig.onShow) {
-            try {
-                stepConfig.onShow();
-            } catch (error) {
-                console.error("❌ Step onShow callback failed:", error);
+        // Update progress dots
+        const dot = document.getElementById(`tutorialDot${i}`);
+        if (dot) {
+            dot.classList.remove('active', 'completed');
+            if (i < stepNumber) {
+                dot.classList.add('completed');
+            } else if (i === stepNumber) {
+                dot.classList.add('active');
             }
         }
     }
+    
+    // OPRAVENO: Zobraz pouze aktuální krok
+    const currentStepElement = document.getElementById(`tutorialStep${stepNumber}`);
+    if (currentStepElement) {
+        currentStepElement.style.display = 'block';
+        currentStepElement.style.visibility = 'visible';
+        console.log(`✅ Showing step ${stepNumber} - element found and displayed`);
+        
+        // Dodatečná kontrola pro centrované kroky
+        const centerBubble = currentStepElement.querySelector('.tutorial-bubble-center');
+        if (centerBubble) {
+            console.log(`🎯 Center bubble found for step ${stepNumber}, ensuring visibility`);
+            centerBubble.style.display = 'block';
+            centerBubble.style.visibility = 'visible';
+        }
+    } else {
+        console.error(`❌ Step element not found: tutorialStep${stepNumber}`);
+    }
+    
+    this.currentStep = stepNumber;
+    
+    // Call step callback if provided
+    const stepConfig = this.config.steps[stepNumber - 1];
+    if (stepConfig && stepConfig.onShow) {
+        try {
+            stepConfig.onShow();
+        } catch (error) {
+            console.error("❌ Step onShow callback failed:", error);
+        }
+    }
+}
     
     next() {
         console.log(`🎓 Next button clicked - current step: ${this.currentStep}/${this.totalSteps}`);
