@@ -16,7 +16,7 @@
     <script src="/game/bohuslavice_stezka_config.js"></script>
     <link rel="stylesheet" href="/css/tutorial.css">
     <script src="/tutorial.js"></script>
-    <script src="/assets/stezka_bohuslavice/tutorial/config_vcela.js"></script>
+    
     <style>
         body {
             margin: 0;
@@ -1302,7 +1302,7 @@
                 setupModelRotation();
                 getCurrentPosition();
                 watchPosition();
-                
+                startTutorialWhenReady();
                 // NOVÉ: Pravidelná kontrola kvízů
                 setInterval(() => {
                     checkDistanceForQuiz();
@@ -1311,6 +1311,62 @@
         });
 
         console.log("🐝 Bee AR script with quiz system and gamification loaded successfully!");
+        // === TUTORIAL INICIALIZACE ===
+let tutorialInitialized = false;
+
+async function initializeTutorial() {
+    if (tutorialInitialized) return;
+    
+    try {
+        console.log("🎓 Loading tutorial config...");
+        
+        // Dynamicky načti config
+        const script = document.createElement('script');
+        script.src = '/assets/stezka_bohuslavice/tutorial/config_vcela.js';
+        
+        await new Promise((resolve, reject) => {
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+        
+        // Počkej chvilku na vykonání
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        console.log("✅ Tutorial config loaded, creating instance...");
+        
+        // Vytvoř tutorial instanci
+        if (typeof ARTutorial !== 'undefined' && typeof tutorialConfig !== 'undefined') {
+            window.arTutorial = ARTutorial.create(tutorialConfig);
+            tutorialInitialized = true;
+            console.log("✅ Tutorial initialized successfully");
+            return true;
+        } else {
+            console.error("❌ Tutorial dependencies not loaded");
+            return false;
+        }
+        
+    } catch (error) {
+        console.error("❌ Tutorial initialization failed:", error);
+        return false;
+    }
+}
+
+function startTutorialWhenReady() {
+    // Spusť tutorial až když je všechno připraveno
+    setTimeout(async () => {
+        console.log("🎓 Starting tutorial initialization...");
+        
+        const success = await initializeTutorial();
+        if (success && window.arTutorial) {
+            // Malé zpoždění pro plynulý přechod
+            setTimeout(() => {
+                console.log("🎓 Starting tutorial...");
+                window.arTutorial.start();
+            }, 1000);
+        }
+    }, 3000); // 3 sekundy po načtení A-Frame
+}
     </script>
 </body>
 </html>
