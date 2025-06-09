@@ -1400,6 +1400,31 @@ function debugSteps() {
 setTimeout(() => {
     debugSteps();
 }, 5000);
+
+        window.manualNext = function() {
+    if (window.arTutorial) {
+        console.log("🔧 Manual next step");
+        window.arTutorial.next();
+        setTimeout(debugSteps, 100);
+    }
+};
+
+window.manualShowStep = function(stepNum) {
+    if (window.arTutorial) {
+        console.log(`🔧 Manual show step ${stepNum}`);
+        window.arTutorial.showStep(stepNum);
+        setTimeout(debugSteps, 100);
+    }
+};
+
+window.resetAndStart = function() {
+    if (window.arTutorial) {
+        console.log("🔧 Reset and restart tutorial");
+        window.arTutorial.reset();
+        window.arTutorial.start();
+        setTimeout(debugSteps, 100);
+    }
+};
     </script>
 </body>
 </html>
