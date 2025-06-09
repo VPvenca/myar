@@ -8,25 +8,22 @@
     <!-- A-Frame a AR.js - funkční verze -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
+   
 
-    <!-- Gamifikační skripty - OPRAVENÉ POŘADÍ -->
+     <!-- Gamifikační skripty - OPRAVENÉ POŘADÍ -->
     <script src="/gamification-config.js"></script>
     <script src="/gamification.js"></script>
     <script src="/game/bohuslavice_stezka_config.js"></script>
-    
-    <!-- OPRAVENÉ POŘADÍ: Tutorial skripty -->
     <link rel="stylesheet" href="/css/tutorial.css">
     <script src="/tutorial.js"></script>
-    <!-- Konfigurační soubor se načte později v kódu -->
-    
+    <script src="/assets/stezka_bohuslavice/tutorial/config_vcela.js"></script>
     <style>
         body {
             margin: 0;
             font-family: Arial, sans-serif;
         }
         
-       
-        
+        /* UI elementy - zachováno z původního kódu */
         .ui-overlay {
             position: fixed;
             z-index: 1000;
@@ -276,55 +273,9 @@
             from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
             to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
-
-        /* NOVÉ: Indikátor načítání */
-        .loading-indicator {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 193, 7, 0.9);
-            color: black;
-            padding: 20px 30px;
-            border-radius: 15px;
-            font-size: 18px;
-            font-weight: bold;
-            z-index: 10002;
-            text-align: center;
-            border: 3px solid #FFD700;
-            display: block;
-        }
-
-        .loading-step {
-            margin: 8px 0;
-            font-size: 14px;
-        }
-
-        .loading-step.completed {
-            color: #28a745;
-        }
-
-        .loading-step.current {
-            color: #007bff;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
     </style>
 </head>
 <body>
-    <!-- NOVÉ: Indikátor načítání -->
-    <div class="loading-indicator" id="loadingIndicator">
-        <div>🐝 Příprava včelí stezky</div>
-        <div class="loading-step current" id="step1">📷 Inicializace kamery...</div>
-        <div class="loading-step" id="step2">📍 Získávání GPS pozice...</div>
-        <div class="loading-step" id="step3">🎮 Načítání gamifikace...</div>
-        <div class="loading-step" id="step4">✨ Příprava AR objektů...</div>
-    </div>
-
     <!-- UI Elementy -->
     <a href="/assets/stezka_bohuslavice/bohuslavice.html" class="back-button ui-element">
         🐝 Zpět do Menu
@@ -458,49 +409,10 @@
     </a-scene>
 
     <script>
-        // === NAČÍTÁNÍ A INICIALIZACE ===
-        
-        let loadingSteps = {
-            camera: false,
-            gps: false,
-            gamification: false,
-            ar: false
-        };
-        
-        function updateLoadingStep(step, completed = false) {
-            const stepElement = document.getElementById(`step${step}`);
-            if (stepElement) {
-                stepElement.classList.remove('current');
-                if (completed) {
-                    stepElement.classList.add('completed');
-                    stepElement.innerHTML = stepElement.innerHTML.replace('...', ' ✅');
-                }
-            }
-            
-            // Přejdi na další krok
-            const nextStep = step + 1;
-            const nextStepElement = document.getElementById(`step${nextStep}`);
-            if (nextStepElement && !completed) {
-                nextStepElement.classList.add('current');
-            }
-        }
-        
-        function checkAllLoaded() {
-            const allLoaded = Object.values(loadingSteps).every(step => step === true);
-            if (allLoaded) {
-                console.log("🎉 All systems ready - hiding loading indicator");
-                setTimeout(() => {
-                    document.getElementById('loadingIndicator').style.display = 'none';
-                    // NYNÍ teprve spustíme tutoriál
-                    initTutorialWhenReady();
-                }, 1000);
-            }
-        }
-
         // === GAMIFIKAČNÍ PROMĚNNÉ ===
         let gamificationInitialized = false;
         let currentExpositionId = 'stezka_bohuslavice';
-        let currentSceneId = '/assets/stezka_bohuslavice/vcela.html';
+        let currentSceneId = '/assets/stezka_bohuslavice/vcela.html';  // OPRAVENO: Správné ID scény
         
         // GPS a navigační proměnné
         let userPosition = null;
@@ -513,7 +425,7 @@
         let audioIsPaused = false;
         
         // NOVÉ: Kvízový systém
-        const QUIZ_DISTANCE_STEP = 50;
+        const QUIZ_DISTANCE_STEP = 50; // každých 50m
         let startPosition = null;
         let lastQuizMilestone = -1;
         let currentQuiz = null;
@@ -573,11 +485,112 @@
                 answers: ["A) 1 lžičku", "B) 1/12 lžičky", "C) 3 lžičky"],
                 correct: 1,
                 explanation: "Včela za celý svůj život vyprodukuje pouze 1/12 lžičky medu. Proto je med tak cenný!"
+            },
+            {
+                question: "⚡ Kolikrát za sekundu rozhýbe včela křídla?",
+                answers: ["A) 50krát", "B) 230krát", "C) 400krát"],
+                correct: 1,
+                explanation: "Včela rozhýbe křídla až 230krát za sekundu! Proto vydává charakteristické bzučení."
+            },
+            {
+                question: "🌈 Kterou barvu včely nevidí?",
+                answers: ["A) Červenou", "B) Modrou", "C) Žlutou"],
+                correct: 0,
+                explanation: "Včely nevidí červenou barvu, místo ní vidí ultrafialové záření. Červené květy pro ně vypadají černě."
+            },
+            {
+                question: "🏃‍♀️ Jak rychle dokáže létat včela?",
+                answers: ["A) 15 km/h", "B) 25 km/h", "C) 35 km/h"],
+                correct: 1,
+                explanation: "Včela dokáže létat rychlostí až 25 km/h! To jí umožňuje efektivně prozkoumávat velká území."
+            },
+            {
+                question: "🏠 Z kolika šestihranných buněk se skládá plást?",
+                answers: ["A) 1000 buněk", "B) 3000 buněk", "C) 7000 buněk"],
+                correct: 2,
+                explanation: "Jeden plást obsahuje až 7000 šestihranných buněk! Šestihrany jsou nejefektivnější tvar pro skladování."
+            },
+            {
+                question: "🌍 Jak daleko může včela létat od úlu?",
+                answers: ["A) 2 km", "B) 5 km", "C) 8 km"],
+                correct: 2,
+                explanation: "Včela může létat až 8 km od úlu! Obvykle však zůstává v okruhu 2-3 km, kde najde dostatek potravy."
+            },
+            {
+                question: "🕐 Jak dlouho žije včela dělnice v létě?",
+                answers: ["A) 2 týdny", "B) 6 týdnů", "C) 3 měsíce"],
+                correct: 1,
+                explanation: "Včela dělnice žije v létě pouze 6 týdnů. V zimě žijí déle - až 6 měsíců kvůli menší aktivitě."
+            },
+            {
+                question: "💃 Jak včely komunikují směr ke zdroji potravy?",
+                answers: ["A) Bzučením", "B) Tancem", "C) Vůní"],
+                correct: 1,
+                explanation: "Včely komunikují tancem! Kruhový tanec znamená blízký zdroj, osmičkový tanec ukazuje směr a vzdálenost."
+            },
+            {
+                question: "🌡️ Jakou teplotu udržují včely v úlu?",
+                answers: ["A) 25°C", "B) 35°C", "C) 45°C"],
+                correct: 1,
+                explanation: "Včely udržují v úlu konstantní teplotu 35°C! To je ideální teplota pro vývoj larev a zpracování medu."
+            },
+            {
+                question: "🧠 Kolik očí má včela?",
+                answers: ["A) 2 oči", "B) 5 očí", "C) 8 očí"],
+                correct: 1,
+                explanation: "Včela má 5 očí - 2 složené oči a 3 jednoduché oči na vrcholu hlavy! Složené oči mají až 7000 facetek."
+            },
+            {
+                question: "🔢 Kolik včel žije v silném úlu?",
+                answers: ["A) 20 000", "B) 60 000", "C) 100 000"],
+                correct: 1,
+                explanation: "V silném úlu může žít až 60 000 včel! V zimě jich zůstává jen 10-20 000."
+            },
+            {
+                question: "🌸 Kolik květů potřebuje včela pro 1 kg medu?",
+                answers: ["A) 500 000", "B) 2 miliony", "C) 4 miliony"],
+                correct: 2,
+                explanation: "Pro 1 kg medu musí včely navštívit až 4 miliony květů! A nalétat vzdálenost 3x kolem Země."
+            },
+            {
+                question: "👃 Jak daleko cítí včela aroma květů?",
+                answers: ["A) 2 m", "B) 50 m", "C) 2 km"],
+                correct: 2,
+                explanation: "Včela dokáže cítit aroma květů až na vzdálenost 2 km! Má mimořádně vyvinutý čich."
+            },
+            {
+                question: "🏗️ Z čeho včely stavějí plásty?",
+                answers: ["A) Propolisu", "B) Vosku", "C) Medu"],
+                correct: 1,
+                explanation: "Plásty stavějí z vosku, který si samy vyrábějí ve speciálních žlázách na břiše!"
+            },
+            {
+                question: "💪 Kolikrát své váhy unese včela?",
+                answers: ["A) Polovinu", "B) Stejnou váhu", "C) Dvojnásobek"],
+                correct: 2,
+                explanation: "Včela dokáže unést až dvojnásobek své vlastní váhy! To odpovídá 70 mg nektaru nebo pylu."
+            },
+            {
+                question: "🛡️ Co je propolis?",
+                answers: ["A) Včelí lepidlo", "B) Druh medu", "C) Včelí jed"],
+                correct: 0,
+                explanation: "Propolis je přírodní 'lepidlo' které včely vyrábějí ze stromových pryskyřic. Má antibiotické účinky!"
+            },
+            {
+                question: "⏰ V kolik hodin jsou včely nejaktivnější?",
+                answers: ["A) 6-8 hodin", "B) 10-14 hodin", "C) 16-18 hodin"],
+                correct: 1,
+                explanation: "Včely jsou nejaktivnější mezi 10-14 hodinou, kdy je nejvíce květů otevřených a slunce nejsilnější."
+            },
+            {
+                question: "🌙 Co dělají včely v noci?",
+                answers: ["A) Spí", "B) Zpracovávají med", "C) Hlídají úl"],
+                correct: 1,
+                explanation: "Včely v noci nezahálí! Zpracovávají nektar na med, větrají úl a mladé včely pokračují ve stavbě plástů."
             }
-            // ... zbytek kvízů stejný jako v původním kódu
         ];
         
-        // Funkce kvízového systému - stejné jako v původním kódu
+        // Systém pro správu kvízů
         function getCompletedQuizzes() {
             const completed = localStorage.getItem('beeQuizzesCompleted');
             return completed ? JSON.parse(completed) : [];
@@ -590,6 +603,7 @@
                 localStorage.setItem('beeQuizzesCompleted', JSON.stringify(completed));
                 console.log(`🐝 Quiz ${quizIndex} completed. Total: ${completed.length}/${BEE_QUIZZES.length}`);
                 
+                // Pokud jsou všechny kvízy dokončené, aktivuj gamifikační odznak
                 if (completed.length === BEE_QUIZZES.length) {
                     console.log('🏆 All bee quizzes completed! Activating achievement...');
                     if (typeof recordMarkerActivation === 'function') {
@@ -617,13 +631,18 @@
                 return;
             }
             
+            // Vypočítej vzdálenost od startu
             const distanceFromStart = calculateDistance(
                 startPosition.lat, startPosition.lng,
                 userPosition.lat, userPosition.lng
             );
             
+            // Zjisti, na kterém 50m milníku jsme
             const currentMilestone = Math.floor(distanceFromStart / QUIZ_DISTANCE_STEP);
             
+            console.log(`🎯 Distance from start: ${distanceFromStart.toFixed(1)}m, milestone: ${currentMilestone}, last quiz milestone: ${lastQuizMilestone}`);
+            
+            // Pokud jsme na novém milníku a ještě jsme tu kvíz nezobrazili
             if (currentMilestone > lastQuizMilestone && currentMilestone > 0) {
                 console.log(`🎯 New milestone reached: ${currentMilestone * QUIZ_DISTANCE_STEP}m - showing quiz!`);
                 lastQuizMilestone = currentMilestone;
@@ -641,6 +660,7 @@
             const { quiz, index } = quizData;
             currentQuiz = { ...quiz, index };
             
+            // Zobraz kvíz
             document.getElementById('quizQuestion').textContent = quiz.question;
             
             const answersContainer = document.getElementById('quizAnswers');
@@ -654,6 +674,7 @@
                 answersContainer.appendChild(button);
             });
             
+            // Aktualizuj progress
             const completed = getCompletedQuizzes();
             const distanceFromStart = startPosition ? calculateDistance(
                 startPosition.lat, startPosition.lng,
@@ -673,18 +694,21 @@
             const answers = document.querySelectorAll('.quiz-answer');
             const explanationDiv = document.getElementById('quizExplanation');
             
+            // Označ odpovědi
             answers.forEach((answer, index) => {
                 if (index === currentQuiz.correct) {
                     answer.classList.add('correct');
                 } else if (index === selectedIndex && index !== currentQuiz.correct) {
                     answer.classList.add('incorrect');
                 }
-                answer.onclick = null;
+                answer.onclick = null; // Deaktivuj klikání
             });
             
+            // Zobraz vysvětlení
             explanationDiv.textContent = currentQuiz.explanation;
             explanationDiv.style.display = 'block';
             
+            // Označ kvíz jako dokončený
             markQuizCompleted(currentQuiz.index);
             
             console.log(`🐝 Answer selected: ${selectedIndex}, correct: ${currentQuiz.correct}`);
@@ -698,27 +722,33 @@
 
         // === GAMIFIKAČNÍ FUNKCE ===
         
+        // OPRAVENÁ inicializace gamifikace - TICHÁ VERZE
         function initializeGameification() {
             console.log("🎮 Initializing gamification for včelařská stezka...");
             
+            // Ujisti se, že jsou načtené všechny konfigurace
             if (typeof SCENE_CONFIG === 'undefined' || typeof ACHIEVEMENTS_CONFIG === 'undefined') {
                 console.log("⏳ Waiting for gamification config...");
                 setTimeout(initializeGameification, 500);
                 return;
             }
             
+            // Debug výpis konfigurací (pouze do konzole)
             console.log("📊 Scene config:", SCENE_CONFIG);
             console.log("🏆 Achievements config:", ACHIEVEMENTS_CONFIG);
             console.log("🏛️ Exposition registry:", EXPOSITION_REGISTRY);
             
+            // Zkontroluj, že je expozice registrovaná
             if (typeof EXPOSITION_REGISTRY !== 'undefined' && EXPOSITION_REGISTRY['stezka_bohuslavice']) {
-                console.log("✅ Včelařská stezka exposition is registered");
+            console.log("✅ Včelařská stezka exposition is registered");
             } else {
-                console.warn("⚠️ Včelařská stezka exposition not found in registry");
-                setTimeout(initializeGameification, 1000);
-                return;
-            }
+             console.warn("⚠️ Včelařská stezka exposition not found in registry");
+            // Zkus inicializovat znovu za chvíli
+            setTimeout(initializeGameification, 1000);
+            return;
+}
             
+            // Inicializuj time tracking
             if (typeof initializeTimeTracking === 'function') {
                 initializeTimeTracking(currentExpositionId, currentSceneId);
                 console.log("⏱️ Time tracking initialized");
@@ -727,12 +757,10 @@
             }
             
             gamificationInitialized = true;
-            loadingSteps.gamification = true;
-            updateLoadingStep(3, true);
             console.log("✅ Gamification initialized successfully for včelařská stezka");
-            checkAllLoaded();
         }
 
+        // OPRAVENÁ funkce pro záznam aktivace včelích markerů
         function recordBeeMarkerActivation(markerId) {
             if (!gamificationInitialized) {
                 console.warn("⚠️ Gamification not initialized yet, skipping marker activation");
@@ -748,6 +776,7 @@
             }
         }
 
+        // Page visibility API pro pozastavení gamifikace
         document.addEventListener('visibilitychange', () => {
             if (typeof pauseTimeTracking === 'function' && typeof resumeTimeTracking === 'function') {
                 if (document.hidden) {
@@ -758,6 +787,7 @@
             }
         });
 
+        // Finalizace při odchodu ze stránky
         window.addEventListener('beforeunload', () => {
             if (typeof finalizeTimeTracking === 'function') {
                 finalizeTimeTracking(currentExpositionId, currentSceneId);
@@ -766,6 +796,7 @@
 
         // === PŮVODNÍ FUNKCE S GAMIFIKAČNÍMI ROZŠÍŘENÍMI ===
 
+        // Výpočet vzdálenosti mezi GPS body
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371000;
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -777,6 +808,7 @@
             return R * c;
         }
 
+        // Formátování vzdálenosti
         function formatDistance(distance) {
             if (distance < 1000) {
                 return `${Math.round(distance)}m`;
@@ -785,24 +817,23 @@
             }
         }
 
+        // Získání aktuální pozice
         function getCurrentPosition() {
             console.log("Requesting GPS position...");
-            updateLoadingStep(2); // Začni GPS krok
+            document.getElementById('distanceInfo').innerHTML = '📍 Hledám GPS signál...';
             
             if (!navigator.geolocation) {
                 console.error("Geolocation is not supported");
+                document.getElementById('distanceInfo').innerHTML = '❌ GPS není podporován';
                 userPosition = {
                     lat: 49.090675,
                     lng: 17.132976,
                     accuracy: 50
                 };
-                startPosition = { ...userPosition };
+                startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
                 console.log("Using fallback position:", userPosition);
-                loadingSteps.gps = true;
-                updateLoadingStep(2, true);
                 checkProximityToMarkers();
                 updateNavigation();
-                checkAllLoaded();
                 return;
             }
 
@@ -814,15 +845,12 @@
                         accuracy: position.coords.accuracy
                     };
                     if (!startPosition) {
-                        startPosition = { ...userPosition };
+                        startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici pouze při prvním GPS fix
                         console.log("🎯 Start position set:", startPosition);
                     }
                     console.log("GPS position found:", userPosition);
-                    loadingSteps.gps = true;
-                    updateLoadingStep(2, true);
                     checkProximityToMarkers();
                     updateNavigation();
-                    checkAllLoaded();
                 },
                 (error) => {
                     console.error("Geolocation error:", error);
@@ -832,14 +860,12 @@
                         lng: 17.132976,
                         accuracy: 100
                     };
-                    startPosition = { ...userPosition };
+                    startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
                     
+                    document.getElementById('distanceInfo').innerHTML = '🔄 Používám testovací pozici';
                     console.log("Using fallback position due to GPS error:", userPosition);
-                    loadingSteps.gps = true;
-                    updateLoadingStep(2, true);
                     checkProximityToMarkers();
                     updateNavigation();
-                    checkAllLoaded();
                 },
                 {
                     enableHighAccuracy: true,
@@ -849,23 +875,22 @@
             );
             
             setTimeout(() => {
-                if (!loadingSteps.gps) {
+                if (!userPosition) {
                     console.log("GPS timeout - activating fallback position");
                     userPosition = {
                         lat: 49.090675,
                         lng: 17.132976,
                         accuracy: 100
                     };
-                    startPosition = { ...userPosition };
-                    loadingSteps.gps = true;
-                    updateLoadingStep(2, true);
+                    startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
+                    document.getElementById('distanceInfo').innerHTML = '🔄 Testovací pozice aktivní';
                     checkProximityToMarkers();
                     updateNavigation();
-                    checkAllLoaded();
                 }
             }, 5000);
         }
 
+        // Sledování pozice
         function watchPosition() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
@@ -877,7 +902,7 @@
                         };
                         checkProximityToMarkers();
                         updateNavigation();
-                        checkDistanceForQuiz();
+                        checkDistanceForQuiz(); // NOVÉ: Kontrola kvízů
                     },
                     (error) => {
                         console.error("Watch position error:", error);
@@ -891,6 +916,7 @@
             }
         }
 
+        // HLAVNÍ FUNKCE - Kontrola proximity s gamifikací
         function checkProximityToMarkers() {
             if (!userPosition) return;
             
@@ -908,6 +934,7 @@
                 
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
                 if (entity) {
+                    // Zobrazení AR objektu
                     if (distance <= AR_VISIBILITY_THRESHOLD) {
                         entity.setAttribute('visible', 'true');
                         console.log(`✅ ${marker.id} VISIBLE at ${distance.toFixed(1)}m`);
@@ -916,12 +943,14 @@
                         console.log(`❌ ${marker.id} too far: ${distance.toFixed(1)}m`);
                     }
                     
+                    // Audio přehrávání
                     if (distance <= AUDIO_THRESHOLD) {
                         playAudio(marker.id);
                         shouldStopAudio = false;
                         console.log(`🎵 Audio playing for ${marker.id}`);
                     }
                     
+                    // GAMIFIKACE: Aktivace markeru při proximity
                     if (distance <= PROXIMITY_THRESHOLD) {
                         console.log(`🎯 Bee activated: ${marker.id}`);
                         markersActivatedThisCheck.push(marker.id);
@@ -934,6 +963,7 @@
                 stopCurrentAudio();
             }
             
+            // Počet viditelných včel
             const visibleCount = markers.filter(marker => {
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
                 return entity && entity.getAttribute('visible') === true;
@@ -941,6 +971,7 @@
             console.log(`${visibleCount}/${markers.length} bees are visible in AR`);
         }
 
+        // UPRAVENÉ AUDIO FUNKCE - POUZE IKONY
         function playAudio(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (!marker || audioPlayingForMarker === markerId) return;
@@ -977,6 +1008,7 @@
             }
         }
 
+        // ZJEDNODUŠENÉ ZOBRAZENÍ AUDIO - POUZE IKONA
         function updateAudioDisplay() {
             const audioInfo = document.getElementById('audioInfo');
             if (audioIsPaused) {
@@ -1002,6 +1034,7 @@
             }
         }
 
+        // Navigace
         function updateNavigation() {
             if (!userPosition) return;
             
@@ -1054,6 +1087,7 @@
             const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
             const completed = getCompletedQuizzes();
             
+            // Vypočítej vzdálenost od startu
             const distanceFromStart = startPosition ? calculateDistance(
                 startPosition.lat, startPosition.lng,
                 userPosition.lat, userPosition.lng
@@ -1121,6 +1155,7 @@
             updateNavigation();
         }
 
+        // Rotace modelů dotykem
         function setupModelRotation() {
             let touchStarted = false;
             let rotationActive = false;
@@ -1212,8 +1247,7 @@
                 '.distance-info',
                 '.audio-info',
                 '.rotation-hint',
-                '.bee-quiz',
-                '.loading-indicator'
+                '.bee-quiz' // NOVÉ: Přidáno kvíz mezi UI elementy
             ];
             
             for (let selector of uiSelectors) {
@@ -1235,209 +1269,6 @@
             }, 3000);
         }
 
-        // === TUTORIAL INICIALIZACE ===
-        
-        // OPRAVENÉ: Dynamické načtení konfigurační souboru
-       function loadTutorialConfig() {
-    return new Promise((resolve, reject) => {
-        console.log("📂 Attempting to load config from: /assets/stezka_bohuslavice/tutorial/config_vcela.js");
-        
-        const script = document.createElement('script');
-        script.src = '/assets/stezka_bohuslavice/tutorial/config_vcela.js';
-        
-        script.onload = () => {
-            console.log("✅ Config script loaded successfully");
-            
-            // Počkej chvilku na vykonání skriptu
-            setTimeout(() => {
-                console.log("🔍 Variables available after script load:");
-                console.log("- global tutorialConfig:", typeof tutorialConfig);
-                console.log("- global initTutorial:", typeof initTutorial);
-                console.log("- window.tutorialConfig:", typeof window.tutorialConfig);
-                console.log("- window.initTutorial:", typeof window.initTutorial);
-                
-                // Zkus zavolat init funkci hned
-                if (typeof window.initTutorial === 'function') {
-                    console.log("🔧 Calling window.initTutorial() immediately...");
-                    const result = window.initTutorial();
-                    console.log("🔧 Immediate initTutorial result:", result);
-                }
-                
-                resolve();
-            }, 100);
-        };
-        
-        script.onerror = (error) => {
-            console.error("❌ Failed to load config script:", error);
-            reject(error);
-        };
-        
-        document.head.appendChild(script);
-    });
-}
-        
-       // SUPER DEBUG verze
-// NOUZOVÉ ŘEŠENÍ - Kompletní tutorial config inline
-async function initTutorialWhenReady() {
-    try {
-        console.log("🎓 Starting EMERGENCY tutorial initialization...");
-        
-        // NOUZOVÁ KONFIGURACE PŘÍMO V KÓDU
-        const emergencyTutorialConfig = {
-            id: 'vcela-stezka',
-            storageKey: 'ar-tutorial-completed',
-            autoStart: false,
-            autoStartDelay: 0,
-            
-            steps: [
-                {
-                    title: '🔙 Zpět do Menu',
-                    content: '<p>Tímto tlačítkem se vrátíte do hlavního menu aplikace</p>',
-                    arrow: {
-                        direction: 'right',
-                        style: 'top: 25px; left: 120px;'
-                    },
-                    bubble: {
-                        style: 'top: 10px; left: 140px;'
-                    }
-                },
-                {
-                    title: '🔊 Audio ovládání',
-                    content: '<p>Ovládá přehrávání zvuku, který se spustí při přiblížení k bodu zájmu</p>',
-                    arrow: {
-                        direction: 'right',
-                        style: 'top: 75px; left: 70px;'
-                    },
-                    bubble: {
-                        style: 'top: 60px; left: 90px;'
-                    }
-                },
-                {
-                    title: '🧭 Navigace',
-                    content: '<p>Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
-                    arrow: {
-                        direction: 'left',
-                        style: 'top: 25px; right: 160px;'
-                    },
-                    bubble: {
-                        style: 'top: 10px; right: 180px;'
-                    }
-                },
-                {
-                    title: '📍 Informace o vzdálenosti',
-                    content: '<p>Ukazuje vzdálenost k nejbližšímu nebo vybranému bodu zájmu</p>',
-                    arrow: {
-                        direction: 'up',
-                        style: 'bottom: 100px; left: 50%; transform: translateX(-50%);'
-                    },
-                    bubble: {
-                        style: 'bottom: 120px; left: 50%; transform: translateX(-50%);'
-                    }
-                },
-                {
-                    title: '👁️ Rozšířená realita',
-                    content: `
-                        <ul>
-                            <li>🎯 Na <strong>30m</strong> se objekt zobrazí v AR</li>
-                            <li>🎵 Na <strong>15m</strong> se spustí zvukový doprovod</li>
-                            <li>🔄 Dotykem můžete objekt otáčet</li>
-                            <li>📱 Pohybujte telefonem pro lepší zobrazení</li>
-                        </ul>
-                    `,
-                    center: true
-                },
-                {
-                    title: '⚠️ Bezpečnost na prvním místě',
-                    content: `
-                        <div style="background: rgba(255, 69, 58, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #ff453a; margin-bottom: 10px;">
-                            <p style="margin: 5px 0; font-weight: bold; color: #ff453a;">Důležité upozornění:</p>
-                            <ul style="margin: 8px 0;">
-                                <li>👀 <strong>Vždy sledujte okolí</strong> a cestu před sebou</li>
-                                <li>🚶 Při pohledu do telefonu se <strong>zastavte</strong></li>
-                                <li>🛣️ Dávejte pozor na <strong>vozovky a překážky</strong></li>
-                                <li>👥 Buďte ohleduplní k <strong>ostatním návštěvníkům</strong></li>
-                            </ul>
-                            <p style="margin: 5px 0; font-size: 13px; color: #ff8a80;">Bezpečná cesta je nejlepší cesta! 🙏</p>
-                        </div>
-                    `,
-                    center: true,
-                    finalButton: 'Rozumím, začít bezpečně! 🚀'
-                }
-            ],
-            
-            onComplete: function() {
-                console.log('Tutorial completed for včelí stezka');
-            }
-        };
-        
-        // Zkontroluj ARTutorial class
-        if (typeof ARTutorial === 'undefined') {
-            console.error("❌ ARTutorial class not found!");
-            return;
-        }
-        
-        console.log("✅ Creating tutorial with emergency config...");
-        
-        // Několik pokusů o vytvoření
-        let attempts = 0;
-        const maxAttempts = 3;
-        
-        while (attempts < maxAttempts && !window.arTutorial) {
-            attempts++;
-            console.log(`🔄 Tutorial creation attempt ${attempts}/${maxAttempts}`);
-            
-            try {
-                // Pokus 1: ARTutorial.create()
-                window.arTutorial = ARTutorial.create(emergencyTutorialConfig);
-                console.log("✅ Tutorial created with ARTutorial.create()");
-                break;
-            } catch (error1) {
-                console.warn(`⚠️ Attempt ${attempts} failed with create():`, error1);
-                
-                try {
-                    // Pokus 2: new ARTutorial()
-                    window.arTutorial = new ARTutorial(emergencyTutorialConfig);
-                    console.log("✅ Tutorial created with new ARTutorial()");
-                    break;
-                } catch (error2) {
-                    console.warn(`⚠️ Attempt ${attempts} failed with constructor:`, error2);
-                    
-                    if (attempts === maxAttempts) {
-                        console.error("❌ All tutorial creation attempts failed!");
-                        console.error("Last errors:", { create: error1, constructor: error2 });
-                        return;
-                    }
-                    
-                    // Počkej chvilku před dalším pokusem
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
-            }
-        }
-        
-        // Finální kontrola
-        if (!window.arTutorial) {
-            console.error("❌ Tutorial instance still not created after all attempts!");
-            return;
-        }
-        
-        console.log("✅ Tutorial instance successfully created:", window.arTutorial);
-        
-        // Reset localStorage pro testování
-        const storageKey = `${emergencyTutorialConfig.storageKey}-${emergencyTutorialConfig.id}`;
-        console.log("🔄 Clearing tutorial storage:", storageKey);
-        localStorage.removeItem(storageKey);
-        
-        // Spusť tutorial
-        console.log("🎓 Starting tutorial...");
-        window.arTutorial.start();
-        console.log("✅ Tutorial started successfully!");
-        
-    } catch (error) {
-        console.error("❌ Emergency tutorial initialization failed:", error);
-        console.error("Error stack:", error.stack);
-    }
-}
-
         // === EVENT LISTENERY ===
         
         document.getElementById('navToggle').addEventListener('click', () => {
@@ -1446,7 +1277,7 @@ async function initTutorialWhenReady() {
 
         document.getElementById('clearSelection').addEventListener('click', clearSelection);
         document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
-        document.getElementById('quizClose').addEventListener('click', closeQuiz);
+        document.getElementById('quizClose').addEventListener('click', closeQuiz); // NOVÉ: Event listener pro zavření kvízu
 
         document.addEventListener('click', (e) => {
             const navPanel = document.querySelector('.navigation');
@@ -1460,32 +1291,22 @@ async function initTutorialWhenReady() {
         window.addEventListener('load', () => {
             console.log("Starting bee AR application with quiz system and gamification...");
             
+            // Počkej na načtení gamifikačních skriptů a pak inicializuj
+            setTimeout(() => {
+                initializeGameification();
+            }, 2000);  // Prodloužený timeout pro jistotu
+            
             // Počkáme na A-Frame
             document.querySelector('a-scene').addEventListener('loaded', () => {
                 console.log("A-Frame scene loaded");
-                loadingSteps.camera = true;
-                updateLoadingStep(1, true);
-                
                 setupModelRotation();
                 getCurrentPosition();
                 watchPosition();
                 
-                // Gamifikace
-                setTimeout(() => {
-                    initializeGameification();
-                }, 2000);
-                
-                // AR objekty
-                setTimeout(() => {
-                    loadingSteps.ar = true;
-                    updateLoadingStep(4, true);
-                    checkAllLoaded();
-                }, 3000);
-                
-                // Pravidelná kontrola kvízů
+                // NOVÉ: Pravidelná kontrola kvízů
                 setInterval(() => {
                     checkDistanceForQuiz();
-                }, 3000);
+                }, 3000); // Kontrola každé 3 sekundy
             });
         });
 
