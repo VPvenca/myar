@@ -27,7 +27,7 @@ const tutorialConfig = {
             content: '<p>Ovládá přehrávání zvuku, který se spustí při přiblížení k bodu zájmu</p>',
             arrow: {
                 direction: 'right',
-                style: 'top: 25px; left: 120px;'
+                style: 'top: 75px; left: 70px;'
             },
             bubble: {
                 style: 'top: 60px; left: 90px;'
@@ -36,24 +36,12 @@ const tutorialConfig = {
         {
             title: '🧭 Navigace',
             content: '<p>Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
-            arrow: {
-                direction: 'center',
-                style: 'top: 25px; right: 120px;'
-            },
-            bubble: {
-                style: 'top: 10px; right: 180px;'
-            }
+            center: true  // ZMĚNA: Centrováno na střed
         },
         {
             title: '📍 Informace o vzdálenosti',
             content: '<p>Ukazuje vzdálenost k nejbližšímu nebo vybranému bodu zájmu</p>',
-            arrow: {
-                direction: 'up',
-                style: 'bottom: 100px; left: 50%; transform: translateX(-50%);'
-            },
-            bubble: {
-                style: 'bottom: 120px; left: 50%; transform: translateX(-50%);'
-            }
+            center: true  // ZMĚNA: Centrováno na střed
         },
         {
             title: '👁️ Rozšířená realita',
