@@ -1277,98 +1277,163 @@
 }
         
        // SUPER DEBUG verze
+// NOUZOVÉ ŘEŠENÍ - Kompletní tutorial config inline
 async function initTutorialWhenReady() {
     try {
-        console.log("🎓 Starting tutorial initialization...");
+        console.log("🎓 Starting EMERGENCY tutorial initialization...");
         
-        // Debug 1: Zkontroluj ARTutorial class
-        console.log("🔍 Checking ARTutorial class:", typeof ARTutorial);
+        // NOUZOVÁ KONFIGURACE PŘÍMO V KÓDU
+        const emergencyTutorialConfig = {
+            id: 'vcela-stezka',
+            storageKey: 'ar-tutorial-completed',
+            autoStart: false,
+            autoStartDelay: 0,
+            
+            steps: [
+                {
+                    title: '🔙 Zpět do Menu',
+                    content: '<p>Tímto tlačítkem se vrátíte do hlavního menu aplikace</p>',
+                    arrow: {
+                        direction: 'right',
+                        style: 'top: 25px; left: 120px;'
+                    },
+                    bubble: {
+                        style: 'top: 10px; left: 140px;'
+                    }
+                },
+                {
+                    title: '🔊 Audio ovládání',
+                    content: '<p>Ovládá přehrávání zvuku, který se spustí při přiblížení k bodu zájmu</p>',
+                    arrow: {
+                        direction: 'right',
+                        style: 'top: 75px; left: 70px;'
+                    },
+                    bubble: {
+                        style: 'top: 60px; left: 90px;'
+                    }
+                },
+                {
+                    title: '🧭 Navigace',
+                    content: '<p>Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
+                    arrow: {
+                        direction: 'left',
+                        style: 'top: 25px; right: 160px;'
+                    },
+                    bubble: {
+                        style: 'top: 10px; right: 180px;'
+                    }
+                },
+                {
+                    title: '📍 Informace o vzdálenosti',
+                    content: '<p>Ukazuje vzdálenost k nejbližšímu nebo vybranému bodu zájmu</p>',
+                    arrow: {
+                        direction: 'up',
+                        style: 'bottom: 100px; left: 50%; transform: translateX(-50%);'
+                    },
+                    bubble: {
+                        style: 'bottom: 120px; left: 50%; transform: translateX(-50%);'
+                    }
+                },
+                {
+                    title: '👁️ Rozšířená realita',
+                    content: `
+                        <ul>
+                            <li>🎯 Na <strong>30m</strong> se objekt zobrazí v AR</li>
+                            <li>🎵 Na <strong>15m</strong> se spustí zvukový doprovod</li>
+                            <li>🔄 Dotykem můžete objekt otáčet</li>
+                            <li>📱 Pohybujte telefonem pro lepší zobrazení</li>
+                        </ul>
+                    `,
+                    center: true
+                },
+                {
+                    title: '⚠️ Bezpečnost na prvním místě',
+                    content: `
+                        <div style="background: rgba(255, 69, 58, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #ff453a; margin-bottom: 10px;">
+                            <p style="margin: 5px 0; font-weight: bold; color: #ff453a;">Důležité upozornění:</p>
+                            <ul style="margin: 8px 0;">
+                                <li>👀 <strong>Vždy sledujte okolí</strong> a cestu před sebou</li>
+                                <li>🚶 Při pohledu do telefonu se <strong>zastavte</strong></li>
+                                <li>🛣️ Dávejte pozor na <strong>vozovky a překážky</strong></li>
+                                <li>👥 Buďte ohleduplní k <strong>ostatním návštěvníkům</strong></li>
+                            </ul>
+                            <p style="margin: 5px 0; font-size: 13px; color: #ff8a80;">Bezpečná cesta je nejlepší cesta! 🙏</p>
+                        </div>
+                    `,
+                    center: true,
+                    finalButton: 'Rozumím, začít bezpečně! 🚀'
+                }
+            ],
+            
+            onComplete: function() {
+                console.log('Tutorial completed for včelí stezka');
+            }
+        };
+        
+        // Zkontroluj ARTutorial class
         if (typeof ARTutorial === 'undefined') {
             console.error("❌ ARTutorial class not found!");
             return;
-        } else {
-            console.log("✅ ARTutorial class is available");
         }
         
-        // Debug 2: Načti konfiguraci
-        console.log("🔍 Loading tutorial config...");
-        await loadTutorialConfig();
-        console.log("✅ Config loading completed");
+        console.log("✅ Creating tutorial with emergency config...");
         
-        // Debug 3: Zkontroluj všechny možné proměnné
-        console.log("🔍 Checking all possible config variables:");
-        console.log("- typeof tutorialConfig:", typeof tutorialConfig);
-        console.log("- typeof window.tutorialConfig:", typeof window.tutorialConfig);
-        console.log("- tutorialConfig value:", window.tutorialConfig || tutorialConfig);
+        // Několik pokusů o vytvoření
+        let attempts = 0;
+        const maxAttempts = 3;
         
-        // Debug 4: Zkontroluj initTutorial funkci
-        console.log("🔍 Checking initTutorial functions:");
-        console.log("- typeof initTutorial:", typeof initTutorial);
-        console.log("- typeof window.initTutorial:", typeof window.initTutorial);
+        while (attempts < maxAttempts && !window.arTutorial) {
+            attempts++;
+            console.log(`🔄 Tutorial creation attempt ${attempts}/${maxAttempts}`);
+            
+            try {
+                // Pokus 1: ARTutorial.create()
+                window.arTutorial = ARTutorial.create(emergencyTutorialConfig);
+                console.log("✅ Tutorial created with ARTutorial.create()");
+                break;
+            } catch (error1) {
+                console.warn(`⚠️ Attempt ${attempts} failed with create():`, error1);
+                
+                try {
+                    // Pokus 2: new ARTutorial()
+                    window.arTutorial = new ARTutorial(emergencyTutorialConfig);
+                    console.log("✅ Tutorial created with new ARTutorial()");
+                    break;
+                } catch (error2) {
+                    console.warn(`⚠️ Attempt ${attempts} failed with constructor:`, error2);
+                    
+                    if (attempts === maxAttempts) {
+                        console.error("❌ All tutorial creation attempts failed!");
+                        console.error("Last errors:", { create: error1, constructor: error2 });
+                        return;
+                    }
+                    
+                    // Počkej chvilku před dalším pokusem
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+            }
+        }
         
-        // Zkus použít správnou verzi
-        let configToUse = window.tutorialConfig || tutorialConfig;
-        let initFunc = window.initTutorial || initTutorial;
-        
-        if (!configToUse) {
-            console.error("❌ No tutorial config found!");
+        // Finální kontrola
+        if (!window.arTutorial) {
+            console.error("❌ Tutorial instance still not created after all attempts!");
             return;
         }
         
-        console.log("✅ Using config:", configToUse);
+        console.log("✅ Tutorial instance successfully created:", window.arTutorial);
         
-        // Debug 5: Zkus vytvořit instanci přímo
-        if (typeof initFunc === 'function') {
-            console.log("🔍 Calling initTutorial function...");
-            const success = initFunc();
-            console.log("🔍 initTutorial returned:", success);
-        } else {
-            console.log("🔍 No initTutorial function, creating directly...");
-            try {
-                window.arTutorial = ARTutorial.create(configToUse);
-                console.log("✅ ARTutorial instance created directly");
-            } catch (createError) {
-                console.error("❌ Failed to create ARTutorial directly:", createError);
-                return;
-            }
-        }
+        // Reset localStorage pro testování
+        const storageKey = `${emergencyTutorialConfig.storageKey}-${emergencyTutorialConfig.id}`;
+        console.log("🔄 Clearing tutorial storage:", storageKey);
+        localStorage.removeItem(storageKey);
         
-        // Debug 6: Zkontroluj výsledek
-        console.log("🔍 Final check - arTutorial instance:");
-        console.log("- typeof window.arTutorial:", typeof window.arTutorial);
-        console.log("- arTutorial object:", window.arTutorial);
-        
-        if (!window.arTutorial) {
-            console.error("❌ arTutorial instance still not created!");
-            
-            // POKUS O NOUZOVÉ ŘEŠENÍ
-            console.log("🆘 Attempting emergency tutorial creation...");
-            try {
-                window.arTutorial = new ARTutorial(configToUse);
-                console.log("✅ Emergency tutorial created with constructor");
-            } catch (emergencyError) {
-                console.error("❌ Emergency creation also failed:", emergencyError);
-                return;
-            }
-        }
-        
-        // Debug 7: Zkontroluj shouldShow
-        const shouldShow = window.arTutorial.shouldShow();
-        console.log("🔍 Should show tutorial:", shouldShow);
-        
-        if (shouldShow) {
-            console.log("🎓 Starting tutorial NOW...");
-            window.arTutorial.start();
-            console.log("🎓 Tutorial start() called");
-        } else {
-            console.log("ℹ️ Tutorial already completed - not showing");
-            // Pro debug - spusť i tak
-            console.log("🔧 DEBUG: Starting anyway...");
-            window.arTutorial.start();
-        }
+        // Spusť tutorial
+        console.log("🎓 Starting tutorial...");
+        window.arTutorial.start();
+        console.log("✅ Tutorial started successfully!");
         
     } catch (error) {
-        console.error("❌ Tutorial initialization failed:", error);
+        console.error("❌ Emergency tutorial initialization failed:", error);
         console.error("Error stack:", error.stack);
     }
 }
