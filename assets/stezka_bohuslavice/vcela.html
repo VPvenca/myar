@@ -1254,42 +1254,64 @@
             });
         }
         
-        // NOVÁ: Inicializace tutoriálu až když je vše připraveno
-        async function initTutorialWhenReady() {
-            try {
-                console.log("🎓 Initializing tutorial system...");
-                
-                // Načti konfiguraci
-                await loadTutorialConfig();
-                
-                // Zkontroluj, že je ARTutorial class dostupná
-                if (typeof ARTutorial === 'undefined') {
-                    console.error("❌ ARTutorial class not found. Make sure tutorial.js is loaded.");
-                    return;
-                }
-                
-                // Zkontroluj, že je konfigurace dostupná
-                if (typeof tutorialConfig === 'undefined') {
-                    console.error("❌ tutorialConfig not found. Make sure config file is loaded.");
-                    return;
-                }
-                
-                // Vytvoř tutorial instance
-                arTutorial = ARTutorial.create(tutorialConfig);
-                console.log("✅ Tutorial system initialized successfully");
-                
-                // Spusť tutoriál s krátkým zpožděním pro plynulý přechod
-                setTimeout(() => {
-                    if (arTutorial && arTutorial.shouldShow()) {
-                        console.log("🎓 Starting tutorial...");
-                        arTutorial.start();
-                    }
-                }, 500);
-                
-            } catch (error) {
-                console.error("❌ Tutorial initialization failed:", error);
-            }
+        // NOVÁ: Inicializace tutoriálu až když je vše připraveno - S DEBUGGINGEM
+async function initTutorialWhenReady() {
+    try {
+        console.log("🎓 Starting tutorial initialization...");
+        
+        // Debug 1: Zkontroluj ARTutorial class
+        console.log("🔍 Checking ARTutorial class:", typeof ARTutorial);
+        if (typeof ARTutorial === 'undefined') {
+            console.error("❌ ARTutorial class not found!");
+            return;
         }
+        
+        // Debug 2: Načti konfiguraci
+        console.log("🔍 Loading tutorial config...");
+        await loadTutorialConfig();
+        
+        // Debug 3: Zkontroluj tutorialConfig
+        console.log("🔍 Checking tutorialConfig:", typeof tutorialConfig);
+        if (typeof tutorialConfig === 'undefined') {
+            console.error("❌ tutorialConfig not found after loading!");
+            return;
+        }
+        
+        // Debug 4: Zkontroluj initTutorial funkci
+        console.log("🔍 Checking initTutorial function:", typeof initTutorial);
+        if (typeof initTutorial === 'function') {
+            console.log("🔍 Calling initTutorial()...");
+            const success = initTutorial();
+            console.log("🔍 initTutorial result:", success);
+        } else {
+            console.error("❌ initTutorial function not found!");
+            return;
+        }
+        
+        // Debug 5: Zkontroluj arTutorial instance
+        console.log("🔍 Checking arTutorial instance:", typeof window.arTutorial);
+        if (!window.arTutorial) {
+            console.error("❌ arTutorial instance not created!");
+            return;
+        }
+        
+        // Debug 6: Zkontroluj shouldShow
+        const shouldShow = window.arTutorial.shouldShow();
+        console.log("🔍 Should show tutorial:", shouldShow);
+        
+        if (shouldShow) {
+            console.log("🎓 Starting tutorial NOW...");
+            window.arTutorial.start();
+            console.log("🎓 Tutorial start() called");
+        } else {
+            console.log("ℹ️ Tutorial already completed - not showing");
+        }
+        
+    } catch (error) {
+        console.error("❌ Tutorial initialization failed:", error);
+        console.error("Error stack:", error.stack);
+    }
+}
 
         // === EVENT LISTENERY ===
         
