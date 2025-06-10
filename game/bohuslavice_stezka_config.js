@@ -1,5 +1,5 @@
 // game/bohuslavice_stezka_config.js
-// KOMPLETNĚ OPRAVENÁ Konfigurace pro Včelařskou stezku
+// VYČIŠTĚNÁ Konfigurace pro Včelařskou stezku (bez duplicitních globálních achievementů)
 
 const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
     // === SCÉNY ===
@@ -11,7 +11,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
         }
     },
 
-    // === ACHIEVEMENTY PRO VČELAŘSKOU STEZKU ===
+    // === ACHIEVEMENTY SPECIFICKÉ PRO VČELAŘSKOU STEZKU ===
     achievements: {
         // === MARKER-SPECIFICKÉ ACHIEVEMENTY ===
         "vcela_1_delnice": {
@@ -70,7 +70,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             image: "/img/achievements/bee_quiz_master.png"
         },
 
-        // === ZÁKLADNÍ ACHIEVEMENTY PRO EXPOZICI ===
+        // === EXPOZICE-SPECIFICKÉ ACHIEVEMENTY ===
         "stezka_bohuslavice_first_scene": {
             name: "První krůčky ve včelařství",
             description: "Dokončil jsi první scénu na Včelařské stezce",
@@ -78,6 +78,42 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             category: "stezka_bohuslavice",
             rarity: "common",
             image: "/img/achievements/vcelarstvi_first_scene.png"
+        },
+
+        "stezka_bohuslavice_half_complete": {
+            name: "Pokročilý včelař",
+            description: "Dokončil jsi polovinu scén na Včelařské stezce",
+            icon: "📚",
+            category: "stezka_bohuslavice",
+            rarity: "uncommon",
+            image: "/img/achievements/vcelarstvi_half_complete.png"
+        },
+
+        "stezka_bohuslavice_all_scenes": {
+            name: "Znalec včelařství",
+            description: "Dokončil jsi všechny scény na Včelařské stezce",
+            icon: "🎓",
+            category: "stezka_bohuslavice",
+            rarity: "rare",
+            image: "/img/achievements/vcelarstvi_all_scenes.png"
+        },
+
+        "stezka_bohuslavice_perfectionist": {
+            name: "Perfektní včelař",
+            description: "Získal jsi zlaté hvězdy ve všech scénách Včelařské stezky",
+            icon: "👑",
+            category: "stezka_bohuslavice",
+            rarity: "legendary",
+            image: "/img/achievements/vcelarstvi_perfectionist.png"
+        },
+
+        "stezka_bohuslavice_gold_collector": {
+            name: "Sběratel zlatých hvězd",
+            description: "Získal jsi 3 zlaté hvězdy na Včelařské stezce",
+            icon: "⭐",
+            category: "stezka_bohuslavice",
+            rarity: "rare",
+            image: "/img/achievements/vcelarstvi_gold_collector.png"
         }
     },
 
