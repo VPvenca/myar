@@ -34,13 +34,13 @@ const tutorialConfig = {
             }
         },
         {
-            title: '🧭 Navigace',
-            content: '<p>↗️Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
+            title: '↗️ Navigace',
+            content: '<p>Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
             center: true  // ZMĚNA: Centrováno na střed
         },
         {
-            title: '📍 Informace o vzdálenosti',
-            content: '<p>⬇️Ukazuje vzdálenost k nejbližšímu nebo vybranému bodu zájmu</p>',
+            title: '⬇️ Informace o vzdálenosti',
+            content: '<p>Ukazuje vzdálenost k nejbližšímu nebo vybranému bodu zájmu</p>',
             center: true  // ZMĚNA: Centrováno na střed
         },
         {
@@ -64,7 +64,7 @@ const tutorialConfig = {
                         <li>👀 <strong>Vždy sledujte okolí</strong> a cestu před sebou</li>
                         <li>🚶 Při pohledu do telefonu se <strong>zastavte</strong></li>
                         <li>🛣️ Dávejte pozor na <strong>vozovky a překážky</strong></li>
-                        <li>👥 Buďte ohleduplní k <strong>ostatním návštěvníkům</strong></li>
+                        <li>👥 Buďte ohleduplní k <strong>ostatním lidem</strong></li>
                     </ul>
                     <p style="margin: 5px 0; font-size: 13px; color: #ff8a80;">Bezpečná cesta je nejlepší cesta! 🙏</p>
                 </div>
