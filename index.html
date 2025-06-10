@@ -8,38 +8,71 @@
 
     <!-- === SKRIPT PRO KONTROLU PRVNÍ NÁVŠTĚVY (MUSÍ BÝT HNED NA ZAČÁTKU HEAD) === -->
     <script>
-      (function() {
-        const visitedInfoFlagKey = 'arAppVisitedInfo_v1';
-        const consentStatusKey = 'ga_consent_status'; // Klíč pro stav souhlasu
+      // Nahraďte skript v <head> index.html tímto kódem:
+(function() {
+  const visitedInfoFlagKey = 'arAppVisitedInfo_v1';
+  const consentStatusKey = 'ga_consent_status';
 
-        try {
-          const hasVisited = localStorage.getItem(visitedInfoFlagKey);
-          const consentStatus = localStorage.getItem(consentStatusKey);
+  // Funkce pro bezpečné čtení localStorage s fallbackem
+  function safeGetLocalStorage(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch (e) {
+      console.warn(`localStorage čtení selhalo pro klíč ${key}:`, e);
+      return null;
+    }
+  }
 
-          // Pokud uživatel ještě nenavštívil info stránku NEBO nemá uložený stav souhlasu
-          // (pojistka, pokud by flag 'arAppVisitedInfo_v1' existoval, ale souhlas ne)
-          // přesměrujeme na info.html
-          if (hasVisited !== 'true' || !consentStatus) {
-            console.log('První návštěva nebo chybějící souhlas detekován. Přesměrovávám na info.html');
+  // Funkce pro bezpečné nastavení localStorage
+  function safeSetLocalStorage(key, value) {
+    try {
+      localStorage.setItem(key, value);
+      return true;
+    } catch (e) {
+      console.warn(`localStorage zápis selhal pro klíč ${key}:`, e);
+      return false;
+    }
+  }
 
-            // Nastavíme flag návštěvy (pokud ještě není)
-            if (hasVisited !== 'true') {
-                localStorage.setItem(visitedInfoFlagKey, 'true');
-            }
-            // Poznámka: Stav souhlasu se nastaví až na info.html
+  // Detekce iOS standalone režimu
+  const isIOSStandalone = navigator.userAgent.match(/iPhone|iPad|iPod/) && 
+                         window.navigator.standalone;
 
-            // Přesměrujeme
-            window.location.replace('info.html');
-            // Důležité: Po replace se zbytek <head> v tomto cyklu nezpracuje,
-            // což je v pořádku, protože uživatel jde na info.html
-          } else {
-            console.log('Opakovaná návštěva a souhlas nalezen. Načítám index.html normálně.');
-          }
-        } catch (e) {
-          console.error('Nepodařilo se pracovat s localStorage při kontrole první návštěvy:', e);
-          // V případě chyby necháme pokračovat, Consent Mode nastaví default 'denied'
-        }
-      })();
+  try {
+    const hasVisited = safeGetLocalStorage(visitedInfoFlagKey);
+    const consentStatus = safeGetLocalStorage(consentStatusKey);
+
+    // Pro iOS standalone: použij sessionStorage jako fallback
+    if (isIOSStandalone && (!hasVisited || !consentStatus)) {
+      const sessionVisited = sessionStorage.getItem(visitedInfoFlagKey);
+      const sessionConsent = sessionStorage.getItem(consentStatusKey);
+      
+      if (!sessionVisited || !sessionConsent) {
+        console.log('iOS standalone: První návštěva detekována. Přesměrovávám na info.html');
+        sessionStorage.setItem(visitedInfoFlagKey, 'true');
+        window.location.replace('info.html');
+        return;
+      }
+    }
+
+    // Standardní logika pro ostatní případy
+    if (hasVisited !== 'true' || !consentStatus) {
+      console.log('První návštěva nebo chybějící souhlas detekován. Přesměrovávám na info.html');
+      
+      if (hasVisited !== 'true') {
+        safeSetLocalStorage(visitedInfoFlagKey, 'true');
+      }
+      
+      window.location.replace('info.html');
+    } else {
+      console.log('Opakovaná návštěva a souhlas nalezen. Načítám index.html normálně.');
+    }
+  } catch (e) {
+    console.error('Chyba při kontrole první návštěvy:', e);
+    // V případě chyby jdi na info stránku pro jistotu
+    window.location.replace('info.html');
+  }
+})();
     </script>
     <!-- === KONEC SKRIPTU PRVNÍ NÁVŠTĚVY === -->
 
