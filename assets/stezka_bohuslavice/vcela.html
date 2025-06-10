@@ -1374,6 +1374,84 @@ function startTutorialWhenReady() {
     }, 3000); // 3 sekundy po načtení A-Frame
 }
 
+        // === DEBUG KVÍZOVÉHO ACHIEVEMENTU ===
+// Přidejte tyto funkce do vcela.html pro debugging
+
+// 1. Debug funkce pro testování kvízů
+function debugQuizAchievement() {
+    console.log("=== QUIZ ACHIEVEMENT DEBUG ===");
+    
+    // Zkontroluj počet dokončených kvízů
+    const completed = getCompletedQuizzes();
+    console.log("Completed quizzes:", completed);
+    console.log("Total completed:", completed.length);
+    console.log("Total quizzes available:", BEE_QUIZZES.length);
+    
+    // Zkontroluj gamifikační proměnné
+    console.log("currentExpositionId:", currentExpositionId);
+    console.log("currentSceneId:", currentSceneId);
+    console.log("gamificationInitialized:", gamificationInitialized);
+    
+    // Zkontroluj dostupnost funkcí
+    console.log("recordMarkerActivation function:", typeof recordMarkerActivation);
+    console.log("recordBeeMarkerActivation function:", typeof recordBeeMarkerActivation);
+    
+    // Zkontroluj konfiguraci
+    if (typeof SCENE_CONFIG !== 'undefined') {
+        console.log("Scene config for current scene:", SCENE_CONFIG[currentSceneId]);
+    }
+    
+    if (typeof ACHIEVEMENTS_CONFIG !== 'undefined') {
+        console.log("bee_quiz_master achievement:", ACHIEVEMENTS_CONFIG['bee_quiz_master']);
+    }
+    
+    console.log("========================");
+}
+
+// 2. Funkce pro ruční aktivaci kvízového achievementu (pro testování)
+function testQuizAchievement() {
+    console.log("🧪 Testing quiz achievement manually...");
+    
+    if (typeof recordBeeMarkerActivation === 'function') {
+        recordBeeMarkerActivation('bee_quiz_master');
+        console.log("✅ recordBeeMarkerActivation called");
+    } else if (typeof recordMarkerActivation === 'function') {
+        recordMarkerActivation(currentExpositionId, currentSceneId, 'bee_quiz_master');
+        console.log("✅ recordMarkerActivation called");
+    } else {
+        console.error("❌ No gamification function available");
+    }
+}
+
+// 3. Simulace dokončení všech kvízů
+function simulateAllQuizzesCompleted() {
+    console.log("🧪 Simulating all quizzes completed...");
+    
+    // Nastav všechny kvízy jako dokončené
+    const allQuizzes = Array.from({length: BEE_QUIZZES.length}, (_, i) => i);
+    localStorage.setItem('beeQuizzesCompleted', JSON.stringify(allQuizzes));
+    
+    console.log("✅ All quizzes marked as completed");
+    
+    // Zavolej markQuizCompleted pro poslední kvíz
+    markQuizCompleted(BEE_QUIZZES.length - 1);
+}
+
+// 4. Vyčistění kvízových dat
+function clearQuizData() {
+    localStorage.removeItem('beeQuizzesCompleted');
+    console.log("🔄 Quiz data cleared");
+}
+
+// Globální dostupnost pro debugging
+if (typeof window !== 'undefined') {
+    window.debugQuizAchievement = debugQuizAchievement;
+    window.testQuizAchievement = testQuizAchievement;
+    window.simulateAllQuizzesCompleted = simulateAllQuizzesCompleted;
+    window.clearQuizData = clearQuizData;
+}
+
+console.log("🔧 Quiz debugging functions loaded");
 
     </script>
 </body>
