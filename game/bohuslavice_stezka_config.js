@@ -70,8 +70,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             image: "/img/achievements/bee_quiz_master.png"
         }
 
-        // === ZAKOMENTOVANÉ ACHIEVEMENTY ===
-        /*
+
         "stezka_bohuslavice_first_scene": {
             name: "První krůčky ve včelařství",
             description: "Dokončil jsi první scénu na Včelařské stezce",
@@ -80,7 +79,8 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             rarity: "common",
             image: "/img/achievements/vcelarstvi_first_scene.png"
         },
-
+         // === ZAKOMENTOVANÉ ACHIEVEMENTY ===
+        /*
         "stezka_bohuslavice_half_complete": {
             name: "Pokročilý včelař",
             description: "Dokončil jsi polovinu scén na Včelařské stezce", 
