@@ -6,8 +6,8 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
     scenes: {
         "/assets/stezka_bohuslavice/vcela.html": {
             name: "Včelařská stezka",
-            totalMarkers: 3, 
-            markers: ["vcela_1", "vcela_2", "vcela_3"]
+            totalMarkers: 4, // 3 včely + 1 kvízový achievement
+            markers: ["vcela_1", "vcela_2", "vcela_3", "bee_quiz_master"]
         }
     },
 
@@ -58,7 +58,19 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             image: "/img/achievements/znalec_vcelstva.png"
         },
 
-        // === ZÁKLADNÍ ACHIEVEMENTY PRO EXPOZICI (OPRAVENÉ ID) ===
+        // === KVÍZOVÝ ACHIEVEMENT ===
+        "bee_quiz_master": {
+            name: "Mistr včelařství",
+            description: "Dokončil jsi všech 20 včelích kvízů!",
+            icon: "🏆",
+            category: "stezka_bohuslavice",
+            rarity: "legendary",
+            sceneId: "/assets/stezka_bohuslavice/vcela.html",
+            markerId: "bee_quiz_master",
+            image: "/img/achievements/bee_quiz_master.png"
+        },
+
+        // === ZÁKLADNÍ ACHIEVEMENTY PRO EXPOZICI ===
         "stezka_bohuslavice_first_scene": {
             name: "První krůčky ve včelařství",
             description: "Dokončil jsi první scénu na Včelařské stezce",
@@ -66,25 +78,7 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             category: "stezka_bohuslavice",
             rarity: "common",
             image: "/img/achievements/vcelarstvi_first_scene.png"
-        },
-/*
-        "stezka_bohuslavice_all_scenes": {
-            name: "Znalec včelařství",
-            description: "Dokončil jsi všechny scény na Včelařské stezce",
-            icon: "🎓",
-            category: "stezka_bohuslavice",
-            rarity: "rare",
-            image: "/img/achievements/vcelarstvi_all_scenes.png"
-        },
-
-        "stezka_bohuslavice_perfectionist": {
-            name: "Mistr včelařství",
-            description: "Získal jsi zlaté hvězdy ve všech scénách Včelařské stezky",
-            icon: "👑",
-            category: "stezka_bohuslavice",
-            rarity: "legendary",
-            image: "/img/achievements/vcelarstvi_perfectionist.png"
-        } */
+        }
     },
 
     // === KATEGORIE ===
