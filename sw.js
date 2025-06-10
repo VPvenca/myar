@@ -1,7 +1,7 @@
 // Optimalizovaný Service Worker pro iOS PWA
 console.log('Service Worker soubor načten.');
 
-const CACHE_NAME = 'ar-app-cache-v64'; // Zvyšte verzi po změnách
+const CACHE_NAME = 'ar-app-cache-v65'; // Zvyšte verzi po změnách
 const urlsToCache = [
   '/index.html',
   '/info.html', // Přidáno pro iOS
