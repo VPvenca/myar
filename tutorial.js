@@ -125,10 +125,6 @@ class ARTutorial {
         if (!step.center && step.bubble && step.bubble.style) {
             bubble.style.cssText = step.bubble.style;
         }
-        // PŘIDEJTE TENTO KÓD:
-if (step.customPosition) {
-    bubble.setAttribute('data-position', step.customPosition);
-}
         
         // Title
         const title = document.createElement('h3');
