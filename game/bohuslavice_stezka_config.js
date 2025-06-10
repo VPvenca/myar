@@ -68,9 +68,9 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             sceneId: "/assets/stezka_bohuslavice/vcela.html",
             markerId: "bee_quiz_master",
             image: "/img/achievements/bee_quiz_master.png"
-        }
+        },
 
-
+        
         "stezka_bohuslavice_first_scene": {
             name: "První krůčky ve včelařství",
             description: "Dokončil jsi první scénu na Včelařské stezce",
