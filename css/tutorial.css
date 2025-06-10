@@ -248,3 +248,20 @@
     font-size: 13px;
     color: #ff8a80;
 }
+/* Speciální pozicování pro navigaci */
+.tutorial-bubble-center[data-position="navigation"] {
+    top: 60px !important;
+    right: 10px !important;
+    left: auto !important;
+    transform: none !important;
+    max-width: 280px !important;
+}
+
+/* Speciální pozicování pro distance info */
+.tutorial-bubble-center[data-position="distance"] {
+    bottom: 120px !important;
+    top: auto !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    max-width: 300px !important;
+}
