@@ -14,10 +14,7 @@ const tutorialConfig = {
         {
             title: '⬅️ Zpět do Menu',
             content: '<p>Tímto tlačítkem se vrátíte do hlavního menu aplikace</p>',
-            arrow: {
-                direction: 'right',
-                style: 'top: 25px; left: 120px;'
-            },
+          
             bubble: {
                 style: 'top: 10px; left: 140px;'
             }
@@ -25,10 +22,7 @@ const tutorialConfig = {
         {
             title: '🔊 Audio ovládání',
             content: '<p>Ovládá přehrávání zvuku, který se spustí při přiblížení k bodu zájmu</p>',
-            arrow: {
-                direction: 'right',
-                style: 'top: 75px; left: 70px;'
-            },
+         
             bubble: {
                 style: 'top: 60px; left: 90px;'
             }
