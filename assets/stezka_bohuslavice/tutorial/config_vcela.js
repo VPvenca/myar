@@ -37,13 +37,11 @@ const tutorialConfig = {
             title: '🧭 Navigace',
             content: '<p>↗️Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
             center: true  // ZMĚNA: Centrováno na střed
-            customPosition: 'navigation'  // přidáme vlastní značku
         },
         {
             title: '📍 Informace o vzdálenosti',
             content: '<p>⬇️Ukazuje vzdálenost k nejbližšímu nebo vybranému bodu zájmu</p>',
             center: true  // ZMĚNA: Centrováno na střed
-            customPosition: 'distance'  // přidáme vlastní značku
         },
         {
             title: '👁️ Rozšířená realita',
