@@ -1317,7 +1317,7 @@
 
         console.log("🐝 Bee AR script with quiz system and gamification loaded successfully!");
 
-        // === TUTORIAL INICIALIZACE ===
+        // === TUTORIAL INICIALIZACE DEBUG===
 let tutorialInitialized = false;
 
 async function initializeTutorial() {
@@ -1374,114 +1374,111 @@ function startTutorialWhenReady() {
     }, 3000); // 3 sekundy po načtení A-Frame
 }
 
- // === KONTROLA AKTIVACE ACHIEVEMENTU ===
+// === OPRAVA PROBLÉMU S NAČÍTÁNÍM DAT ===
 
-// 1. Zkontroluj, zda je achievement skutečně aktivovaný v localStorage
-function checkBeeQuizAchievementStatus() {
-    console.log("=== BEE QUIZ ACHIEVEMENT STATUS ===");
+// 1. Nejdřív zkontrolujme funkci getCompletedQuizzes
+function debugGetCompletedQuizzes() {
+    console.log("=== DEBUG getCompletedQuizzes ===");
     
-    // Zkontroluj localStorage
-    const achievementData = localStorage.getItem('arAchievements');
-    console.log("Raw achievement data:", achievementData);
+    // Zkontroluj co je v localStorage
+    const rawData = localStorage.getItem('beeQuizzesCompleted');
+    console.log("Raw localStorage data:", rawData);
     
-    if (achievementData) {
-        const parsed = JSON.parse(achievementData);
-        console.log("bee_quiz_master in localStorage:", !!parsed['bee_quiz_master']);
-        
-        if (parsed['bee_quiz_master']) {
-            console.log("bee_quiz_master details:", parsed['bee_quiz_master']);
-            console.log("Unlocked at:", parsed['bee_quiz_master'].unlockedAt);
-        } else {
-            console.log("❌ bee_quiz_master NOT found in localStorage");
+    // Zkontroluj co vrací funkce
+    const completed = getCompletedQuizzes();
+    console.log("getCompletedQuizzes() returns:", completed);
+    console.log("Type:", typeof completed);
+    console.log("Is array:", Array.isArray(completed));
+    
+    // Zkus parsovat ručně
+    if (rawData) {
+        try {
+            const parsed = JSON.parse(rawData);
+            console.log("Manual parse:", parsed);
+        } catch (e) {
+            console.log("Parse error:", e);
         }
-    } else {
-        console.log("❌ No achievement data in localStorage");
     }
+    console.log("===============================");
+}
+
+// 2. Opravená test funkce s čekáním
+function testAchievementActivationFixed() {
+    console.log("🧪 FIXED ACHIEVEMENT ACTIVATION TEST");
+    console.log("=====================================");
     
-    // Zkontroluj pomocí gamifikační funkce
-    if (typeof isAchievementUnlocked === 'function') {
-        const isUnlocked = isAchievementUnlocked('bee_quiz_master');
-        console.log("isAchievementUnlocked('bee_quiz_master'):", isUnlocked);
-    }
+    // Nastav kvízy
+    const allQuizzes = Array.from({length: BEE_QUIZZES.length}, (_, i) => i);
+    localStorage.setItem('beeQuizzesCompleted', JSON.stringify(allQuizzes));
+    console.log("✅ All quizzes set in localStorage");
+    
+    // Zkontroluj ihned po nastavení
+    setTimeout(() => {
+        console.log("🔍 Checking data after setTimeout...");
+        debugGetCompletedQuizzes();
+        
+        // Nyní zavolej markQuizCompleted
+        console.log("🎯 Now calling markQuizCompleted(19)...");
+        markQuizCompleted(19);
+        
+        // Zkontroluj výsledek
+        setTimeout(() => {
+            console.log("FINAL CHECK:");
+            checkBeeQuizAchievementStatus();
+        }, 500);
+        
+    }, 100); // Malé zpoždění pro jistotu
     
     console.log("=====================================");
 }
 
-// 2. Zkontroluj kvízový progress
-function checkQuizProgress() {
-    console.log("=== QUIZ PROGRESS CHECK ===");
-    const completed = getCompletedQuizzes();
-    console.log("Completed quizzes:", completed.length);
-    console.log("Total quizzes:", BEE_QUIZZES.length);
-    console.log("All completed:", completed.length === BEE_QUIZZES.length);
-    console.log("Completed quiz IDs:", completed);
-    console.log("===========================");
-}
-
-// 3. Manuální test aktivace s debugem
-function testAchievementActivationWithDebug() {
-    console.log("🧪 TESTING ACHIEVEMENT ACTIVATION WITH DEBUG");
-    console.log("=============================================");
+// 3. Alternativní řešení - přímá aktivace
+function directActivateBeeQuizAchievement() {
+    console.log("🎯 DIRECT ACHIEVEMENT ACTIVATION");
+    console.log("=================================");
     
-    // Ujisti se, že jsou všechny kvízy dokončené
+    // Nastav kvízy
     const allQuizzes = Array.from({length: BEE_QUIZZES.length}, (_, i) => i);
     localStorage.setItem('beeQuizzesCompleted', JSON.stringify(allQuizzes));
-    console.log("✅ All quizzes marked as completed");
     
-    // Zkontroluj před aktivací
-    console.log("BEFORE activation:");
-    checkBeeQuizAchievementStatus();
-    
-    // Zkus aktivovat pomocí markQuizCompleted
-    console.log("🎯 Calling markQuizCompleted(19)...");
-    markQuizCompleted(19);
-    
-    // Zkontroluj po aktivaci
-    setTimeout(() => {
-        console.log("AFTER activation:");
-        checkBeeQuizAchievementStatus();
-    }, 1000);
-    
-    console.log("=============================================");
-}
-
-// 4. Zkontroluj inventář a zakomentované achievementy
-function checkInventoryAndCommented() {
-    console.log("=== INVENTORY VS CONFIG CHECK ===");
-    
-    // Zkontroluj, co je v localStorage
-    const achievementData = localStorage.getItem('arAchievements');
-    if (achievementData) {
-        const savedAchievements = Object.keys(JSON.parse(achievementData));
-        console.log("Achievements in localStorage:", savedAchievements);
-        
-        // Zkontroluj, co je v aktuální konfiguraci
-        if (typeof ACHIEVEMENTS_CONFIG !== 'undefined') {
-            const configAchievements = Object.keys(ACHIEVEMENTS_CONFIG);
-            console.log("Achievements in current config:", configAchievements);
-            
-            // Najdi achievementy v localStorage, které nejsou v config
-            const orphaned = savedAchievements.filter(id => !configAchievements.includes(id));
-            console.log("Orphaned achievements (in localStorage but not in config):", orphaned);
-            
-            // Najdi stezka_bohuslavice_first_scene
-            const hasFirstScene = savedAchievements.includes('stezka_bohuslavice_first_scene');
-            const configHasFirstScene = configAchievements.includes('stezka_bohuslavice_first_scene');
-            console.log("stezka_bohuslavice_first_scene in localStorage:", hasFirstScene);
-            console.log("stezka_bohuslavice_first_scene in config:", configHasFirstScene);
-        }
+    // Aktivuj achievement přímo bez markQuizCompleted
+    if (typeof unlockAchievement === 'function') {
+        console.log("🏆 Calling unlockAchievement directly...");
+        const result = unlockAchievement('bee_quiz_master');
+        console.log("Result:", result);
+    } else {
+        console.log("❌ unlockAchievement not available");
     }
+    
+    // Zkontroluj výsledek
+    setTimeout(() => {
+        checkBeeQuizAchievementStatus();
+    }, 500);
+    
     console.log("=================================");
 }
 
+// 4. Zkontroluj současnou implementaci getCompletedQuizzes
+function checkGetCompletedQuizzesImplementation() {
+    console.log("=== getCompletedQuizzes IMPLEMENTATION ===");
+    
+    if (typeof getCompletedQuizzes === 'function') {
+        console.log("Function source:");
+        console.log(getCompletedQuizzes.toString());
+    } else {
+        console.log("❌ getCompletedQuizzes function not found");
+    }
+    
+    console.log("=========================================");
+}
+
 // Globální dostupnost
-window.checkBeeQuizAchievementStatus = checkBeeQuizAchievementStatus;
-window.checkQuizProgress = checkQuizProgress;
-window.testAchievementActivationWithDebug = testAchievementActivationWithDebug;
-window.checkInventoryAndCommented = checkInventoryAndCommented;
+window.debugGetCompletedQuizzes = debugGetCompletedQuizzes;
+window.testAchievementActivationFixed = testAchievementActivationFixed;
+window.directActivateBeeQuizAchievement = directActivateBeeQuizAchievement;
+window.checkGetCompletedQuizzesImplementation = checkGetCompletedQuizzesImplementation;
 
-console.log("🔧 Achievement activation diagnostic loaded");
-
+console.log("🔧 Timing fix functions loaded");
     </script>
 </body>
 </html>
