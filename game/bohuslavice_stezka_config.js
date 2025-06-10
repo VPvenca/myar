@@ -6,8 +6,8 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
     scenes: {
         "/assets/stezka_bohuslavice/vcela.html": {
             name: "Včelařská stezka",
-            totalMarkers: 3, 
-            markers: ["vcela_1", "vcela_2", "vcela_3"]
+            totalMarkers: 4, 
+            markers: ["vcela_1", "vcela_2", "vcela_3", "quiz_master"]
         }
     },
 
@@ -57,6 +57,17 @@ const BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG = {
             sceneId: "/assets/stezka_bohuslavice/vcela.html",
             image: "/img/achievements/znalec_vcelstva.png"
         },
+
+        "quiz_master": {
+    name: "Mistr včelařství",
+    description: "Dokončil jsi všech 20 včelích kvízů!",
+    icon: "🏆",
+    category: "stezka_bohuslavice",
+    rarity: "legendary",
+    sceneId: "/assets/stezka_bohuslavice/vcela.html",
+    markerId: "quiz_master",
+    image: "/img/achievements/quiz_master.png"
+}
 
         // === ZÁKLADNÍ ACHIEVEMENTY PRO EXPOZICI (OPRAVENÉ ID) ===
         "stezka_bohuslavice_first_scene": {
