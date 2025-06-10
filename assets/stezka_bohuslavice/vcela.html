@@ -596,25 +596,46 @@
             return completed ? JSON.parse(completed) : [];
         }
         
+        // === OPRAVENÁ FUNKCE markQuizCompleted ===
         function markQuizCompleted(quizIndex) {
-    const completed = getCompletedQuizzes();
-    if (!completed.includes(quizIndex)) {
-        completed.push(quizIndex);
-        localStorage.setItem('beeQuizzesCompleted', JSON.stringify(completed));
-        console.log(`🐝 Quiz ${quizIndex} completed. Total: ${completed.length}/${BEE_QUIZZES.length}`);
-        
-        // === PŘÍMÁ AKTIVACE KVÍZOVÉHO ACHIEVEMENTU ===
-        if (completed.length === BEE_QUIZZES.length) {
-            console.log('🏆 All 20 quizzes completed! Activating quiz achievement directly...');
+            const completed = getCompletedQuizzes();
+            console.log(`🐝 markQuizCompleted called for quiz ${quizIndex}`);
+            console.log(`📊 Current completed: ${completed.length}/${BEE_QUIZZES.length}`);
             
-            // Aktivuj přímo kvízový achievement pomocí unlockAchievement
-            if (typeof unlockAchievement === 'function') {
-                unlockAchievement('bee_quiz_master');
-                console.log('✅ bee_quiz_master achievement unlocked directly');
+            // Přidej kvíz, pokud není dokončený
+            if (!completed.includes(quizIndex)) {
+                completed.push(quizIndex);
+                localStorage.setItem('beeQuizzesCompleted', JSON.stringify(completed));
+                console.log(`✅ Quiz ${quizIndex} added. New total: ${completed.length}/${BEE_QUIZZES.length}`);
             } else {
-                console.error("❌ unlockAchievement function not found");
-                    }
+                console.log(`ℹ️ Quiz ${quizIndex} already completed`);
+            }
+            
+            // === KONTROLA ACHIEVEMENTU MIMO IF - VŽDY SE ZKONTROLUJE ===
+            const finalCompleted = getCompletedQuizzes(); // Znovu načti data
+            
+            if (finalCompleted.length === BEE_QUIZZES.length) {
+                console.log('🏆 All 20 quizzes completed! Activating quiz achievement...');
+                
+                // Zkontroluj, zda už není achievement odemčený
+                if (typeof isAchievementUnlocked === 'function' && isAchievementUnlocked('bee_quiz_master')) {
+                    console.log('ℹ️ bee_quiz_master already unlocked');
+                    return;
                 }
+                
+                // Aktivuj achievement přímo
+                if (typeof unlockAchievement === 'function') {
+                    const success = unlockAchievement('bee_quiz_master');
+                    console.log('✅ unlockAchievement result:', success);
+                    
+                    if (success) {
+                        console.log('🎉 Kvízový achievement úspěšně aktivován!');
+                    }
+                } else {
+                    console.error("❌ unlockAchievement function not found");
+                }
+            } else {
+                console.log(`📈 Progress: ${finalCompleted.length}/${BEE_QUIZZES.length} quizzes completed`);
             }
         }
         
@@ -745,13 +766,13 @@
             
             // Zkontroluj, že je expozice registrovaná
             if (typeof EXPOSITION_REGISTRY !== 'undefined' && EXPOSITION_REGISTRY['stezka_bohuslavice']) {
-            console.log("✅ Včelařská stezka exposition is registered");
+                console.log("✅ Včelařská stezka exposition is registered");
             } else {
-             console.warn("⚠️ Včelařská stezka exposition not found in registry");
-            // Zkus inicializovat znovu za chvíli
-            setTimeout(initializeGameification, 1000);
-            return;
-}
+                console.warn("⚠️ Včelařská stezka exposition not found in registry");
+                // Zkus inicializovat znovu za chvíli
+                setTimeout(initializeGameification, 1000);
+                return;
+            }
             
             // Inicializuj time tracking
             if (typeof initializeTimeTracking === 'function') {
@@ -1317,168 +1338,112 @@
 
         console.log("🐝 Bee AR script with quiz system and gamification loaded successfully!");
 
-        // === TUTORIAL INICIALIZACE DEBUG===
-let tutorialInitialized = false;
+        // === TUTORIAL INICIALIZACE ===
+        let tutorialInitialized = false;
 
-async function initializeTutorial() {
-    if (tutorialInitialized) return;
-    
-    try {
-        console.log("🎓 Loading tutorial config...");
-        
-        // Dynamicky načti config
-        const script = document.createElement('script');
-        script.src = '/assets/stezka_bohuslavice/tutorial/config_vcela.js';
-        
-        await new Promise((resolve, reject) => {
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
-        
-        // Počkej chvilku na vykonání
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        console.log("✅ Tutorial config loaded, creating instance...");
-        
-        // Vytvoř tutorial instanci
-        if (typeof ARTutorial !== 'undefined' && typeof tutorialConfig !== 'undefined') {
-            window.arTutorial = ARTutorial.create(tutorialConfig);
-            tutorialInitialized = true;
-            console.log("✅ Tutorial initialized successfully");
-            return true;
-        } else {
-            console.error("❌ Tutorial dependencies not loaded");
-            return false;
+        async function initializeTutorial() {
+            if (tutorialInitialized) return;
+            
+            try {
+                console.log("🎓 Loading tutorial config...");
+                
+                // Dynamicky načti config
+                const script = document.createElement('script');
+                script.src = '/assets/stezka_bohuslavice/tutorial/config_vcela.js';
+                
+                await new Promise((resolve, reject) => {
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+                
+                // Počkej chvilku na vykonání
+                await new Promise(resolve => setTimeout(resolve, 200));
+                
+                console.log("✅ Tutorial config loaded, creating instance...");
+                
+                // Vytvoř tutorial instanci
+                if (typeof ARTutorial !== 'undefined' && typeof tutorialConfig !== 'undefined') {
+                    window.arTutorial = ARTutorial.create(tutorialConfig);
+                    tutorialInitialized = true;
+                    console.log("✅ Tutorial initialized successfully");
+                    return true;
+                } else {
+                    console.error("❌ Tutorial dependencies not loaded");
+                    return false;
+                }
+                
+            } catch (error) {
+                console.error("❌ Tutorial initialization failed:", error);
+                return false;
+            }
         }
-        
-    } catch (error) {
-        console.error("❌ Tutorial initialization failed:", error);
-        return false;
-    }
-}
 
-function startTutorialWhenReady() {
-    // Spusť tutorial až když je všechno připraveno
-    setTimeout(async () => {
-        console.log("🎓 Starting tutorial initialization...");
-        
-        const success = await initializeTutorial();
-        if (success && window.arTutorial) {
-            // Malé zpoždění pro plynulý přechod
-            setTimeout(() => {
-                console.log("🎓 Starting tutorial...");
-                window.arTutorial.start();
-            }, 1000);
+        function startTutorialWhenReady() {
+            // Spusť tutorial až když je všechno připraveno
+            setTimeout(async () => {
+                console.log("🎓 Starting tutorial initialization...");
+                
+                const success = await initializeTutorial();
+                if (success && window.arTutorial) {
+                    // Malé zpoždění pro plynulý přechod
+                    setTimeout(() => {
+                        console.log("🎓 Starting tutorial...");
+                        window.arTutorial.start();
+                    }, 1000);
+                }
+            }, 3000); // 3 sekundy po načtení A-Frame
         }
-    }, 3000); // 3 sekundy po načtení A-Frame
-}
 
-// === OPRAVA PROBLÉMU S NAČÍTÁNÍM DAT ===
-
-// 1. Nejdřív zkontrolujme funkci getCompletedQuizzes
-function debugGetCompletedQuizzes() {
-    console.log("=== DEBUG getCompletedQuizzes ===");
-    
-    // Zkontroluj co je v localStorage
-    const rawData = localStorage.getItem('beeQuizzesCompleted');
-    console.log("Raw localStorage data:", rawData);
-    
-    // Zkontroluj co vrací funkce
-    const completed = getCompletedQuizzes();
-    console.log("getCompletedQuizzes() returns:", completed);
-    console.log("Type:", typeof completed);
-    console.log("Is array:", Array.isArray(completed));
-    
-    // Zkus parsovat ručně
-    if (rawData) {
-        try {
-            const parsed = JSON.parse(rawData);
-            console.log("Manual parse:", parsed);
-        } catch (e) {
-            console.log("Parse error:", e);
+        // === DEBUG FUNKCE ===
+        
+        // Debug funkce pro testování
+        function debugGetCompletedQuizzes() {
+            console.log("=== DEBUG getCompletedQuizzes ===");
+            
+            const rawData = localStorage.getItem('beeQuizzesCompleted');
+            console.log("Raw localStorage data:", rawData);
+            
+            const completed = getCompletedQuizzes();
+            console.log("getCompletedQuizzes() returns:", completed);
+            console.log("Type:", typeof completed);
+            console.log("Is array:", Array.isArray(completed));
+            
+            if (rawData) {
+                try {
+                    const parsed = JSON.parse(rawData);
+                    console.log("Manual parse:", parsed);
+                } catch (e) {
+                    console.log("Parse error:", e);
+                }
+            }
+            console.log("===============================");
         }
-    }
-    console.log("===============================");
-}
 
-// 2. Opravená test funkce s čekáním
-function testAchievementActivationFixed() {
-    console.log("🧪 FIXED ACHIEVEMENT ACTIVATION TEST");
-    console.log("=====================================");
-    
-    // Nastav kvízy
-    const allQuizzes = Array.from({length: BEE_QUIZZES.length}, (_, i) => i);
-    localStorage.setItem('beeQuizzesCompleted', JSON.stringify(allQuizzes));
-    console.log("✅ All quizzes set in localStorage");
-    
-    // Zkontroluj ihned po nastavení
-    setTimeout(() => {
-        console.log("🔍 Checking data after setTimeout...");
-        debugGetCompletedQuizzes();
-        
-        // Nyní zavolej markQuizCompleted
-        console.log("🎯 Now calling markQuizCompleted(19)...");
-        markQuizCompleted(19);
-        
-        // Zkontroluj výsledek
-        setTimeout(() => {
-            console.log("FINAL CHECK:");
-            checkBeeQuizAchievementStatus();
-        }, 500);
-        
-    }, 100); // Malé zpoždění pro jistotu
-    
-    console.log("=====================================");
-}
+        function directActivateBeeQuizAchievement() {
+            console.log("🎯 DIRECT ACHIEVEMENT ACTIVATION");
+            console.log("=================================");
+            
+            const allQuizzes = Array.from({length: BEE_QUIZZES.length}, (_, i) => i);
+            localStorage.setItem('beeQuizzesCompleted', JSON.stringify(allQuizzes));
+            
+            if (typeof unlockAchievement === 'function') {
+                console.log("🏆 Calling unlockAchievement directly...");
+                const result = unlockAchievement('bee_quiz_master');
+                console.log("Result:", result);
+            } else {
+                console.log("❌ unlockAchievement not available");
+            }
+            
+            console.log("=================================");
+        }
 
-// 3. Alternativní řešení - přímá aktivace
-function directActivateBeeQuizAchievement() {
-    console.log("🎯 DIRECT ACHIEVEMENT ACTIVATION");
-    console.log("=================================");
-    
-    // Nastav kvízy
-    const allQuizzes = Array.from({length: BEE_QUIZZES.length}, (_, i) => i);
-    localStorage.setItem('beeQuizzesCompleted', JSON.stringify(allQuizzes));
-    
-    // Aktivuj achievement přímo bez markQuizCompleted
-    if (typeof unlockAchievement === 'function') {
-        console.log("🏆 Calling unlockAchievement directly...");
-        const result = unlockAchievement('bee_quiz_master');
-        console.log("Result:", result);
-    } else {
-        console.log("❌ unlockAchievement not available");
-    }
-    
-    // Zkontroluj výsledek
-    setTimeout(() => {
-        checkBeeQuizAchievementStatus();
-    }, 500);
-    
-    console.log("=================================");
-}
+        // Globální dostupnost pro debugging
+        window.debugGetCompletedQuizzes = debugGetCompletedQuizzes;
+        window.directActivateBeeQuizAchievement = directActivateBeeQuizAchievement;
+        window.markQuizCompleted = markQuizCompleted; // Pro testování
 
-// 4. Zkontroluj současnou implementaci getCompletedQuizzes
-function checkGetCompletedQuizzesImplementation() {
-    console.log("=== getCompletedQuizzes IMPLEMENTATION ===");
-    
-    if (typeof getCompletedQuizzes === 'function') {
-        console.log("Function source:");
-        console.log(getCompletedQuizzes.toString());
-    } else {
-        console.log("❌ getCompletedQuizzes function not found");
-    }
-    
-    console.log("=========================================");
-}
-
-// Globální dostupnost
-window.debugGetCompletedQuizzes = debugGetCompletedQuizzes;
-window.testAchievementActivationFixed = testAchievementActivationFixed;
-window.directActivateBeeQuizAchievement = directActivateBeeQuizAchievement;
-window.checkGetCompletedQuizzesImplementation = checkGetCompletedQuizzesImplementation;
-
-console.log("🔧 Timing fix functions loaded");
+        console.log("🔧 Debug functions loaded");
     </script>
 </body>
 </html>
