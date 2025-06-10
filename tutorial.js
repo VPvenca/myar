@@ -102,91 +102,59 @@ class ARTutorial {
         console.log(`✅ Tutorial HTML created with ${this.config.steps.length} steps`);
     }
     
-   // UPRAVENÁ FUNKCE createStepElement v tutorial.js
-
-
-createStepElement(step, stepNumber) {
-    const stepDiv = document.createElement('div');
-    stepDiv.className = 'tutorial-step';
-    stepDiv.id = `tutorialStep${stepNumber}`;
-    stepDiv.setAttribute('data-step', stepNumber);
-    stepDiv.style.display = 'none';
-    
-    // Pro centrované kroky nastavit celý step na fixed positioning
-    if (step.center) {
-        stepDiv.style.position = 'fixed';
-        stepDiv.style.top = '0';
-        stepDiv.style.left = '0';
-        stepDiv.style.width = '100vw';
-        stepDiv.style.height = '100vh';
-        stepDiv.style.zIndex = '10001';
-        stepDiv.style.pointerEvents = 'none';
-    }
-    
-    // Arrow - UPRAVENO: i pro centrované kroky
-    if (step.arrow) {
-        const arrow = document.createElement('div');
-        arrow.className = `tutorial-arrow tutorial-arrow-${step.arrow.direction}`;
-        if (step.arrow.style) {
-            arrow.style.cssText = step.arrow.style;
-        }
-        stepDiv.appendChild(arrow);
-    }
-    
-    // Bubble
-    const bubble = document.createElement('div');
-    bubble.className = step.center ? 'tutorial-bubble-center' : 'tutorial-bubble';
-    bubble.style.pointerEvents = 'auto';
-    
-    // NOVÉ: Aplikace custom stylů pro centrované bubliny
-    if (step.center) {
-        // Základní centrování
-        bubble.style.position = 'fixed';
-        bubble.style.zIndex = '10002';
+    createStepElement(step, stepNumber) {
+        const stepDiv = document.createElement('div');
+        stepDiv.className = 'tutorial-step';
+        stepDiv.id = `tutorialStep${stepNumber}`;
+        stepDiv.setAttribute('data-step', stepNumber);
+        stepDiv.style.display = 'none';
         
-        // Pokud má step vlastní style, použij ho
-        if (step.style) {
-            bubble.style.cssText += '; ' + step.style;
-            console.log(`🎨 Applied custom style to step ${stepNumber}: ${step.style}`);
-        } else {
-            // Výchozí centrování
-            bubble.style.top = '50%';
-            bubble.style.left = '50%';
-            bubble.style.transform = 'translate(-50%, -50%)';
+        // Arrow
+        if (step.arrow) {
+            const arrow = document.createElement('div');
+            arrow.className = `tutorial-arrow tutorial-arrow-${step.arrow.direction}`;
+            if (step.arrow.style) {
+                arrow.style.cssText = step.arrow.style;
+            }
+            stepDiv.appendChild(arrow);
         }
-    } else if (step.bubble && step.bubble.style) {
-        bubble.style.cssText = step.bubble.style;
+        
+        // Bubble
+        const bubble = document.createElement('div');
+        bubble.className = step.center ? 'tutorial-bubble-center' : 'tutorial-bubble';
+        if (!step.center && step.bubble && step.bubble.style) {
+            bubble.style.cssText = step.bubble.style;
+        }
+        
+        // Title
+        const title = document.createElement('h3');
+        title.innerHTML = step.title;
+        bubble.appendChild(title);
+        
+        // Content
+        const content = document.createElement('div');
+        content.innerHTML = step.content;
+        bubble.appendChild(content);
+        
+        // Button
+        const nextButton = document.createElement('button');
+        nextButton.className = 'tutorial-next';
+        nextButton.textContent = stepNumber === this.totalSteps ? (step.finalButton || 'Začít!') : 'Pokračovat';
+        
+        // OPRAVENO: Event listener místo onclick
+        nextButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log(`🎓 Button clicked for step ${stepNumber}`);
+            this.next();
+        });
+        
+        bubble.appendChild(nextButton);
+        stepDiv.appendChild(bubble);
+        
+        console.log(`✅ Step ${stepNumber} element created: ${step.title}`);
+        return stepDiv;
     }
-    
-    // Title
-    const title = document.createElement('h3');
-    title.innerHTML = step.title;
-    bubble.appendChild(title);
-    
-    // Content
-    const content = document.createElement('div');
-    content.innerHTML = step.content;
-    bubble.appendChild(content);
-    
-    // Button
-    const nextButton = document.createElement('button');
-    nextButton.className = 'tutorial-next';
-    nextButton.textContent = stepNumber === this.totalSteps ? (step.finalButton || 'Začít!') : 'Pokračovat';
-    
-    // Event listener
-    nextButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log(`🎓 Button clicked for step ${stepNumber}`);
-        this.next();
-    });
-    
-    bubble.appendChild(nextButton);
-    stepDiv.appendChild(bubble);
-    
-    console.log(`✅ Step ${stepNumber} element created: ${step.title}${step.center ? ' (CENTERED)' : ''}${step.style ? ' with custom style' : ''}`);
-    return stepDiv;
-}
     
     createProgressDots() {
         const progress = document.createElement('div');
