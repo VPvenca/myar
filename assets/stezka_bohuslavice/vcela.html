@@ -596,23 +596,18 @@
             return completed ? JSON.parse(completed) : [];
         }
         
-        function markQuizCompleted(quizIndex, wasCorrect = true) {
-    const completed = getCompletedQuizzes();
-    if (!completed.includes(quizIndex)) {
-        completed.push(quizIndex);
-        localStorage.setItem('beeQuizzesCompleted', JSON.stringify(completed));
-        
-        console.log(`🐝 Quiz ${quizIndex} completed. Total: ${completed.length}/${BEE_QUIZZES.length}`);
-        
-        // === JEDNODUCHÁ KONTROLA ACHIEVEMENTU ===
-        if (completed.length === BEE_QUIZZES.length) {
-            console.log('🏆 All 20 quizzes completed! Activating achievement...');
-            
-            // Aktivuj achievement - používá stávající gamifikační systém
-            if (typeof recordBeeMarkerActivation === 'function') {
-                recordBeeMarkerActivation('quiz_master');
-            } else {
-                console.error("❌ recordBeeMarkerActivation function not found");
+        function markQuizCompleted(quizIndex) {
+            const completed = getCompletedQuizzes();
+            if (!completed.includes(quizIndex)) {
+                completed.push(quizIndex);
+                localStorage.setItem('beeQuizzesCompleted', JSON.stringify(completed));
+                console.log(`🐝 Quiz ${quizIndex} completed. Total: ${completed.length}/${BEE_QUIZZES.length}`);
+                
+                // Pokud jsou všechny kvízy dokončené, aktivuj gamifikační odznak
+                if (completed.length === BEE_QUIZZES.length) {
+                    console.log('🏆 All bee quizzes completed! Activating achievement...');
+                    if (typeof recordMarkerActivation === 'function') {
+                        recordMarkerActivation(currentExpositionId, currentSceneId, 'bee_quiz_master');
                     }
                 }
             }
