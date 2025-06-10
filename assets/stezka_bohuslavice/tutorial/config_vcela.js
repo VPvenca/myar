@@ -36,7 +36,13 @@ const tutorialConfig = {
         {
             title: '🧭 Navigace',
             content: '<p>↗️Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
-            center: true  // ZMĚNA: Centrováno na střed
+             arrow: {
+                direction: 'right',
+                style: 'top: 25px; left: 120px;'
+            },
+            bubble: {
+                style: 'top: 10px; left: 140px;'
+            
         },
         {
             title: '📍 Informace o vzdálenosti',
