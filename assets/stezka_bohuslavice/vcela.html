@@ -597,17 +597,22 @@
         }
         
         function markQuizCompleted(quizIndex) {
-            const completed = getCompletedQuizzes();
-            if (!completed.includes(quizIndex)) {
-                completed.push(quizIndex);
-                localStorage.setItem('beeQuizzesCompleted', JSON.stringify(completed));
-                console.log(`🐝 Quiz ${quizIndex} completed. Total: ${completed.length}/${BEE_QUIZZES.length}`);
-                
-                // Pokud jsou všechny kvízy dokončené, aktivuj gamifikační odznak
-                if (completed.length === BEE_QUIZZES.length) {
-                    console.log('🏆 All bee quizzes completed! Activating achievement...');
-                    if (typeof recordMarkerActivation === 'function') {
-                        recordMarkerActivation(currentExpositionId, currentSceneId, 'bee_quiz_master');
+    const completed = getCompletedQuizzes();
+    if (!completed.includes(quizIndex)) {
+        completed.push(quizIndex);
+        localStorage.setItem('beeQuizzesCompleted', JSON.stringify(completed));
+        console.log(`🐝 Quiz ${quizIndex} completed. Total: ${completed.length}/${BEE_QUIZZES.length}`);
+        
+        // === PŘÍMÁ AKTIVACE KVÍZOVÉHO ACHIEVEMENTU ===
+        if (completed.length === BEE_QUIZZES.length) {
+            console.log('🏆 All 20 quizzes completed! Activating quiz achievement directly...');
+            
+            // Aktivuj přímo kvízový achievement pomocí unlockAchievement
+            if (typeof unlockAchievement === 'function') {
+                unlockAchievement('bee_quiz_master');
+                console.log('✅ bee_quiz_master achievement unlocked directly');
+            } else {
+                console.error("❌ unlockAchievement function not found");
                     }
                 }
             }
