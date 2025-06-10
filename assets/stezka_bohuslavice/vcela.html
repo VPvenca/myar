@@ -1374,7 +1374,113 @@ function startTutorialWhenReady() {
     }, 3000); // 3 sekundy po načtení A-Frame
 }
 
- 
+ // === KONTROLA AKTIVACE ACHIEVEMENTU ===
+
+// 1. Zkontroluj, zda je achievement skutečně aktivovaný v localStorage
+function checkBeeQuizAchievementStatus() {
+    console.log("=== BEE QUIZ ACHIEVEMENT STATUS ===");
+    
+    // Zkontroluj localStorage
+    const achievementData = localStorage.getItem('arAchievements');
+    console.log("Raw achievement data:", achievementData);
+    
+    if (achievementData) {
+        const parsed = JSON.parse(achievementData);
+        console.log("bee_quiz_master in localStorage:", !!parsed['bee_quiz_master']);
+        
+        if (parsed['bee_quiz_master']) {
+            console.log("bee_quiz_master details:", parsed['bee_quiz_master']);
+            console.log("Unlocked at:", parsed['bee_quiz_master'].unlockedAt);
+        } else {
+            console.log("❌ bee_quiz_master NOT found in localStorage");
+        }
+    } else {
+        console.log("❌ No achievement data in localStorage");
+    }
+    
+    // Zkontroluj pomocí gamifikační funkce
+    if (typeof isAchievementUnlocked === 'function') {
+        const isUnlocked = isAchievementUnlocked('bee_quiz_master');
+        console.log("isAchievementUnlocked('bee_quiz_master'):", isUnlocked);
+    }
+    
+    console.log("=====================================");
+}
+
+// 2. Zkontroluj kvízový progress
+function checkQuizProgress() {
+    console.log("=== QUIZ PROGRESS CHECK ===");
+    const completed = getCompletedQuizzes();
+    console.log("Completed quizzes:", completed.length);
+    console.log("Total quizzes:", BEE_QUIZZES.length);
+    console.log("All completed:", completed.length === BEE_QUIZZES.length);
+    console.log("Completed quiz IDs:", completed);
+    console.log("===========================");
+}
+
+// 3. Manuální test aktivace s debugem
+function testAchievementActivationWithDebug() {
+    console.log("🧪 TESTING ACHIEVEMENT ACTIVATION WITH DEBUG");
+    console.log("=============================================");
+    
+    // Ujisti se, že jsou všechny kvízy dokončené
+    const allQuizzes = Array.from({length: BEE_QUIZZES.length}, (_, i) => i);
+    localStorage.setItem('beeQuizzesCompleted', JSON.stringify(allQuizzes));
+    console.log("✅ All quizzes marked as completed");
+    
+    // Zkontroluj před aktivací
+    console.log("BEFORE activation:");
+    checkBeeQuizAchievementStatus();
+    
+    // Zkus aktivovat pomocí markQuizCompleted
+    console.log("🎯 Calling markQuizCompleted(19)...");
+    markQuizCompleted(19);
+    
+    // Zkontroluj po aktivaci
+    setTimeout(() => {
+        console.log("AFTER activation:");
+        checkBeeQuizAchievementStatus();
+    }, 1000);
+    
+    console.log("=============================================");
+}
+
+// 4. Zkontroluj inventář a zakomentované achievementy
+function checkInventoryAndCommented() {
+    console.log("=== INVENTORY VS CONFIG CHECK ===");
+    
+    // Zkontroluj, co je v localStorage
+    const achievementData = localStorage.getItem('arAchievements');
+    if (achievementData) {
+        const savedAchievements = Object.keys(JSON.parse(achievementData));
+        console.log("Achievements in localStorage:", savedAchievements);
+        
+        // Zkontroluj, co je v aktuální konfiguraci
+        if (typeof ACHIEVEMENTS_CONFIG !== 'undefined') {
+            const configAchievements = Object.keys(ACHIEVEMENTS_CONFIG);
+            console.log("Achievements in current config:", configAchievements);
+            
+            // Najdi achievementy v localStorage, které nejsou v config
+            const orphaned = savedAchievements.filter(id => !configAchievements.includes(id));
+            console.log("Orphaned achievements (in localStorage but not in config):", orphaned);
+            
+            // Najdi stezka_bohuslavice_first_scene
+            const hasFirstScene = savedAchievements.includes('stezka_bohuslavice_first_scene');
+            const configHasFirstScene = configAchievements.includes('stezka_bohuslavice_first_scene');
+            console.log("stezka_bohuslavice_first_scene in localStorage:", hasFirstScene);
+            console.log("stezka_bohuslavice_first_scene in config:", configHasFirstScene);
+        }
+    }
+    console.log("=================================");
+}
+
+// Globální dostupnost
+window.checkBeeQuizAchievementStatus = checkBeeQuizAchievementStatus;
+window.checkQuizProgress = checkQuizProgress;
+window.testAchievementActivationWithDebug = testAchievementActivationWithDebug;
+window.checkInventoryAndCommented = checkInventoryAndCommented;
+
+console.log("🔧 Achievement activation diagnostic loaded");
 
     </script>
 </body>
