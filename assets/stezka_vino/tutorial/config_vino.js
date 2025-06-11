@@ -1,0 +1,102 @@
+/**
+ * TUTORIAL CONFIG FOR VCELA.HTML
+ * Konfigurační soubor pro tutoriál včelí stezky
+ */
+
+// Konfigurace tutoriálu pro včelí stezku
+const tutorialConfig = {
+    id: 'vcela-stezka',
+    storageKey: 'ar-tutorial-completed',
+    autoStart: true,
+    autoStartDelay: 1500,
+    
+    steps: [
+        {
+            title: '⬅️ Zpět do Menu',
+            content: '<p>Tímto tlačítkem se vrátíte do hlavního menu aplikace</p>',
+          
+            bubble: {
+                style: 'top: 10px; left: 140px;'
+            }
+        },
+        {
+            title: '🔊 Audio ovládání',
+            content: '<p>Ovládá přehrávání zvuku, který se spustí při přiblížení k bodu zájmu</p>',
+         
+            bubble: {
+                style: 'top: 60px; left: 90px;'
+            }
+        },
+        {
+            title: '↗️ Navigace',
+            content: '<p>Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
+            center: true  // ZMĚNA: Centrováno na střed
+        },
+        {
+            title: '⬇️ Informace o vzdálenosti',
+            content: '<p>Ukazuje vzdálenost k nejbližšímu nebo vybranému bodu zájmu</p>',
+            center: true  // ZMĚNA: Centrováno na střed
+        },
+        {
+            title: '👁️ Rozšířená realita',
+            content: `
+                <ul>
+                    <li>🎯 Na <strong>30m</strong> se objekt zobrazí v AR</li>
+                    <li>🎵 Na <strong>15m</strong> se spustí zvukový doprovod</li>
+                    <li>🔄 Dotykem můžete objekt otáčet</li>
+                    <li>📱 Pohybujte telefonem pro lepší zobrazení</li>
+                </ul>
+            `,
+            center: true
+        },
+        {
+            title: '⚠️ Bezpečnost na prvním místě',
+            content: `
+                <div style="background: rgba(255, 69, 58, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #ff453a; margin-bottom: 10px;">
+                    <p style="margin: 5px 0; font-weight: bold; color: #ff453a;">Důležité upozornění:</p>
+                    <ul style="margin: 8px 0;">
+                        <li>👀 <strong>Vždy sledujte okolí</strong> a cestu před sebou</li>
+                        <li>🚶 Při pohledu do telefonu se <strong>zastavte</strong></li>
+                        <li>🛣️ Dávejte pozor na <strong>vozovky a překážky</strong></li>
+                        <li>👥 Buďte ohleduplní k <strong>ostatním lidem</strong></li>
+                    </ul>
+                    <p style="margin: 5px 0; font-size: 13px; color: #ff8a80;">Bezpečná cesta je nejlepší cesta! 🙏</p>
+                </div>
+            `,
+            center: true,
+            finalButton: 'Rozumím, začít bezpečně! 🚀'
+        }
+    ],
+    
+    onComplete: function() {
+        console.log('Tutorial completed for včelí stezka');
+        // Zde můžete spustit další logiku po dokončení tutoriálu
+    }
+};
+
+// Inicializace tutoriálu
+function initTutorial() {
+    // Kontrola, jestli je ARTutorial class dostupná
+    if (typeof ARTutorial !== 'undefined') {
+        arTutorial = ARTutorial.create(tutorialConfig);
+    } else {
+        console.error('ARTutorial class not found. Make sure tutorial.js is loaded first.');
+    }
+}
+
+// Spustit po načtení stránky
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initTutorial, 500);
+    });
+} else {
+    setTimeout(initTutorial, 500);
+}
+
+// Pro debug - resetování tutoriálu (volitelné)
+function resetTutorial() {
+    if (arTutorial) {
+        arTutorial.reset();
+        arTutorial.start();
+    }
+}

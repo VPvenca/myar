@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="/img/favicon.png" />
+
+    <title>AR Aplikace</title> <!-- Mírně upravený titulek -->
+    <!-- Základní styly a preset -->
+    <link rel="stylesheet" href="/css/base.css">
+
+    <!-- Styly pro layout stránky -->
+    <link rel="stylesheet" href="/css/layout.css">
+
+    <!-- Styly pro komponenty -->
+    <link rel="stylesheet" href="/css/buttons.css">
+    <link rel="stylesheet" href="/css/modal.css">
+    <link rel="stylesheet" href="/css/text-block.css">
+    <link rel="stylesheet" href="/css/links.css">
+
+    <!-- Styly specifické pro stránky (musí být poslední, aby mohly přepsat obecné) -->
+    <link rel="stylesheet" href="/css/pages.css"> 
+    
+    <!-- Pokud chcete použít Google Font (viz níže), přidejte sem link -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/img/apple_touch_icon_192x192.png">
+   
+</head>
+<body class="home-page">
+
+    <div class="page-wrapper"> <!-- Obalovač pro flexbox layout s patičkou dole -->
+        <header class="app-header">
+            <!-- Sem umístěte logo -->
+            <img src="/img/augview.png" alt="Logo AR Aplikace" id="app-logo">
+            <h1>Vyberte AR Scénu</h1>
+        </header>
+        
+    <main>    
+        
+          <div class="menu-content">
+  
+    
+        <!-- OPRAVENÉ tlačítko s hvězdami -->
+<a href="/assets/stezka_vino/stezka.html" class="menu-button icon-button">
+    <img src="/assets/stezka_vino/thumb/hrozen.png" alt="" class="button-icon">
+    <span class="button-text">vinařská stezka</span>
+    <div class="star-display" data-scene-id="/assets/stezka_vino/stezka.html"></div>
+</a>
+            
+              
+           
+          </div>  
+
+            <div class="centered-controls">
+                <!-- Původní tlačítko mapy můžete odstranit nebo ponechat -->
+                <!-- <div class="map-section-minimal">
+                    <p class="map-link-wrapper-minimal">
+                        <a href="https://www.google.com/maps/search/?api=1&query=49.049458,17.122834" target="_blank" rel="noopener noreferrer" class="map-button-minimal">
+                            Zobrazit na mapě
+                        </a>
+                    </p>
+                </div> -->
+
+                <div class="back-button-container">
+                    <a href="/mista_stezky.html" class="menu-button back-button">
+                        Zpět
+                    </a>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- PLOVOUCÍ TLAČÍTKA v pravém dolním rohu -->
+        <div class="floating-buttons">
+            <!-- Tlačítko mapy -->
+            <a href="https://www.google.com/maps/search/?api=1&query=49.049458,17.122834" 
+               target="_blank" 
+               rel="noopener noreferrer" 
+               class="floating-button map-floating-button"
+               title="Zobrazit na mapě">
+                <svg class="map-icon" viewBox="0 0 24 24">
+                    <path d="M20.5,3L20.34,3.03L15,5.1L9,3L3.36,4.9C3.15,4.97 3,5.15 3,5.38V20.5A0.5,0.5 0 0,0 3.5,21L3.66,20.97L9,18.9L15,21L20.64,19.1C20.85,19.03 21,18.85 21,18.62V3.5A0.5,0.5 0 0,0 20.5,3M10,5.47L14,6.87V18.53L10,17.13V5.47M5,6.46L8,5.45V17.15L5,18.31V6.46M16,18.55L19,17.54V5.84L16,6.9V18.55Z"/>
+                </svg>
+            </a>
+            
+            <!-- Tlačítko nápovědy -->
+            <button id="help-button" class="floating-button help-icon-button" title="Nápověda">?</button>
+        </div>
+
+        <footer class="app-footer">
+            <p>© 2025 Vytvořil Václav Pěnčík</p>
+        </footer>
+
+    </div> <!-- Konec page-wrapper -->
+ <!-- Modální okno Nápovědy -->
+    <div id="help-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>📌 Nápověda</h2>
+            <p>
+                Vyberte si jednu z dostupných scén pomocí tlačítek v hlavní nabídce.
+                Po spuštění scény postupujte podle instrukcí na obrazovce pro zobrazení
+                rozšířené reality.
+            </p>
+            <h3 style="color: #666; margin-bottom: 0.5rem;">🎥 Je nutné povolit přístup ke kameře zařízení!</h3>
+            <p>
+            <h3 style="color: #666; margin-bottom: 0.5rem;">👀 Ujistěte se, že máte dostatek světla a sledujte okolí.</h3>
+            </p>    
+            <h2>📲 Menu Panel</h2>
+            <div class="help-items-container">
+                 
+                <div class="help-item">
+                    <img src="/assets/stezka_vino/thumb/hrozen.png" alt="hrozen" class="inline-icon">
+                    <p>Vydejte se na hravou stezku a zjistěte víc o víně.</p>
+                </div>
+                 <h2>🌟Sbírejte hvězdy!</h2>
+            <div class="help-items-container">
+                <div class="help-item"> 
+                    <img src="/img/stars.png" alt="stars" class="inline-icon">
+                    <p>Hvězdy ukazují, jak moc jste zvídaví. Objevují se u tlačítek se scénami.
+                       Za zhlédnutí všech scén v jedné kategorii získáte zlatou hvězdu.
+                       Pokud si přehrajete alespoň polovinu, dostanete stříbrnou hvězdu.
+                       A bronzovou získáte už jen za krátké nahlédnutí.</p>
+                    <p>
+                      Cílem je nasbírat všechny zlaté hvězdy – to je ta pravá výzva!
+                      A když se vám to podaří, čeká vás odměna na recepci.</p>
+               
+              
+            </div> <!-- Konec help-items-container -->
+
+            
+            
+
+            <button id="close-help-button" class="menu-button modal-close-button">Zpět do menu</button>
+        </div>
+    </div> <!-- Konec modal-overlay -->
+    <script src="/gamification-config.js"></script>
+<script src="/gamification.js"></script>
+<script src="/game/vino_stezka_config.js"></script>
+<script src="/script.js"></script>
+
+<!-- Skript pro zobrazení hvězd na této stránce -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("🌟 Star display script starting...");
+    
+    // Počkej, až bude vše načteno
+    setTimeout(() => {
+        const starDisplayElements = document.querySelectorAll('.star-display[data-scene-id]');
+        console.log("Found star display elements:", starDisplayElements.length);
+        
+        const currentExpositionId = getCurrentExpositionId(); 
+        console.log("Current exposition ID:", currentExpositionId);
+        
+        if (!currentExpositionId || currentExpositionId === 'unknown') {
+             console.error("Cannot determine current exposition ID. Stars may not display correctly.");
+             return;
+        }
+
+        starDisplayElements.forEach(starElement => {
+            const sceneId = starElement.dataset.sceneId;
+            console.log("Processing scene ID:", sceneId);
+
+            if (SCENE_CONFIG && SCENE_CONFIG[sceneId]) {
+                console.log("✅ Scene config found for:", sceneId);
+                const level = getSceneStarLevel(currentExpositionId, sceneId); 
+                console.log("Star level:", level);
+                displayStars(starElement, level);
+            } else {
+                console.warn(`Config for scene ID "${sceneId}" not found in SCENE_CONFIG.`);
+                console.log("Available scene configs:", Object.keys(SCENE_CONFIG || {}));
+            }
+        });
+    }, 500); // Počkáme 500ms, aby se vše stihlo načíst
+});
+    </script>
+   
+
+</body>
+</html>
