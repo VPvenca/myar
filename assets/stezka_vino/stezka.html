@@ -1135,7 +1135,10 @@
                 distanceInfo.innerHTML = '📍 Čekám na GPS...';
                 return;
             }
-            
+             if (!startPosition) {
+                startPosition = { ...userPosition };
+                console.log("🎯 Start position initialized in updateDistanceDisplay");
+            }
             const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
             const completed = getCompletedQuizzes();
             
