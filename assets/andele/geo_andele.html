@@ -242,8 +242,6 @@
             display: none;
         }
 
-
-
         /* Gamifikační status - SKRYTO */
         .gamification-status {
             display: none !important;
@@ -384,6 +382,136 @@
     </a-scene>
 
     <script>
+        // === TUTORIAL KONFIGURACE (PŘIDÁNO) ===
+        const tutorialConfig = {
+            id: 'andele-stezka',
+            storageKey: 'ar-tutorial-completed',
+            autoStart: true,
+            autoStartDelay: 1500,
+            
+            steps: [
+                {
+                    title: '🔙 Zpět do Menu',
+                    content: '<p>Tímto tlačítkem se vrátíte do hlavního menu aplikace</p>',
+                    arrow: {
+                        direction: 'right',
+                        style: 'top: 25px; left: 120px;'
+                    },
+                    bubble: {
+                        style: 'top: 10px; left: 140px;'
+                    }
+                },
+                {
+                    title: '🔊 Audio ovládání',
+                    content: '<p>Ovládá přehrávání zvuku, který se spustí při přiblížení k bodu zájmu</p>',
+                    arrow: {
+                        direction: 'right',
+                        style: 'top: 75px; left: 70px;'
+                    },
+                    bubble: {
+                        style: 'top: 60px; left: 90px;'
+                    }
+                },
+                {
+                    title: '🧭 Navigace',
+                    content: '<p>Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
+                    arrow: {
+                        direction: 'left',
+                        style: 'top: 25px; right: 160px;'
+                    },
+                    bubble: {
+                        style: 'top: 10px; right: 180px;'
+                    }
+                },
+                {
+                    title: '📍 Informace o vzdálenosti',
+                    content: '<p>Ukazuje vzdálenost k nejbližšímu nebo vybranému bodu zájmu</p>',
+                    arrow: {
+                        direction: 'up',
+                        style: 'bottom: 100px; left: 50%; transform: translateX(-50%);'
+                    },
+                    bubble: {
+                        style: 'bottom: 120px; left: 50%; transform: translateX(-50%);'
+                    }
+                },
+                {
+                    title: '👁️ Rozšířená realita',
+                    content: `
+                        <ul>
+                            <li>🎯 Na <strong>30m</strong> se objekt zobrazí v AR</li>
+                            <li>🎵 Na <strong>15m</strong> se spustí zvukový doprovod</li>
+                            <li>🔄 Dotykem můžete objekt otáčet</li>
+                            <li>📱 Pohybujte telefonem pro lepší zobrazení</li>
+                        </ul>
+                    `,
+                    center: true
+                },
+                {
+                    title: '⚠️ Bezpečnost na prvním místě',
+                    content: `
+                        <div style="background: rgba(255, 69, 58, 0.1); padding: 12px; border-radius: 8px; border-left: 3px solid #ff453a; margin-bottom: 10px;">
+                            <p style="margin: 5px 0; font-weight: bold; color: #ff453a;">Důležité upozornění:</p>
+                            <ul style="margin: 8px 0;">
+                                <li>👀 <strong>Vždy sledujte okolí</strong> a cestu před sebou</li>
+                                <li>🚶 Při pohledu do telefonu se <strong>zastavte</strong></li>
+                                <li>🛣️ Dávejte pozor na <strong>vozovky a překážky</strong></li>
+                                <li>👥 Buďte ohleduplní k <strong>ostatním návštěvníkům</strong></li>
+                            </ul>
+                            <p style="margin: 5px 0; font-size: 13px; color: #ff8a80;">Bezpečná cesta je nejlepší cesta! 🙏</p>
+                        </div>
+                    `,
+                    center: true,
+                    finalButton: 'Rozumím, začít bezpečně! ✨'
+                }
+            ],
+            
+            onComplete: function() {
+                console.log('Tutorial completed for andělská stezka');
+            }
+        };
+
+        // === TUTORIAL SYSTÉM (PŘIDÁNO ZE VČELA.HTML) ===
+        let tutorialInitialized = false;
+
+        async function initializeTutorial() {
+            if (tutorialInitialized) return;
+            
+            try {
+                console.log("🎓 Initializing tutorial for angels...");
+                
+                // Vytvoř tutorial instanci
+                if (typeof ARTutorial !== 'undefined') {
+                    window.arTutorial = ARTutorial.create(tutorialConfig);
+                    tutorialInitialized = true;
+                    console.log("✅ Tutorial initialized successfully");
+                    return true;
+                } else {
+                    console.error("❌ ARTutorial class not found");
+                    return false;
+                }
+                
+            } catch (error) {
+                console.error("❌ Tutorial initialization failed:", error);
+                return false;
+            }
+        }
+
+        function startTutorialWhenReady() {
+            // Spusť tutorial až když je všechno připraveno
+            setTimeout(async () => {
+                console.log("🎓 Starting tutorial initialization...");
+                
+                const success = await initializeTutorial();
+                if (success && window.arTutorial) {
+                    // Malé zpoždění pro plynulý přechod
+                    setTimeout(() => {
+                        console.log("🎓 Starting tutorial...");
+                        window.arTutorial.start();
+                    }, 1000);
+                }
+            }, 3000); // 3 sekundy po načtení A-Frame
+        }
+
         // === GAMIFIKAČNÍ PROMĚNNÉ ===
         let gamificationInitialized = false;
         let currentExpositionId = 'andele';  // OPRAVENO: Správné ID expozice
@@ -1224,7 +1352,7 @@
 
         // Inicializace
         window.addEventListener('load', () => {
-            console.log("Starting geolocation AR scene with 3 GLB angel models, touch rotation, sequential unlocking and gamification...");
+            console.log("Starting geolocation AR scene with 3 GLB angel models, touch rotation, sequential unlocking, gamification and tutorial...");
             
             // Počkej na načtení gamifikačních skriptů a pak inicializuj
             setTimeout(() => {
@@ -1244,13 +1372,17 @@
             console.log("Camera fix applied for mobile devices");
             console.log("Sequential unlocking system enabled");
             console.log("Gamification system enabled - achievements handle rewards");
+            console.log("Tutorial system enabled");
         });
 
         // A-Frame scéna je připravena
         document.querySelector('a-scene').addEventListener('loaded', () => {
-            console.log("A-Frame scene loaded for geolocation AR with 3 GLB angel models, sequential unlocking and gamification");
+            console.log("A-Frame scene loaded for geolocation AR with 3 GLB angel models, sequential unlocking, gamification and tutorial");
             
             setupCameraFix();
+            
+            // PŘIDÁNO: Spuštění tutorialu když je A-Frame připravený
+            startTutorialWhenReady();
             
             // Kontrola načtení všech GLB modelů
             const glbModel1 = document.querySelector('#rotatable-angel-1');
@@ -1285,7 +1417,7 @@
             }
         });
 
-        console.log("😇 Angel AR script with 3D models, touch rotation, sequential unlocking and achievement-based gamification loaded successfully!");
+        console.log("😇 Angel AR script with 3D models, touch rotation, sequential unlocking, achievement-based gamification and tutorial loaded successfully!");
     </script>
 </body>
 </html>
