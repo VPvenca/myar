@@ -240,38 +240,7 @@
             display: none;
         }
 
-        /* NOVÝ PRVEK - PROGRESS INFO */
-        .progress-info {
-            position: fixed;
-            top: 60px;
-            right: 10px;
-            background-color: rgba(0,0,255,0.8);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            z-index: 1000;
-            border: 2px solid #4444ff;
-        }
-        
-        /* NOVÝ PRVEK - ZPRÁVA O DOKONČENÍ */
-        .completion-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0,255,0,0.9);
-            color: white;
-            padding: 20px 30px;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: bold;
-            z-index: 2000;
-            text-align: center;
-            border: 3px solid #00ff00;
-            display: none;
-        }
+
 
         /* Gamifikační status - SKRYTO */
         .gamification-status {
@@ -291,11 +260,6 @@
     
     <!-- UPRAVENÉ AUDIO TLAČÍTKO - POUZE IKONA -->
     <div class="audio-info" id="audioInfo">🔊</div>
-    
-    <!-- NOVÝ PRVEK - PROGRESS INFO -->
-    <div class="progress-info" id="progressInfo">
-        👼 Najdi prvního anděla
-    </div>
     
     <div class="rotation-hint" id="rotationHint">
         🔄 Tažením otočíte anděla
@@ -317,12 +281,6 @@
                 ✕ Zrušit výběr
             </div>
         </div>
-    </div>
-    
-    <!-- NOVÝ PRVEK - ZPRÁVA O DOKONČENÍ -->
-    <div class="completion-message" id="completionMessage">
-        🎉 Gratulujeme!<br>
-        Našli jste všechny Anděly!
     </div>
     
     <!-- Gamifikační status - SKRYTO -->
@@ -491,47 +449,6 @@
                 return unlockedMarkers.has(marker.id);
             });
         }
-        
-        // Funkce pro získání aktuálního cíle pro progress
-        function getNextIncompleteTarget() {
-            return markerSequence.find(marker => 
-                unlockedMarkers.has(marker.id) && !completedMarkers.has(marker.id)
-            );
-        }
-        
-        // Funkce pro aktualizaci progressu
-        function updateProgress() {
-            const progressInfo = document.getElementById('progressInfo');
-            const completed = completedMarkers.size;
-            const total = markerSequence.length;
-            
-            if (completed >= total) {
-                progressInfo.innerHTML = `🎉 Všichni andělé nalezeni! (${completed}/${total})`;
-                progressInfo.style.backgroundColor = 'rgba(0,255,0,0.8)';
-                progressInfo.style.borderColor = '#00ff00';
-                
-                // Zobrazíme zprávu o dokončení
-                showCompletionMessage();
-            } else {
-                const nextTarget = getNextIncompleteTarget();
-                if (nextTarget) {
-                    progressInfo.innerHTML = `👼 Najdi ${nextTarget.name.split(' ')[1] || nextTarget.name}`;
-                } else {
-                    progressInfo.innerHTML = `👼 Prozkoumej nalezené anděly`;
-                }
-            }
-        }
-        
-        // Zobrazení zprávy o dokončení
-        function showCompletionMessage() {
-            const completionMessage = document.getElementById('completionMessage');
-            completionMessage.style.display = 'block';
-            
-            // Automaticky skryjeme po 5 sekundách
-            setTimeout(() => {
-                completionMessage.style.display = 'none';
-            }, 5000);
-        }
 
         // === GAMIFIKAČNÍ FUNKCE ===
         
@@ -604,15 +521,9 @@
                 // Aktualizujeme zobrazení
                 updateNavigation();
                 updateDistanceDisplay();
-                updateProgress();
                 
-                // Pokud je vše dokončeno, zobrazíme zprávu
-                if (completedMarkers.size >= markerSequence.length) {
-                    console.log("All markers completed!");
-                    setTimeout(() => {
-                        showCompletionMessage();
-                    }, 1000);
-                }
+                // Achievement systém se postará o odměny - žádné explicitní zprávy
+                console.log(`Progress: ${completedMarkers.size}/${markerSequence.length} angels found`);
             }
             
             if (typeof recordMarkerActivation === 'function') {
@@ -902,9 +813,7 @@
                 '.clear-selection',
                 '.distance-info',
                 '.audio-info',
-                '.rotation-hint',
-                '.progress-info',
-                '.completion-message'
+                '.rotation-hint'
             ];
             
             for (let selector of uiSelectors) {
@@ -1023,7 +932,9 @@
                     distanceInfo.style.backgroundColor = 'rgba(255, 0, 0, 0.9)';
                 }
             } else {
-                const nextTarget = getNextIncompleteTarget();
+                const nextTarget = markerSequence.find(marker => 
+                    unlockedMarkers.has(marker.id) && !completedMarkers.has(marker.id)
+                );
                 if (nextTarget) {
                     distanceInfo.innerHTML = `📍 Hledám ${nextTarget.name.split(' ')[1] || nextTarget.name}...`;
                 } else if (completedMarkers.size > 0) {
@@ -1127,7 +1038,6 @@
             });
             
             updateDistanceDisplay();
-            updateProgress();
         }
 
         function selectTarget(targetId) {
@@ -1273,11 +1183,6 @@
             
             // Přidej event listener pro audio panel
             document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
-            
-            // Zavření zprávy o dokončení při kliku
-            document.getElementById('completionMessage').addEventListener('click', () => {
-                document.getElementById('completionMessage').style.display = 'none';
-            });
         }
 
         function setupCameraFix() {
@@ -1336,7 +1241,7 @@
             console.log("Touch rotation enabled for all 3 angel GLB models");
             console.log("Camera fix applied for mobile devices");
             console.log("Sequential unlocking system enabled");
-            console.log("Gamification system enabled for Angels");
+            console.log("Gamification system enabled - achievements handle rewards");
         });
 
         // A-Frame scéna je připravena
@@ -1378,7 +1283,7 @@
             }
         });
 
-        console.log("😇 Angel AR script with 3D models, touch rotation, sequential unlocking and gamification loaded successfully!");
+        console.log("😇 Angel AR script with 3D models, touch rotation, sequential unlocking and achievement-based gamification loaded successfully!");
     </script>
 </body>
 </html>
