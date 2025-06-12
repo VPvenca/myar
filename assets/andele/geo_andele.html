@@ -151,6 +151,23 @@
             border-left-color: #ff0000;
         }
         
+        /* NOVÉ STYLY PRO POSTUPNÉ ODEMYKÁNÍ */
+        .target-item.current {
+            border-left-color: #00ff00; /* Aktuální cíl = zelená */
+        }
+        
+        .target-item.completed {
+            border-left-color: #888888; /* Dokončené = šedá */
+            background-color: rgba(136,136,136,0.2);
+        }
+        
+        .target-item.locked {
+            border-left-color: #666666; /* Uzamčené = tmavě šedá */
+            background-color: rgba(68,68,68,0.2);
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
         .target-name {
             font-weight: bold;
             color: white;
@@ -223,6 +240,39 @@
             display: none;
         }
 
+        /* NOVÝ PRVEK - PROGRESS INFO */
+        .progress-info {
+            position: fixed;
+            top: 60px;
+            right: 10px;
+            background-color: rgba(0,0,255,0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 1000;
+            border: 2px solid #4444ff;
+        }
+        
+        /* NOVÝ PRVEK - ZPRÁVA O DOKONČENÍ */
+        .completion-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0,255,0,0.9);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            z-index: 2000;
+            text-align: center;
+            border: 3px solid #00ff00;
+            display: none;
+        }
+
         /* Gamifikační status - SKRYTO */
         .gamification-status {
             display: none !important;
@@ -241,6 +291,11 @@
     
     <!-- UPRAVENÉ AUDIO TLAČÍTKO - POUZE IKONA -->
     <div class="audio-info" id="audioInfo">🔊</div>
+    
+    <!-- NOVÝ PRVEK - PROGRESS INFO -->
+    <div class="progress-info" id="progressInfo">
+        👼 Najdi prvního anděla
+    </div>
     
     <div class="rotation-hint" id="rotationHint">
         🔄 Tažením otočíte anděla
@@ -262,6 +317,12 @@
                 ✕ Zrušit výběr
             </div>
         </div>
+    </div>
+    
+    <!-- NOVÝ PRVEK - ZPRÁVA O DOKONČENÍ -->
+    <div class="completion-message" id="completionMessage">
+        🎉 Gratulujeme!<br>
+        Našli jste všechny Anděly!
     </div>
     
     <!-- Gamifikační status - SKRYTO -->
@@ -371,9 +432,9 @@
         // GPS přesnost a debugging
         let userPosition = null;
         let lastStablePosition = null;
-        const PROXIMITY_THRESHOLD = 10; // metry - vzdálenost pro aktivaci gamifikace
-        const AR_VISIBILITY_THRESHOLD = 20; // metry
-        const AUDIO_THRESHOLD = 10; // metry - vzdálenost pro spuštění audio
+        const PROXIMITY_THRESHOLD = 15; // metry - vzdálenost pro aktivaci gamifikace
+        const AR_VISIBILITY_THRESHOLD = 30; // metry
+        const AUDIO_THRESHOLD = 15; // metry - vzdálenost pro spuštění audio
         const GPS_SMOOTHING_FACTOR = 0.3;
         const MIN_GPS_ACCURACY = 20;
         let arObjectsVisible = false;
@@ -383,20 +444,24 @@
         let audioIsPaused = false;
         let positionHistory = [];
         
+        // NOVÉ PROMĚNNÉ PRO POSTUPNÉ ODEMYKÁNÍ
+        let completedMarkers = new Set(); // Dokončené markery
+        let unlockedMarkers = new Set(['andel_1']); // Odemčené markery (první je odemčený od začátku)
+        
         // Proměnné pro rotaci modelů
         let modelRotationY = 30;
         let isRotating = false;
         let startX = 0;
         let rotationHintShown = false;
         
-        // Definice cílových bodů
-        const markers = [
+        // UPRAVENÁ DEFINICE CÍLOVÝCH BODŮ S POSTUPNOSTÍ
+        const markerSequence = [
             { 
                 id: "andel_1", 
                 lat: 49.0096667,
                 lng: 17.1254167,
                 name: "😇 Anděl Gabriel",
-                description: "Gabriel - Anděl zvěstování",
+                description: "Gabriel - Anděl zvěstování (První)",
                 audioId: "audio1"
             },
             { 
@@ -404,7 +469,7 @@
                  lat: 49.0091389,  
                  lng: 17.1286111,  
                  name: "💚 Anděl Rafael",
-                 description: "Rafael - Anděl léčení",
+                 description: "Rafael - Anděl léčení (Druhý)",
                  audioId: "audio2"
             },
             { 
@@ -412,10 +477,61 @@
                  lat: 49.0100556,  
                  lng: 17.1227778,  
                  name: "⚔️ Anděl Michael",
-                 description: "Michael - Archanděl",
+                 description: "Michael - Archanděl (Třetí)",
                  audioId: "audio3"
             }
         ];
+
+        // NOVÉ FUNKCE PRO POSTUPNÉ ODEMYKÁNÍ
+        
+        // Funkce pro získání aktuálně dostupných markerů
+        function getAvailableMarkers() {
+            return markerSequence.filter(marker => {
+                // Odemčené markery jsou dostupné
+                return unlockedMarkers.has(marker.id);
+            });
+        }
+        
+        // Funkce pro získání aktuálního cíle pro progress
+        function getNextIncompleteTarget() {
+            return markerSequence.find(marker => 
+                unlockedMarkers.has(marker.id) && !completedMarkers.has(marker.id)
+            );
+        }
+        
+        // Funkce pro aktualizaci progressu
+        function updateProgress() {
+            const progressInfo = document.getElementById('progressInfo');
+            const completed = completedMarkers.size;
+            const total = markerSequence.length;
+            
+            if (completed >= total) {
+                progressInfo.innerHTML = `🎉 Všichni andělé nalezeni! (${completed}/${total})`;
+                progressInfo.style.backgroundColor = 'rgba(0,255,0,0.8)';
+                progressInfo.style.borderColor = '#00ff00';
+                
+                // Zobrazíme zprávu o dokončení
+                showCompletionMessage();
+            } else {
+                const nextTarget = getNextIncompleteTarget();
+                if (nextTarget) {
+                    progressInfo.innerHTML = `👼 Najdi ${nextTarget.name.split(' ')[1] || nextTarget.name}`;
+                } else {
+                    progressInfo.innerHTML = `👼 Prozkoumej nalezené anděly`;
+                }
+            }
+        }
+        
+        // Zobrazení zprávy o dokončení
+        function showCompletionMessage() {
+            const completionMessage = document.getElementById('completionMessage');
+            completionMessage.style.display = 'block';
+            
+            // Automaticky skryjeme po 5 sekundách
+            setTimeout(() => {
+                completionMessage.style.display = 'none';
+            }, 5000);
+        }
 
         // === GAMIFIKAČNÍ FUNKCE ===
         
@@ -457,7 +573,7 @@
             console.log("✅ Gamification initialized successfully for andělé");
         }
 
-        // OPRAVENÁ funkce pro záznam aktivace andělských markerů
+        // OPRAVENÁ funkce pro záznam aktivace andělských markerů s postupným odemykáním
         function recordAngelMarkerActivation(markerId) {
             if (!gamificationInitialized) {
                 console.warn("⚠️ Gamification not initialized yet, skipping marker activation");
@@ -465,6 +581,39 @@
             }
             
             console.log(`😇 Recording angel marker activation: ${markerId} in exposition ${currentExpositionId}, scene ${currentSceneId}`);
+            
+            // Zkontrolujeme, zda je marker odemčený
+            if (!unlockedMarkers.has(markerId)) {
+                console.log(`Marker ${markerId} is locked, ignoring activation`);
+                return;
+            }
+            
+            // Přidáme marker do dokončených pokud už tam není
+            if (!completedMarkers.has(markerId)) {
+                completedMarkers.add(markerId);
+                console.log(`Marker ${markerId} completed! (${completedMarkers.size}/${markerSequence.length})`);
+                
+                // Odemkneme další marker v sekvenci
+                const currentIndex = markerSequence.findIndex(m => m.id === markerId);
+                if (currentIndex >= 0 && currentIndex + 1 < markerSequence.length) {
+                    const nextMarker = markerSequence[currentIndex + 1];
+                    unlockedMarkers.add(nextMarker.id);
+                    console.log(`Unlocked next marker: ${nextMarker.id}`);
+                }
+                
+                // Aktualizujeme zobrazení
+                updateNavigation();
+                updateDistanceDisplay();
+                updateProgress();
+                
+                // Pokud je vše dokončeno, zobrazíme zprávu
+                if (completedMarkers.size >= markerSequence.length) {
+                    console.log("All markers completed!");
+                    setTimeout(() => {
+                        showCompletionMessage();
+                    }, 1000);
+                }
+            }
             
             if (typeof recordMarkerActivation === 'function') {
                 recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
@@ -495,8 +644,11 @@
 
         // UPRAVENÉ AUDIO FUNKCE - POUZE IKONY JAKO U VČEL
         function playAudio(markerId) {
-            const marker = markers.find(m => m.id === markerId);
+            const marker = markerSequence.find(m => m.id === markerId);
             if (!marker) return;
+            
+            // Zkontroluj, zda je marker odemčený
+            if (!unlockedMarkers.has(markerId)) return;
             
             if (audioPlayingForMarker === markerId) return;
             
@@ -627,20 +779,21 @@
             return R * c;
         }
 
-        // HLAVNÍ FUNKCE - Kontrola proximity s gamifikací
+        // HLAVNÍ FUNKCE - Kontrola proximity s gamifikací a postupným odemykáním
         function checkProximityToMarkers() {
             if (!userPosition) return;
             
             console.log("Checking proximity with user position:", userPosition);
             let shouldStopAudio = true;
+            const availableMarkers = getAvailableMarkers(); // Pouze odemčené markery
             
-            markers.forEach(marker => {
+            availableMarkers.forEach(marker => {
                 const distance = calculateDistance(
                     userPosition.lat, userPosition.lng,
                     marker.lat, marker.lng
                 );
                 
-                console.log(`${marker.id}: distance = ${distance.toFixed(1)}m, visibility threshold = ${AR_VISIBILITY_THRESHOLD}m`);
+                console.log(`${marker.id}: distance = ${distance.toFixed(1)}m, visibility threshold = ${AR_VISIBILITY_THRESHOLD}m, unlocked = ${unlockedMarkers.has(marker.id)}`);
                 
                 const arEntity = document.querySelector(`[data-marker-id="${marker.id}"]`);
                 if (arEntity) {
@@ -673,11 +826,11 @@
                 stopCurrentAudio();
             }
             
-            const visibleCount = markers.filter(marker => {
+            const visibleCount = availableMarkers.filter(marker => {
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
                 return entity && entity.getAttribute('visible') === true;
             }).length;
-            console.log(`${visibleCount}/${markers.length} angels are visible in AR`);
+            console.log(`${visibleCount}/${availableMarkers.length} available angels are visible in AR`);
         }
 
         // Funkce pro rotace všech tří GLB modelů dotykem
@@ -749,7 +902,9 @@
                 '.clear-selection',
                 '.distance-info',
                 '.audio-info',
-                '.rotation-hint'
+                '.rotation-hint',
+                '.progress-info',
+                '.completion-message'
             ];
             
             for (let selector of uiSelectors) {
@@ -780,7 +935,8 @@
         
         function isModelVisible() {
             let anyVisible = false;
-            markers.forEach(marker => {
+            const availableMarkers = getAvailableMarkers();
+            availableMarkers.forEach(marker => {
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
                 if (entity && entity.getAttribute('visible') === true) {
                     anyVisible = true;
@@ -799,13 +955,18 @@
             }, 3000);
         }
 
+        // UPRAVENÉ FUNKCE PRO POSTUPNÉ ODEMYKÁNÍ
+
         function findClosestMarker() {
             if (!userPosition) return null;
+            
+            const availableMarkers = getAvailableMarkers();
+            if (availableMarkers.length === 0) return null;
             
             let closest = null;
             let minDistance = Infinity;
             
-            markers.forEach(marker => {
+            availableMarkers.forEach(marker => {
                 const distance = calculateDistance(
                     userPosition.lat, userPosition.lng,
                     marker.lat, marker.lng
@@ -823,7 +984,8 @@
         function findSelectedMarker() {
             if (!userPosition || !selectedTargetId) return null;
             
-            const marker = markers.find(m => m.id === selectedTargetId);
+            const availableMarkers = getAvailableMarkers();
+            const marker = availableMarkers.find(m => m.id === selectedTargetId);
             if (!marker) return null;
             
             const distance = calculateDistance(
@@ -861,7 +1023,14 @@
                     distanceInfo.style.backgroundColor = 'rgba(255, 0, 0, 0.9)';
                 }
             } else {
-                distanceInfo.innerHTML = '📍 Hledám nejbližší anděla...';
+                const nextTarget = getNextIncompleteTarget();
+                if (nextTarget) {
+                    distanceInfo.innerHTML = `📍 Hledám ${nextTarget.name.split(' ')[1] || nextTarget.name}...`;
+                } else if (completedMarkers.size > 0) {
+                    distanceInfo.innerHTML = `👼 Vyberte anděla v navigaci`;
+                } else {
+                    distanceInfo.innerHTML = `📍 Hledám prvního anděla...`;
+                }
                 distanceInfo.style.borderColor = '#FFD700';
                 distanceInfo.style.backgroundColor = 'rgba(255, 215, 0, 0.9)';
             }
@@ -873,48 +1042,75 @@
             const targetsList = document.getElementById('targetsList');
             let html = '';
             
-            const markersWithDistance = markers.map(marker => {
+            // Vypočítání vzdáleností pro všechny markery
+            markerSequence.forEach((marker, index) => {
                 const distance = calculateDistance(
                     userPosition.lat, userPosition.lng,
                     marker.lat, marker.lng
                 );
-                return { ...marker, distance };
-            }).sort((a, b) => a.distance - b.distance);
-            
-            markersWithDistance.forEach((marker, index) => {
-                const isClosest = index === 0;
+                
+                const isCompleted = completedMarkers.has(marker.id);
+                const isUnlocked = unlockedMarkers.has(marker.id);
                 const isSelected = marker.id === selectedTargetId;
                 
+                // Určení CSS třídy a stavu
                 let cssClass = 'target-item';
-                if (isSelected) {
-                    cssClass += ' selected';
+                let statusIcon = '';
+                let clickable = true;
+                
+                if (!isUnlocked) {
+                    cssClass += ' locked';
+                    statusIcon = ' 🔒';
+                    clickable = false;
+                    
+                    html += `
+                        <div class="${cssClass}">
+                            <div class="target-name">
+                                ${marker.name}${statusIcon}
+                            </div>
+                            <div class="target-details">
+                                Uzamčeno - najděte předchozí anděly
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                if (isCompleted) {
+                    cssClass += ' completed';
+                    statusIcon = ' ✅';
                 } else {
-                    if (marker.distance <= AR_VISIBILITY_THRESHOLD) {
+                    cssClass += ' current';
+                    statusIcon = ' 👼';
+                    
+                    // Přidáme barvu podle vzdálenosti pro nedokončené
+                    if (distance <= AR_VISIBILITY_THRESHOLD) {
                         cssClass += ' very-close';
-                    } else if (marker.distance <= 100) {
+                    } else if (distance <= 100) {
                         cssClass += ' medium';
                     } else {
                         cssClass += ' far';
                     }
-                    
-                    if (isClosest && !isSelected) {
-                        cssClass = 'target-item closest';
-                    }
                 }
                 
+                if (isSelected) {
+                    cssClass += ' selected';
+                }
+                
+                // Audio indikátor v navigaci
                 let audioIndicator = '';
-                if (marker.distance <= AUDIO_THRESHOLD) {
+                if (distance <= AUDIO_THRESHOLD) {
                     audioIndicator = ' 🎵';
                 }
                 
                 html += `
                     <div class="${cssClass}" data-target-id="${marker.id}">
                         <div class="target-name">
-                            ${marker.name}${audioIndicator}
+                            ${marker.name}${statusIcon}${audioIndicator}
                             ${isSelected ? ' 🎯' : ''}
                         </div>
                         <div class="target-details">
-                            ${formatDistance(marker.distance)} - ${marker.description}
+                            ${formatDistance(distance)}${isCompleted ? ' - Znovu navštívit' : ''}
                         </div>
                     </div>
                 `;
@@ -922,7 +1118,8 @@
             
             targetsList.innerHTML = html;
             
-            document.querySelectorAll('.target-item').forEach(item => {
+            // Přidání event listenerů pro výběr cíle (pouze pro odemčené)
+            document.querySelectorAll('.target-item[data-target-id]').forEach(item => {
                 item.addEventListener('click', () => {
                     const targetId = item.getAttribute('data-target-id');
                     selectTarget(targetId);
@@ -930,9 +1127,14 @@
             });
             
             updateDistanceDisplay();
+            updateProgress();
         }
 
         function selectTarget(targetId) {
+            const isUnlocked = unlockedMarkers.has(targetId);
+            
+            if (!isUnlocked) return; // Nelze vybrat uzamčený marker
+            
             selectedTargetId = targetId;
             document.getElementById('clearSelection').style.display = 'block';
             updateNavigation();
@@ -1071,6 +1273,11 @@
             
             // Přidej event listener pro audio panel
             document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
+            
+            // Zavření zprávy o dokončení při kliku
+            document.getElementById('completionMessage').addEventListener('click', () => {
+                document.getElementById('completionMessage').style.display = 'none';
+            });
         }
 
         function setupCameraFix() {
@@ -1110,7 +1317,7 @@
 
         // Inicializace
         window.addEventListener('load', () => {
-            console.log("Starting geolocation AR scene with 3 GLB angel models, touch rotation and gamification...");
+            console.log("Starting geolocation AR scene with 3 GLB angel models, touch rotation, sequential unlocking and gamification...");
             
             // Počkej na načtení gamifikačních skriptů a pak inicializuj
             setTimeout(() => {
@@ -1123,16 +1330,18 @@
             getCurrentPosition();
             watchPosition();
             
+            console.log(`Starting with unlocked markers: ${Array.from(unlockedMarkers).join(', ')}`);
             console.log(`Audio threshold set to: ${AUDIO_THRESHOLD} meters`);
             console.log(`AR visibility threshold set to: ${AR_VISIBILITY_THRESHOLD} meters`);
             console.log("Touch rotation enabled for all 3 angel GLB models");
             console.log("Camera fix applied for mobile devices");
+            console.log("Sequential unlocking system enabled");
             console.log("Gamification system enabled for Angels");
         });
 
         // A-Frame scéna je připravena
         document.querySelector('a-scene').addEventListener('loaded', () => {
-            console.log("A-Frame scene loaded for geolocation AR with 3 GLB angel models and gamification");
+            console.log("A-Frame scene loaded for geolocation AR with 3 GLB angel models, sequential unlocking and gamification");
             
             setupCameraFix();
             
@@ -1169,7 +1378,7 @@
             }
         });
 
-        console.log("😇 Angel AR script with 3D models, touch rotation and gamification loaded successfully!");
+        console.log("😇 Angel AR script with 3D models, touch rotation, sequential unlocking and gamification loaded successfully!");
     </script>
 </body>
 </html>
