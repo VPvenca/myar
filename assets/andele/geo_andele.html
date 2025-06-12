@@ -197,37 +197,53 @@
             background-color: rgba(255, 68, 68, 1);
         }
         
-        /* NOVÝ STYL PRO AUDIO TLAČÍTKO - POUZE IKONA JAKO U VČEL */
+        /* NOVÝ STYL PRO AUDIO TLAČÍTKO - STÁLE VIDITELNÉ */
         .audio-info {
             position: fixed;
             top: 60px;
             left: 10px;
-            background: rgba(40, 167, 69, 0.9);
+            background: rgba(100, 100, 100, 0.9);
             color: white;
             padding: 12px;
             border-radius: 50%;
             font-size: 20px;
             z-index: 1000;
-            display: none;
+            display: flex; /* STÁLE VIDITELNÉ */
             cursor: pointer;
             user-select: none;
             width: 40px;
             height: 40px;
-            display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.2s;
-            border: 2px solid rgba(40, 167, 69, 1);
+            transition: background 0.3s, transform 0.2s;
+            border: 2px solid rgba(100, 100, 100, 1);
         }
 
         .audio-info:hover {
-            background: rgba(40, 167, 69, 1);
             transform: scale(1.05);
         }
 
         .audio-info:active {
-            background: rgba(34, 142, 58, 1);
             transform: scale(0.95);
+        }
+        
+        /* Stavy audio tlačítka */
+        .audio-info.inactive {
+            background: rgba(100, 100, 100, 0.9);
+            border-color: rgba(100, 100, 100, 1);
+            color: white;
+        }
+        
+        .audio-info.playing {
+            background: rgba(40, 167, 69, 0.9);
+            border-color: rgba(40, 167, 69, 1);
+            color: white;
+        }
+        
+        .audio-info.paused {
+            background: rgba(135, 206, 235, 0.9);
+            border-color: rgba(135, 206, 235, 1);
+            color: black;
         }
         
         .rotation-hint {
@@ -307,10 +323,10 @@
             }
         }
         
-        /* Tlačítko pro přepínání efektů */
+        /* Tlačítko pro přepínání efektů - PŘESUNUTO NÍŽE */
         .effects-toggle {
             position: fixed;
-            top: 110px;
+            top: 160px;
             left: 10px;
             background: rgba(255, 215, 0, 0.9);
             color: black;
@@ -355,8 +371,8 @@
         😇 Zpět do Menu
     </a>
     
-    <!-- UPRAVENÉ AUDIO TLAČÍTKO - POUZE IKONA -->
-    <div class="audio-info" id="audioInfo">🔊</div>
+    <!-- UPRAVENÉ AUDIO TLAČÍTKO - STÁLE VIDITELNÉ -->
+    <div class="audio-info inactive" id="audioInfo">🔊</div>
     
     <!-- NOVÉ TLAČÍTKO PRO PŘEPÍNÁNÍ EFEKTŮ -->
     <div class="effects-toggle" id="effectsToggle" title="Přepnout efekty">✨</div>
@@ -566,6 +582,50 @@
         // NOVÉ PROMĚNNÉ PRO POSTUPNÉ ODEMYKÁNÍ
         let completedMarkers = new Set(); // Dokončené markery
         let unlockedMarkers = new Set(['andel_1']); // Odemčené markery (první je odemčený od začátku)
+        
+        // === NOVÉ FUNKCE PRO TRVALÉ ULOŽENÍ POSTUPU ===
+        function loadProgress() {
+            try {
+                const savedCompleted = localStorage.getItem('andele_completed_markers');
+                const savedUnlocked = localStorage.getItem('andele_unlocked_markers');
+                
+                if (savedCompleted) {
+                    completedMarkers = new Set(JSON.parse(savedCompleted));
+                    console.log('📦 Loaded completed markers:', Array.from(completedMarkers));
+                }
+                
+                if (savedUnlocked) {
+                    unlockedMarkers = new Set(JSON.parse(savedUnlocked));
+                    console.log('📦 Loaded unlocked markers:', Array.from(unlockedMarkers));
+                } else {
+                    // Pokud nejsou uložené, zajisti že první je odemčený
+                    unlockedMarkers = new Set(['andel_1']);
+                }
+                
+                // Pokud jsou všichni andělé dokončeni, odemkni všechny
+                if (completedMarkers.size === markerSequence.length) {
+                    markerSequence.forEach(marker => {
+                        unlockedMarkers.add(marker.id);
+                    });
+                    console.log('⭐ All angels completed - all remain unlocked');
+                }
+                
+            } catch (error) {
+                console.error('❌ Error loading progress:', error);
+                completedMarkers = new Set();
+                unlockedMarkers = new Set(['andel_1']);
+            }
+        }
+        
+        function saveProgress() {
+            try {
+                localStorage.setItem('andele_completed_markers', JSON.stringify(Array.from(completedMarkers)));
+                localStorage.setItem('andele_unlocked_markers', JSON.stringify(Array.from(unlockedMarkers)));
+                console.log('💾 Progress saved');
+            } catch (error) {
+                console.error('❌ Error saving progress:', error);
+            }
+        }
         
         // Proměnné pro rotaci modelů
         let modelRotationY = 30;
@@ -833,10 +893,15 @@
                     console.log(`Unlocked next marker: ${nextMarker.id}`);
                 }
                 
+                // Uložit postup
+                saveProgress();
+                
                 updateNavigation();
                 updateDistanceDisplay();
                 
                 console.log(`Progress: ${completedMarkers.size}/${markerSequence.length} angels found`);
+                
+                // === ODSTRANĚNO: GRATULAČNÍ ZPRÁVA - ACHIEVEMENTY TO ZVLÁDNOU ===
             }
             
             if (typeof recordMarkerActivation === 'function') {
@@ -870,9 +935,12 @@
             if (!marker) return;
             
             if (!unlockedMarkers.has(markerId)) return;
-            if (audioPlayingForMarker === markerId) return;
+            if (audioPlayingForMarker === markerId && currentlyPlayingAudio && !currentlyPlayingAudio.paused) return;
             
-            stopCurrentAudio();
+            // Pokud hraje jiné audio, zastav ho
+            if (currentlyPlayingAudio && audioPlayingForMarker !== markerId) {
+                stopCurrentAudio();
+            }
             
             const audioElement = document.getElementById(marker.audioId);
             if (audioElement) {
@@ -887,8 +955,23 @@
                     updateAudioDisplay();
                     
                     audioElement.onended = () => {
-                        console.log(`Audio ended for marker: ${markerId}`);
-                        stopCurrentAudio();
+                        console.log(`Audio ended for marker: ${markerId} - restarting if still close`);
+                        // === NOVÉ: RESTART AUDIO POKUD JE UŽIVATEL STÁLE BLÍZKO ===
+                        if (audioPlayingForMarker === markerId) {
+                            setTimeout(() => {
+                                if (audioPlayingForMarker === markerId && userPosition) {
+                                    const distance = calculateDistance(
+                                        userPosition.lat, userPosition.lng,
+                                        marker.lat, marker.lng
+                                    );
+                                    if (distance <= AUDIO_THRESHOLD) {
+                                        playAudio(markerId); // Restart audio
+                                    } else {
+                                        stopCurrentAudio();
+                                    }
+                                }
+                            }, 500);
+                        }
                     };
                     
                 }).catch(error => {
@@ -898,32 +981,43 @@
         }
 
         function toggleAudioPlayPause() {
-            if (!currentlyPlayingAudio) return;
+            if (!currentlyPlayingAudio) {
+                console.log("No audio to toggle");
+                return;
+            }
             
             if (audioIsPaused) {
                 currentlyPlayingAudio.play().then(() => {
                     audioIsPaused = false;
                     updateAudioDisplay();
+                    console.log("Audio resumed");
                 }).catch(console.error);
             } else {
                 currentlyPlayingAudio.pause();
                 audioIsPaused = true;
                 updateAudioDisplay();
+                console.log("Audio paused");
             }
         }
 
         function updateAudioDisplay() {
             const audioInfo = document.getElementById('audioInfo');
-            if (audioIsPaused) {
-                audioInfo.innerHTML = '▶️';
-                audioInfo.style.background = 'rgba(135, 206, 235, 0.9)';
-                audioInfo.style.borderColor = 'rgba(135, 206, 235, 1)';
+            
+            if (currentlyPlayingAudio && audioPlayingForMarker) {
+                if (audioIsPaused) {
+                    audioInfo.innerHTML = '▶️';
+                    audioInfo.className = 'audio-info paused';
+                    console.log("Audio button: paused state");
+                } else {
+                    audioInfo.innerHTML = '⏸️';
+                    audioInfo.className = 'audio-info playing';
+                    console.log("Audio button: playing state");
+                }
             } else {
-                audioInfo.innerHTML = '⏸️';
-                audioInfo.style.background = 'rgba(40, 167, 69, 0.9)';
-                audioInfo.style.borderColor = 'rgba(40, 167, 69, 1)';
+                audioInfo.innerHTML = '🔊';
+                audioInfo.className = 'audio-info inactive';
+                console.log("Audio button: inactive state");
             }
-            audioInfo.style.display = 'flex';
         }
 
         function stopCurrentAudio() {
@@ -935,8 +1029,9 @@
                 audioPlayingForMarker = null;
                 audioIsPaused = false;
                 
-                document.getElementById('audioInfo').style.display = 'none';
-                console.log("Audio stopped");
+                // === OPRAVA: TLAČÍTKO ZŮSTANE VIDITELNÉ, JEN ZMĚNÍ STAV ===
+                updateAudioDisplay();
+                console.log("Audio stopped - button remains visible");
             }
         }
 
@@ -1003,7 +1098,7 @@
             if (!userPosition) return;
             
             console.log("Checking proximity with user position:", userPosition);
-            let shouldStopAudio = true;
+            let hasCloseMarker = false; // Sleduj zda je nějaký marker blízko pro audio
             const availableMarkers = getAvailableMarkers();
             
             availableMarkers.forEach(marker => {
@@ -1026,9 +1121,12 @@
                     }
                     
                     if (distance <= AUDIO_THRESHOLD) {
-                        playAudio(marker.id);
-                        shouldStopAudio = false;
-                        console.log(`🎵 Audio playing for ${marker.id}`);
+                        hasCloseMarker = true;
+                        // === SPUSŤ AUDIO POUZE POKUD JEŠTĚ NEHRAJE PRO TENTO MARKER ===
+                        if (audioPlayingForMarker !== marker.id) {
+                            playAudio(marker.id);
+                        }
+                        console.log(`🎵 Audio available for ${marker.id}`);
                     }
                     
                     if (distance <= PROXIMITY_THRESHOLD) {
@@ -1038,7 +1136,8 @@
                 }
             });
             
-            if (shouldStopAudio && currentlyPlayingAudio) {
+            // === OPRAVA: ZASTAV AUDIO POUZE POKUD NENÍ ŽÁDNÝ MARKER BLÍZKO ===
+            if (!hasCloseMarker && currentlyPlayingAudio) {
                 stopCurrentAudio();
             }
             
@@ -1527,6 +1626,9 @@
         window.addEventListener('load', () => {
             console.log("Starting geolocation AR scene with 3 GLB angel models, touch rotation, sequential unlocking, gamification, DYNAMIC tutorial loading and DISTANCE EFFECTS...");
             
+            // === NAČTI ULOŽENÝ POSTUP HNED NA ZAČÁTKU ===
+            loadProgress();
+            
             setTimeout(() => {
                 initializeGameification();
             }, 2000);
@@ -1538,11 +1640,12 @@
             watchPosition();
             
             console.log(`Starting with unlocked markers: ${Array.from(unlockedMarkers).join(', ')}`);
+            console.log(`Completed markers: ${Array.from(completedMarkers).join(', ')}`);
             console.log(`Audio threshold set to: ${AUDIO_THRESHOLD} meters`);
             console.log(`AR visibility threshold set to: ${AR_VISIBILITY_THRESHOLD} meters`);
             console.log("Touch rotation enabled for all 3 angel GLB models");
             console.log("Camera fix applied for mobile devices");
-            console.log("Sequential unlocking system enabled");
+            console.log("Sequential unlocking system enabled with PERSISTENT SAVE");
             console.log("Gamification system enabled - achievements handle rewards");
             console.log("🎓 Tutorial system enabled with DYNAMIC config loading");
             console.log("🌟 Distance effects system enabled with glow and feathers modes");
@@ -1557,6 +1660,9 @@
             
             // 🎓 SPUŠTĚNÍ TUTORIALU S DYNAMICKY NAČTENOU KONFIGURACÍ
             startTutorialWhenReady();
+            
+            // === INICIALIZACE AUDIO TLAČÍTKA ===
+            updateAudioDisplay(); // Nastav počáteční stav
             
             // Kontrola načtení všech GLB modelů
             const glbModel1 = document.querySelector('#rotatable-angel-1');
@@ -1591,7 +1697,7 @@
             }
         });
 
-        console.log("😇 Angel AR script with 3D models, touch rotation, sequential unlocking, achievement-based gamification, DYNAMIC tutorial loading and DISTANCE EFFECTS loaded successfully!");
+        console.log("😇 Angel AR script with 3D models, touch rotation, sequential unlocking, achievement-based gamification, DYNAMIC tutorial loading, DISTANCE EFFECTS and PERSISTENT PROGRESS loaded successfully!");
     </script>
 </body>
 </html>
