@@ -81,7 +81,7 @@ const VINO_STEZKA_EXPOSITION_CONFIG = {
             markerId: "wine_quiz_master",
             image: "/img/achievements/wine_quiz_master.png"
         },
-/*
+
         // === PROGRESNÍ ACHIEVEMENTY ===
         "stezka_vino_first_scene": {
             name: "První krůčky ve vinařství",
@@ -147,7 +147,7 @@ const VINO_STEZKA_EXPOSITION_CONFIG = {
             image: "/img/achievements/pruzkumnik_vinic.png"
         }
     },
-*/
+
     // === KATEGORIE ===
     category: {
         name: "Vinařská stezka",
