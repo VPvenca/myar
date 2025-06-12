@@ -12,12 +12,9 @@ const tutorialConfig = {
     
     steps: [
         {
-            title: '🔙 Zpět do Menu',
+            title: '⬅️ Zpět do Menu',
             content: '<p>Tímto tlačítkem se vrátíte do hlavního menu aplikace</p>',
-            arrow: {
-                direction: 'right',
-                style: 'top: 25px; left: 120px;'
-            },
+          
             bubble: {
                 style: 'top: 10px; left: 140px;'
             }
@@ -25,42 +22,27 @@ const tutorialConfig = {
         {
             title: '🔊 Audio ovládání',
             content: '<p>Ovládá přehrávání zvuku, který se spustí při přiblížení k bodu zájmu</p>',
-            arrow: {
-                direction: 'right',
-                style: 'top: 75px; left: 70px;'
-            },
+         
             bubble: {
                 style: 'top: 60px; left: 90px;'
             }
         },
         {
-            title: '🧭 Navigace',
+            title: '↗️ Navigace',
             content: '<p>Zobrazí seznam všech bodů zájmu a jejich vzdálenosti od vaší pozice</p>',
-            arrow: {
-                direction: 'left',
-                style: 'top: 25px; right: 160px;'
-            },
-            bubble: {
-                style: 'top: 10px; right: 180px;'
-            }
+            center: true  // ZMĚNA: Centrováno na střed
         },
         {
-            title: '📍 Informace o vzdálenosti',
+            title: '⬇️ Informace o vzdálenosti',
             content: '<p>Ukazuje vzdálenost k nejbližšímu nebo vybranému bodu zájmu</p>',
-            arrow: {
-                direction: 'up',
-                style: 'bottom: 100px; left: 50%; transform: translateX(-50%);'
-            },
-            bubble: {
-                style: 'bottom: 120px; left: 50%; transform: translateX(-50%);'
-            }
+            center: true  // ZMĚNA: Centrováno na střed
         },
         {
             title: '👁️ Rozšířená realita',
             content: `
                 <ul>
-                    <li>🎯 Na <strong>20m</strong> se objekt zobrazí v AR</li>
-                    <li>🎵 Na <strong>10m</strong> se spustí zvukový doprovod</li>
+                    <li>🎯 Na <strong>30m</strong> se objekt zobrazí v AR</li>
+                    <li>🎵 Na <strong>15m</strong> se spustí zvukový doprovod</li>
                     <li>🔄 Dotykem můžete objekt otáčet</li>
                     <li>📱 Pohybujte telefonem pro lepší zobrazení</li>
                 </ul>
@@ -76,18 +58,18 @@ const tutorialConfig = {
                         <li>👀 <strong>Vždy sledujte okolí</strong> a cestu před sebou</li>
                         <li>🚶 Při pohledu do telefonu se <strong>zastavte</strong></li>
                         <li>🛣️ Dávejte pozor na <strong>vozovky a překážky</strong></li>
-                        <li>👥 Buďte ohleduplní k <strong>ostatním návštěvníkům</strong></li>
+                        <li>👥 Buďte ohleduplní k <strong>ostatním lidem</strong></li>
                     </ul>
                     <p style="margin: 5px 0; font-size: 13px; color: #ff8a80;">Bezpečná cesta je nejlepší cesta! 🙏</p>
                 </div>
             `,
             center: true,
-            finalButton: 'Rozumím, začít bezpečně! ✨'
+            finalButton: 'Rozumím, začít bezpečně! 🚀'
         }
     ],
     
     onComplete: function() {
-        console.log('Tutorial completed for andělská stezka');
+        console.log('Tutorial completed for včelí stezka');
         // Zde můžete spustit další logiku po dokončení tutoriálu
     }
 };
