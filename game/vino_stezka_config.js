@@ -167,8 +167,7 @@ const VINO_STEZKA_EXPOSITION_CONFIG = {
         difficulty: "střední",
         estimatedTime: "45 minut",
         topics: ["vinařství", "odrůdy vína", "historie", "tradice"]
-    }
-  }      
+    }      
 };
 
 // Automatická registrace při načtení skriptu
