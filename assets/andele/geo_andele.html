@@ -243,6 +243,102 @@
             display: none;
         }
 
+        /* NOVÉ STYLY PRO VZDÁLENOSTNÍ EFEKTY */
+        
+        /* Glow efekt pro rámeček obrazu */
+        .distance-glow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 500;
+            border: 0px solid rgba(255, 255, 255, 0);
+            border-radius: 20px;
+            transition: all 1s ease-in-out;
+            box-sizing: border-box;
+        }
+        
+        /* Animované pírka */
+        .feathers-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 499;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .feather {
+            position: absolute;
+            font-size: 20px;
+            opacity: 0;
+            animation: float 4s infinite ease-in-out;
+            filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-50px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes glow-pulse {
+            0%, 100% {
+                box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.3);
+            }
+            50% {
+                box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.6);
+            }
+        }
+        
+        /* Tlačítko pro přepínání efektů */
+        .effects-toggle {
+            position: fixed;
+            top: 110px;
+            left: 10px;
+            background: rgba(255, 215, 0, 0.9);
+            color: black;
+            padding: 12px;
+            border-radius: 50%;
+            font-size: 16px;
+            z-index: 1000;
+            cursor: pointer;
+            user-select: none;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+            border: 2px solid rgba(255, 215, 0, 1);
+            font-weight: bold;
+        }
+
+        .effects-toggle:hover {
+            background: rgba(255, 215, 0, 1);
+            transform: scale(1.05);
+        }
+
+        .effects-toggle:active {
+            transform: scale(0.95);
+        }
+
         /* Gamifikační status - SKRYTO */
         .gamification-status {
             display: none !important;
@@ -262,9 +358,16 @@
     <!-- UPRAVENÉ AUDIO TLAČÍTKO - POUZE IKONA -->
     <div class="audio-info" id="audioInfo">🔊</div>
     
+    <!-- NOVÉ TLAČÍTKO PRO PŘEPÍNÁNÍ EFEKTŮ -->
+    <div class="effects-toggle" id="effectsToggle" title="Přepnout efekty">✨</div>
+    
     <div class="rotation-hint" id="rotationHint">
         🔄 Tažením otočíte anděla
     </div>
+    
+    <!-- NOVÉ PRVKY PRO VZDÁLENOSTNÍ EFEKTY -->
+    <div class="distance-glow" id="distanceGlow"></div>
+    <div class="feathers-container" id="feathersContainer"></div>
     
     <!-- Zobrazení vzdálenosti k vybranému nebo nejbližšímu bodu -->
     <div class="distance-info" id="distanceInfo">
@@ -470,6 +573,16 @@
         let startX = 0;
         let rotationHintShown = false;
         
+        // === NOVÉ PROMĚNNÉ PRO VZDÁLENOSTNÍ EFEKTY ===
+        let currentEffectMode = 'glow'; // 'glow' nebo 'feathers'
+        let lastDistance = null;
+        let featherAnimationId = null;
+        const DISTANCE_THRESHOLDS = {
+            VERY_CLOSE: 100,    // 0-100m - silný efekt
+            MEDIUM: 200,        // 100-200m - střední efekt  
+            FAR: 300           // 200-300m - slabý efekt
+        };
+        
         // UPRAVENÁ DEFINICE CÍLOVÝCH BODŮ S POSTUPNOSTÍ
         const markerSequence = [
             { 
@@ -497,6 +610,164 @@
                  audioId: "audio3"
             }
         ];
+
+        // === NOVÉ FUNKCE PRO VZDÁLENOSTNÍ EFEKTY ===
+        
+        function updateDistanceEffects(distance) {
+            if (!distance || distance === lastDistance) return;
+            lastDistance = distance;
+            
+            if (currentEffectMode === 'glow') {
+                updateGlowEffect(distance);
+            } else {
+                updateFeathersEffect(distance);
+            }
+        }
+        
+        function updateGlowEffect(distance) {
+            const glowElement = document.getElementById('distanceGlow');
+            const feathersContainer = document.getElementById('feathersContainer');
+            
+            // Skryj pírka
+            feathersContainer.style.display = 'none';
+            stopFeatherAnimation();
+            
+            let intensity = 0;
+            let color = 'rgba(255, 255, 255, 0.3)';
+            let borderWidth = 0;
+            
+            if (distance <= DISTANCE_THRESHOLDS.VERY_CLOSE) {
+                // 0-100m - silný efekt
+                intensity = 0.8 - (distance / DISTANCE_THRESHOLDS.VERY_CLOSE) * 0.5; // 0.8 - 0.3
+                color = `rgba(255, 215, 0, ${intensity})`;
+                borderWidth = 8;
+                glowElement.style.animation = 'glow-pulse 2s infinite';
+            } else if (distance <= DISTANCE_THRESHOLDS.MEDIUM) {
+                // 100-200m - střední efekt
+                intensity = 0.3 - ((distance - DISTANCE_THRESHOLDS.VERY_CLOSE) / (DISTANCE_THRESHOLDS.MEDIUM - DISTANCE_THRESHOLDS.VERY_CLOSE)) * 0.15; // 0.3 - 0.15
+                color = `rgba(135, 206, 235, ${intensity})`;
+                borderWidth = 5;
+                glowElement.style.animation = 'glow-pulse 3s infinite';
+            } else if (distance <= DISTANCE_THRESHOLDS.FAR) {
+                // 200-300m - slabý efekt
+                intensity = 0.15 - ((distance - DISTANCE_THRESHOLDS.MEDIUM) / (DISTANCE_THRESHOLDS.FAR - DISTANCE_THRESHOLDS.MEDIUM)) * 0.1; // 0.15 - 0.05
+                color = `rgba(255, 255, 255, ${intensity})`;
+                borderWidth = 2;
+                glowElement.style.animation = 'glow-pulse 4s infinite';
+            } else {
+                // Nad 300m - žádný efekt
+                intensity = 0;
+                borderWidth = 0;
+                glowElement.style.animation = 'none';
+            }
+            
+            glowElement.style.borderWidth = `${borderWidth}px`;
+            glowElement.style.borderColor = color;
+            glowElement.style.boxShadow = intensity > 0 ? `inset 0 0 ${20 + intensity * 30}px ${color}` : 'none';
+            
+            console.log(`🌟 Glow effect updated: distance=${distance.toFixed(1)}m, intensity=${intensity.toFixed(2)}, border=${borderWidth}px`);
+        }
+        
+        function updateFeathersEffect(distance) {
+            const feathersContainer = document.getElementById('feathersContainer');
+            const glowElement = document.getElementById('distanceGlow');
+            
+            // Skryj glow efekt
+            glowElement.style.borderWidth = '0px';
+            glowElement.style.boxShadow = 'none';
+            glowElement.style.animation = 'none';
+            
+            let featherCount = 0;
+            let animationSpeed = 4; // sekundy
+            
+            if (distance <= DISTANCE_THRESHOLDS.VERY_CLOSE) {
+                // 0-100m - hodně pírk
+                featherCount = 8 - Math.floor((distance / DISTANCE_THRESHOLDS.VERY_CLOSE) * 4); // 8-4 pírka
+                animationSpeed = 3;
+                feathersContainer.style.display = 'block';
+            } else if (distance <= DISTANCE_THRESHOLDS.MEDIUM) {
+                // 100-200m - střední množství pírk
+                featherCount = 4 - Math.floor(((distance - DISTANCE_THRESHOLDS.VERY_CLOSE) / (DISTANCE_THRESHOLDS.MEDIUM - DISTANCE_THRESHOLDS.VERY_CLOSE)) * 2); // 4-2 pírka
+                animationSpeed = 4;
+                feathersContainer.style.display = 'block';
+            } else if (distance <= DISTANCE_THRESHOLDS.FAR) {
+                // 200-300m - málo pírk
+                featherCount = 2 - Math.floor(((distance - DISTANCE_THRESHOLDS.MEDIUM) / (DISTANCE_THRESHOLDS.FAR - DISTANCE_THRESHOLDS.MEDIUM)) * 1); // 2-1 pírko
+                animationSpeed = 5;
+                feathersContainer.style.display = 'block';
+            } else {
+                // Nad 300m - žádná pírka
+                featherCount = 0;
+                feathersContainer.style.display = 'none';
+            }
+            
+            if (featherCount > 0) {
+                startFeatherAnimation(featherCount, animationSpeed);
+            } else {
+                stopFeatherAnimation();
+            }
+            
+            console.log(`🪶 Feathers effect updated: distance=${distance.toFixed(1)}m, count=${featherCount}, speed=${animationSpeed}s`);
+        }
+        
+        function startFeatherAnimation(count, speed) {
+            stopFeatherAnimation();
+            
+            const feathersContainer = document.getElementById('feathersContainer');
+            const featherEmojis = ['🪶', '🤍', '✨', '🕊️', '💫'];
+            
+            function createFeather() {
+                const feather = document.createElement('div');
+                feather.className = 'feather';
+                feather.innerHTML = featherEmojis[Math.floor(Math.random() * featherEmojis.length)];
+                feather.style.left = Math.random() * 100 + '%';
+                feather.style.animationDuration = (speed + Math.random() * 2) + 's';
+                feather.style.animationDelay = Math.random() * 2 + 's';
+                
+                feathersContainer.appendChild(feather);
+                
+                // Odstranit pírko po animaci
+                setTimeout(() => {
+                    if (feather.parentNode) {
+                        feather.parentNode.removeChild(feather);
+                    }
+                }, (speed + 2) * 1000);
+            }
+            
+            // Vytvoř počáteční pírka
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => createFeather(), i * (1000 / count));
+            }
+            
+            // Pokračuj v vytváření pírk
+            featherAnimationId = setInterval(() => {
+                if (feathersContainer.children.length < count * 2) {
+                    createFeather();
+                }
+            }, 1000 / count);
+        }
+        
+        function stopFeatherAnimation() {
+            if (featherAnimationId) {
+                clearInterval(featherAnimationId);
+                featherAnimationId = null;
+            }
+        }
+        
+        function toggleEffectMode() {
+            currentEffectMode = currentEffectMode === 'glow' ? 'feathers' : 'glow';
+            
+            const toggleButton = document.getElementById('effectsToggle');
+            toggleButton.innerHTML = currentEffectMode === 'glow' ? '✨' : '🪶';
+            toggleButton.title = currentEffectMode === 'glow' ? 'Přepnout na pírka' : 'Přepnout na záři';
+            
+            // Aktualizuj efekty s aktuální vzdáleností
+            if (lastDistance !== null) {
+                updateDistanceEffects(lastDistance);
+            }
+            
+            console.log(`🎨 Effect mode changed to: ${currentEffectMode}`);
+        }
 
         // NOVÉ FUNKCE PRO POSTUPNÉ ODEMYKÁNÍ
         function getAvailableMarkers() {
@@ -847,7 +1118,8 @@
                 '.clear-selection',
                 '.distance-info',
                 '.audio-info',
-                '.rotation-hint'
+                '.rotation-hint',
+                '.effects-toggle'  // PŘIDÁNO NOVÉ TLAČÍTKO
             ];
             
             for (let selector of uiSelectors) {
@@ -951,6 +1223,9 @@
                     audioIndicator = ' 🎵';
                 }
                 
+                // === AKTUALIZACE VZDÁLENOSTNÍCH EFEKTŮ ===
+                updateDistanceEffects(distance);
+                
                 distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${audioIndicator}<br><strong>${distance}m</strong>`;
                 
                 if (distance <= AR_VISIBILITY_THRESHOLD) {
@@ -964,6 +1239,9 @@
                     distanceInfo.style.backgroundColor = 'rgba(255, 0, 0, 0.9)';
                 }
             } else {
+                // Žádný cíl - vypni efekty
+                updateDistanceEffects(null);
+                
                 const nextTarget = markerSequence.find(marker => 
                     unlockedMarkers.has(marker.id) && !completedMarkers.has(marker.id)
                 );
@@ -1205,6 +1483,9 @@
             
             document.getElementById('clearSelection').addEventListener('click', clearSelection);
             document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
+            
+            // === NOVÝ EVENT LISTENER PRO PŘEPÍNÁNÍ EFEKTŮ ===
+            document.getElementById('effectsToggle').addEventListener('click', toggleEffectMode);
         }
 
         function setupCameraFix() {
@@ -1244,7 +1525,7 @@
 
         // === HLAVNÍ INICIALIZACE ===
         window.addEventListener('load', () => {
-            console.log("Starting geolocation AR scene with 3 GLB angel models, touch rotation, sequential unlocking, gamification and DYNAMIC tutorial loading...");
+            console.log("Starting geolocation AR scene with 3 GLB angel models, touch rotation, sequential unlocking, gamification, DYNAMIC tutorial loading and DISTANCE EFFECTS...");
             
             setTimeout(() => {
                 initializeGameification();
@@ -1264,11 +1545,13 @@
             console.log("Sequential unlocking system enabled");
             console.log("Gamification system enabled - achievements handle rewards");
             console.log("🎓 Tutorial system enabled with DYNAMIC config loading");
+            console.log("🌟 Distance effects system enabled with glow and feathers modes");
+            console.log(`Distance thresholds: VERY_CLOSE=${DISTANCE_THRESHOLDS.VERY_CLOSE}m, MEDIUM=${DISTANCE_THRESHOLDS.MEDIUM}m, FAR=${DISTANCE_THRESHOLDS.FAR}m`);
         });
 
         // A-Frame scéna je připravena
         document.querySelector('a-scene').addEventListener('loaded', () => {
-            console.log("A-Frame scene loaded for geolocation AR with 3 GLB angel models, sequential unlocking, gamification and dynamic tutorial");
+            console.log("A-Frame scene loaded for geolocation AR with 3 GLB angel models, sequential unlocking, gamification, dynamic tutorial and distance effects");
             
             setupCameraFix();
             
@@ -1308,8 +1591,7 @@
             }
         });
 
-        console.log("😇 Angel AR script with 3D models, touch rotation, sequential unlocking, achievement-based gamification and DYNAMIC tutorial loading loaded successfully!");
+        console.log("😇 Angel AR script with 3D models, touch rotation, sequential unlocking, achievement-based gamification, DYNAMIC tutorial loading and DISTANCE EFFECTS loaded successfully!");
     </script>
 </body>
 </html>
-            
