@@ -638,9 +638,9 @@
         let lastDistance = null;
         let featherAnimationId = null;
         const DISTANCE_THRESHOLDS = {
-            VERY_CLOSE: 100,    // 0-100m - silný efekt
-            MEDIUM: 200,        // 100-200m - střední efekt  
-            FAR: 300           // 200-300m - slabý efekt
+            VERY_CLOSE: 50,    // 0-50m - silný efekt
+            MEDIUM: 100,        // 50-100m - střední efekt  
+            FAR: 300           // 100-300m - slabý efekt
         };
         
         // UPRAVENÁ DEFINICE CÍLOVÝCH BODŮ S POSTUPNOSTÍ
@@ -741,17 +741,17 @@
             let animationSpeed = 4; // sekundy
             
             if (distance <= DISTANCE_THRESHOLDS.VERY_CLOSE) {
-                // 0-100m - hodně pírk
+                // 0-50m - hodně pírk
                 featherCount = 8 - Math.floor((distance / DISTANCE_THRESHOLDS.VERY_CLOSE) * 4); // 8-4 pírka
                 animationSpeed = 3;
                 feathersContainer.style.display = 'block';
             } else if (distance <= DISTANCE_THRESHOLDS.MEDIUM) {
-                // 100-200m - střední množství pírk
+                // 50-100m - střední množství pírk
                 featherCount = 4 - Math.floor(((distance - DISTANCE_THRESHOLDS.VERY_CLOSE) / (DISTANCE_THRESHOLDS.MEDIUM - DISTANCE_THRESHOLDS.VERY_CLOSE)) * 2); // 4-2 pírka
                 animationSpeed = 4;
                 feathersContainer.style.display = 'block';
             } else if (distance <= DISTANCE_THRESHOLDS.FAR) {
-                // 200-300m - málo pírk
+                // 100-300m - málo pírk
                 featherCount = 2 - Math.floor(((distance - DISTANCE_THRESHOLDS.MEDIUM) / (DISTANCE_THRESHOLDS.FAR - DISTANCE_THRESHOLDS.MEDIUM)) * 1); // 2-1 pírko
                 animationSpeed = 5;
                 feathersContainer.style.display = 'block';
