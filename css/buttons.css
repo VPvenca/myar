@@ -59,7 +59,9 @@
        aby tam bylo více místa, ale position: absolute by to měla řešit. */
     /* padding-right: 30px; */ /* Příklad - pokud byste potřebovali místo pro hvězdu, která není absolutní */
 }
-
+.button-icon {
+    font-size: 50px; /* nebo větší hodnotu */
+}
 /* --- Efekty pro Obecná Tlačítka --- */
 .menu-button:hover { /* Styl při najetí myší */
     background-color: #2980b9; /* Mírně tmavší modrá */
