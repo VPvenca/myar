@@ -20,9 +20,9 @@ const tutorialConfig = {
             }
         },
         {
-            title: '🔊 Audio ovládání',
-            content: '<p>Ovládá přehrávání zvuku, který se spustí při přiblížení k bodu zájmu</p>',
-         
+            title: '🔊 ✨ Ovládání audio / záře',
+            content: '<p>Ovládá přehrávání zvuku, který se spustí při přiblížení k bodu zájmu, druhé tlačítko přepíná záři a hvězdičky (indikace zesiluje blíže k bodu zájmu)</p>',
+                     
             bubble: {
                 style: 'top: 60px; left: 90px;'
             }
