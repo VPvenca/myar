@@ -83,6 +83,7 @@ const VINO_STEZKA_EXPOSITION_CONFIG = {
         },
 
         // === PROGRESNÍ ACHIEVEMENTY ===
+        /*
         "stezka_vino_first_scene": {
             name: "První krůčky ve vinařství",
             description: "Dokončil jsi první scénu na Vinařské stezce",
@@ -127,7 +128,7 @@ const VINO_STEZKA_EXPOSITION_CONFIG = {
             rarity: "rare", 
             image: "/img/achievements/vinarstvi_gold_collector.png"
         },
-
+        
         // === SPECIÁLNÍ ACHIEVEMENTY ===
         "wine_taster": {
             name: "Degustátor",
@@ -147,7 +148,7 @@ const VINO_STEZKA_EXPOSITION_CONFIG = {
             image: "/img/achievements/pruzkumnik_vinic.png"
         }
     },
-
+    */
     // === KATEGORIE ===
     category: {
         name: "Vinařská stezka",
