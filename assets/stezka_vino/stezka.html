@@ -348,7 +348,8 @@
             gps-entity-place="latitude: 49.088855; longitude: 17.134609" 
             data-marker-id="sud"
             data-audio-id="audio1"
-            visible="false">
+            visible="false"
+            id="marker-sud">
             <a-gltf-model 
                 id="wine-model-1-gltf"
                 src="#wine-model-1"
@@ -361,10 +362,11 @@
 
         <!-- lis -->
         <a-entity 
-            gps-entity-place="latitude: 49.086341; longitude: 17.133468" 49.086341, 17.133468
+            gps-entity-place="latitude: 49.086341; longitude: 17.133468"
             data-marker-id="lis"
             data-audio-id="audio2"
-            visible="false">
+            visible="false"
+            id="marker-lis">
             <a-gltf-model 
                 id="wine-model-2-gltf"
                 src="#wine-model-2"
@@ -380,7 +382,8 @@
             gps-entity-place="latitude: 49.081785; longitude: 17.130330" 
             data-marker-id="urban"
             data-audio-id="audio3"
-            visible="false">
+            visible="false"
+            id="marker-urban">
             <a-gltf-model 
                 id="wine-model-3-gltf"
                 src="#wine-model-3"
@@ -396,7 +399,8 @@
             gps-entity-place="latitude: 49.083421; longitude: 17.132444" 
             data-marker-id="vinar"
             data-audio-id="audio4"
-            visible="false">
+            visible="false"
+            id="marker-vinar">
             <a-gltf-model 
                 id="wine-model-4-gltf"
                 src="#wine-model-4"
@@ -441,6 +445,11 @@
         let currentlyPlayingAudio = null;
         let audioPlayingForMarker = null;
         let audioIsPaused = false;
+        
+        // NOVÉ: Proměnné pro kontrolu visibility stavů
+        let markerVisibilityStates = {};
+        let lastGpsUpdate = 0;
+        const GPS_UPDATE_INTERVAL = 1000; // minimální interval mezi GPS aktualizacemi
         
         // NOVÉ: Kvízový systém
         const QUIZ_DISTANCE_STEP = 50; // každých 50m
@@ -489,6 +498,11 @@
                 audioId: "audio4"
             }
         ];
+
+        // Inicializace visibility stavů
+        markers.forEach(marker => {
+            markerVisibilityStates[marker.id] = false;
+        });
 
         // === VINNÝ KVÍZOVÝ SYSTÉM ===
         
@@ -846,7 +860,7 @@
             }
         });
 
-        // === PŮVODNÍ FUNKCE S GAMIFIKAČNÍMI ROZŠÍŘENÍMI ===
+        // === PŮVODNÍ FUNKCE S GAMIFIKAČNÍMI ROZŠÍŘENÍMI A OPRAVAMI ===
 
         // Výpočet vzdálenosti mezi GPS body
         function calculateDistance(lat1, lon1, lat2, lon2) {
@@ -869,7 +883,7 @@
             }
         }
 
-        // Získání aktuální pozice
+        // OPRAVENÁ funkce pro GPS pozici s throttling
         function getCurrentPosition() {
             console.log("Requesting GPS position...");
             document.getElementById('distanceInfo').innerHTML = '📍 Hledám GPS signál...';
@@ -882,9 +896,9 @@
                     lng: 17.132976,
                     accuracy: 50
                 };
-                startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
+                startPosition = { ...userPosition };
                 console.log("Using fallback position:", userPosition);
-                checkProximityToMarkers();
+                checkProximityToMarkersThrottled();
                 updateNavigation();
                 return;
             }
@@ -897,11 +911,11 @@
                         accuracy: position.coords.accuracy
                     };
                     if (!startPosition) {
-                        startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici pouze při prvním GPS fix
+                        startPosition = { ...userPosition };
                         console.log("🎯 Start position set:", startPosition);
                     }
                     console.log("GPS position found:", userPosition);
-                    checkProximityToMarkers();
+                    checkProximityToMarkersThrottled();
                     updateNavigation();
                 },
                 (error) => {
@@ -912,11 +926,11 @@
                         lng: 17.132976,
                         accuracy: 100
                     };
-                    startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
+                    startPosition = { ...userPosition };
                     
                     document.getElementById('distanceInfo').innerHTML = '🔄 Používám testovací pozici';
                     console.log("Using fallback position due to GPS error:", userPosition);
-                    checkProximityToMarkers();
+                    checkProximityToMarkersThrottled();
                     updateNavigation();
                 },
                 {
@@ -934,15 +948,15 @@
                         lng: 17.132976,
                         accuracy: 100
                     };
-                    startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
+                    startPosition = { ...userPosition };
                     document.getElementById('distanceInfo').innerHTML = '🔄 Testovací pozice aktivní';
-                    checkProximityToMarkers();
+                    checkProximityToMarkersThrottled();
                     updateNavigation();
                 }
             }, 5000);
         }
 
-        // Sledování pozice
+        // OPRAVENÁ funkce pro sledování pozice s throttling
         function watchPosition() {
             if (navigator.geolocation) {
                 navigator.geolocation.watchPosition(
@@ -952,9 +966,9 @@
                             lng: position.coords.longitude,
                             accuracy: position.coords.accuracy
                         };
-                        checkProximityToMarkers();
+                        checkProximityToMarkersThrottled();
                         updateNavigation();
-                        checkDistanceForQuiz(); // NOVÉ: Kontrola kvízů
+                        checkDistanceForQuiz();
                     },
                     (error) => {
                         console.error("Watch position error:", error);
@@ -968,7 +982,18 @@
             }
         }
 
-        // HLAVNÍ FUNKCE - Kontrola proximity s gamifikací
+        // NOVÁ: Throttled verze kontroly proximity pro prevenci blikání
+        function checkProximityToMarkersThrottled() {
+            const now = Date.now();
+            if (now - lastGpsUpdate < GPS_UPDATE_INTERVAL) {
+                return; // Příliš brzy od posledního updatu
+            }
+            lastGpsUpdate = now;
+            
+            checkProximityToMarkers();
+        }
+
+        // HLAVNÍ OPRAVENÁ FUNKCE - Kontrola proximity s anti-blikáním
         function checkProximityToMarkers() {
             if (!userPosition) return;
             
@@ -986,16 +1011,28 @@
                 
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
                 if (entity) {
-                    // Zobrazení AR objektu
-                    if (distance <= AR_VISIBILITY_THRESHOLD) {
-                        entity.setAttribute('visible', 'true');
-                        console.log(`✅ ${marker.id} VISIBLE at ${distance.toFixed(1)}m`);
-                    } else {
-                        entity.setAttribute('visible', 'false');
-                        console.log(`❌ ${marker.id} too far: ${distance.toFixed(1)}m`);
+                    const shouldBeVisible = distance <= AR_VISIBILITY_THRESHOLD;
+                    const currentlyVisible = markerVisibilityStates[marker.id];
+                    
+                    // ANTI-BLIKÁNÍ: Změň visibility pouze pokud se skutečně změnil stav
+                    if (shouldBeVisible !== currentlyVisible) {
+                        console.log(`🔄 ${marker.id} visibility change: ${currentlyVisible} → ${shouldBeVisible} (${distance.toFixed(1)}m)`);
+                        
+                        // Přidej hysterezi - pro skrytí musí být vzdálenost o 5m větší
+                        const hysteresisDistance = currentlyVisible ? AR_VISIBILITY_THRESHOLD + 5 : AR_VISIBILITY_THRESHOLD;
+                        
+                        if (shouldBeVisible && distance <= AR_VISIBILITY_THRESHOLD) {
+                            entity.setAttribute('visible', 'true');
+                            markerVisibilityStates[marker.id] = true;
+                            console.log(`✅ ${marker.id} SHOWN at ${distance.toFixed(1)}m`);
+                        } else if (!shouldBeVisible && distance > hysteresisDistance) {
+                            entity.setAttribute('visible', 'false');
+                            markerVisibilityStates[marker.id] = false;
+                            console.log(`❌ ${marker.id} HIDDEN at ${distance.toFixed(1)}m`);
+                        }
                     }
                     
-                    // Audio přehrávání
+                    // Audio přehrávání s hysterezí
                     if (distance <= AUDIO_THRESHOLD) {
                         playAudio(marker.id);
                         shouldStopAudio = false;
@@ -1015,11 +1052,8 @@
                 stopCurrentAudio();
             }
             
-            // Počet viditelných markeru
-            const visibleCount = markers.filter(marker => {
-                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                return entity && entity.getAttribute('visible') === true;
-            }).length;
+            // Počet viditelných markerů podle nového stavu
+            const visibleCount = Object.values(markerVisibilityStates).filter(visible => visible).length;
             console.log(`${visibleCount}/${markers.length} wine markers are visible in AR`);
         }
 
@@ -1290,10 +1324,7 @@
         }
 
         function isAnyModelVisible() {
-            return markers.some(marker => {
-                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                return entity && entity.getAttribute('visible') === true;
-            });
+            return Object.values(markerVisibilityStates).some(visible => visible);
         }
 
         function isTouchingUI(target) {
@@ -1306,7 +1337,7 @@
                 '.distance-info',
                 '.audio-info',
                 '.rotation-hint',
-                '.wine-quiz' // NOVÉ: Přidáno kvíz mezi UI elementy
+                '.wine-quiz'
             ];
             
             for (let selector of uiSelectors) {
@@ -1336,7 +1367,7 @@
 
         document.getElementById('clearSelection').addEventListener('click', clearSelection);
         document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
-        document.getElementById('quizClose').addEventListener('click', closeQuiz); // NOVÉ: Event listener pro zavření kvízu
+        document.getElementById('quizClose').addEventListener('click', closeQuiz);
 
         document.addEventListener('click', (e) => {
             const navPanel = document.querySelector('.navigation');
@@ -1353,7 +1384,7 @@
             // Počkej na načtení gamifikačních skriptů a pak inicializuj
             setTimeout(() => {
                 initializeGameification();
-            }, 2000);  // Prodloužený timeout pro jistotu
+            }, 2000);
             
             // Počkáme na A-Frame
             document.querySelector('a-scene').addEventListener('loaded', () => {
@@ -1362,10 +1393,10 @@
                 getCurrentPosition();
                 watchPosition();
                 startTutorialWhenReady();
-                // NOVÉ: Pravidelná kontrola kvízů
+                // Pravidelná kontrola kvízů
                 setInterval(() => {
                     checkDistanceForQuiz();
-                }, 3000); // Kontrola každé 3 sekundy
+                }, 3000);
             });
         });
 
@@ -1390,12 +1421,10 @@
                     document.head.appendChild(script);
                 });
                 
-                // Počkej chvilku na vykonání
                 await new Promise(resolve => setTimeout(resolve, 200));
                 
                 console.log("✅ Tutorial config loaded, creating instance...");
                 
-                // Vytvoř tutorial instanci
                 if (typeof ARTutorial !== 'undefined' && typeof tutorialConfig !== 'undefined') {
                     window.arTutorial = ARTutorial.create(tutorialConfig);
                     tutorialInitialized = true;
@@ -1413,24 +1442,21 @@
         }
 
         function startTutorialWhenReady() {
-            // Spusť tutorial až když je všechno připraveno
             setTimeout(async () => {
                 console.log("🎓 Starting tutorial initialization...");
                 
                 const success = await initializeTutorial();
                 if (success && window.arTutorial) {
-                    // Malé zpoždění pro plynulý přechod
                     setTimeout(() => {
                         console.log("🎓 Starting tutorial...");
                         window.arTutorial.start();
                     }, 1000);
                 }
-            }, 3000); // 3 sekundy po načtení A-Frame
+            }, 3000);
         }
 
         // === DEBUG FUNKCE ===
         
-        // Debug funkce pro testování
         function debugGetCompletedQuizzes() {
             console.log("=== DEBUG getCompletedQuizzes ===");
             
@@ -1474,7 +1500,7 @@
         // Globální dostupnost pro debugging
         window.debugGetCompletedQuizzes = debugGetCompletedQuizzes;
         window.directActivateWineQuizAchievement = directActivateWineQuizAchievement;
-        window.markQuizCompleted = markQuizCompleted; // Pro testování
+        window.markQuizCompleted = markQuizCompleted;
 
         console.log("🔧 Debug functions loaded");
     </script>
