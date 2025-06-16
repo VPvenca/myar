@@ -103,7 +103,7 @@
     .info-bubble {
         /* Pozicování - dole uprostřed */
         bottom: 20px !important;
-        left: 30% !important;
+        left: 45% !important;
         right: auto !important;
         top: auto !important;
         
@@ -119,8 +119,8 @@
         /* Více zakulacené rohy */
         border-radius: 20px !important;
         
-        /* Animace shora */
-        transform: translate(-50%, -200%) !important; /* Začíná mimo obrazovku nahoře */
+       /* ANIMACE ZLEVA - počáteční pozice */
+        transform: translate(-150%, 0) !important; /* Začíná vlevo mimo obrazovku */
         
         /* Stín a ohraničení */
         box-shadow: 0 15px 40px rgba(0,0,0,0.15), 0 5px 20px rgba(0,0,0,0.1) !important;
