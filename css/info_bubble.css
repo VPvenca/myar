@@ -2,7 +2,7 @@
     position: fixed;
     /* POZICOVÁNÍ - můžete změnit podle potřeby */
     bottom: 20px;  /* Místo top: 20px */
-    right: 20px;
+    right: 40px;
     /* Alternativně můžete použít: */
     /* top: 50%; left: 50%; transform: translate(-50%, -50%); - pro střed */
     /* bottom: 20px; left: 20px; - pro levý dolní roh */
