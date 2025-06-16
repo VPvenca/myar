@@ -112,9 +112,9 @@
         width: auto; /* Automatická šířka podle obsahu */
         min-width: 280px; /* Minimální šířka pro čitelnost */
         
-        /* Bílé pozadí s jemným gradientem */
-        background: linear-gradient(135deg, #a8b8f5 0%, #b599d1 100%) !important;
-        color: white !important; /* Tmavý text na bílém pozadí */
+        /* ZMĚNA: Vrácen původní modrý gradient */
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important; /* Bílý text */
         
         /* Více zakulacené rohy */
         border-radius: 40px 40px 0 40px !important; /* Pravý dolní roh ostrý */
@@ -134,52 +134,56 @@
         transform: translate(-50%, 0) !important; /* Zajede na finální pozici */
     }
     
-    /* Úprava textu pro bílé pozadí na mobilu */
+    /* Úprava textu a tlačítek pro modrý gradient na mobilu */
     @media (max-width: 768px) {
         .info-bubble-header {
-            color: #2c3e50 !important;
+            color: white !important;
         }
         
         .info-bubble-content {
-            color: #555 !important;
+            color: white !important;
         }
         
         .info-bubble-close {
             color: white !important; /* Bílá ikona zavření */
-            background: rgba(0,0,0,0.2) !important;
+            background: rgba(255,255,255,0.2) !important;
             border-radius: 50% !important; /* Kulaté tlačítko */
-        }
-        .info-bubble-btn {
-            border-radius: 25px !important; /* Více zaoblené tlačítka */
         }
         
         .info-bubble-close:hover {
-            background: rgba(0,0,0,0.3) !important;
+            background: rgba(255,255,255,0.3) !important;
+        }
+        
+        .info-bubble-btn {
+            border-radius: 20px !important; /* ZMĚNA: 20px zaoblení tlačítek */
         }
         
         .info-bubble-btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-            color: white !important;
+            background: white !important; /* Bílé pozadí */
+            color: #667eea !important; /* Modrý text */
+            border-radius: 20px !important;
+            font-weight: bold !important;
         }
         
         .info-bubble-btn-primary:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+            background: rgba(255,255,255,0.9) !important;
         }
         
         .info-bubble-btn-secondary {
-            background: rgba(0,0,0,0.6) !important; /* Tmavší pozadí pro lepší viditelnost */
+            background: rgba(255,255,255,0.2) !important; /* Průhledné bílé pozadí */
             color: white !important; /* Bílý text */
-            border: 1px solid rgba(255,255,255,0.3) !important; /* Světlé ohraničení */
-            border-radius: 25px !important;
-            font-weight: 500 !important; /* Trochu tučnější text */
+            border: 1px solid rgba(255,255,255,0.4) !important;
+            border-radius: 20px !important;
+            font-weight: 500 !important;
         }
         
         .info-bubble-btn-secondary:hover {
-            background: rgba(0,0,0,0.7) !important; /* Ještě tmavší při hoveru */
-            border: 1px solid rgba(255,255,255,0.5) !important;
+            background: rgba(255,255,255,0.3) !important;
+            border: 1px solid rgba(255,255,255,0.6) !important;
         }
     }
 }
+
 /* DALŠÍ MOŽNOSTI POZICOVÁNÍ - odkomentujte tu, kterou chcete použít */
 
 /* Střed obrazovky */
