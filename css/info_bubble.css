@@ -102,7 +102,7 @@
 @media (max-width: 768px) {
     .info-bubble {
         /* Pozicování - dole uprostřed */
-        bottom: 60px !important;
+        bottom: 110px !important;
         left: 45% !important;
         right: auto !important;
         top: auto !important;
