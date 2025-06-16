@@ -1156,9 +1156,9 @@
                 if (distance <= AUDIO_THRESHOLD) indicators += ' 🎵';
                 if (distance <= AR_VISIBILITY_THRESHOLD) indicators += ' 👁️';
                 
-                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${indicators}<br><strong>${distance}m</strong><br><small>📚 Kvízy: ${completed.length}/${WINE_QUIZZES.length} • Vzdálenost: ${distanceFromStart.toFixed(0)}m</small>`;
+                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${indicators}<br><strong>${distance}m</strong><br><small>📚 Kvízy: ${completed.length}/${WINE_QUIZZES.length} • Nachozeno: ${distanceFromStart.toFixed(0)}m</small>`;
             } else {
-                distanceInfo.innerHTML = `🍇 GPS aktivní<br><small>📚 Kvízy: ${completed.length}/${WINE_QUIZZES.length} • Vzdálenost: ${distanceFromStart.toFixed(0)}m</small>`;
+                distanceInfo.innerHTML = `🍇 GPS aktivní<br><small>📚 Kvízy: ${completed.length}/${WINE_QUIZZES.length} • Nachozeno: ${distanceFromStart.toFixed(0)}m</small>`;
             }
         }
 
