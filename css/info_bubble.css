@@ -117,7 +117,7 @@
         color: #333 !important; /* Tmavý text na bílém pozadí */
         
         /* Více zakulacené rohy */
-        border-radius: 40px 40px 40px 0 !important; /* Pravý dolní roh ostrý */
+        border-radius: 40px 40px 0 40px !important; /* Pravý dolní roh ostrý */
         
        /* ANIMACE ZLEVA - počáteční pozice */
         transform: translate(-150%, 0) !important; /* Začíná vlevo mimo obrazovku */
