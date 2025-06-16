@@ -102,7 +102,7 @@
 @media (max-width: 768px) {
     .info-bubble {
         /* Pozicování - dole uprostřed */
-        bottom: 20px !important;
+        bottom: 115px !important;
         left: 50% !important;
         right: auto !important;
         top: auto !important;
@@ -113,14 +113,14 @@
         min-width: 280px; /* Minimální šířka pro čitelnost */
         
         /* Bílé pozadí s jemným gradientem */
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
-        color: #333 !important; /* Tmavý text na bílém pozadí */
+        background: linear-gradient(135deg, #a8b8f5 0%, #b599d1 100%) !important;
+        color: white !important; /* Tmavý text na bílém pozadí */
         
         /* Více zakulacené rohy */
-        border-radius: 20px !important;
+        border-radius: 40px 40px 0 40px !important; /* Pravý dolní roh ostrý */
         
-        /* Animace shora */
-        transform: translate(-50%, -200%) !important; /* Začíná mimo obrazovku nahoře */
+       /* ANIMACE ZLEVA - počáteční pozice */
+        transform: translate(-150%, 0) !important; /* Začíná vlevo mimo obrazovku */
         
         /* Stín a ohraničení */
         box-shadow: 0 15px 40px rgba(0,0,0,0.15), 0 5px 20px rgba(0,0,0,0.1) !important;
@@ -149,19 +149,17 @@
             background: rgba(0,0,0,0.2) !important;
             border-radius: 50% !important; /* Kulaté tlačítko */
         }
+        .info-bubble-btn {
+            border-radius: 25px !important; /* Více zaoblené tlačítka */
+        }
         
         .info-bubble-close:hover {
             background: rgba(0,0,0,0.3) !important;
         }
         
-        .info-bubble-btn {
-            border-radius: 25px !important; /* Více zaoblené tlačítka */
-        }
-        
         .info-bubble-btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             color: white !important;
-            border-radius: 25px !important;
         }
         
         .info-bubble-btn-primary:hover {
