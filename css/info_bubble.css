@@ -1,108 +1,224 @@
+.info-bubble {
+    position: fixed;
+    /* POZICOVÁNÍ - můžete změnit podle potřeby */
+    bottom: 20px;  /* Místo top: 20px */
+    right: 20px;
+    /* Alternativně můžete použít: */
+    /* top: 50%; left: 50%; transform: translate(-50%, -50%); - pro střed */
+    /* bottom: 20px; left: 20px; - pro levý dolní roh */
+    /* top: 100px; right: 20px; - pro specifickou vzdálenost shora */
+    
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 300px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    z-index: 10000;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    border: 2px solid rgba(255,255,255,0.2);
+}
 
-        .info-bubble {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            max-width: 300px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 14px;
-            line-height: 1.5;
-            z-index: 10000;
-            transform: translateX(100%);
-            opacity: 0;
-            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            border: 2px solid rgba(255,255,255,0.2);
-        }
+.info-bubble.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.info-bubble-header {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.info-bubble-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.3s;
+    flex-shrink: 0; /* Zabráníme smrštění tlačítka */
+}
+
+.info-bubble-close:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.info-bubble-content {
+    margin-bottom: 15px;
+}
+
+.info-bubble-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.info-bubble-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s;
+}
+
+.info-bubble-btn-primary {
+    background: white;
+    color: #667eea;
+    font-weight: bold;
+}
+
+.info-bubble-btn-primary:hover {
+    background: #f0f0f0;
+}
+
+.info-bubble-btn-secondary {
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.5);
+}
+
+.info-bubble-btn-secondary:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+/* Responsivní design pro mobily */
+@media (max-width: 768px) {
+    .info-bubble {
+        /* Pozicování - dole uprostřed */
+        bottom: 20px !important;
+        left: 50% !important;
+        right: auto !important;
+        top: auto !important;
         
-        .info-bubble.show {
-            transform: translateX(0);
-            opacity: 1;
-        }
+        /* Velikost - pouze podle obsahu */
+        max-width: 90vw; /* Maximálně 90% šířky obrazovky */
+        width: auto; /* Automatická šířka podle obsahu */
+        min-width: 280px; /* Minimální šířka pro čitelnost */
         
+        /* Bílé pozadí s jemným gradientem */
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+        color: #333 !important; /* Tmavý text na bílém pozadí */
+        
+        /* Více zakulacené rohy */
+        border-radius: 20px !important;
+        
+        /* Animace shora */
+        transform: translate(-50%, -200%) !important; /* Začíná mimo obrazovku nahoře */
+        
+        /* Stín a ohraničení */
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15), 0 5px 20px rgba(0,0,0,0.1) !important;
+        border: 1px solid rgba(0,0,0,0.1) !important;
+        
+        /* Padding menší na mobilu */
+        padding: 16px 20px !important;
+    }
+    
+    .info-bubble.show {
+        transform: translate(-50%, 0) !important; /* Zajede na finální pozici */
+    }
+    
+    /* Úprava textu pro bílé pozadí na mobilu */
+    @media (max-width: 768px) {
         .info-bubble-header {
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .info-bubble-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            padding: 0;
-            width: 25px;
-            height: 25px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.3s;
-        }
-        
-        .info-bubble-close:hover {
-            background: rgba(255,255,255,0.2);
+            color: #2c3e50 !important;
         }
         
         .info-bubble-content {
-            margin-bottom: 15px;
+            color: #555 !important;
         }
         
-        .info-bubble-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
+        .info-bubble-close {
+            color: #666 !important;
+            background: rgba(0,0,0,0.05) !important;
         }
         
-        .info-bubble-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s;
+        .info-bubble-close:hover {
+            background: rgba(0,0,0,0.1) !important;
         }
         
         .info-bubble-btn-primary {
-            background: white;
-            color: #667eea;
-            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            color: white !important;
         }
         
         .info-bubble-btn-primary:hover {
-            background: #f0f0f0;
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
         }
         
         .info-bubble-btn-secondary {
-            background: transparent;
-            color: white;
-            border: 1px solid rgba(255,255,255,0.5);
+            background: transparent !important;
+            color: #666 !important;
+            border: 1px solid #ddd !important;
         }
         
         .info-bubble-btn-secondary:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.05) !important;
         }
-        
-        /* Responsivní design */
-        @media (max-width: 768px) {
-            .info-bubble {
-                bottom: 20px;
-                right: 20px;
-                left: 10px;
-                max-width: none;
-                transform: translateY(-100%);
-            }
-            
-            .info-bubble.show {
-                transform: translateY(0);
-            }
-        }
+    }
+}
+
+/* DALŠÍ MOŽNOSTI POZICOVÁNÍ - odkomentujte tu, kterou chcete použít */
+
+/* Střed obrazovky */
+/*
+.info-bubble {
+    top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: translate(-50%, -50%) scale(0.8) !important;
+    opacity: 0 !important;
+}
+
+.info-bubble.show {
+    transform: translate(-50%, -50%) scale(1) !important;
+    opacity: 1 !important;
+}
+*/
+
+/* Levý dolní roh */
+/*
+.info-bubble {
+    bottom: 20px !important;
+    left: 20px !important;
+    right: auto !important;
+    top: auto !important;
+    transform: translateX(-100%) !important;
+}
+
+.info-bubble.show {
+    transform: translateX(0) !important;
+}
+*/
+
+/* Horní střed */
+/*
+.info-bubble {
+    top: 20px !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: translate(-50%, -100%) !important;
+}
+
+.info-bubble.show {
+    transform: translate(-50%, 0) !important;
+}
+*/
