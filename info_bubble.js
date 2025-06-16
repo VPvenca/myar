@@ -129,7 +129,7 @@ class InfoBubbleModule {
 // Inicializace modulu - spustí se až po načtení DOM
 function initializeInfoBubble() {
     const infoBubble = new InfoBubbleModule({
-       title: '<img src="/img/map_ico.png" style="width: 20px; height: 20px; margin-right: 8px; vertical-align: middle;">Navigace➡️',
+       title: '<img src="/img/map_ico.png" style="width: 30px; height: 30px; margin-right: 8px; vertical-align: middle;">Navigace',
         content: 'Tlačítko mapy vás nasměruje k místu na Google mapách, kde se expozice nachází',
         delay: 3000,
         primaryButtonText: 'Rozumím!',
