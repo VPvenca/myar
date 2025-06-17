@@ -345,7 +345,7 @@
         <!-- AR objekty na GPS souřadnicích -->
         <!-- sud -->
         <a-entity 
-            gps-entity-place="latitude: 49.008014; longitude: 17.131151" 
+            gps-entity-place="latitude: 49.008022; longitude: 17.131167" 
             data-marker-id="sud"
             data-audio-id="audio1"
             visible="false">
@@ -361,7 +361,9 @@
 
         <!-- lis -->
         <a-entity 
-            gps-entity-place="latitude: 49.009083; longitude: 17.128691"  
+            gps-entity-place="latitude: 49.009103; longitude: 17.128638" 
+
+
             data-marker-id="lis"
             data-audio-id="audio2"
             visible="false">
@@ -458,16 +460,16 @@
         const markers = [
             { 
                 id: "sud", 
-                lat: 49.008014, 
-                lng: 17.131151, 
+                lat: 49.008022, 
+                lng: 17.131167, 
                 name: "🏺 Sud",
                 description: "Dřevěný sud na víno",
                 audioId: "audio1"
             },
             { 
                 id: "lis", 
-                lat: 49.009083, 
-                lng: 17.128691,
+                lat: 49.009103, 
+                lng: 17.128638,
                 name: "⚙️ Lis", 
                 description: "Ruční lis na révu",
                 audioId: "audio2"
@@ -1210,39 +1212,79 @@
             updateNavigation();
         }
 
-        // Rotace modelů dotykem
+        // Rotace modelů dotykem - OPRAVENÁ VERZE
         function setupModelRotation() {
+            console.log("🔄 Setting up model rotation...");
             let touchStarted = false;
             let rotationActive = false;
             
+            // Touch events
             document.addEventListener('touchstart', (e) => {
-                if (isTouchingUI(e.target)) return;
-                if (!isAnyModelVisible()) return;
+                console.log("👆 Touch start detected");
+                
+                if (isTouchingUI(e.target)) {
+                    console.log("👆 Touch on UI element, ignoring");
+                    return;
+                }
+                
+                const visibleCount = markers.filter(marker => {
+                    const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                    return entity && entity.getAttribute('visible') === 'true';
+                }).length;
+                
+                console.log(`👆 Visible models: ${visibleCount}`);
+                
+                if (visibleCount === 0) {
+                    console.log("👆 No visible models, ignoring touch");
+                    return;
+                }
                 
                 touchStarted = true;
                 rotationActive = true;
                 isRotating = true;
                 startX = e.touches[0].clientX;
                 showRotationHintOnce();
+                console.log("🔄 Touch rotation started");
                 e.preventDefault();
             }, { passive: false });
             
+            // Mouse events (pro desktop/debug)
             document.addEventListener('mousedown', (e) => {
-                if (isTouchingUI(e.target)) return;
-                if (!isAnyModelVisible()) return;
+                console.log("🖱️ Mouse down detected");
+                
+                if (isTouchingUI(e.target)) {
+                    console.log("🖱️ Mouse on UI element, ignoring");
+                    return;
+                }
+                
+                const visibleCount = markers.filter(marker => {
+                    const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                    return entity && entity.getAttribute('visible') === 'true';
+                }).length;
+                
+                console.log(`🖱️ Visible models: ${visibleCount}`);
+                
+                if (visibleCount === 0) {
+                    console.log("🖱️ No visible models, ignoring mouse");
+                    return;
+                }
                 
                 rotationActive = true;
                 isRotating = true;
                 startX = e.clientX;
                 showRotationHintOnce();
+                console.log("🔄 Mouse rotation started");
                 e.preventDefault();
             });
             
             document.addEventListener('touchmove', (e) => {
                 if (!isRotating || !touchStarted || !rotationActive) return;
+                
                 const currentX = e.touches[0].clientX;
                 const deltaX = currentX - startX;
                 modelRotationY += deltaX * 0.3;
+                
+                console.log(`🔄 Touch rotating: deltaX=${deltaX}, newRotation=${modelRotationY}`);
                 updateModelRotation();
                 startX = currentX;
                 e.preventDefault();
@@ -1250,50 +1292,77 @@
             
             document.addEventListener('mousemove', (e) => {
                 if (!isRotating || !rotationActive) return;
+                
                 const deltaX = e.clientX - startX;
                 modelRotationY += deltaX * 0.3;
+                
+                console.log(`🔄 Mouse rotating: deltaX=${deltaX}, newRotation=${modelRotationY}`);
                 updateModelRotation();
                 startX = e.clientX;
                 e.preventDefault();
             });
             
             document.addEventListener('touchend', () => {
+                if (isRotating) {
+                    console.log("🔄 Touch rotation ended");
+                }
                 isRotating = false;
                 touchStarted = false;
                 rotationActive = false;
             });
             
             document.addEventListener('mouseup', () => {
+                if (isRotating) {
+                    console.log("🔄 Mouse rotation ended");
+                }
                 isRotating = false;
                 rotationActive = false;
             });
         }
 
         function updateModelRotation() {
+            console.log(`🔄 Updating model rotation to: ${modelRotationY}°`);
+            
             const wineModel1 = document.getElementById('wine-model-1-gltf');
             const wineModel2 = document.getElementById('wine-model-2-gltf');
             const wineModel3 = document.getElementById('wine-model-3-gltf');
             const wineModel4 = document.getElementById('wine-model-4-gltf');
 
+            let updatedCount = 0;
+            
             if (wineModel1) {
                 wineModel1.setAttribute('rotation', `0 ${modelRotationY} 0`);
+                updatedCount++;
+                console.log(`✅ Updated wine-model-1 rotation`);
             }
             if (wineModel2) {
                 wineModel2.setAttribute('rotation', `0 ${modelRotationY} 0`);
+                updatedCount++;
+                console.log(`✅ Updated wine-model-2 rotation`);
             }
             if (wineModel3) {
                 wineModel3.setAttribute('rotation', `0 ${modelRotationY} 0`);
+                updatedCount++;
+                console.log(`✅ Updated wine-model-3 rotation`);
             }
             if (wineModel4) {
                 wineModel4.setAttribute('rotation', `0 ${modelRotationY} 0`);
+                updatedCount++;
+                console.log(`✅ Updated wine-model-4 rotation`);
             }
+            
+            console.log(`🔄 Total models rotated: ${updatedCount}`);
         }
 
         function isAnyModelVisible() {
-            return markers.some(marker => {
+            const visibleMarkers = markers.filter(marker => {
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                return entity && entity.getAttribute('visible') === 'true';
+                const isVisible = entity && entity.getAttribute('visible') === 'true';
+                console.log(`🔍 Model ${marker.id}: visible = ${isVisible}`);
+                return isVisible;
             });
+            console.log(`🔍 Total visible models: ${visibleMarkers.length}`);
+            return visibleMarkers.length > 0;
         }
 
         function isTouchingUI(target) {
@@ -1471,12 +1540,49 @@
             console.log("=================================");
         }
 
+        // Debug funkce pro testování rotace
+        function testRotation() {
+            console.log("🧪 Testing manual rotation...");
+            modelRotationY += 45;
+            updateModelRotation();
+            console.log(`🧪 Manual rotation test: ${modelRotationY}°`);
+        }
+
+        function forceShowAllMarkers() {
+            console.log("🔧 DEBUG: Force showing all markers");
+            markers.forEach(marker => {
+                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                if (entity) {
+                    entity.setAttribute('visible', 'true');
+                    console.log(`✅ Forced ${marker.id} visible`);
+                }
+            });
+        }
+
+        function forceHideAllMarkers() {
+            console.log("🔧 DEBUG: Force hiding all markers");
+            markers.forEach(marker => {
+                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                if (entity) {
+                    entity.setAttribute('visible', 'false');
+                    console.log(`❌ Forced ${marker.id} hidden`);
+                }
+            });
+        }
+
         // Globální dostupnost pro debugging
         window.debugGetCompletedQuizzes = debugGetCompletedQuizzes;
         window.directActivateWineQuizAchievement = directActivateWineQuizAchievement;
         window.markQuizCompleted = markQuizCompleted;
+        window.testRotation = testRotation;
+        window.forceShowAllMarkers = forceShowAllMarkers;
+        window.forceHideAllMarkers = forceHideAllMarkers;
 
         console.log("🔧 Debug functions loaded");
+        console.log("🔧 Available commands:");
+        console.log("   - testRotation() - manually rotate models by 45°");
+        console.log("   - forceShowAllMarkers() - show all markers for testing");
+        console.log("   - forceHideAllMarkers() - hide all markers");
     </script>
 </body>
 </html>
