@@ -314,7 +314,7 @@
     <!-- Debug tlačítko - SKRYTO -->
     <button class="debug-button ui-element" id="debugButton" style="display: none !important;">🔧 Debug</button>
 
-    <!-- A-Frame AR scéna s GPS pozicováním -->
+    <!-- A-Frame AR scéna s GPS pozicováním - PRÁZDNÁ SCÉNA -->
     <a-scene 
         vr-mode-ui="enabled: false"
         arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
@@ -342,70 +342,7 @@
             rotation-reader>
         </a-camera>
 
-        <!-- AR objekty na GPS souřadnicích -->
-        <!-- sud -->
-        <a-entity 
-            gps-entity-place="latitude: 49.088855; longitude: 17.134609" 
-            data-marker-id="sud"
-            data-audio-id="audio1"
-            visible="false">
-            <a-gltf-model 
-                id="wine-model-1-gltf"
-                src="#wine-model-1"
-                position="0 0 0"
-                scale="7 7 7"
-                rotation="0 30 0"
-                animation-mixer>
-            </a-gltf-model>
-        </a-entity>
-
-        <!-- lis -->
-        <a-entity 
-            gps-entity-place="latitude: 49.086341; longitude: 17.133468" 
-            data-marker-id="lis"
-            data-audio-id="audio2"
-            visible="false">
-            <a-gltf-model 
-                id="wine-model-2-gltf"
-                src="#wine-model-2"
-                position="0 0 0"
-                scale="7 7 7"
-                rotation="0 30 0"
-                animation-mixer>
-            </a-gltf-model>
-        </a-entity>
-
-        <!-- urban -->
-        <a-entity 
-            gps-entity-place="latitude: 49.081785; longitude: 17.130330" 
-            data-marker-id="urban"
-            data-audio-id="audio3"
-            visible="false">
-            <a-gltf-model 
-                id="wine-model-3-gltf"
-                src="#wine-model-3"
-                position="0 0 0"
-                scale="8 8 8"
-                rotation="0 30 0"
-                animation-mixer>
-            </a-gltf-model>
-        </a-entity>
-
-         <!-- vinar -->
-        <a-entity 
-            gps-entity-place="latitude: 49.083421; longitude: 17.132444" 
-            data-marker-id="vinar"
-            data-audio-id="audio4"
-            visible="false">
-            <a-gltf-model 
-                id="wine-model-4-gltf"
-                src="#wine-model-4"
-                position="0 0 0"
-                scale="8 8 8"
-                rotation="0 30 0"
-                animation-mixer>
-            </a-gltf-model>
-        </a-entity>
+        <!-- ŽÁDNÉ AR OBJEKTY - BUDOU PŘIDÁNY DYNAMICKY -->
 
         <!-- Základní osvětlení -->
         <a-light type="ambient" color="#ffffff" intensity="1.0" id="ambientLight"></a-light>
@@ -427,6 +364,10 @@
     </a-scene>
 
     <script>
+        // === NOVÉ: FYZICKÁ SPRÁVA AR OBJEKTŮ ===
+        const arObjectDefinitions = new Map();
+        const activeArObjects = new Set();
+
         // === GAMIFIKAČNÍ PROMĚNNÉ ===
         let gamificationInitialized = false;
         let currentExpositionId = 'stezka_vino';
@@ -489,6 +430,113 @@
                 audioId: "audio4"
             }
         ];
+
+        // === NOVÉ: FUNKCE PRO FYZICKOU SPRÁVU OBJEKTŮ ===
+
+        function initializeEmptyARScene() {
+            // Najdi všechny existující AR objekty a odstraň je
+            const existingObjects = document.querySelectorAll('[data-marker-id]');
+            existingObjects.forEach(obj => {
+                console.log(`🗑️ Removing existing AR object: ${obj.getAttribute('data-marker-id')}`);
+                obj.parentNode.removeChild(obj);
+            });
+            
+            // Uložení definic objektů pro pozdější použití
+            markers.forEach(marker => {
+                arObjectDefinitions.set(marker.id, {
+                    lat: marker.lat,
+                    lng: marker.lng,
+                    audioId: marker.audioId,
+                    glbModel: getGLBModelForMarker(marker.id),
+                    scale: getScaleForMarker(marker.id),
+                    rotation: "0 30 0"
+                });
+            });
+            
+            console.log("✅ Wine AR scene cleared, object definitions stored");
+        }
+
+        function getGLBModelForMarker(markerId) {
+            switch(markerId) {
+                case 'sud': return '#wine-model-1';
+                case 'lis': return '#wine-model-2';
+                case 'urban': return '#wine-model-3';
+                case 'vinar': return '#wine-model-4';
+                default: return '#wine-model-1';
+            }
+        }
+
+        function getScaleForMarker(markerId) {
+            switch(markerId) {
+                case 'sud': 
+                case 'lis': 
+                    return "7 7 7";
+                case 'urban':
+                case 'vinar':
+                    return "8 8 8";
+                default: 
+                    return "7 7 7";
+            }
+        }
+
+        function addARObjectToScene(markerId) {
+            if (activeArObjects.has(markerId)) {
+                console.log(`⚠️ AR object ${markerId} already in scene`);
+                return;
+            }
+            
+            const definition = arObjectDefinitions.get(markerId);
+            if (!definition) {
+                console.error(`❌ No definition found for marker ${markerId}`);
+                return;
+            }
+            
+            const scene = document.querySelector('a-scene');
+            if (!scene) {
+                console.error("❌ A-Frame scene not found");
+                return;
+            }
+            
+            // Vytvoř nový AR entity
+            const arEntity = document.createElement('a-entity');
+            arEntity.setAttribute('gps-entity-place', `latitude: ${definition.lat}; longitude: ${definition.lng}`);
+            arEntity.setAttribute('data-marker-id', markerId);
+            arEntity.setAttribute('data-audio-id', definition.audioId);
+            arEntity.setAttribute('visible', 'true');
+            
+            // Vytvoř GLB model
+            const glbModel = document.createElement('a-gltf-model');
+            glbModel.id = `wine-model-${markerId}-gltf`;
+            glbModel.setAttribute('src', definition.glbModel);
+            glbModel.setAttribute('position', '0 0 0');
+            glbModel.setAttribute('scale', definition.scale);
+            glbModel.setAttribute('rotation', `0 ${modelRotationY} 0`);
+            glbModel.setAttribute('animation-mixer', '');
+            
+            // Přidej model do entity
+            arEntity.appendChild(glbModel);
+            
+            // Přidej entity do scény
+            scene.appendChild(arEntity);
+            
+            // Zaznamenej jako aktivní
+            activeArObjects.add(markerId);
+            
+            console.log(`➕ Wine AR object ${markerId} added to scene at ${definition.lat}, ${definition.lng}`);
+        }
+
+        function removeARObjectFromScene(markerId) {
+            if (!activeArObjects.has(markerId)) {
+                return; // Už není ve scéně
+            }
+            
+            const arEntity = document.querySelector(`[data-marker-id="${markerId}"]`);
+            if (arEntity && arEntity.parentNode) {
+                arEntity.parentNode.removeChild(arEntity);
+                activeArObjects.delete(markerId);
+                console.log(`➖ Wine AR object ${markerId} removed from scene`);
+            }
+        }
 
         // === VINNÝ KVÍZOVÝ SYSTÉM ===
         
@@ -968,11 +1016,11 @@
             }
         }
 
-        // HLAVNÍ FUNKCE - Kontrola proximity s gamifikací
+        // === NAHRAZENÁ HLAVNÍ FUNKCE S FYZICKOU SPRÁVOU OBJEKTŮ ===
         function checkProximityToMarkers() {
             if (!userPosition) return;
             
-            console.log("Checking proximity with user position:", userPosition);
+            console.log("Checking proximity with PHYSICAL object management...");
             let shouldStopAudio = true;
             let markersActivatedThisCheck = [];
             
@@ -982,32 +1030,30 @@
                     marker.lat, marker.lng
                 );
                 
-                console.log(`${marker.id}: distance = ${distance.toFixed(1)}m, visibility threshold = ${AR_VISIBILITY_THRESHOLD}m`);
+                const isCurrentlyInScene = activeArObjects.has(marker.id);
+                const shouldBeInScene = distance <= AR_VISIBILITY_THRESHOLD;
                 
-                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                if (entity) {
-                    // Zobrazení AR objektu
-                    if (distance <= AR_VISIBILITY_THRESHOLD) {
-                        entity.setAttribute('visible', 'true');
-                        console.log(`✅ ${marker.id} VISIBLE at ${distance.toFixed(1)}m`);
-                    } else {
-                        entity.setAttribute('visible', 'false');
-                        console.log(`❌ ${marker.id} too far: ${distance.toFixed(1)}m`);
-                    }
-                    
-                    // Audio přehrávání
-                    if (distance <= AUDIO_THRESHOLD) {
-                        playAudio(marker.id);
-                        shouldStopAudio = false;
-                        console.log(`🎵 Audio playing for ${marker.id}`);
-                    }
-                    
-                    // GAMIFIKACE: Aktivace markeru při proximity
-                    if (distance <= PROXIMITY_THRESHOLD) {
-                        console.log(`🎯 Wine marker activated: ${marker.id}`);
-                        markersActivatedThisCheck.push(marker.id);
-                        recordWineMarkerActivation(marker.id);
-                    }
+                console.log(`${marker.id}: distance=${distance.toFixed(1)}m, inScene=${isCurrentlyInScene}, shouldBe=${shouldBeInScene}`);
+                
+                // FYZICKÉ PŘIDÁNÍ/ODSTRANĚNÍ OBJEKTŮ
+                if (shouldBeInScene && !isCurrentlyInScene) {
+                    addARObjectToScene(marker.id);
+                } else if (!shouldBeInScene && isCurrentlyInScene) {
+                    removeARObjectFromScene(marker.id);
+                }
+                
+                // Audio logika (pouze pro objekty ve scéně)
+                if (distance <= AUDIO_THRESHOLD && isCurrentlyInScene) {
+                    playAudio(marker.id);
+                    shouldStopAudio = false;
+                    console.log(`🎵 Audio playing for ${marker.id}`);
+                }
+                
+                // Gamifikace (pouze pro objekty ve scéně)
+                if (distance <= PROXIMITY_THRESHOLD && isCurrentlyInScene) {
+                    console.log(`🎯 Wine marker activated: ${marker.id}`);
+                    markersActivatedThisCheck.push(marker.id);
+                    recordWineMarkerActivation(marker.id);
                 }
             });
             
@@ -1015,12 +1061,9 @@
                 stopCurrentAudio();
             }
             
-            // Počet viditelných markeru
-            const visibleCount = markers.filter(marker => {
-                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                return entity && entity.getAttribute('visible') === true;
-            }).length;
-            console.log(`${visibleCount}/${markers.length} wine markers are visible in AR`);
+            // Počet objektů ve scéně
+            const activeCount = activeArObjects.size;
+            console.log(`📊 Wine AR Status: ${activeCount} objects in scene`);
         }
 
         // UPRAVENÉ AUDIO FUNKCE - POUZE IKONY
@@ -1210,7 +1253,7 @@
             updateNavigation();
         }
 
-        // Rotace modelů dotykem
+        // === AKTUALIZOVANÉ ROTACE MODELŮ ===
         function setupModelRotation() {
             let touchStarted = false;
             let rotationActive = false;
@@ -1269,31 +1312,20 @@
             });
         }
 
+        // === AKTUALIZOVANÁ FUNKCE ROTACE ===
         function updateModelRotation() {
-            const wineModel1 = document.getElementById('wine-model-1-gltf');
-            const wineModel2 = document.getElementById('wine-model-2-gltf');
-            const wineModel3 = document.getElementById('wine-model-3-gltf');
-            const wineModel4 = document.getElementById('wine-model-4-gltf');
-
-            if (wineModel1) {
-                wineModel1.setAttribute('rotation', `0 ${modelRotationY} 0`);
-            }
-            if (wineModel2) {
-                wineModel2.setAttribute('rotation', `0 ${modelRotationY} 0`);
-            }
-            if (wineModel3) {
-                wineModel3.setAttribute('rotation', `0 ${modelRotationY} 0`);
-            }
-            if (wineModel4) {
-                wineModel4.setAttribute('rotation', `0 ${modelRotationY} 0`);
-            }
+            // Aktualizuj rotaci pouze pro objekty, které jsou skutečně ve scéně
+            activeArObjects.forEach(markerId => {
+                const wineModel = document.querySelector(`#wine-model-${markerId}-gltf`);
+                if (wineModel) {
+                    wineModel.setAttribute('rotation', `0 ${modelRotationY} 0`);
+                }
+            });
         }
 
+        // === AKTUALIZOVANÁ FUNKCE VIDITELNOSTI ===
         function isAnyModelVisible() {
-            return markers.some(marker => {
-                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                return entity && entity.getAttribute('visible') === true;
-            });
+            return activeArObjects.size > 0;
         }
 
         function isTouchingUI(target) {
@@ -1328,6 +1360,74 @@
             }, 3000);
         }
 
+        // === DEBUG FUNKCE ===
+        
+        function getWineARSceneStatus() {
+            console.log("=== WINE AR SCENE STATUS ===");
+            console.log(`Active objects in scene: ${Array.from(activeArObjects).join(', ')}`);
+            
+            const entitiesInDOM = document.querySelectorAll('[data-marker-id]');
+            console.log(`Entities in DOM: ${Array.from(entitiesInDOM).map(e => e.getAttribute('data-marker-id')).join(', ')}`);
+            
+            return {
+                activeObjects: Array.from(activeArObjects),
+                entitiesInDOM: Array.from(entitiesInDOM).map(e => e.getAttribute('data-marker-id'))
+            };
+        }
+
+        function forceCleanWineARScene() {
+            const allEntities = document.querySelectorAll('[data-marker-id]');
+            allEntities.forEach(entity => {
+                if (entity.parentNode) {
+                    entity.parentNode.removeChild(entity);
+                }
+            });
+            
+            activeArObjects.clear();
+            console.log("🧹 Force wine AR cleanup completed - all objects removed");
+        }
+
+        // Debug funkce pro testování
+        function debugGetCompletedQuizzes() {
+            console.log("=== DEBUG getCompletedQuizzes ===");
+            
+            const rawData = localStorage.getItem('wineQuizzesCompleted');
+            console.log("Raw localStorage data:", rawData);
+            
+            const completed = getCompletedQuizzes();
+            console.log("getCompletedQuizzes() returns:", completed);
+            console.log("Type:", typeof completed);
+            console.log("Is array:", Array.isArray(completed));
+            
+            if (rawData) {
+                try {
+                    const parsed = JSON.parse(rawData);
+                    console.log("Manual parse:", parsed);
+                } catch (e) {
+                    console.log("Parse error:", e);
+                }
+            }
+            console.log("===============================");
+        }
+
+        function directActivateWineQuizAchievement() {
+            console.log("🎯 DIRECT ACHIEVEMENT ACTIVATION");
+            console.log("=================================");
+            
+            const allQuizzes = Array.from({length: WINE_QUIZZES.length}, (_, i) => i);
+            localStorage.setItem('wineQuizzesCompleted', JSON.stringify(allQuizzes));
+            
+            if (typeof unlockAchievement === 'function') {
+                console.log("🏆 Calling unlockAchievement directly...");
+                const result = unlockAchievement('wine_quiz_master');
+                console.log("Result:", result);
+            } else {
+                console.log("❌ unlockAchievement not available");
+            }
+            
+            console.log("=================================");
+        }
+
         // === EVENT LISTENERY ===
         
         document.getElementById('navToggle').addEventListener('click', () => {
@@ -1344,32 +1444,6 @@
                 document.getElementById('navContent').classList.remove('open');
             }
         });
-
-        // === HLAVNÍ INICIALIZACE ===
-        
-        window.addEventListener('load', () => {
-            console.log("Starting wine AR application with quiz system and gamification...");
-            
-            // Počkej na načtení gamifikačních skriptů a pak inicializuj
-            setTimeout(() => {
-                initializeGameification();
-            }, 2000);  // Prodloužený timeout pro jistotu
-            
-            // Počkáme na A-Frame
-            document.querySelector('a-scene').addEventListener('loaded', () => {
-                console.log("A-Frame scene loaded");
-                setupModelRotation();
-                getCurrentPosition();
-                watchPosition();
-                startTutorialWhenReady();
-                // NOVÉ: Pravidelná kontrola kvízů
-                setInterval(() => {
-                    checkDistanceForQuiz();
-                }, 3000); // Kontrola každé 3 sekundy
-            });
-        });
-
-        console.log("🍇 Wine AR script with quiz system and gamification loaded successfully!");
 
         // === TUTORIAL INICIALIZACE ===
         let tutorialInitialized = false;
@@ -1413,7 +1487,7 @@
         }
 
         function startTutorialWhenReady() {
-            // Spusť tutorial až když je všechno připraveno
+            // Spusť tutorial až když je všechno připravené
             setTimeout(async () => {
                 console.log("🎓 Starting tutorial initialization...");
                 
@@ -1428,55 +1502,50 @@
             }, 3000); // 3 sekundy po načtení A-Frame
         }
 
-        // === DEBUG FUNKCE ===
+        // === HLAVNÍ INICIALIZACE ===
         
-        // Debug funkce pro testování
-        function debugGetCompletedQuizzes() {
-            console.log("=== DEBUG getCompletedQuizzes ===");
+        window.addEventListener('load', () => {
+            console.log("🚀 Starting wine AR application with PHYSICAL object management and quiz system...");
             
-            const rawData = localStorage.getItem('wineQuizzesCompleted');
-            console.log("Raw localStorage data:", rawData);
+            // Počkej na načtení gamifikačních skriptů a pak inicializuj
+            setTimeout(() => {
+                initializeGameification();
+            }, 2000);  // Prodloužený timeout pro jistotu
             
-            const completed = getCompletedQuizzes();
-            console.log("getCompletedQuizzes() returns:", completed);
-            console.log("Type:", typeof completed);
-            console.log("Is array:", Array.isArray(completed));
+            // Počkáme na A-Frame
+            document.querySelector('a-scene').addEventListener('loaded', () => {
+                console.log("A-Frame scene loaded");
+                
+                // === NOVÉ: INICIALIZACE PRÁZDNÉ SCÉNY ===
+                setTimeout(() => {
+                    initializeEmptyARScene();
+                    console.log("🍷 Wine AR scene cleared, empty scene initialized");
+                }, 1000);
+                
+                setupModelRotation();
+                getCurrentPosition();
+                watchPosition();
+                startTutorialWhenReady();
+                
+                // NOVÉ: Pravidelná kontrola kvízů
+                setInterval(() => {
+                    checkDistanceForQuiz();
+                }, 3000); // Kontrola každé 3 sekundy
+            });
             
-            if (rawData) {
-                try {
-                    const parsed = JSON.parse(rawData);
-                    console.log("Manual parse:", parsed);
-                } catch (e) {
-                    console.log("Parse error:", e);
-                }
-            }
-            console.log("===============================");
-        }
+            // Přidej debug funkce do globálního scope
+            window.getWineARStatus = getWineARSceneStatus;
+            window.forceCleanWineARScene = forceCleanWineARScene;
+            window.debugGetCompletedQuizzes = debugGetCompletedQuizzes;
+            window.directActivateWineQuizAchievement = directActivateWineQuizAchievement;
+            window.markQuizCompleted = markQuizCompleted; // Pro testování
+            
+            console.log("💡 Debug commands: getWineARStatus(), forceCleanWineARScene(), debugGetCompletedQuizzes()");
+        });
 
-        function directActivateWineQuizAchievement() {
-            console.log("🎯 DIRECT ACHIEVEMENT ACTIVATION");
-            console.log("=================================");
-            
-            const allQuizzes = Array.from({length: WINE_QUIZZES.length}, (_, i) => i);
-            localStorage.setItem('wineQuizzesCompleted', JSON.stringify(allQuizzes));
-            
-            if (typeof unlockAchievement === 'function') {
-                console.log("🏆 Calling unlockAchievement directly...");
-                const result = unlockAchievement('wine_quiz_master');
-                console.log("Result:", result);
-            } else {
-                console.log("❌ unlockAchievement not available");
-            }
-            
-            console.log("=================================");
-        }
-
-        // Globální dostupnost pro debugging
-        window.debugGetCompletedQuizzes = debugGetCompletedQuizzes;
-        window.directActivateWineQuizAchievement = directActivateWineQuizAchievement;
-        window.markQuizCompleted = markQuizCompleted; // Pro testování
-
+        console.log("🍇 Wine AR script with PHYSICAL object management, quiz system and gamification loaded successfully!");
         console.log("🔧 Debug functions loaded");
     </script>
 </body>
 </html>
+                }
