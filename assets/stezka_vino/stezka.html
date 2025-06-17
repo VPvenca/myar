@@ -345,7 +345,7 @@
         <!-- AR objekty na GPS souřadnicích -->
         <!-- sud -->
         <a-entity 
-            gps-entity-place="latitude: 49.008022; longitude: 17.131167" 
+            gps-entity-place="latitude: 49.088855; longitude: 17.134609" 
             data-marker-id="sud"
             data-audio-id="audio1"
             visible="false">
@@ -361,9 +361,7 @@
 
         <!-- lis -->
         <a-entity 
-            gps-entity-place="latitude: 49.009103; longitude: 17.128638" 
-
-
+            gps-entity-place="latitude: 49.086341; longitude: 17.133468" 
             data-marker-id="lis"
             data-audio-id="audio2"
             visible="false">
@@ -460,16 +458,16 @@
         const markers = [
             { 
                 id: "sud", 
-                lat: 49.008022, 
-                lng: 17.131167, 
+                lat: 49.088855, 
+                lng: 17.134609, 
                 name: "🏺 Sud",
                 description: "Dřevěný sud na víno",
                 audioId: "audio1"
             },
             { 
                 id: "lis", 
-                lat: 49.009103, 
-                lng: 17.128638,
+                lat: 49.086341, 
+                lng: 17.133468,
                 name: "⚙️ Lis", 
                 description: "Ruční lis na révu",
                 audioId: "audio2"
@@ -970,7 +968,7 @@
             }
         }
 
-        // === ZJEDNODUŠENÁ KONTROLA PROXIMITY - JEDNODUCHÁ LOGIKA ===
+        // HLAVNÍ FUNKCE - Kontrola proximity s gamifikací
         function checkProximityToMarkers() {
             if (!userPosition) return;
             
@@ -988,13 +986,13 @@
                 
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
                 if (entity) {
-                    // JEDNODUCHÁ LOGIKA: Do 30m visible true, nad 30m visible false
+                    // Zobrazení AR objektu
                     if (distance <= AR_VISIBILITY_THRESHOLD) {
                         entity.setAttribute('visible', 'true');
                         console.log(`✅ ${marker.id} VISIBLE at ${distance.toFixed(1)}m`);
                     } else {
                         entity.setAttribute('visible', 'false');
-                        console.log(`❌ ${marker.id} HIDDEN - too far: ${distance.toFixed(1)}m`);
+                        console.log(`❌ ${marker.id} too far: ${distance.toFixed(1)}m`);
                     }
                     
                     // Audio přehrávání
@@ -1020,7 +1018,7 @@
             // Počet viditelných markeru
             const visibleCount = markers.filter(marker => {
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                return entity && entity.getAttribute('visible') === 'true';
+                return entity && entity.getAttribute('visible') === true;
             }).length;
             console.log(`${visibleCount}/${markers.length} wine markers are visible in AR`);
         }
@@ -1212,79 +1210,39 @@
             updateNavigation();
         }
 
-        // Rotace modelů dotykem - OPRAVENÁ VERZE
+        // Rotace modelů dotykem
         function setupModelRotation() {
-            console.log("🔄 Setting up model rotation...");
             let touchStarted = false;
             let rotationActive = false;
             
-            // Touch events
             document.addEventListener('touchstart', (e) => {
-                console.log("👆 Touch start detected");
-                
-                if (isTouchingUI(e.target)) {
-                    console.log("👆 Touch on UI element, ignoring");
-                    return;
-                }
-                
-                const visibleCount = markers.filter(marker => {
-                    const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                    return entity && entity.getAttribute('visible') === 'true';
-                }).length;
-                
-                console.log(`👆 Visible models: ${visibleCount}`);
-                
-                if (visibleCount === 0) {
-                    console.log("👆 No visible models, ignoring touch");
-                    return;
-                }
+                if (isTouchingUI(e.target)) return;
+                if (!isAnyModelVisible()) return;
                 
                 touchStarted = true;
                 rotationActive = true;
                 isRotating = true;
                 startX = e.touches[0].clientX;
                 showRotationHintOnce();
-                console.log("🔄 Touch rotation started");
                 e.preventDefault();
             }, { passive: false });
             
-            // Mouse events (pro desktop/debug)
             document.addEventListener('mousedown', (e) => {
-                console.log("🖱️ Mouse down detected");
-                
-                if (isTouchingUI(e.target)) {
-                    console.log("🖱️ Mouse on UI element, ignoring");
-                    return;
-                }
-                
-                const visibleCount = markers.filter(marker => {
-                    const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                    return entity && entity.getAttribute('visible') === 'true';
-                }).length;
-                
-                console.log(`🖱️ Visible models: ${visibleCount}`);
-                
-                if (visibleCount === 0) {
-                    console.log("🖱️ No visible models, ignoring mouse");
-                    return;
-                }
+                if (isTouchingUI(e.target)) return;
+                if (!isAnyModelVisible()) return;
                 
                 rotationActive = true;
                 isRotating = true;
                 startX = e.clientX;
                 showRotationHintOnce();
-                console.log("🔄 Mouse rotation started");
                 e.preventDefault();
             });
             
             document.addEventListener('touchmove', (e) => {
                 if (!isRotating || !touchStarted || !rotationActive) return;
-                
                 const currentX = e.touches[0].clientX;
                 const deltaX = currentX - startX;
                 modelRotationY += deltaX * 0.3;
-                
-                console.log(`🔄 Touch rotating: deltaX=${deltaX}, newRotation=${modelRotationY}`);
                 updateModelRotation();
                 startX = currentX;
                 e.preventDefault();
@@ -1292,77 +1250,50 @@
             
             document.addEventListener('mousemove', (e) => {
                 if (!isRotating || !rotationActive) return;
-                
                 const deltaX = e.clientX - startX;
                 modelRotationY += deltaX * 0.3;
-                
-                console.log(`🔄 Mouse rotating: deltaX=${deltaX}, newRotation=${modelRotationY}`);
                 updateModelRotation();
                 startX = e.clientX;
                 e.preventDefault();
             });
             
             document.addEventListener('touchend', () => {
-                if (isRotating) {
-                    console.log("🔄 Touch rotation ended");
-                }
                 isRotating = false;
                 touchStarted = false;
                 rotationActive = false;
             });
             
             document.addEventListener('mouseup', () => {
-                if (isRotating) {
-                    console.log("🔄 Mouse rotation ended");
-                }
                 isRotating = false;
                 rotationActive = false;
             });
         }
 
         function updateModelRotation() {
-            console.log(`🔄 Updating model rotation to: ${modelRotationY}°`);
-            
             const wineModel1 = document.getElementById('wine-model-1-gltf');
             const wineModel2 = document.getElementById('wine-model-2-gltf');
             const wineModel3 = document.getElementById('wine-model-3-gltf');
             const wineModel4 = document.getElementById('wine-model-4-gltf');
 
-            let updatedCount = 0;
-            
             if (wineModel1) {
                 wineModel1.setAttribute('rotation', `0 ${modelRotationY} 0`);
-                updatedCount++;
-                console.log(`✅ Updated wine-model-1 rotation`);
             }
             if (wineModel2) {
                 wineModel2.setAttribute('rotation', `0 ${modelRotationY} 0`);
-                updatedCount++;
-                console.log(`✅ Updated wine-model-2 rotation`);
             }
             if (wineModel3) {
                 wineModel3.setAttribute('rotation', `0 ${modelRotationY} 0`);
-                updatedCount++;
-                console.log(`✅ Updated wine-model-3 rotation`);
             }
             if (wineModel4) {
                 wineModel4.setAttribute('rotation', `0 ${modelRotationY} 0`);
-                updatedCount++;
-                console.log(`✅ Updated wine-model-4 rotation`);
             }
-            
-            console.log(`🔄 Total models rotated: ${updatedCount}`);
         }
 
         function isAnyModelVisible() {
-            const visibleMarkers = markers.filter(marker => {
+            return markers.some(marker => {
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                const isVisible = entity && entity.getAttribute('visible') === 'true';
-                console.log(`🔍 Model ${marker.id}: visible = ${isVisible}`);
-                return isVisible;
+                return entity && entity.getAttribute('visible') === true;
             });
-            console.log(`🔍 Total visible models: ${visibleMarkers.length}`);
-            return visibleMarkers.length > 0;
         }
 
         function isTouchingUI(target) {
@@ -1375,7 +1306,7 @@
                 '.distance-info',
                 '.audio-info',
                 '.rotation-hint',
-                '.wine-quiz'
+                '.wine-quiz' // NOVÉ: Přidáno kvíz mezi UI elementy
             ];
             
             for (let selector of uiSelectors) {
@@ -1405,7 +1336,7 @@
 
         document.getElementById('clearSelection').addEventListener('click', clearSelection);
         document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
-        document.getElementById('quizClose').addEventListener('click', closeQuiz);
+        document.getElementById('quizClose').addEventListener('click', closeQuiz); // NOVÉ: Event listener pro zavření kvízu
 
         document.addEventListener('click', (e) => {
             const navPanel = document.querySelector('.navigation');
@@ -1417,29 +1348,28 @@
         // === HLAVNÍ INICIALIZACE ===
         
         window.addEventListener('load', () => {
-            console.log("🍷 Starting wine AR application with simple visibility logic...");
+            console.log("Starting wine AR application with quiz system and gamification...");
             
             // Počkej na načtení gamifikačních skriptů a pak inicializuj
             setTimeout(() => {
                 initializeGameification();
-            }, 2000);
+            }, 2000);  // Prodloužený timeout pro jistotu
             
             // Počkáme na A-Frame
             document.querySelector('a-scene').addEventListener('loaded', () => {
-                console.log("✅ A-Frame scene loaded");
+                console.log("A-Frame scene loaded");
                 setupModelRotation();
                 getCurrentPosition();
                 watchPosition();
                 startTutorialWhenReady();
-                
-                // Pravidelná kontrola kvízů
+                // NOVÉ: Pravidelná kontrola kvízů
                 setInterval(() => {
                     checkDistanceForQuiz();
                 }, 3000); // Kontrola každé 3 sekundy
             });
         });
 
-        console.log("🍇 Wine AR script with simple visibility logic loaded successfully!");
+        console.log("🍇 Wine AR script with quiz system and gamification loaded successfully!");
 
         // === TUTORIAL INICIALIZACE ===
         let tutorialInitialized = false;
@@ -1500,6 +1430,7 @@
 
         // === DEBUG FUNKCE ===
         
+        // Debug funkce pro testování
         function debugGetCompletedQuizzes() {
             console.log("=== DEBUG getCompletedQuizzes ===");
             
@@ -1540,49 +1471,12 @@
             console.log("=================================");
         }
 
-        // Debug funkce pro testování rotace
-        function testRotation() {
-            console.log("🧪 Testing manual rotation...");
-            modelRotationY += 45;
-            updateModelRotation();
-            console.log(`🧪 Manual rotation test: ${modelRotationY}°`);
-        }
-
-        function forceShowAllMarkers() {
-            console.log("🔧 DEBUG: Force showing all markers");
-            markers.forEach(marker => {
-                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                if (entity) {
-                    entity.setAttribute('visible', 'true');
-                    console.log(`✅ Forced ${marker.id} visible`);
-                }
-            });
-        }
-
-        function forceHideAllMarkers() {
-            console.log("🔧 DEBUG: Force hiding all markers");
-            markers.forEach(marker => {
-                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                if (entity) {
-                    entity.setAttribute('visible', 'false');
-                    console.log(`❌ Forced ${marker.id} hidden`);
-                }
-            });
-        }
-
         // Globální dostupnost pro debugging
         window.debugGetCompletedQuizzes = debugGetCompletedQuizzes;
         window.directActivateWineQuizAchievement = directActivateWineQuizAchievement;
-        window.markQuizCompleted = markQuizCompleted;
-        window.testRotation = testRotation;
-        window.forceShowAllMarkers = forceShowAllMarkers;
-        window.forceHideAllMarkers = forceHideAllMarkers;
+        window.markQuizCompleted = markQuizCompleted; // Pro testování
 
         console.log("🔧 Debug functions loaded");
-        console.log("🔧 Available commands:");
-        console.log("   - testRotation() - manually rotate models by 45°");
-        console.log("   - forceShowAllMarkers() - show all markers for testing");
-        console.log("   - forceHideAllMarkers() - hide all markers");
     </script>
 </body>
 </html>
