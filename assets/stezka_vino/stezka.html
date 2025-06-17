@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
+    
     <!-- A-Frame a AR.js - funkční verze -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
    
-    <!-- Gamifikační skripty - OPRAVENÉ POŘADÍ -->
+
+     <!-- Gamifikační skripty - OPRAVENÉ POŘADÍ -->
     <script src="/gamification-config.js"></script>
     <script src="/gamification.js"></script>
     <script src="/game/vino_stezka_config.js"></script>
@@ -124,7 +126,7 @@
             border-left-color: #28a745;
         }
         
-        /* Audio tlačítko - pouze ikona */
+        /* UPRAVENÝ STYL PRO AUDIO TLAČÍTKO - POUZE IKONA */
         .audio-info {
             position: fixed;
             top: 60px;
@@ -172,7 +174,7 @@
             text-align: center;
         }
 
-        /* Vinný kvíz */
+        /* NOVÉ: Styl pro vinný kvíz */
         .wine-quiz {
             position: fixed;
             top: 15%;
@@ -271,30 +273,6 @@
             from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
             to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
-
-        /* GPS permission button */
-        .gps-permission-btn {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(40, 167, 69, 0.95);
-            color: white;
-            padding: 15px 25px;
-            border-radius: 15px;
-            border: none;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 2000;
-            display: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        .gps-permission-btn:hover {
-            background: rgba(40, 167, 69, 1);
-            transform: translate(-50%, -50%) scale(1.05);
-        }
     </style>
 </head>
 <body>
@@ -304,13 +282,8 @@
     </a>
     
     <div class="distance-info ui-element" id="distanceInfo">
-        🍷 Inicializuji GPS...
+        🍷 Hledám nejbližší zajímavost...
     </div>
-
-    <!-- GPS Permission Button -->
-    <button class="gps-permission-btn ui-element" id="gpsPermissionBtn">
-        📍 Povolit GPS lokalizaci
-    </button>
     
     <div class="navigation ui-element">
         <div class="nav-toggle" id="navToggle">🍷 Vinná Navigace</div>
@@ -322,11 +295,11 @@
         </div>
     </div>
     
-    <!-- Audio tlačítko -->
+    <!-- UPRAVENÉ AUDIO TLAČÍTKO - POUZE IKONA -->
     <div class="audio-info ui-element" id="audioInfo">🔊</div>
     <div class="rotation-hint" id="rotationHint">🔄 Tažením otočíte objekt</div>
     
-    <!-- Vinný kvíz -->
+    <!--  Vinný kvíz -->
     <div class="wine-quiz ui-element" id="wineQuiz">
         <div class="quiz-question" id="quizQuestion"></div>
         <div class="quiz-answers" id="quizAnswers"></div>
@@ -372,11 +345,10 @@
         <!-- AR objekty na GPS souřadnicích -->
         <!-- sud -->
         <a-entity 
-            gps-entity-place="latitude: 49.009454; longitude: 17.127020" 
+            gps-entity-place="latitude: 49.088855; longitude: 17.134609" 
             data-marker-id="sud"
             data-audio-id="audio1"
-            visible="false"
-            id="marker-sud">
+            visible="false">
             <a-gltf-model 
                 id="wine-model-1-gltf"
                 src="#wine-model-1"
@@ -389,11 +361,10 @@
 
         <!-- lis -->
         <a-entity 
-            gps-entity-place="latitude: 49.009995; longitude: 17.124442" 
+            gps-entity-place="latitude: 49.086341; longitude: 17.133468" 49.086341, 17.133468
             data-marker-id="lis"
             data-audio-id="audio2"
-            visible="false"
-            id="marker-lis">
+            visible="false">
             <a-gltf-model 
                 id="wine-model-2-gltf"
                 src="#wine-model-2"
@@ -406,11 +377,10 @@
 
         <!-- urban -->
         <a-entity 
-            gps-entity-place="latitude: 49.012124; longitude: 17.120797" 
+            gps-entity-place="latitude: 49.081785; longitude: 17.130330" 
             data-marker-id="urban"
             data-audio-id="audio3"
-            visible="false"
-            id="marker-urban">
+            visible="false">
             <a-gltf-model 
                 id="wine-model-3-gltf"
                 src="#wine-model-3"
@@ -423,11 +393,10 @@
 
          <!-- vinar -->
         <a-entity 
-            gps-entity-place="latitude: 49.014692; longitude: 17.122851" 
+            gps-entity-place="latitude: 49.083421; longitude: 17.132444" 
             data-marker-id="vinar"
             data-audio-id="audio4"
-            visible="false"
-            id="marker-vinar">
+            visible="false">
             <a-gltf-model 
                 id="wine-model-4-gltf"
                 src="#wine-model-4"
@@ -465,8 +434,6 @@
         
         // GPS a navigační proměnné
         let userPosition = null;
-        let gpsInitialized = false;
-        let gpsWatchId = null;
         const PROXIMITY_THRESHOLD = 15;
         const AR_VISIBILITY_THRESHOLD = 30;
         const AUDIO_THRESHOLD = 15;
@@ -475,13 +442,8 @@
         let audioPlayingForMarker = null;
         let audioIsPaused = false;
         
-        // Proměnné pro kontrolu visibility stavů
-        let markerVisibilityStates = {};
-        let lastGpsUpdate = 0;
-        const GPS_UPDATE_INTERVAL = 1000;
-        
-        // Kvízový systém
-        const QUIZ_DISTANCE_STEP = 50;
+        // NOVÉ: Kvízový systém
+        const QUIZ_DISTANCE_STEP = 50; // každých 50m
         let startPosition = null;
         let lastQuizMilestone = -1;
         let currentQuiz = null;
@@ -492,46 +454,41 @@
         let startX = 0;
         let rotationHintShown = false;
         
-        // Definice vinných markerů - OPRAVENO
+        // Definice vinných markerů
         const markers = [
             { 
                 id: "sud", 
-                lat: 49.009454, 
-                lng: 17.127020, 
+                lat: 49.088855, 
+                lng: 17.134609, 
                 name: "🏺 Sud",
                 description: "Dřevěný sud na víno",
                 audioId: "audio1"
             },
             { 
                 id: "lis", 
-                lat: 49.009995, 
-                lng: 17.124442,
+                lat: 49.086341, 
+                lng: 17.133468,
                 name: "⚙️ Lis", 
                 description: "Ruční lis na révu",
                 audioId: "audio2"
             },
             { 
                 id: "urban", 
-                lat: 49.012124, 
-                lng: 17.120797,
+                lat: 49.081785, 
+                lng: 17.130330,
                 name: "✝️ Urban",
                 description: "Svatý Urban patron vinařů",
                 audioId: "audio3"
             },
             { 
                 id: "vinar", 
-                lat: 49.014692, 
-                lng: 17.122851,
+                lat: 49.083421, 
+                lng: 17.132444,
                 name: "🧔 Vinař",
                 description: "Vinař",
                 audioId: "audio4"
             }
         ];
-
-        // Inicializace visibility stavů
-        markers.forEach(marker => {
-            markerVisibilityStates[marker.id] = false;
-        });
 
         // === VINNÝ KVÍZOVÝ SYSTÉM ===
         
@@ -566,216 +523,98 @@
                 answers: ["A) 12-14°C", "B) 16-18°C", "C) 20-22°C"],
                 correct: 1,
                 explanation: "Červené víno se ideálně podává při teplotě 16-18°C. Příliš teplé víno ztrácí svou eleganci."
+            },
+            {
+                question: "🏺 Kolik let může víno zrát v sudu?",
+                answers: ["A) 1-2 roky", "B) 3-5 let", "C) 10-20 let"],
+                correct: 1,
+                explanation: "Kvalitní víno může zrát v dubových sudech 3-5 let, výjimečná vína i déle. Krátké zrání je 6-12 měsíců."
+            },
+            {
+                question: "🍇 Kolik kilogramů hroznů vyroste na jedné révě?",
+                answers: ["A) 2-3 kg", "B) 5-8 kg", "C) 10-15 kg"],
+                correct: 1,
+                explanation: "Jedna vinná réva vyprodukuje průměrně 5-8 kg hroznů ročně! To stačí na 3-6 lahví vína."
+            },
+            {
+                question: "🌿 Kolik let může žít vinná réva?",
+                answers: ["A) 30 let", "B) 60 let", "C) 100+ let"],
+                correct: 2,
+                explanation: "Vinná réva může žít přes 100 let! Nejstarší révy na světě mají dokonce přes 400 let."
+            },
+            {
+                question: "💎 Kolik obsahuje víno antioxidantů?",
+                answers: ["A) 200 sloučenin", "B) 500 sloučenin", "C) 1000 sloučenin"],
+                correct: 2,
+                explanation: "Víno obsahuje přes 1000 různých chemických sloučenin! Červené víno má více antioxidantů než bílé."
+            },
+            {
+                question: "🔍 Jak poznáme kvalitu vína podle barvy?",
+                answers: ["A) Podle intenzity", "B) Podle čirosti", "C) Podle obojího"],
+                correct: 2,
+                explanation: "Kvalita vína se pozná podle čirosti a intenzity barvy. Kalné víno nebo víno s hnědým nádechem může být vadné."
+            },
+            {
+                question: "🌡️ Při jaké teplotě fermentuje bílé víno?",
+                answers: ["A) 10-15°C", "B) 15-20°C", "C) 20-25°C"],
+                correct: 1,
+                explanation: "Bílé víno fermentuje při nižší teplotě 15-20°C pro zachování svěžích aromát. Červené při 25-30°C."
+            },
+            {
+                question: "👃 Kolik různých vůní lze rozpoznat ve víně?",
+                answers: ["A) 50 vůní", "B) 200 vůní", "C) 500 vůní"],
+                correct: 2,
+                explanation: "Ve víně lze rozpoznat přes 500 různých aromat! Profesionální someliéři jich dokáží identifikovat stovky."
+            },
+            {
+                question: "🍷 Kolik procent alkoholu má průměrné víno?",
+                answers: ["A) 8-10%", "B) 11-14%", "C) 15-18%"],
+                correct: 1,
+                explanation: "Průměrné víno má 11-14% alkoholu. Lehká vína mají 8-11%, silná vína až 15-16%."
+            },
+            {
+                question: "🌞 Kolik slunečných hodin potřebuje réva za rok?",
+                answers: ["A) 800 hodin", "B) 1300 hodin", "C) 2000 hodin"],
+                correct: 1,
+                explanation: "Vinná réva potřebuje minimálně 1300 slunečních hodin ročně pro kvalitní dozrání hroznů!"
+            },
+            {
+                question: "🍾 Jak dlouho se uchovává otevřené víno?",
+                answers: ["A) 1 den", "B) 3-5 dní", "C) 2 týdny"],
+                correct: 1,
+                explanation: "Otevřené víno se uchovává 3-5 dní v lednici. Červené vydrží o něco déle než bílé."
+            },
+            {
+                question: "🏺 Z jakého materiálu jsou nejlepší vinné sudy?",
+                answers: ["A) Akácie", "B) Dubu", "C) Kaštanu"],
+                correct: 1,
+                explanation: "Nejlepší vinné sudy jsou z dubu! Dubové dřevo dodává vínu komplexní chutě a umožňuje řízenou oxidaci."
+            },
+            {
+                question: "💪 Kolik kilogramů hroznů unese sběrač za den?",
+                answers: ["A) 50 kg", "B) 200 kg", "C) 500 kg"],
+                correct: 1,
+                explanation: "Zkušený sběrač hroznů dokáže za den nasbírat 200-300 kg hroznů! Ruční sběr je stále nejšetrnější metoda."
+            },
+            {
+                question: "🛡️ Co je sulfitan ve víně?",
+                answers: ["A) Konzervant", "B) Barvivo", "C) Chuťová přísada"],
+                correct: 0,
+                explanation: "Sulfitany jsou přírodní konzervant, který brání oxidaci a růstu bakterií. Jsou ve víně přirozeně i uměle."
+            },
+            {
+                question: "⏰ Kdy se hrozny sklízí nejlépe?",
+                answers: ["A) Ráno", "B) Poledne", "C) Večer"],
+                correct: 0,
+                explanation: "Hrozny se nejlépe sklízí časně ráno, kdy jsou chladné a obsahují nejvíce kyselin a aromát."
+            },
+            {
+                question: "🌙 Jak dlouho trvá vinifikace?",
+                answers: ["A) 1 týden", "B) 1 měsíc", "C) 3-6 měsíců"],
+                correct: 2,
+                explanation: "Celá vinifikace trvá 3-6 měsíců! Samotná fermentace 1-3 týdny, pak následuje dozrávání a ležení."
             }
-            // ... další kvízy zde
         ];
-        
-        // === OPRAVENÉ GPS FUNKCE ===
-        
-        // Kontrola, zda je GPS dostupný
-        function isGeolocationAvailable() {
-            return 'geolocation' in navigator;
-        }
-
-        // Kontrola stavu povolení GPS
-        async function checkGPSPermission() {
-            if ('permissions' in navigator) {
-                try {
-                    const result = await navigator.permissions.query({name: 'geolocation'});
-                    console.log('GPS permission state:', result.state);
-                    return result.state;
-                } catch (error) {
-                    console.log('Permission API not supported, trying direct access');
-                    return 'unknown';
-                }
-            }
-            return 'unknown';
-        }
-
-        // HLAVNÍ OPRAVENÁ FUNKCE PRO GPS
-        async function initializeGPS() {
-            console.log("🔄 Inicializuji GPS systém...");
-            document.getElementById('distanceInfo').innerHTML = '📍 Kontroluji GPS oprávnění...';
-            
-            // PRVNÍ KROK: Skryj všechny markery
-            forceHideAllMarkers();
-            
-            if (!isGeolocationAvailable()) {
-                console.error("❌ Geolocation není podporován");
-                document.getElementById('distanceInfo').innerHTML = '❌ GPS není podporován v tomto prohlížeči';
-                useFallbackPosition();
-                return;
-            }
-
-            // DRUHÝ KROK: Zkontroluj oprávnění
-            const permissionState = await checkGPSPermission();
-            console.log("GPS permission state:", permissionState);
-
-            if (permissionState === 'denied') {
-                console.warn("⚠️ GPS oprávnění odepřeno");
-                showGPSPermissionButton();
-                return;
-            }
-
-            // TŘETÍ KROK: Zkus získat pozici
-            try {
-                console.log("📍 Pokouším se získat GPS pozici...");
-                document.getElementById('distanceInfo').innerHTML = '📡 Načítám GPS pozici...';
-                
-                await getCurrentPositionPromise();
-                
-            } catch (error) {
-                console.error("❌ Chyba při získávání GPS:", error);
-                handleGPSError(error);
-            }
-        }
-
-        // Převod getCurrentPosition na Promise
-        function getCurrentPositionPromise() {
-            return new Promise((resolve, reject) => {
-                const options = {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 30000
-                };
-
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        console.log("✅ GPS pozice získána:", position.coords);
-                        userPosition = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                            accuracy: position.coords.accuracy
-                        };
-
-                        if (!startPosition) {
-                            startPosition = { ...userPosition };
-                            console.log("🎯 Počáteční pozice nastavena:", startPosition);
-                        }
-
-                        gpsInitialized = true;
-                        document.getElementById('distanceInfo').innerHTML = '✅ GPS aktivní';
-                        
-                        // Spusť aktualizace
-                        checkProximityToMarkersThrottled();
-                        updateNavigation();
-                        startGPSWatching();
-                        
-                        resolve(position);
-                    },
-                    (error) => {
-                        console.error("❌ getCurrentPosition error:", error);
-                        reject(error);
-                    },
-                    options
-                );
-            });
-        }
-
-        // Zpracování chyb GPS
-        function handleGPSError(error) {
-            console.error("GPS Error details:", error);
-            
-            let errorMessage = '';
-            
-            switch(error.code) {
-                case error.PERMISSION_DENIED:
-                    errorMessage = "GPS oprávnění bylo odepřeno";
-                    showGPSPermissionButton();
-                    return;
-                    
-                case error.POSITION_UNAVAILABLE:
-                    errorMessage = "GPS pozice není dostupná";
-                    break;
-                    
-                case error.TIMEOUT:
-                    errorMessage = "GPS timeout - přepínám na testovací režim";
-                    break;
-                    
-                default:
-                    errorMessage = "Neznámá GPS chyba";
-                    break;
-            }
-            
-            console.log("📍", errorMessage);
-            document.getElementById('distanceInfo').innerHTML = `⚠️ ${errorMessage}`;
-            
-            // Po 2 sekundách přepni na fallback
-            setTimeout(() => {
-                useFallbackPosition();
-            }, 2000);
-        }
-
-        // Zobrazení tlačítka pro povolení GPS
-        function showGPSPermissionButton() {
-            const btn = document.getElementById('gpsPermissionBtn');
-            btn.style.display = 'block';
-            document.getElementById('distanceInfo').innerHTML = '⚠️ GPS vyžaduje oprávnění';
-            
-            btn.onclick = async () => {
-                btn.style.display = 'none';
-                await initializeGPS();
-            };
-        }
-
-        // Fallback pozice když GPS nefunguje
-        function useFallbackPosition() {
-            console.log("🔄 Používám testovací pozici...");
-            
-            userPosition = {
-                lat: 49.009454,  // Sud location
-                lng: 17.127020,
-                accuracy: 100
-            };
-            
-            if (!startPosition) {
-                startPosition = { ...userPosition };
-            }
-            
-            gpsInitialized = true;
-            document.getElementById('distanceInfo').innerHTML = '🧪 Testovací režim aktivní';
-            
-            checkProximityToMarkersThrottled();
-            updateNavigation();
-            
-            console.log("✅ Fallback pozice aktivní:", userPosition);
-        }
-
-        // Spuštění sledování GPS
-        function startGPSWatching() {
-            if (gpsWatchId) {
-                navigator.geolocation.clearWatch(gpsWatchId);
-            }
-
-            const watchOptions = {
-                enableHighAccuracy: true,
-                timeout: 8000,
-                maximumAge: 20000
-            };
-
-            gpsWatchId = navigator.geolocation.watchPosition(
-                (position) => {
-                    userPosition = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                        accuracy: position.coords.accuracy
-                    };
-                    
-                    checkProximityToMarkersThrottled();
-                    updateNavigation();
-                    checkDistanceForQuiz();
-                },
-                (error) => {
-                    console.warn("Watch position error:", error);
-                    // Neukončuj watch kvůli jedné chybě
-                },
-                watchOptions
-            );
-
-            console.log("🔄 GPS sledování aktivní (watchId:", gpsWatchId, ")");
-        }
-
-        // === ZBYTEK PŮVODNÍCH FUNKCÍ (nezměněno) ===
         
         // Systém pro správu kvízů
         function getCompletedQuizzes() {
@@ -783,11 +622,13 @@
             return completed ? JSON.parse(completed) : [];
         }
         
+        // === OPRAVENÁ FUNKCE markQuizCompleted ===
         function markQuizCompleted(quizIndex) {
             const completed = getCompletedQuizzes();
             console.log(`🍇 markQuizCompleted called for quiz ${quizIndex}`);
             console.log(`📊 Current completed: ${completed.length}/${WINE_QUIZZES.length}`);
             
+            // Přidej kvíz, pokud není dokončený
             if (!completed.includes(quizIndex)) {
                 completed.push(quizIndex);
                 localStorage.setItem('wineQuizzesCompleted', JSON.stringify(completed));
@@ -796,16 +637,19 @@
                 console.log(`ℹ️ Quiz ${quizIndex} already completed`);
             }
             
-            const finalCompleted = getCompletedQuizzes();
+            // === KONTROLA ACHIEVEMENTU MIMO IF - VŽDY SE ZKONTROLUJE ===
+            const finalCompleted = getCompletedQuizzes(); // Znovu načti data
             
             if (finalCompleted.length === WINE_QUIZZES.length) {
                 console.log('🏆 All 20 quizzes completed! Activating quiz achievement...');
                 
+                // Zkontroluj, zda už není achievement odemčený
                 if (typeof isAchievementUnlocked === 'function' && isAchievementUnlocked('wine_quiz_master')) {
                     console.log('ℹ️ wine_quiz_master already unlocked');
                     return;
                 }
                 
+                // Aktivuj achievement přímo
                 if (typeof unlockAchievement === 'function') {
                     const success = unlockAchievement('wine_quiz_master');
                     console.log('✅ unlockAchievement result:', success);
@@ -839,15 +683,18 @@
                 return;
             }
             
+            // Vypočítej vzdálenost od startu
             const distanceFromStart = calculateDistance(
                 startPosition.lat, startPosition.lng,
                 userPosition.lat, userPosition.lng
             );
             
+            // Zjisti, na kterém 50m milníku jsme
             const currentMilestone = Math.floor(distanceFromStart / QUIZ_DISTANCE_STEP);
             
             console.log(`🎯 Distance from start: ${distanceFromStart.toFixed(1)}m, milestone: ${currentMilestone}, last quiz milestone: ${lastQuizMilestone}`);
             
+            // Pokud jsme na novém milníku a ještě jsme tu kvíz nezobrazili
             if (currentMilestone > lastQuizMilestone && currentMilestone > 0) {
                 console.log(`🎯 New milestone reached: ${currentMilestone * QUIZ_DISTANCE_STEP}m - showing quiz!`);
                 lastQuizMilestone = currentMilestone;
@@ -865,6 +712,7 @@
             const { quiz, index } = quizData;
             currentQuiz = { ...quiz, index };
             
+            // Zobraz kvíz
             document.getElementById('quizQuestion').textContent = quiz.question;
             
             const answersContainer = document.getElementById('quizAnswers');
@@ -878,6 +726,7 @@
                 answersContainer.appendChild(button);
             });
             
+            // Aktualizuj progress
             const completed = getCompletedQuizzes();
             const distanceFromStart = startPosition ? calculateDistance(
                 startPosition.lat, startPosition.lng,
@@ -897,18 +746,21 @@
             const answers = document.querySelectorAll('.quiz-answer');
             const explanationDiv = document.getElementById('quizExplanation');
             
+            // Označ odpovědi
             answers.forEach((answer, index) => {
                 if (index === currentQuiz.correct) {
                     answer.classList.add('correct');
                 } else if (index === selectedIndex && index !== currentQuiz.correct) {
                     answer.classList.add('incorrect');
                 }
-                answer.onclick = null;
+                answer.onclick = null; // Deaktivuj klikání
             });
             
+            // Zobraz vysvětlení
             explanationDiv.textContent = currentQuiz.explanation;
             explanationDiv.style.display = 'block';
             
+            // Označ kvíz jako dokončený
             markQuizCompleted(currentQuiz.index);
             
             console.log(`🍇 Answer selected: ${selectedIndex}, correct: ${currentQuiz.correct}`);
@@ -922,27 +774,33 @@
 
         // === GAMIFIKAČNÍ FUNKCE ===
         
+        // OPRAVENÁ inicializace gamifikace - TICHÁ VERZE
         function initializeGameification() {
             console.log("🎮 Initializing gamification for vinařská stezka...");
             
+            // Ujisti se, že jsou načtené všechny konfigurace
             if (typeof SCENE_CONFIG === 'undefined' || typeof ACHIEVEMENTS_CONFIG === 'undefined') {
                 console.log("⏳ Waiting for gamification config...");
                 setTimeout(initializeGameification, 500);
                 return;
             }
             
+            // Debug výpis konfigurací (pouze do konzole)
             console.log("📊 Scene config:", SCENE_CONFIG);
             console.log("🏆 Achievements config:", ACHIEVEMENTS_CONFIG);
             console.log("🏛️ Exposition registry:", EXPOSITION_REGISTRY);
             
+            // Zkontroluj, že je expozice registrovaná
             if (typeof EXPOSITION_REGISTRY !== 'undefined' && EXPOSITION_REGISTRY['stezka_vino']) {
                 console.log("✅ Vinařská stezka exposition is registered");
             } else {
                 console.warn("⚠️ Vinařská stezka exposition not found in registry");
+                // Zkus inicializovat znovu za chvíli
                 setTimeout(initializeGameification, 1000);
                 return;
             }
             
+            // Inicializuj time tracking
             if (typeof initializeTimeTracking === 'function') {
                 initializeTimeTracking(currentExpositionId, currentSceneId);
                 console.log("⏱️ Time tracking initialized");
@@ -954,6 +812,7 @@
             console.log("✅ Gamification initialized successfully for vinařská stezka");
         }
 
+        // OPRAVENÁ funkce pro záznam aktivace vinných markerů
         function recordWineMarkerActivation(markerId) {
             if (!gamificationInitialized) {
                 console.warn("⚠️ Gamification not initialized yet, skipping marker activation");
@@ -980,17 +839,16 @@
             }
         });
 
+        // Finalizace při odchodu ze stránky
         window.addEventListener('beforeunload', () => {
             if (typeof finalizeTimeTracking === 'function') {
                 finalizeTimeTracking(currentExpositionId, currentSceneId);
             }
-            if (gpsWatchId) {
-                navigator.geolocation.clearWatch(gpsWatchId);
-            }
         });
 
-        // === PŮVODNÍ FUNKCE S OPRAVAMI ===
+        // === PŮVODNÍ FUNKCE S GAMIFIKAČNÍMI ROZŠÍŘENÍMI ===
 
+        // Výpočet vzdálenosti mezi GPS body
         function calculateDistance(lat1, lon1, lat2, lon2) {
             const R = 6371000;
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -1002,6 +860,7 @@
             return R * c;
         }
 
+        // Formátování vzdálenosti
         function formatDistance(distance) {
             if (distance < 1000) {
                 return `${Math.round(distance)}m`;
@@ -1010,33 +869,108 @@
             }
         }
 
-        function forceHideAllMarkers() {
-            console.log("🔒 Forcing all markers to be hidden initially...");
-            markers.forEach(marker => {
-                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                if (entity) {
-                    entity.setAttribute('visible', false);
-                    markerVisibilityStates[marker.id] = false;
-                    console.log(`🚫 ${marker.id} force hidden`);
-                }
-            });
-        }
-
-        function checkProximityToMarkersThrottled() {
-            const now = Date.now();
-            if (now - lastGpsUpdate < GPS_UPDATE_INTERVAL) {
-                return;
-            }
-            lastGpsUpdate = now;
+        // Získání aktuální pozice
+        function getCurrentPosition() {
+            console.log("Requesting GPS position...");
+            document.getElementById('distanceInfo').innerHTML = '📍 Hledám GPS signál...';
             
-            checkProximityToMarkers();
-        }
-
-        function checkProximityToMarkers() {
-            if (!userPosition || !gpsInitialized) {
-                console.log("⚠️ GPS not ready yet, skipping proximity check");
+            if (!navigator.geolocation) {
+                console.error("Geolocation is not supported");
+                document.getElementById('distanceInfo').innerHTML = '❌ GPS není podporován';
+                userPosition = {
+                    lat: 49.090675,
+                    lng: 17.132976,
+                    accuracy: 50
+                };
+                startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
+                console.log("Using fallback position:", userPosition);
+                checkProximityToMarkers();
+                updateNavigation();
                 return;
             }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    userPosition = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    };
+                    if (!startPosition) {
+                        startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici pouze při prvním GPS fix
+                        console.log("🎯 Start position set:", startPosition);
+                    }
+                    console.log("GPS position found:", userPosition);
+                    checkProximityToMarkers();
+                    updateNavigation();
+                },
+                (error) => {
+                    console.error("Geolocation error:", error);
+                    
+                    userPosition = {
+                        lat: 49.090675,
+                        lng: 17.132976,
+                        accuracy: 100
+                    };
+                    startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
+                    
+                    document.getElementById('distanceInfo').innerHTML = '🔄 Používám testovací pozici';
+                    console.log("Using fallback position due to GPS error:", userPosition);
+                    checkProximityToMarkers();
+                    updateNavigation();
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 60000
+                }
+            );
+            
+            setTimeout(() => {
+                if (!userPosition) {
+                    console.log("GPS timeout - activating fallback position");
+                    userPosition = {
+                        lat: 49.090675,
+                        lng: 17.132976,
+                        accuracy: 100
+                    };
+                    startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
+                    document.getElementById('distanceInfo').innerHTML = '🔄 Testovací pozice aktivní';
+                    checkProximityToMarkers();
+                    updateNavigation();
+                }
+            }, 5000);
+        }
+
+        // Sledování pozice
+        function watchPosition() {
+            if (navigator.geolocation) {
+                navigator.geolocation.watchPosition(
+                    (position) => {
+                        userPosition = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                            accuracy: position.coords.accuracy
+                        };
+                        checkProximityToMarkers();
+                        updateNavigation();
+                        checkDistanceForQuiz(); // NOVÉ: Kontrola kvízů
+                    },
+                    (error) => {
+                        console.error("Watch position error:", error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 8000,
+                        maximumAge: 20000
+                    }
+                );
+            }
+        }
+
+        // === ZJEDNODUŠENÁ KONTROLA PROXIMITY - JEDNODUCHÁ LOGIKA ===
+        function checkProximityToMarkers() {
+            if (!userPosition) return;
             
             console.log("Checking proximity with user position:", userPosition);
             let shouldStopAudio = true;
@@ -1052,41 +986,23 @@
                 
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
                 if (entity) {
-                    const currentlyVisible = markerVisibilityStates[marker.id];
-                    
-                    if (distance > 50 && currentlyVisible) {
-                        console.warn(`⚠️ ${marker.id} is visible at ${distance.toFixed(1)}m (too far!) - forcing hide`);
-                        entity.setAttribute('visible', false);
-                        markerVisibilityStates[marker.id] = false;
-                        return;
+                    // JEDNODUCHÁ LOGIKA: Do 30m visible true, nad 30m visible false
+                    if (distance <= AR_VISIBILITY_THRESHOLD) {
+                        entity.setAttribute('visible', 'true');
+                        console.log(`✅ ${marker.id} VISIBLE at ${distance.toFixed(1)}m`);
+                    } else {
+                        entity.setAttribute('visible', 'false');
+                        console.log(`❌ ${marker.id} HIDDEN - too far: ${distance.toFixed(1)}m`);
                     }
                     
-                    const showDistance = AR_VISIBILITY_THRESHOLD;      
-                    const hideDistance = AR_VISIBILITY_THRESHOLD + 10; 
-                    
-                    let newVisibility = currentlyVisible;
-                    
-                    if (!currentlyVisible && distance <= showDistance) {
-                        newVisibility = true;
-                        entity.setAttribute('visible', true);
-                        console.log(`✅ ${marker.id} SHOWN at ${distance.toFixed(1)}m (show threshold: ${showDistance}m)`);
-                    } else if (currentlyVisible && distance > hideDistance) {
-                        newVisibility = false;
-                        entity.setAttribute('visible', false);
-                        console.log(`❌ ${marker.id} HIDDEN at ${distance.toFixed(1)}m (hide threshold: ${hideDistance}m)`);
-                    }
-                    
-                    if (newVisibility !== currentlyVisible) {
-                        markerVisibilityStates[marker.id] = newVisibility;
-                        console.log(`🔄 ${marker.id} visibility state changed: ${currentlyVisible} → ${newVisibility}`);
-                    }
-                    
+                    // Audio přehrávání
                     if (distance <= AUDIO_THRESHOLD) {
                         playAudio(marker.id);
                         shouldStopAudio = false;
                         console.log(`🎵 Audio playing for ${marker.id}`);
                     }
                     
+                    // GAMIFIKACE: Aktivace markeru při proximity
                     if (distance <= PROXIMITY_THRESHOLD) {
                         console.log(`🎯 Wine marker activated: ${marker.id}`);
                         markersActivatedThisCheck.push(marker.id);
@@ -1099,11 +1015,15 @@
                 stopCurrentAudio();
             }
             
-            const visibleCount = Object.values(markerVisibilityStates).filter(visible => visible).length;
+            // Počet viditelných markeru
+            const visibleCount = markers.filter(marker => {
+                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                return entity && entity.getAttribute('visible') === 'true';
+            }).length;
             console.log(`${visibleCount}/${markers.length} wine markers are visible in AR`);
         }
 
-        // AUDIO FUNKCE
+        // UPRAVENÉ AUDIO FUNKCE - POUZE IKONY
         function playAudio(markerId) {
             const marker = markers.find(m => m.id === markerId);
             if (!marker || audioPlayingForMarker === markerId) return;
@@ -1140,6 +1060,7 @@
             }
         }
 
+        // ZJEDNODUŠENÉ ZOBRAZENÍ AUDIO - POUZE IKONA
         function updateAudioDisplay() {
             const audioInfo = document.getElementById('audioInfo');
             if (audioIsPaused) {
@@ -1165,9 +1086,9 @@
             }
         }
 
-        // NAVIGACE
+        // Navigace
         function updateNavigation() {
-            if (!userPosition || !gpsInitialized) return;
+            if (!userPosition) return;
             
             const targetsList = document.getElementById('targetsList');
             let html = '';
@@ -1210,19 +1131,18 @@
         function updateDistanceDisplay() {
             const distanceInfo = document.getElementById('distanceInfo');
             
-            if (!userPosition || !gpsInitialized) {
+            if (!userPosition) {
                 distanceInfo.innerHTML = '📍 Čekám na GPS...';
                 return;
             }
-            
-            if (!startPosition) {
+             if (!startPosition) {
                 startPosition = { ...userPosition };
                 console.log("🎯 Start position initialized in updateDistanceDisplay");
             }
-            
             const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
             const completed = getCompletedQuizzes();
             
+            // Vypočítej vzdálenost od startu
             const distanceFromStart = startPosition ? calculateDistance(
                 startPosition.lat, startPosition.lng,
                 userPosition.lat, userPosition.lng
@@ -1290,7 +1210,7 @@
             updateNavigation();
         }
 
-        // ROTACE MODELŮ
+        // Rotace modelů dotykem
         function setupModelRotation() {
             let touchStarted = false;
             let rotationActive = false;
@@ -1370,7 +1290,10 @@
         }
 
         function isAnyModelVisible() {
-            return Object.values(markerVisibilityStates).some(visible => visible);
+            return markers.some(marker => {
+                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                return entity && entity.getAttribute('visible') === 'true';
+            });
         }
 
         function isTouchingUI(target) {
@@ -1383,8 +1306,7 @@
                 '.distance-info',
                 '.audio-info',
                 '.rotation-hint',
-                '.wine-quiz',
-                '.gps-permission-btn'
+                '.wine-quiz'
             ];
             
             for (let selector of uiSelectors) {
@@ -1423,7 +1345,34 @@
             }
         });
 
-        // === TUTORIAL FUNKCE ===
+        // === HLAVNÍ INICIALIZACE ===
+        
+        window.addEventListener('load', () => {
+            console.log("🍷 Starting wine AR application with simple visibility logic...");
+            
+            // Počkej na načtení gamifikačních skriptů a pak inicializuj
+            setTimeout(() => {
+                initializeGameification();
+            }, 2000);
+            
+            // Počkáme na A-Frame
+            document.querySelector('a-scene').addEventListener('loaded', () => {
+                console.log("✅ A-Frame scene loaded");
+                setupModelRotation();
+                getCurrentPosition();
+                watchPosition();
+                startTutorialWhenReady();
+                
+                // Pravidelná kontrola kvízů
+                setInterval(() => {
+                    checkDistanceForQuiz();
+                }, 3000); // Kontrola každé 3 sekundy
+            });
+        });
+
+        console.log("🍇 Wine AR script with simple visibility logic loaded successfully!");
+
+        // === TUTORIAL INICIALIZACE ===
         let tutorialInitialized = false;
 
         async function initializeTutorial() {
@@ -1432,6 +1381,7 @@
             try {
                 console.log("🎓 Loading tutorial config...");
                 
+                // Dynamicky načti config
                 const script = document.createElement('script');
                 script.src = '/assets/stezka_vino/tutorial/config_vino.js';
                 
@@ -1441,10 +1391,12 @@
                     document.head.appendChild(script);
                 });
                 
+                // Počkej chvilku na vykonání
                 await new Promise(resolve => setTimeout(resolve, 200));
                 
                 console.log("✅ Tutorial config loaded, creating instance...");
                 
+                // Vytvoř tutorial instanci
                 if (typeof ARTutorial !== 'undefined' && typeof tutorialConfig !== 'undefined') {
                     window.arTutorial = ARTutorial.create(tutorialConfig);
                     tutorialInitialized = true;
@@ -1462,85 +1414,20 @@
         }
 
         function startTutorialWhenReady() {
+            // Spusť tutorial až když je všechno připraveno
             setTimeout(async () => {
                 console.log("🎓 Starting tutorial initialization...");
                 
                 const success = await initializeTutorial();
                 if (success && window.arTutorial) {
+                    // Malé zpoždění pro plynulý přechod
                     setTimeout(() => {
                         console.log("🎓 Starting tutorial...");
                         window.arTutorial.start();
                     }, 1000);
                 }
-            }, 3000);
+            }, 3000); // 3 sekundy po načtení A-Frame
         }
-
-        // === HLAVNÍ INICIALIZACE ===
-        
-        window.addEventListener('load', () => {
-            console.log("🍇 Starting wine AR application with improved GPS...");
-            
-            // Počkej na načtení gamifikačních skriptů
-            setTimeout(() => {
-                initializeGameification();
-            }, 2000);
-            
-            // Počkáme na A-Frame
-            document.querySelector('a-scene').addEventListener('loaded', () => {
-                console.log("A-Frame scene loaded");
-                
-                setTimeout(() => {
-                    console.log("🔍 Post-load marker visibility check...");
-                    forceHideAllMarkers();
-                    
-                    markers.forEach(marker => {
-                        const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                        if (entity) {
-                            const visible = entity.getAttribute('visible');
-                            console.log(`📋 ${marker.id}: visible="${visible}", state=${markerVisibilityStates[marker.id]}`);
-                        }
-                    });
-                }, 1000);
-                
-                setupModelRotation();
-                
-                // OPRAVENÝ STARTUP - nejdřív GPS, pak zbytek
-                initializeGPS().then(() => {
-                    console.log("✅ GPS initialization completed");
-                    startTutorialWhenReady();
-                }).catch((error) => {
-                    console.error("❌ GPS initialization failed:", error);
-                    startTutorialWhenReady();
-                });
-                
-                // Pravidelná kontrola kvízů
-                setInterval(() => {
-                    if (gpsInitialized) {
-                        checkDistanceForQuiz();
-                    }
-                }, 3000);
-                
-                // Bezpečnostní kontrola viditelnosti
-                setInterval(() => {
-                    if (userPosition && gpsInitialized) {
-                        console.log("🔒 Periodic safety check for marker visibility...");
-                        markers.forEach(marker => {
-                            const distance = calculateDistance(
-                                userPosition.lat, userPosition.lng,
-                                marker.lat, marker.lng
-                            );
-                            const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
-                            
-                            if (entity && entity.getAttribute('visible') === true && distance > 50) {
-                                console.warn(`🚨 SAFETY: ${marker.id} visible at ${distance.toFixed(1)}m - force hiding!`);
-                                entity.setAttribute('visible', false);
-                                markerVisibilityStates[marker.id] = false;
-                            }
-                        });
-                    }
-                }, 5000);
-            });
-        });
 
         // === DEBUG FUNKCE ===
         
@@ -1590,7 +1477,6 @@
         window.markQuizCompleted = markQuizCompleted;
 
         console.log("🔧 Debug functions loaded");
-        console.log("🍇 Wine AR script with improved GPS system loaded successfully!");
     </script>
 </body>
 </html>
