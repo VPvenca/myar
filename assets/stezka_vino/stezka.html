@@ -883,10 +883,13 @@
             }
         }
 
-        // OPRAVENÁ funkce pro GPS pozici s throttling
+        // OPRAVENÁ funkce pro GPS pozici s inicializací skrytých markerů
         function getCurrentPosition() {
             console.log("Requesting GPS position...");
             document.getElementById('distanceInfo').innerHTML = '📍 Hledám GPS signál...';
+            
+            // KRITICKÉ: Nejdříve skryj všechny markery
+            forceHideAllMarkers();
             
             if (!navigator.geolocation) {
                 console.error("Geolocation is not supported");
@@ -993,7 +996,20 @@
             checkProximityToMarkers();
         }
 
-        // HLAVNÍ OPRAVENÁ FUNKCE - Kontrola proximity s anti-blikáním
+        // NOVÁ: Funkce pro vynucené skrytí všech markerů při inicializaci
+        function forceHideAllMarkers() {
+            console.log("🔒 Forcing all markers to be hidden initially...");
+            markers.forEach(marker => {
+                const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                if (entity) {
+                    entity.setAttribute('visible', false);
+                    markerVisibilityStates[marker.id] = false;
+                    console.log(`🚫 ${marker.id} force hidden`);
+                }
+            });
+        }
+
+        // HLAVNÍ OPRAVENÁ FUNKCE - s dodatečnou kontrolou vzdálenosti
         function checkProximityToMarkers() {
             if (!userPosition) return;
             
@@ -1011,35 +1027,48 @@
                 
                 const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
                 if (entity) {
-                    const shouldBeVisible = distance <= AR_VISIBILITY_THRESHOLD;
                     const currentlyVisible = markerVisibilityStates[marker.id];
                     
-                    // ANTI-BLIKÁNÍ: Změň visibility pouze pokud se skutečně změnil stav
-                    if (shouldBeVisible !== currentlyVisible) {
-                        console.log(`🔄 ${marker.id} visibility change: ${currentlyVisible} → ${shouldBeVisible} (${distance.toFixed(1)}m)`);
-                        
-                        // Přidej hysterezi - pro skrytí musí být vzdálenost o 5m větší
-                        const hysteresisDistance = currentlyVisible ? AR_VISIBILITY_THRESHOLD + 5 : AR_VISIBILITY_THRESHOLD;
-                        
-                        if (shouldBeVisible && distance <= AR_VISIBILITY_THRESHOLD) {
-                            entity.setAttribute('visible', 'true');
-                            markerVisibilityStates[marker.id] = true;
-                            console.log(`✅ ${marker.id} SHOWN at ${distance.toFixed(1)}m`);
-                        } else if (!shouldBeVisible && distance > hysteresisDistance) {
-                            entity.setAttribute('visible', 'false');
-                            markerVisibilityStates[marker.id] = false;
-                            console.log(`❌ ${marker.id} HIDDEN at ${distance.toFixed(1)}m`);
-                        }
+                    // BEZPEČNOSTNÍ KONTROLA: Pokud je marker daleko a je viditelný, skryj ho
+                    if (distance > 50 && currentlyVisible) {
+                        console.warn(`⚠️ ${marker.id} is visible at ${distance.toFixed(1)}m (too far!) - forcing hide`);
+                        entity.setAttribute('visible', false);
+                        markerVisibilityStates[marker.id] = false;
+                        return; // Přeskoč zbytek logiky pro tento marker
                     }
                     
-                    // Audio přehrávání s hysterezí
+                    // HYSTEREZE - zachováváme 30m pro aktivaci, ale 40m pro deaktivaci
+                    const showDistance = AR_VISIBILITY_THRESHOLD;      // 30m
+                    const hideDistance = AR_VISIBILITY_THRESHOLD + 10; // 40m
+                    
+                    let newVisibility = currentlyVisible;
+                    
+                    if (!currentlyVisible && distance <= showDistance) {
+                        // Marker není viditelný a jsme na 30m nebo blíže = ZOBRAZ
+                        newVisibility = true;
+                        entity.setAttribute('visible', true);
+                        console.log(`✅ ${marker.id} SHOWN at ${distance.toFixed(1)}m (show threshold: ${showDistance}m)`);
+                    } else if (currentlyVisible && distance > hideDistance) {
+                        // Marker je viditelný a jsme dál než 40m = SKRYJ
+                        newVisibility = false;
+                        entity.setAttribute('visible', false);
+                        console.log(`❌ ${marker.id} HIDDEN at ${distance.toFixed(1)}m (hide threshold: ${hideDistance}m)`);
+                    }
+                    
+                    // Aktualizuj stav pouze pokud se změnil
+                    if (newVisibility !== currentlyVisible) {
+                        markerVisibilityStates[marker.id] = newVisibility;
+                        console.log(`🔄 ${marker.id} visibility state changed: ${currentlyVisible} → ${newVisibility}`);
+                    }
+                    
+                    // Audio přehrávání - bez hystereze, přesně na AUDIO_THRESHOLD (15m)
                     if (distance <= AUDIO_THRESHOLD) {
                         playAudio(marker.id);
                         shouldStopAudio = false;
                         console.log(`🎵 Audio playing for ${marker.id}`);
                     }
                     
-                    // GAMIFIKACE: Aktivace markeru při proximity
+                    // GAMIFIKACE: Aktivace markeru při proximity (15m)
                     if (distance <= PROXIMITY_THRESHOLD) {
                         console.log(`🎯 Wine marker activated: ${marker.id}`);
                         markersActivatedThisCheck.push(marker.id);
@@ -1376,7 +1405,7 @@
             }
         });
 
-        // === HLAVNÍ INICIALIZACE ===
+        // === HLAVNÍ INICIALIZACE S DODATEČNÝM DEBUG ===
         
         window.addEventListener('load', () => {
             console.log("Starting wine AR application with quiz system and gamification...");
@@ -1389,14 +1418,51 @@
             // Počkáme na A-Frame
             document.querySelector('a-scene').addEventListener('loaded', () => {
                 console.log("A-Frame scene loaded");
+                
+                // NOVÉ: Dodatečná kontrola a vynucené skrytí po načtení A-Frame
+                setTimeout(() => {
+                    console.log("🔍 Post-load marker visibility check...");
+                    forceHideAllMarkers();
+                    
+                    // Debug: Zobraz stav všech markerů
+                    markers.forEach(marker => {
+                        const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                        if (entity) {
+                            const visible = entity.getAttribute('visible');
+                            console.log(`📋 ${marker.id}: visible="${visible}", state=${markerVisibilityStates[marker.id]}`);
+                        }
+                    });
+                }, 1000);
+                
                 setupModelRotation();
                 getCurrentPosition();
                 watchPosition();
                 startTutorialWhenReady();
+                
                 // Pravidelná kontrola kvízů
                 setInterval(() => {
                     checkDistanceForQuiz();
                 }, 3000);
+                
+                // NOVÉ: Pravidelná bezpečnostní kontrola viditelnosti
+                setInterval(() => {
+                    if (userPosition) {
+                        console.log("🔒 Periodic safety check for marker visibility...");
+                        markers.forEach(marker => {
+                            const distance = calculateDistance(
+                                userPosition.lat, userPosition.lng,
+                                marker.lat, marker.lng
+                            );
+                            const entity = document.querySelector(`[data-marker-id="${marker.id}"]`);
+                            
+                            if (entity && entity.getAttribute('visible') === true && distance > 50) {
+                                console.warn(`🚨 SAFETY: ${marker.id} visible at ${distance.toFixed(1)}m - force hiding!`);
+                                entity.setAttribute('visible', false);
+                                markerVisibilityStates[marker.id] = false;
+                            }
+                        });
+                    }
+                }, 5000); // Každých 5 sekund
             });
         });
 
