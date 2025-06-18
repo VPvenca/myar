@@ -18,6 +18,8 @@
     <link rel="stylesheet" href="/css/tutorial.css">
     <script src="/tutorial.js"></script>
     
+    <!-- NOVÝ: Core utilities modul -->
+    <script src="/assets/shared/js/core_utils.js"></script>
     
 </head>
 <body>
@@ -119,7 +121,6 @@
         let currentSceneId = '/assets/stezka_vino/stezka.html';
         
         // GPS a navigační proměnné
-        let userPosition = null;
         const PROXIMITY_THRESHOLD = 15;
         const AR_VISIBILITY_THRESHOLD = 30;
         const AUDIO_THRESHOLD = 15;
@@ -130,7 +131,6 @@
         
         // NOVÉ: Kvízový systém
         const QUIZ_DISTANCE_STEP = 50; // každých 50m
-        let startPosition = null;
         let lastQuizMilestone = -1;
         let currentQuiz = null;
         
@@ -472,14 +472,17 @@
         }
         
         function checkDistanceForQuiz() {
-            if (!userPosition || !startPosition) {
+            const userPos = CoreUtils.getUserPosition();
+            const startPos = CoreUtils.getStartPosition();
+            
+            if (!userPos || !startPos) {
                 return;
             }
             
             // Vypočítej vzdálenost od startu
-            const distanceFromStart = calculateDistance(
-                startPosition.lat, startPosition.lng,
-                userPosition.lat, userPosition.lng
+            const distanceFromStart = CoreUtils.calculateDistance(
+                startPos.lat, startPos.lng,
+                userPos.lat, userPos.lng
             );
             
             // Zjisti, na kterém 50m milníku jsme
@@ -521,9 +524,12 @@
             
             // Aktualizuj progress
             const completed = getCompletedQuizzes();
-            const distanceFromStart = startPosition ? calculateDistance(
-                startPosition.lat, startPosition.lng,
-                userPosition.lat, userPosition.lng
+            const userPos = CoreUtils.getUserPosition();
+            const startPos = CoreUtils.getStartPosition();
+            
+            const distanceFromStart = startPos && userPos ? CoreUtils.calculateDistance(
+                startPos.lat, startPos.lng,
+                userPos.lat, userPos.lng
             ) : 0;
             
             document.getElementById('quizProgress').textContent = 
@@ -641,137 +647,18 @@
 
         // === PŮVODNÍ FUNKCE S GAMIFIKAČNÍMI ROZŠÍŘENÍMI ===
 
-        // Výpočet vzdálenosti mezi GPS body
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371000;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                     Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
-        }
-
-        // Formátování vzdálenosti
-        function formatDistance(distance) {
-            if (distance < 1000) {
-                return `${Math.round(distance)}m`;
-            } else {
-                return `${(distance / 1000).toFixed(1)}km`;
-            }
-        }
-
-        // Získání aktuální pozice
-        function getCurrentPosition() {
-            console.log("Requesting GPS position...");
-            document.getElementById('distanceInfo').innerHTML = '📍 Hledám GPS signál...';
-            
-            if (!navigator.geolocation) {
-                console.error("Geolocation is not supported");
-                document.getElementById('distanceInfo').innerHTML = '❌ GPS není podporován';
-                userPosition = {
-                    lat: 49.090675,
-                    lng: 17.132976,
-                    accuracy: 50
-                };
-                startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
-                console.log("Using fallback position:", userPosition);
-                checkProximityToMarkers();
-                updateNavigation();
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    userPosition = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude,
-                        accuracy: position.coords.accuracy
-                    };
-                    if (!startPosition) {
-                        startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici pouze při prvním GPS fix
-                        console.log("🎯 Start position set:", startPosition);
-                    }
-                    console.log("GPS position found:", userPosition);
-                    checkProximityToMarkers();
-                    updateNavigation();
-                },
-                (error) => {
-                    console.error("Geolocation error:", error);
-                    
-                    userPosition = {
-                        lat: 49.090675,
-                        lng: 17.132976,
-                        accuracy: 100
-                    };
-                    startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
-                    
-                    document.getElementById('distanceInfo').innerHTML = '🔄 Používám testovací pozici';
-                    console.log("Using fallback position due to GPS error:", userPosition);
-                    checkProximityToMarkers();
-                    updateNavigation();
-                },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 15000,
-                    maximumAge: 60000
-                }
-            );
-            
-            setTimeout(() => {
-                if (!userPosition) {
-                    console.log("GPS timeout - activating fallback position");
-                    userPosition = {
-                        lat: 49.090675,
-                        lng: 17.132976,
-                        accuracy: 100
-                    };
-                    startPosition = { ...userPosition }; // NOVÉ: Nastav start pozici
-                    document.getElementById('distanceInfo').innerHTML = '🔄 Testovací pozice aktivní';
-                    checkProximityToMarkers();
-                    updateNavigation();
-                }
-            }, 5000);
-        }
-
-        // Sledování pozice
-        function watchPosition() {
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(
-                    (position) => {
-                        userPosition = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude,
-                            accuracy: position.coords.accuracy
-                        };
-                        checkProximityToMarkers();
-                        updateNavigation();
-                        checkDistanceForQuiz(); // NOVÉ: Kontrola kvízů
-                    },
-                    (error) => {
-                        console.error("Watch position error:", error);
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 8000,
-                        maximumAge: 20000
-                    }
-                );
-            }
-        }
-
         // === NAHRAZENÁ HLAVNÍ FUNKCE S FYZICKOU SPRÁVOU OBJEKTŮ ===
         function checkProximityToMarkers() {
-            if (!userPosition) return;
+            const userPos = CoreUtils.getUserPosition();
+            if (!userPos) return;
             
             console.log("Checking proximity with PHYSICAL object management...");
             let shouldStopAudio = true;
             let markersActivatedThisCheck = [];
             
             markers.forEach(marker => {
-                const distance = calculateDistance(
-                    userPosition.lat, userPosition.lng,
+                const distance = CoreUtils.calculateDistance(
+                    userPos.lat, userPos.lng,
                     marker.lat, marker.lng
                 );
                 
@@ -876,14 +763,15 @@
 
         // Navigace
         function updateNavigation() {
-            if (!userPosition) return;
+            const userPos = CoreUtils.getUserPosition();
+            if (!userPos) return;
             
             const targetsList = document.getElementById('targetsList');
             let html = '';
             
             const markersWithDistance = markers.map(marker => {
-                const distance = calculateDistance(
-                    userPosition.lat, userPosition.lng,
+                const distance = CoreUtils.calculateDistance(
+                    userPos.lat, userPos.lng,
                     marker.lat, marker.lng
                 );
                 return { ...marker, distance };
@@ -900,7 +788,7 @@
                 html += `
                     <div class="${cssClass}" data-target-id="${marker.id}">
                         <div style="font-weight: bold;">${marker.name} ${isSelected ? '🎯' : ''}</div>
-                        <div style="font-size: 12px; color: #666;">${formatDistance(marker.distance)} - ${marker.description}</div>
+                        <div style="font-size: 12px; color: #666;">${CoreUtils.formatDistance(marker.distance)} - ${marker.description}</div>
                     </div>
                 `;
             });
@@ -918,22 +806,21 @@
 
         function updateDistanceDisplay() {
             const distanceInfo = document.getElementById('distanceInfo');
+            const userPos = CoreUtils.getUserPosition();
             
-            if (!userPosition) {
+            if (!userPos) {
                 distanceInfo.innerHTML = '📍 Čekám na GPS...';
                 return;
             }
-             if (!startPosition) {
-                startPosition = { ...userPosition };
-                console.log("🎯 Start position initialized in updateDistanceDisplay");
-            }
+            
+            const startPos = CoreUtils.getStartPosition();
             const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
             const completed = getCompletedQuizzes();
             
             // Vypočítej vzdálenost od startu
-            const distanceFromStart = startPosition ? calculateDistance(
-                startPosition.lat, startPosition.lng,
-                userPosition.lat, userPosition.lng
+            const distanceFromStart = startPos ? CoreUtils.calculateDistance(
+                startPos.lat, startPos.lng,
+                userPos.lat, userPos.lng
             ) : 0;
             
             if (targetMarker) {
@@ -951,14 +838,15 @@
         }
 
         function findClosestMarker() {
-            if (!userPosition) return null;
+            const userPos = CoreUtils.getUserPosition();
+            if (!userPos) return null;
             
             let closest = null;
             let minDistance = Infinity;
             
             markers.forEach(marker => {
-                const distance = calculateDistance(
-                    userPosition.lat, userPosition.lng,
+                const distance = CoreUtils.calculateDistance(
+                    userPos.lat, userPos.lng,
                     marker.lat, marker.lng
                 );
                 
@@ -972,13 +860,14 @@
         }
 
         function findSelectedMarker() {
-            if (!userPosition || !selectedTargetId) return null;
+            const userPos = CoreUtils.getUserPosition();
+            if (!userPos || !selectedTargetId) return null;
             
             const marker = markers.find(m => m.id === selectedTargetId);
             if (!marker) return null;
             
-            const distance = calculateDistance(
-                userPosition.lat, userPosition.lng,
+            const distance = CoreUtils.calculateDistance(
+                userPos.lat, userPos.lng,
                 marker.lat, marker.lng
             );
             
@@ -1004,7 +893,7 @@
             let rotationActive = false;
             
             document.addEventListener('touchstart', (e) => {
-                if (isTouchingUI(e.target)) return;
+                if (CoreUtils.isTouchingUI(e.target)) return;
                 if (!isAnyModelVisible()) return;
                 
                 touchStarted = true;
@@ -1016,7 +905,7 @@
             }, { passive: false });
             
             document.addEventListener('mousedown', (e) => {
-                if (isTouchingUI(e.target)) return;
+                if (CoreUtils.isTouchingUI(e.target)) return;
                 if (!isAnyModelVisible()) return;
                 
                 rotationActive = true;
@@ -1071,28 +960,6 @@
         // === AKTUALIZOVANÁ FUNKCE VIDITELNOSTI ===
         function isAnyModelVisible() {
             return activeArObjects.size > 0;
-        }
-
-        function isTouchingUI(target) {
-            const uiSelectors = [
-                '.back-button',
-                '.navigation', 
-                '.nav-toggle',
-                '.nav-content',
-                '.target-item',
-                '.distance-info',
-                '.audio-info',
-                '.rotation-hint',
-                '.wine-quiz' // NOVÉ: Přidáno kvíz mezi UI elementy
-            ];
-            
-            for (let selector of uiSelectors) {
-                const element = document.querySelector(selector);
-                if (element && (element === target || element.contains(target))) {
-                    return true;
-                }
-            }
-            return false;
         }
 
         function showRotationHintOnce() {
@@ -1181,7 +1048,7 @@
 
         document.getElementById('clearSelection').addEventListener('click', clearSelection);
         document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
-        document.getElementById('quizClose').addEventListener('click', closeQuiz); // NOVÉ: Event listener pro zavření kvízu
+        document.getElementById('quizClose').addEventListener('click', closeQuiz);
 
         document.addEventListener('click', (e) => {
             const navPanel = document.querySelector('.navigation');
@@ -1268,8 +1135,29 @@
                 }, 1000);
                 
                 setupModelRotation();
-                getCurrentPosition();
-                watchPosition();
+                
+                // === AKTUALIZOVANÉ VOLÁNÍ GPS FUNKCÍ ===
+                CoreUtils.getCurrentPosition(
+                    (position) => {
+                        console.log("✅ GPS pozice získána:", position);
+                        document.getElementById('distanceInfo').innerHTML = '🍇 GPS aktivní';
+                        checkProximityToMarkers();
+                        updateNavigation();
+                    },
+                    (error) => {
+                        console.warn("⚠️ GPS chyba:", error);
+                        document.getElementById('distanceInfo').innerHTML = '🔄 Používám testovací pozici';
+                        checkProximityToMarkers();
+                        updateNavigation();
+                    }
+                );
+                
+                CoreUtils.watchPosition((position) => {
+                    checkProximityToMarkers();
+                    updateNavigation();
+                    checkDistanceForQuiz();
+                });
+                
                 startTutorialWhenReady();
                 
                 // NOVÉ: Pravidelná kontrola kvízů
@@ -1293,4 +1181,3 @@
     </script>
 </body>
 </html>
-                }
