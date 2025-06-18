@@ -1,0 +1,313 @@
+/* ======================================
+   VINAŘSKÁ STEZKA - CSS STYLY
+   Extrakce ze stezka.html (bez změn)
+   ====================================== */
+
+/* ===== ZÁKLADNÍ NASTAVENÍ ===== */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* ===== UI OVERLAY SYSTÉM ===== */
+/* Základní vrstva pro všechny UI elementy */
+.ui-overlay {
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Aktivní UI elementy (tlačítka, navigace) */
+.ui-element {
+    pointer-events: auto;
+}
+
+/* ===== ZPĚT TLAČÍTKO ===== */
+/* Žluté tlačítko vlevo nahoře - návrat do menu */
+.back-button {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1001;
+    padding: 10px 15px;
+    background: rgba(255, 193, 7, 0.9);
+    color: black;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+/* ===== INFORMAČNÍ PANEL DOLE ===== */
+/* Hlavní žlutý panel s informacemi o vzdálenosti a kvízech */
+.distance-info {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 193, 7, 0.9);
+    color: black;
+    padding: 15px 20px;
+    border-radius: 12px;
+    font-weight: bold;
+    text-align: center;
+    z-index: 1000;
+}
+
+/* ===== SKRYTÉ GAMIFIKAČNÍ PRVKY ===== */
+/* Gamifikační status - úmyslně skrytý */
+.gamification-status {
+    display: none !important;
+}
+
+/* Debug tlačítko - úmyslně skryté */
+.debug-button {
+    display: none !important;
+}
+
+/* ===== NAVIGAČNÍ MENU VPRAVO ===== */
+/* Kontejner pro navigační menu vpravo nahoře */
+.navigation {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1000;
+}
+
+/* Žluté tlačítko pro otevření navigace */
+.nav-toggle {
+    background: rgba(255, 193, 7, 0.9);
+    color: black;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Rozbalovací obsah navigace */
+.nav-content {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 5px;
+    background: rgba(255, 193, 7, 0.95);
+    border-radius: 8px;
+    padding: 10px;
+    min-width: 200px;
+    display: none;
+}
+
+/* Otevřený stav navigace */
+.nav-content.open {
+    display: block;
+}
+
+/* ===== SEZNAM CÍLOVÝCH BODŮ ===== */
+/* Jednotlivé položky v navigačním seznamu */
+.target-item {
+    padding: 8px;
+    margin: 5px 0;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 5px;
+    cursor: pointer;
+    border-left: 3px solid #ff6b35;
+}
+
+/* Hover efekt pro cílové body */
+.target-item:hover {
+    background: rgba(255, 255, 255, 1);
+}
+
+/* Vybraný cílový bod */
+.target-item.selected {
+    background: rgba(255, 215, 0, 0.9);
+    border-left-color: #FFD700;
+}
+
+/* Nejbližší cílový bod */
+.target-item.closest {
+    border-left-color: #28a745;
+}
+
+/* Tlačítko pro zrušení výběru (inline styly v HTML) */
+#clearSelection {
+    display: none;
+    background: tomato;
+    color: white;
+    padding: 5px;
+    text-align: center;
+    margin-top: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* ===== AUDIO OVLÁDÁNÍ ===== */
+/* Kulaté zelené tlačítko pro audio - pouze ikona */
+.audio-info {
+    position: fixed;
+    top: 60px;
+    left: 10px;
+    background: rgba(40, 167, 69, 0.9);
+    color: white;
+    padding: 12px;
+    border-radius: 50%;
+    font-size: 20px;
+    z-index: 1000;
+    display: none;
+    cursor: pointer;
+    user-select: none;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    border: 2px solid rgba(40, 167, 69, 1);
+}
+
+/* Hover efekt pro audio tlačítko */
+.audio-info:hover {
+    background: rgba(40, 167, 69, 1);
+    transform: scale(1.05);
+}
+
+/* Aktivní stav audio tlačítka */
+.audio-info:active {
+    background: rgba(34, 142, 58, 1);
+    transform: scale(0.95);
+}
+
+/* ===== NÁPOVĚDA PRO ROTACI ===== */
+/* Modrý tooltip pro rotaci 3D modelů */
+.rotation-hint {
+    position: fixed;
+    bottom: 130px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 123, 255, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    z-index: 1000;
+    display: none;
+    text-align: center;
+}
+
+/* ===== VINNÝ KVÍZOVÝ SYSTÉM ===== */
+/* Hlavní kontejner pro kvízové okno */
+.wine-quiz {
+    position: fixed;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 248, 220, 0.98);
+    color: #333;
+    padding: 20px;
+    border-radius: 15px;
+    font-size: 16px;
+    font-weight: normal;
+    z-index: 1001;
+    display: none;
+    max-width: 350px;
+    width: 90%;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    border: 3px solid #FFD700;
+    text-align: center;
+    animation: quizAppear 0.5s ease-out;
+}
+
+/* Otázka v kvízu */
+.quiz-question {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #8B4513;
+}
+
+/* Kontejner pro odpovědi */
+.quiz-answers {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+/* Jednotlivé odpovědi v kvízu */
+.quiz-answer {
+    background: rgba(255, 193, 7, 0.8);
+    color: black;
+    padding: 12px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid #FFA500;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+/* Hover efekt pro odpovědi */
+.quiz-answer:hover {
+    background: rgba(255, 193, 7, 1);
+    transform: scale(1.02);
+}
+
+/* Správná odpověď (po zodpovězení) */
+.quiz-answer.correct {
+    background: rgba(76, 175, 80, 0.9);
+    color: white;
+    border-color: #4CAF50;
+}
+
+/* Špatná odpověď (po zodpovězení) */
+.quiz-answer.incorrect {
+    background: rgba(244, 67, 54, 0.7);
+    color: white;
+    border-color: #F44336;
+}
+
+/* Vysvětlení po zodpovězení kvízu */
+.quiz-explanation {
+    background: rgba(173, 216, 230, 0.9);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-style: italic;
+    border-left: 4px solid #4682B4;
+    display: none;
+}
+
+/* Tlačítko pro zavření kvízu */
+.quiz-close {
+    background: rgba(108, 117, 125, 0.9);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 15px;
+    border: none;
+    font-weight: bold;
+}
+
+/* Hover efekt pro zavírací tlačítko */
+.quiz-close:hover {
+    background: rgba(108, 117, 125, 1);
+}
+
+/* Progress indikátor kvízu */
+.quiz-progress {
+    font-size: 12px;
+    color: #666;
+    margin-top: 10px;
+}
+
+/* ===== ANIMACE ===== */
+/* Animace pro zobrazení kvízu */
+@keyframes quizAppear {
+    from { 
+        opacity: 0; 
+        transform: translateX(-50%) translateY(-20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateX(-50%) translateY(0); 
+    }
+}
