@@ -8,13 +8,6 @@
     <!-- A-Frame a AR.js - funkční verze -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
-   
-    <!-- Gamifikační skripty - OPRAVENÉ POŘADÍ -->
-    <script src="/gamification-config.js"></script>
-    <script src="/gamification.js"></script>
-    <script src="/game/bohuslavice_stezka_config.js"></script>
-    <link rel="stylesheet" href="/css/tutorial.css">
-    <script src="/tutorial.js"></script>
     
     <!-- Vlastní styly -->
     <link rel="stylesheet" href="/assets/stezka_bohuslavice/css/bee-styles.css">
@@ -81,6 +74,39 @@
         <a-light type="directional" color="#ffffff" intensity="1.0" position="2 8 3" id="sunLight"></a-light>
         <a-light type="point" color="#ffffff" intensity="1.0" position="-2 4 2" distance="20" id="fillLight"></a-light>
     </a-scene>
+
+    <!-- NAČTI POUZE JEDNOU GAMIFIKAČNÍ SKRIPTY -->
+    <script>
+        // Zkontroluj jestli už nejsou načtené gamifikační skripty
+        if (typeof SCENE_CONFIG === 'undefined') {
+            const gamificationConfigScript = document.createElement('script');
+            gamificationConfigScript.src = '/gamification-config.js';
+            document.head.appendChild(gamificationConfigScript);
+        }
+        
+        if (typeof BASE_STORAGE_KEY === 'undefined') {
+            const gamificationScript = document.createElement('script');
+            gamificationScript.src = '/gamification.js';
+            document.head.appendChild(gamificationScript);
+        }
+        
+        if (typeof BOHUSLAVICE_STEZKA_EXPOSITION_CONFIG === 'undefined') {
+            const expositionScript = document.createElement('script');
+            expositionScript.src = '/game/bohuslavice_stezka_config.js';
+            document.head.appendChild(expositionScript);
+        }
+        
+        if (typeof ARTutorial === 'undefined') {
+            const tutorialCssLink = document.createElement('link');
+            tutorialCssLink.rel = 'stylesheet';
+            tutorialCssLink.href = '/css/tutorial.css';
+            document.head.appendChild(tutorialCssLink);
+            
+            const tutorialScript = document.createElement('script');
+            tutorialScript.src = '/tutorial.js';
+            document.head.appendChild(tutorialScript);
+        }
+    </script>
 
     <!-- Moduly JS v správném pořadí -->
     <script src="/assets/stezka_bohuslavice/js/bee-config.js"></script>
@@ -94,127 +120,34 @@
     <script src="/assets/stezka_bohuslavice/js/bee-main.js"></script>
     
     <script>
-        // Globální inicializace
+        // Čekej na načtení všech skriptů
         window.addEventListener('load', () => {
-            console.log("🚀 Starting Bee Trail AR Application...");
-            
-            // Vytvoř globální instanci aplikace
-            window.beeApp = new BeeApp();
-            
-            // Spusť inicializaci
-            window.beeApp.initialize().then(() => {
-                console.log("✅ Bee Trail App is ready!");
-                console.log("🔧 Debug commands available in console:");
-                console.log("- getBeeAppStatus() - stav aplikace");
-                console.log("- debugBeeApp() - debug všech modulů");
-                console.log("- testBeeFeatures() - test funkcí");
-                console.log("- resetBeeApp() - restart aplikace");
-            }).catch((error) => {
-                console.error("❌ Bee Trail App failed to start:", error);
-            });
-        });
-    </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="cs">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Včelařská AR Stezka</title>
-    
-    <!-- A-Frame a AR.js - funkční verze -->
-    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
-   
-    <!-- Gamifikační skripty - OPRAVENÉ POŘADÍ -->
-    <script src="/gamification-config.js"></script>
-    <script src="/gamification.js"></script>
-    <script src="/game/bohuslavice_stezka_config.js"></script>
-    <link rel="stylesheet" href="/css/tutorial.css">
-    <script src="/tutorial.js"></script>
-    
-    <!-- Vlastní styly -->
-    <link rel="stylesheet" href="/assets/stezka_bohuslavice/css/bee-styles.css">
-</head>
-<body>
-    <!-- UI Elementy -->
-    <a href="/assets/stezka_bohuslavice/bohuslavice.html" class="back-button ui-element">
-        🐝 Zpět do Menu
-    </a>
-    
-    <div class="distance-info ui-element" id="distanceInfo">
-        🐝 Hledám nejbližší včelu...
-    </div>
-    
-    <div class="navigation ui-element">
-        <div class="nav-toggle" id="navToggle">🐝 Včelí Navigace</div>
-        <div class="nav-content" id="navContent">
-            <div id="targetsList"></div>
-            <div id="clearSelection" style="display: none; background: tomato; color: white; padding: 5px; text-align: center; margin-top: 10px; border-radius: 5px; cursor: pointer;">
-                ✕ Zrušit výběr
-            </div>
-        </div>
-    </div>
-    
-    <div class="audio-info ui-element" id="audioInfo">🔊</div>
-    <div class="rotation-hint" id="rotationHint">🔄 Tažením otočíte včelu</div>
-    
-    <!-- Včelí kvíz -->
-    <div class="bee-quiz ui-element" id="beeQuiz">
-        <div class="quiz-question" id="quizQuestion"></div>
-        <div class="quiz-answers" id="quizAnswers"></div>
-        <div class="quiz-explanation" id="quizExplanation"></div>
-        <button class="quiz-close" id="quizClose">Pokračovat v cestě 🐝</button>
-        <div class="quiz-progress" id="quizProgress"></div>
-    </div>
-    
-    <!-- A-Frame AR scéna - PRÁZDNÁ NA ZAČÁTKU -->
-    <a-scene 
-        vr-mode-ui="enabled: false"
-        arjs="sourceType: webcam; videoTexture: true; debugUIEnabled: false;"
-        renderer="logarithmicDepthBuffer: true; antialias: true;"
-        device-orientation-permission-ui="enabled: false"
-        id="arScene">
-
-        <a-assets>
-            <!-- GLB modely včel -->
-            <a-asset-item id="bee-model-1" src="/assets/stezka_bohuslavice/3d/delnice.glb"></a-asset-item>
-            <a-asset-item id="bee-model-2" src="/assets/stezka_bohuslavice/3d/trubec.glb"></a-asset-item>
-            <a-asset-item id="bee-model-3" src="/assets/stezka_bohuslavice/3d/kralovna.glb"></a-asset-item>
-            
-            <!-- Audio soubory -->
-            <audio id="audio1" src="/assets/stezka_bohuslavice/mp3/delnice.mp3" preload="auto"></audio>
-            <audio id="audio2" src="/assets/stezka_bohuslavice/mp3/trubec.mp3" preload="auto"></audio>
-            <audio id="audio3" src="/assets/stezka_bohuslavice/mp3/kralovna.mp3" preload="auto"></audio>
-        </a-assets>
-
-        <!-- Kamera s geolokací -->
-        <a-camera gps-camera rotation-reader></a-camera>
-
-        <!-- ŽÁDNÉ AR OBJEKTY - BUDOU PŘIDÁNY DYNAMICKY -->
-
-        <!-- Základní osvětlení -->
-        <a-light type="ambient" color="#ffffff" intensity="1.0" id="ambientLight"></a-light>
-        <a-light type="directional" color="#ffffff" intensity="1.0" position="2 8 3" id="sunLight"></a-light>
-        <a-light type="point" color="#ffffff" intensity="1.0" position="-2 4 2" distance="20" id="fillLight"></a-light>
-    </a-scene>
-
-    <!-- Moduly JS -->
-    <script src="/assets/stezka_bohuslavice/js/bee-config.js"></script>
-    <script src="/assets/stezka_bohuslavice/js/bee-ar-manager.js"></script>
-    <script src="/assets/stezka_bohuslavice/js/bee-quiz-system.js"></script>
-    <script src="/assets/stezka_bohuslavice/js/bee-audio.js"></script>
-    <script src="/assets/stezka_bohuslavice/js/bee-navigation.js"></script>
-    <script src="/assets/stezka_bohuslavice/js/bee-rotation.js"></script>
-    <script src="/assets/stezka_bohuslavice/js/bee-gamification.js"></script>
-    <script src="/assets/stezka_bohuslavice/js/bee-tutorial.js"></script>
-    <script src="/assets/stezka_bohuslavice/js/bee-main.js"></script>
-    
-    <script>
-        // Pouze inicializace
-        window.addEventListener('load', () => {
-            const app = new BeeApp();
-            app.initialize();
+            // Další čekání pro jistotu načtení všech dependencies
+            setTimeout(() => {
+                console.log("🚀 Starting Bee Trail AR Application...");
+                
+                // Zkontroluj dostupnost BeeApp třídy
+                if (typeof BeeApp === 'undefined') {
+                    console.error("❌ BeeApp class not loaded! Check bee-main.js");
+                    return;
+                }
+                
+                // Vytvoř globální instanci aplikace
+                window.beeApp = new BeeApp();
+                
+                // Spusť inicializaci
+                window.beeApp.initialize().then(() => {
+                    console.log("✅ Bee Trail App is ready!");
+                    console.log("🔧 Debug commands available in console:");
+                    console.log("- getBeeAppStatus() - stav aplikace");
+                    console.log("- debugBeeApp() - debug všech modulů");
+                    console.log("- testBeeFeatures() - test funkcí");
+                    console.log("- resetBeeApp() - restart aplikace");
+                }).catch((error) => {
+                    console.error("❌ Bee Trail App failed to start:", error);
+                });
+                
+            }, 2000); // 2 sekundy zpoždění
         });
     </script>
 </body>
