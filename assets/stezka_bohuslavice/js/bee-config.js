@@ -22,8 +22,8 @@ const BEE_CONFIG = {
     MARKERS: [
         { 
             id: "vcela_1", 
-            lat: 49.009093, 
-            lng: 17.128643, 
+            lat: 49.009442, 
+            lng: 17.127048, 
             name: "🐝 Dělnice",
             description: "Pracovitá včela dělnice - základ úlu",
             audioId: "audio1",
@@ -32,8 +32,8 @@ const BEE_CONFIG = {
         },
         { 
             id: "vcela_2", 
-            lat: 49.009373, 
-            lng: 7.127490,
+            lat: 49.008636, 
+            lng: 17.125165,
             name: "🐝 Trubec", 
             description: "Samec včely - zodpovědný za rozmnožování",
             audioId: "audio2",
@@ -42,8 +42,8 @@ const BEE_CONFIG = {
         },
         { 
             id: "vcela_3", 
-            lat: 49.008410,  
-            lng: 17.129966,
+            lat: 49.007182, 
+            lng: 17.125096,
             name: "👑 Královna",
             description: "Matka úlu - vládkyně včelího státu",
             audioId: "audio3",
