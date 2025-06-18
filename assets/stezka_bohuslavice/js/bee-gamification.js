@@ -4,44 +4,66 @@ class BeeGamificationManager {
     constructor() {
         this.initialized = false;
         this.trackingActive = false;
+        this.maxWaitTime = 15000; // 15 sekund maximální čekání
     }
     
     initialize() {
         console.log("🎮 Initializing Bee Gamification Manager...");
         
-        // Čekej na načtení gamifikačních konfigurací
+        // Čekej na načtení gamifikačních konfigurací s delším timeoutem
         this.waitForConfigurations().then(() => {
             this.initializeTracking();
         }).catch((error) => {
-            console.error("❌ Gamification initialization failed:", error);
+            console.warn("⚠️ Gamification initialization failed:", error.message);
+            console.log("🎮 Continuing without gamification features");
+            // Nepřerušuj aplikaci, jen pokračuj bez gamifikace
         });
     }
     
     async waitForConfigurations() {
-        // Čekej na načtení všech gamifikačních skriptů
-        let attempts = 0;
-        const maxAttempts = 20; // 10 sekund čekání
+        console.log("⏳ Waiting for gamification configurations...");
         
-        while (attempts < maxAttempts) {
+        const startTime = Date.now();
+        
+        while (Date.now() - startTime < this.maxWaitTime) {
             if (this.areConfigurationsLoaded()) {
                 console.log("✅ Gamification configurations loaded");
+                await this.delay(500); // Dodatečné čekání pro jistotu
                 return true;
             }
             
-            console.log(`⏳ Waiting for gamification config... (${attempts + 1}/${maxAttempts})`);
+            const elapsed = Date.now() - startTime;
+            if (elapsed % 2000 === 0) { // Log každé 2 sekundy
+                console.log(`⏳ Still waiting for gamification config... (${Math.round(elapsed/1000)}s)`);
+                this.debugConfigurationState();
+            }
+            
             await this.delay(500);
-            attempts++;
         }
         
         throw new Error("Gamification configurations not loaded in time");
     }
     
     areConfigurationsLoaded() {
-        return (
-            typeof SCENE_CONFIG !== 'undefined' && 
-            typeof ACHIEVEMENTS_CONFIG !== 'undefined' &&
-            typeof EXPOSITION_REGISTRY !== 'undefined'
-        );
+        const hasSceneConfig = typeof SCENE_CONFIG !== 'undefined';
+        const hasAchievements = typeof ACHIEVEMENTS_CONFIG !== 'undefined';
+        const hasRegistry = typeof EXPOSITION_REGISTRY !== 'undefined';
+        const hasExposition = hasRegistry && EXPOSITION_REGISTRY && EXPOSITION_REGISTRY[BEE_CONFIG.EXPOSITION_ID];
+        
+        return hasSceneConfig && hasAchievements && hasRegistry && hasExposition;
+    }
+    
+    debugConfigurationState() {
+        console.log("🔍 Configuration state check:");
+        console.log("- SCENE_CONFIG:", typeof SCENE_CONFIG !== 'undefined');
+        console.log("- ACHIEVEMENTS_CONFIG:", typeof ACHIEVEMENTS_CONFIG !== 'undefined');
+        console.log("- EXPOSITION_REGISTRY:", typeof EXPOSITION_REGISTRY !== 'undefined');
+        
+        if (typeof EXPOSITION_REGISTRY !== 'undefined' && EXPOSITION_REGISTRY) {
+            console.log("- Available expositions:", Object.keys(EXPOSITION_REGISTRY));
+            console.log("- Looking for:", BEE_CONFIG.EXPOSITION_ID);
+            console.log("- Found:", !!EXPOSITION_REGISTRY[BEE_CONFIG.EXPOSITION_ID]);
+        }
     }
     
     initializeTracking() {
@@ -53,7 +75,8 @@ class BeeGamificationManager {
         if (EXPOSITION_REGISTRY && EXPOSITION_REGISTRY[BEE_CONFIG.EXPOSITION_ID]) {
             console.log("✅ Včelařská stezka exposition is registered");
         } else {
-            console.warn("⚠️ Včelařská stezka exposition not found in registry");
+            console.error("❌ Včelařská stezka exposition not found in registry");
+            this.debugConfigurationState();
             throw new Error("Exposition not registered");
         }
         
@@ -210,16 +233,13 @@ class BeeGamificationManager {
             console.log("Visit count:", this.getVisitCount());
         }
         
+        this.debugConfigurationState();
+        
         console.log("Available functions:");
         console.log("- initializeTimeTracking:", typeof initializeTimeTracking);
         console.log("- recordMarkerActivation:", typeof recordMarkerActivation);
         console.log("- unlockAchievement:", typeof unlockAchievement);
         console.log("- isAchievementUnlocked:", typeof isAchievementUnlocked);
-        
-        console.log("Configurations:");
-        console.log("- SCENE_CONFIG:", typeof SCENE_CONFIG !== 'undefined');
-        console.log("- ACHIEVEMENTS_CONFIG:", typeof ACHIEVEMENTS_CONFIG !== 'undefined');
-        console.log("- EXPOSITION_REGISTRY:", typeof EXPOSITION_REGISTRY !== 'undefined');
         
         console.log("===========================");
     }

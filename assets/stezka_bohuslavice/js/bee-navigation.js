@@ -7,6 +7,7 @@ class BeeNavigationManager {
         this.selectedTargetId = null;
         this.watchId = null;
         this.elements = {};
+        this.startPositionSet = false; // NOVÉ: Sleduj zda byla start pozice nastavena
     }
     
     initialize() {
@@ -65,9 +66,10 @@ class BeeNavigationManager {
                     accuracy: position.coords.accuracy
                 };
                 
-                // Nastav start pozici pouze při prvním GPS fix
-                if (!this.startPosition) {
+                // OPRAVA: Nastav start pozici pouze jednou při prvním GPS fix
+                if (!this.startPositionSet) {
                     this.startPosition = { ...this.userPosition };
+                    this.startPositionSet = true;
                     console.log("🎯 Start position set:", this.startPosition);
                 }
                 
@@ -85,20 +87,29 @@ class BeeNavigationManager {
         setTimeout(() => {
             if (!this.userPosition) {
                 console.log("📍 GPS timeout - activating fallback position");
-                this.userPosition = { ...BEE_CONFIG.FALLBACK_POSITION };
-                this.startPosition = { ...this.userPosition };
-                this.updateDistanceDisplay('🔄 Testovací pozice aktivní');
-                this.updateAll();
+                this.setFallbackPosition();
             }
         }, 5000);
     }
     
-    handleGPSError(message) {
+    setFallbackPosition() {
         this.userPosition = { ...BEE_CONFIG.FALLBACK_POSITION };
-        this.startPosition = { ...this.userPosition };
-        this.updateDistanceDisplay(`🔄 ${message} - používám testovací pozici`);
-        console.log("📍 Using fallback position:", this.userPosition);
+        
+        // OPRAVA: Nastav start pozici pouze pokud ještě nebyla nastavena
+        if (!this.startPositionSet) {
+            this.startPosition = { ...this.userPosition };
+            this.startPositionSet = true;
+            console.log("🎯 Fallback start position set:", this.startPosition);
+        }
+        
+        this.updateDistanceDisplay('🔄 Testovací pozice aktivní');
         this.updateAll();
+    }
+    
+    handleGPSError(message) {
+        this.updateDistanceDisplay(`🔄 ${message} - používám testovací pozici`);
+        console.log("📍 Using fallback position:", BEE_CONFIG.FALLBACK_POSITION);
+        this.setFallbackPosition();
     }
     
     watchPosition() {
@@ -110,6 +121,10 @@ class BeeNavigationManager {
                         lng: position.coords.longitude,
                         accuracy: position.coords.accuracy
                     };
+                    
+                    // DŮLEŽITÉ: Při watch position NIKDY neměň start pozici
+                    // Start pozice se nastavuje pouze jednou
+                    
                     this.updateAll();
                 },
                 (error) => {
@@ -185,19 +200,16 @@ class BeeNavigationManager {
             return;
         }
         
-        // Nastav start pozici pokud ještě není
-        if (!this.startPosition) {
-            this.startPosition = { ...this.userPosition };
-            console.log("🎯 Start position initialized in updateDistanceDisplay");
-        }
-        
         const targetMarker = this.selectedTargetId ? this.findSelectedMarker() : this.findClosestMarker();
         
-        // Vypočítej vzdálenost od startu
-        const distanceFromStart = this.startPosition ? this.calculateDistance(
-            this.startPosition.lat, this.startPosition.lng,
-            this.userPosition.lat, this.userPosition.lng
-        ) : 0;
+        // OPRAVA: Vypočítej vzdálenost od start pozice pouze pokud je nastavena
+        let distanceFromStart = 0;
+        if (this.startPosition && this.userPosition) {
+            distanceFromStart = this.calculateDistance(
+                this.startPosition.lat, this.startPosition.lng,
+                this.userPosition.lat, this.userPosition.lng
+            );
+        }
         
         if (targetMarker) {
             const distance = Math.round(targetMarker.distance);
@@ -321,6 +333,16 @@ class BeeNavigationManager {
         return R * c;
     }
     
+    // NOVÁ METODA: Reset start pozice (pro debug)
+    resetStartPosition() {
+        if (this.userPosition) {
+            this.startPosition = { ...this.userPosition };
+            this.startPositionSet = true;
+            console.log("🔄 Start position reset to current position:", this.startPosition);
+            this.updateAll();
+        }
+    }
+    
     // Gettery pro ostatní moduly
     getUserPosition() {
         return this.userPosition;
@@ -338,6 +360,7 @@ class BeeNavigationManager {
         return {
             userPosition: this.userPosition,
             startPosition: this.startPosition,
+            startPositionSet: this.startPositionSet,
             selectedTarget: this.selectedTargetId,
             watchId: this.watchId,
             hasGPS: !!navigator.geolocation
