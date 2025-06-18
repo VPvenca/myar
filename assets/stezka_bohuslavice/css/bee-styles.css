@@ -43,10 +43,10 @@ body {
     z-index: 1000;
 }
 
-/* Navigace - OPRAVENÉ ZAROVNÁNÍ */
+/* Navigace */
 .navigation {
     position: fixed;
-    top: 10px;           /* STEJNÁ VÝŠKA JAKO BACK BUTTON */
+    top: 10px;
     right: 10px;
     z-index: 1000;
 }
@@ -54,12 +54,10 @@ body {
 .nav-toggle {
     background: rgba(255, 193, 7, 0.9);
     color: black;
-    padding: 10px 15px;  /* STEJNÝ PADDING JAKO BACK BUTTON */
+    padding: 10px 15px;
     border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
-    line-height: 1;      /* PŘIDÁNO: Zarovnání text výšky */
-    display: inline-block;
 }
 
 .nav-content {
