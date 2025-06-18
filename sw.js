@@ -18,7 +18,6 @@ const urlsToCache = [
   '/muzea_galerie.html',
   '/mista_stezky.html',
   '/knihy_publikace.html',
-  '/info.html',
   '/manifest.json' // Přidáno
 ];
 
