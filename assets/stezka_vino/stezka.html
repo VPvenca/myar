@@ -24,6 +24,9 @@
     <!-- NOVÝ: AR Manager modul -->
     <script src="/assets/shared/js/ar_manager.js"></script>
     
+    <!-- NOVÝ: Audio-UI Manager modul -->
+    <script src="/assets/shared/js/audio_ui.js"></script>
+    
 </head>
 <body>
     <!-- UI Elementy -->
@@ -123,10 +126,6 @@
         const PROXIMITY_THRESHOLD = 15;
         const AR_VISIBILITY_THRESHOLD = 30;
         const AUDIO_THRESHOLD = 15;
-        let selectedTargetId = null;
-        let currentlyPlayingAudio = null;
-        let audioPlayingForMarker = null;
-        let audioIsPaused = false;
         
         // NOVÉ: Kvízový systém
         const QUIZ_DISTANCE_STEP = 50; // každých 50m
@@ -552,12 +551,12 @@
             }
         });
 
-        // === HLAVNÍ FUNKCE S POUŽITÍM AR-MANAGER ===
+        // === HLAVNÍ FUNKCE S POUŽITÍM MODULŮ ===
         function checkProximityToMarkers() {
             const userPos = CoreUtils.getUserPosition();
             if (!userPos) return;
             
-            console.log("Checking proximity with PHYSICAL object management...");
+            console.log("Checking proximity with modular management...");
             let shouldStopAudio = true;
             let markersActivatedThisCheck = [];
             
@@ -581,7 +580,7 @@
                 
                 // Audio logika (pouze pro objekty ve scéně)
                 if (distance <= AUDIO_THRESHOLD && isCurrentlyInScene) {
-                    playAudio(marker.id);
+                    AudioUI.playAudio(marker.id, markers);
                     shouldStopAudio = false;
                     console.log(`🎵 Audio playing for ${marker.id}`);
                 }
@@ -594,8 +593,8 @@
                 }
             });
             
-            if (shouldStopAudio && currentlyPlayingAudio) {
-                stopCurrentAudio();
+            if (shouldStopAudio) {
+                AudioUI.stopCurrentAudio();
             }
             
             // Počet objektů ve scéně
@@ -603,133 +602,43 @@
             console.log(`📊 Wine AR Status: ${activeCount} objects in scene`);
         }
 
-        // === AUDIO FUNKCE ===
-        function playAudio(markerId) {
-            const marker = markers.find(m => m.id === markerId);
-            if (!marker || audioPlayingForMarker === markerId) return;
-            
-            stopCurrentAudio();
-            
-            const audioElement = document.getElementById(marker.audioId);
-            if (audioElement) {
-                audioElement.currentTime = 0;
-                audioIsPaused = false;
-                audioElement.play().then(() => {
-                    currentlyPlayingAudio = audioElement;
-                    audioPlayingForMarker = markerId;
-                    
-                    updateAudioDisplay();
-                    
-                    audioElement.onended = stopCurrentAudio;
-                }).catch(console.error);
-            }
-        }
-
-        function toggleAudioPlayPause() {
-            if (!currentlyPlayingAudio) return;
-            
-            if (audioIsPaused) {
-                currentlyPlayingAudio.play().then(() => {
-                    audioIsPaused = false;
-                    updateAudioDisplay();
-                }).catch(console.error);
-            } else {
-                currentlyPlayingAudio.pause();
-                audioIsPaused = true;
-                updateAudioDisplay();
-            }
-        }
-
-        function updateAudioDisplay() {
-            const audioInfo = document.getElementById('audioInfo');
-            if (audioIsPaused) {
-                audioInfo.innerHTML = '▶️';
-                audioInfo.style.background = 'rgba(255, 193, 7, 0.9)';
-                audioInfo.style.borderColor = 'rgba(255, 193, 7, 1)';
-            } else {
-                audioInfo.innerHTML = '⏸️';
-                audioInfo.style.background = 'rgba(40, 167, 69, 0.9)';
-                audioInfo.style.borderColor = 'rgba(40, 167, 69, 1)';
-            }
-            audioInfo.style.display = 'flex';
-        }
-
-        function stopCurrentAudio() {
-            if (currentlyPlayingAudio) {
-                currentlyPlayingAudio.pause();
-                currentlyPlayingAudio.currentTime = 0;
-                currentlyPlayingAudio = null;
-                audioPlayingForMarker = null;
-                audioIsPaused = false;
-                document.getElementById('audioInfo').style.display = 'none';
-            }
-        }
-
-        // === NAVIGACE ===
+        // === NAVIGACE A UI (DELEGOVÁNO NA AUDIO-UI) ===
         function updateNavigation() {
-            const userPos = CoreUtils.getUserPosition();
-            if (!userPos) return;
-            
-            const targetsList = document.getElementById('targetsList');
-            let html = '';
-            
-            const markersWithDistance = markers.map(marker => {
-                const distance = CoreUtils.calculateDistance(
-                    userPos.lat, userPos.lng,
-                    marker.lat, marker.lng
-                );
-                return { ...marker, distance };
-            }).sort((a, b) => a.distance - b.distance);
-            
-            markersWithDistance.forEach((marker, index) => {
-                const isClosest = index === 0;
-                const isSelected = marker.id === selectedTargetId;
-                
-                let cssClass = 'target-item';
-                if (isSelected) cssClass += ' selected';
-                else if (isClosest) cssClass += ' closest';
-                
-                html += `
-                    <div class="${cssClass}" data-target-id="${marker.id}">
-                        <div style="font-weight: bold;">${marker.name} ${isSelected ? '🎯' : ''}</div>
-                        <div style="font-size: 12px; color: #666;">${CoreUtils.formatDistance(marker.distance)} - ${marker.description}</div>
-                    </div>
-                `;
-            });
-            
-            targetsList.innerHTML = html;
-            
-            document.querySelectorAll('.target-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    selectTarget(item.getAttribute('data-target-id'));
-                });
-            });
-            
+            AudioUI.updateNavigation(markers, CoreUtils.formatDistance, CoreUtils.calculateDistance);
             updateDistanceDisplay();
         }
 
         function updateDistanceDisplay() {
-            const distanceInfo = document.getElementById('distanceInfo');
-            const userPos = CoreUtils.getUserPosition();
+            const thresholds = {
+                AUDIO_THRESHOLD,
+                AR_VISIBILITY_THRESHOLD
+            };
             
-            if (!userPos) {
-                distanceInfo.innerHTML = '📍 Čekám na GPS...';
-                return;
-            }
+            const getQuizProgress = () => ({
+                completed: getCompletedQuizzes().length,
+                total: WINE_QUIZZES.length
+            });
             
-            const startPos = CoreUtils.getStartPosition();
-            const targetMarker = selectedTargetId ? findSelectedMarker() : findClosestMarker();
-            const completed = getCompletedQuizzes();
-            
-            // Vypočítej vzdálenost od startu
-            const distanceFromStart = startPos ? CoreUtils.calculateDistance(
-                startPos.lat, startPos.lng,
-                userPos.lat, userPos.lng
-            ) : 0;
-            
-            if (targetMarker) {
-                const distance = Math.round(targetMarker.distance);
-                const prefix = selectedTargetId ? '🎯' : '🍇';
+            AudioUI.updateDistanceDisplay(markers, CoreUtils.formatDistance, CoreUtils.calculateDistance, thresholds, getQuizProgress);
+        }
+
+        function findClosestMarker() {
+            return AudioUI.findClosestMarker(markers, CoreUtils.calculateDistance);
+        }
+
+        function findSelectedMarker() {
+            return AudioUI.findSelectedMarker(markers, CoreUtils.calculateDistance);
+        }
+
+        function selectTarget(targetId) {
+            AudioUI.selectTarget(targetId);
+            updateNavigation();
+        }
+
+        function clearSelection() {
+            AudioUI.clearSelection();
+            updateNavigation();
+        }';
                 
                 let indicators = '';
                 if (distance <= AUDIO_THRESHOLD) indicators += ' 🎵';
@@ -741,54 +650,13 @@
             }
         }
 
-        function findClosestMarker() {
-            const userPos = CoreUtils.getUserPosition();
-            if (!userPos) return null;
+        // === EVENT LISTENERY (DELEGOVÁNO NA AUDIO-UI) ===
+        function setupEventListeners() {
+            // Nastavení základních UI event listenerů
+            AudioUI.setupUIEventListeners();
             
-            let closest = null;
-            let minDistance = Infinity;
-            
-            markers.forEach(marker => {
-                const distance = CoreUtils.calculateDistance(
-                    userPos.lat, userPos.lng,
-                    marker.lat, marker.lng
-                );
-                
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closest = { ...marker, distance };
-                }
-            });
-            
-            return closest;
-        }
-
-        function findSelectedMarker() {
-            const userPos = CoreUtils.getUserPosition();
-            if (!userPos || !selectedTargetId) return null;
-            
-            const marker = markers.find(m => m.id === selectedTargetId);
-            if (!marker) return null;
-            
-            const distance = CoreUtils.calculateDistance(
-                userPos.lat, userPos.lng,
-                marker.lat, marker.lng
-            );
-            
-            return { ...marker, distance };
-        }
-
-        function selectTarget(targetId) {
-            selectedTargetId = targetId;
-            document.getElementById('clearSelection').style.display = 'block';
-            updateNavigation();
-            document.getElementById('navContent').classList.remove('open');
-        }
-
-        function clearSelection() {
-            selectedTargetId = null;
-            document.getElementById('clearSelection').style.display = 'none';
-            updateNavigation();
+            // Specifické event listenery pro kvízy
+            document.getElementById('quizClose').addEventListener('click', closeQuiz);
         }
 
         // === DEBUG FUNKCE ===
@@ -798,6 +666,10 @@
 
         function forceCleanWineARScene() {
             ARManager.forceCleanARScene();
+        }
+
+        function debugAudioUI() {
+            return AudioUI.debugAudioUIStatus();
         }
 
         function debugGetCompletedQuizzes() {
@@ -927,6 +799,9 @@
                     console.log("🍷 Wine AR scene initialized via AR-Manager");
                 }, 1000);
                 
+                // Nastavení UI event listenerů
+                setupEventListeners();
+                
                 // Nastavení rotace pomocí AR-Manager
                 ARManager.setupModelRotation();
                 
@@ -963,15 +838,17 @@
             // Debug funkce do globálního scope
             window.getWineARStatus = getWineARSceneStatus;
             window.forceCleanWineARScene = forceCleanWineARScene;
+            window.debugAudioUI = debugAudioUI;
             window.debugGetCompletedQuizzes = debugGetCompletedQuizzes;
             window.directActivateWineQuizAchievement = directActivateWineQuizAchievement;
             window.markQuizCompleted = markQuizCompleted;
             
-            console.log("💡 Debug commands: getWineARStatus(), forceCleanWineARScene(), debugGetCompletedQuizzes()");
+            console.log("💡 Debug commands: getWineARStatus(), forceCleanWineARScene(), debugAudioUI()");
             console.log("💡 ARManager debug: ARManager.debugARSceneStatus(), ARManager.testARObjectToggle('sud')");
+            console.log("💡 AudioUI debug: AudioUI.debugAudioUIStatus(), AudioUI.testAudioPlayback('sud', markers)");
         });
 
-        console.log("🍇 Wine AR script with core-utils and ar-manager loaded successfully!");
+        console.log("🍇 Wine AR script with core-utils, ar-manager and audio-ui loaded successfully!");
     </script>
 </body>
 </html>
