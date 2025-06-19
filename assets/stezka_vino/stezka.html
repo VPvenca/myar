@@ -327,30 +327,23 @@
         function markQuizCompleted(quizIndex) {
             const completed = getCompletedQuizzes();
             console.log(`🍇 markQuizCompleted called for quiz ${quizIndex}`);
-            console.log(`📊 Current completed: ${completed.length}/${WINE_QUIZZES.length}`);
             
-            // Přidej kvíz, pokud není dokončený
             if (!completed.includes(quizIndex)) {
                 completed.push(quizIndex);
                 localStorage.setItem('wineQuizzesCompleted', JSON.stringify(completed));
                 console.log(`✅ Quiz ${quizIndex} added. New total: ${completed.length}/${WINE_QUIZZES.length}`);
-            } else {
-                console.log(`ℹ️ Quiz ${quizIndex} already completed`);
             }
             
-            // === KONTROLA ACHIEVEMENTU MIMO IF - VŽDY SE ZKONTROLUJE ===
-            const finalCompleted = getCompletedQuizzes(); // Znovu načti data
+            const finalCompleted = getCompletedQuizzes();
             
             if (finalCompleted.length === WINE_QUIZZES.length) {
                 console.log('🏆 All 20 quizzes completed! Activating quiz achievement...');
                 
-                // Zkontroluj, zda už není achievement odemčený
                 if (typeof isAchievementUnlocked === 'function' && isAchievementUnlocked('wine_quiz_master')) {
                     console.log('ℹ️ wine_quiz_master already unlocked');
                     return;
                 }
                 
-                // Aktivuj achievement přímo
                 if (typeof unlockAchievement === 'function') {
                     const success = unlockAchievement('wine_quiz_master');
                     console.log('✅ unlockAchievement result:', success);
@@ -361,8 +354,6 @@
                 } else {
                     console.error("❌ unlockAchievement function not found");
                 }
-            } else {
-                console.log(`📈 Progress: ${finalCompleted.length}/${WINE_QUIZZES.length} quizzes completed`);
             }
         }
         
@@ -387,18 +378,13 @@
                 return;
             }
             
-            // Vypočítej vzdálenost od startu
             const distanceFromStart = CoreUtils.calculateDistance(
                 startPos.lat, startPos.lng,
                 userPos.lat, userPos.lng
             );
             
-            // Zjisti, na kterém 50m milníku jsme
             const currentMilestone = Math.floor(distanceFromStart / QUIZ_DISTANCE_STEP);
             
-            console.log(`🎯 Distance from start: ${distanceFromStart.toFixed(1)}m, milestone: ${currentMilestone}, last quiz milestone: ${lastQuizMilestone}`);
-            
-            // Pokud jsme na novém milníku a ještě jsme tu kvíz nezobrazili
             if (currentMilestone > lastQuizMilestone && currentMilestone > 0) {
                 console.log(`🎯 New milestone reached: ${currentMilestone * QUIZ_DISTANCE_STEP}m - showing quiz!`);
                 lastQuizMilestone = currentMilestone;
@@ -416,7 +402,6 @@
             const { quiz, index } = quizData;
             currentQuiz = { ...quiz, index };
             
-            // Zobraz kvíz
             document.getElementById('quizQuestion').textContent = quiz.question;
             
             const answersContainer = document.getElementById('quizAnswers');
@@ -430,7 +415,6 @@
                 answersContainer.appendChild(button);
             });
             
-            // Aktualizuj progress
             const completed = getCompletedQuizzes();
             const userPos = CoreUtils.getUserPosition();
             const startPos = CoreUtils.getStartPosition();
@@ -453,21 +437,18 @@
             const answers = document.querySelectorAll('.quiz-answer');
             const explanationDiv = document.getElementById('quizExplanation');
             
-            // Označ odpovědi
             answers.forEach((answer, index) => {
                 if (index === currentQuiz.correct) {
                     answer.classList.add('correct');
                 } else if (index === selectedIndex && index !== currentQuiz.correct) {
                     answer.classList.add('incorrect');
                 }
-                answer.onclick = null; // Deaktivuj klikání
+                answer.onclick = null;
             });
             
-            // Zobraz vysvětlení
             explanationDiv.textContent = currentQuiz.explanation;
             explanationDiv.style.display = 'block';
             
-            // Označ kvíz jako dokončený
             markQuizCompleted(currentQuiz.index);
             
             console.log(`🍇 Answer selected: ${selectedIndex}, correct: ${currentQuiz.correct}`);
@@ -484,29 +465,24 @@
         function initializeGameification() {
             console.log("🎮 Initializing gamification for vinařská stezka...");
             
-            // Ujisti se, že jsou načtené všechny konfigurace
             if (typeof SCENE_CONFIG === 'undefined' || typeof ACHIEVEMENTS_CONFIG === 'undefined') {
                 console.log("⏳ Waiting for gamification config...");
                 setTimeout(initializeGameification, 500);
                 return;
             }
             
-            // Debug výpis konfigurací (pouze do konzole)
             console.log("📊 Scene config:", SCENE_CONFIG);
             console.log("🏆 Achievements config:", ACHIEVEMENTS_CONFIG);
             console.log("🏛️ Exposition registry:", EXPOSITION_REGISTRY);
             
-            // Zkontroluj, že je expozice registrovaná
             if (typeof EXPOSITION_REGISTRY !== 'undefined' && EXPOSITION_REGISTRY['stezka_vino']) {
                 console.log("✅ Vinařská stezka exposition is registered");
             } else {
                 console.warn("⚠️ Vinařská stezka exposition not found in registry");
-                // Zkus inicializovat znovu za chvíli
                 setTimeout(initializeGameification, 1000);
                 return;
             }
             
-            // Inicializuj time tracking
             if (typeof initializeTimeTracking === 'function') {
                 initializeTimeTracking(currentExpositionId, currentSceneId);
                 console.log("⏱️ Time tracking initialized");
@@ -533,24 +509,6 @@
             }
         }
 
-        // Page visibility API pro pozastavení gamifikace
-        document.addEventListener('visibilitychange', () => {
-            if (typeof pauseTimeTracking === 'function' && typeof resumeTimeTracking === 'function') {
-                if (document.hidden) {
-                    pauseTimeTracking();
-                } else {
-                    resumeTimeTracking();
-                }
-            }
-        });
-
-        // Finalizace při odchodu ze stránky
-        window.addEventListener('beforeunload', () => {
-            if (typeof finalizeTimeTracking === 'function') {
-                finalizeTimeTracking(currentExpositionId, currentSceneId);
-            }
-        });
-
         // === HLAVNÍ FUNKCE S POUŽITÍM MODULŮ ===
         function checkProximityToMarkers() {
             const userPos = CoreUtils.getUserPosition();
@@ -571,21 +529,21 @@
                 
                 console.log(`${marker.id}: distance=${distance.toFixed(1)}m, inScene=${isCurrentlyInScene}, shouldBe=${shouldBeInScene}`);
                 
-                // FYZICKÉ PŘIDÁNÍ/ODSTRANĚNÍ OBJEKTŮ
+                // AR objekty management
                 if (shouldBeInScene && !isCurrentlyInScene) {
                     ARManager.addARObjectToScene(marker.id);
                 } else if (!shouldBeInScene && isCurrentlyInScene) {
                     ARManager.removeARObjectFromScene(marker.id);
                 }
                 
-                // Audio logika (pouze pro objekty ve scéně)
+                // Audio logika
                 if (distance <= AUDIO_THRESHOLD && isCurrentlyInScene) {
                     AudioUI.playAudio(marker.id, markers);
                     shouldStopAudio = false;
                     console.log(`🎵 Audio playing for ${marker.id}`);
                 }
                 
-                // Gamifikace (pouze pro objekty ve scéně)
+                // Gamifikace
                 if (distance <= PROXIMITY_THRESHOLD && isCurrentlyInScene) {
                     console.log(`🎯 Wine marker activated: ${marker.id}`);
                     markersActivatedThisCheck.push(marker.id);
@@ -597,7 +555,6 @@
                 AudioUI.stopCurrentAudio();
             }
             
-            // Počet objektů ve scéně
             const activeCount = ARManager.getActiveARObjectsCount();
             console.log(`📊 Wine AR Status: ${activeCount} objects in scene`);
         }
@@ -622,14 +579,6 @@
             AudioUI.updateDistanceDisplay(markers, CoreUtils.formatDistance, CoreUtils.calculateDistance, thresholds, getQuizProgress);
         }
 
-        function findClosestMarker() {
-            return AudioUI.findClosestMarker(markers, CoreUtils.calculateDistance);
-        }
-
-        function findSelectedMarker() {
-            return AudioUI.findSelectedMarker(markers, CoreUtils.calculateDistance);
-        }
-
         function selectTarget(targetId) {
             AudioUI.selectTarget(targetId);
             updateNavigation();
@@ -638,25 +587,6 @@
         function clearSelection() {
             AudioUI.clearSelection();
             updateNavigation();
-        }';
-                
-                let indicators = '';
-                if (distance <= AUDIO_THRESHOLD) indicators += ' 🎵';
-                if (distance <= AR_VISIBILITY_THRESHOLD) indicators += ' 👁️';
-                
-                distanceInfo.innerHTML = `${prefix} ${targetMarker.name}${indicators}<br><strong>${distance}m</strong><br><small>📚 Kvízy: ${completed.length}/${WINE_QUIZZES.length} • Nachozeno: ${distanceFromStart.toFixed(0)}m</small>`;
-            } else {
-                distanceInfo.innerHTML = `🍇 GPS aktivní<br><small>📚 Kvízy: ${completed.length}/${WINE_QUIZZES.length} • Nachozeno: ${distanceFromStart.toFixed(0)}m</small>`;
-            }
-        }
-
-        // === EVENT LISTENERY (DELEGOVÁNO NA AUDIO-UI) ===
-        function setupEventListeners() {
-            // Nastavení základních UI event listenerů
-            AudioUI.setupUIEventListeners();
-            
-            // Specifické event listenery pro kvízy
-            document.getElementById('quizClose').addEventListener('click', closeQuiz);
         }
 
         // === DEBUG FUNKCE ===
@@ -683,20 +613,11 @@
             console.log("Type:", typeof completed);
             console.log("Is array:", Array.isArray(completed));
             
-            if (rawData) {
-                try {
-                    const parsed = JSON.parse(rawData);
-                    console.log("Manual parse:", parsed);
-                } catch (e) {
-                    console.log("Parse error:", e);
-                }
-            }
             console.log("===============================");
         }
 
         function directActivateWineQuizAchievement() {
             console.log("🎯 DIRECT ACHIEVEMENT ACTIVATION");
-            console.log("=================================");
             
             const allQuizzes = Array.from({length: WINE_QUIZZES.length}, (_, i) => i);
             localStorage.setItem('wineQuizzesCompleted', JSON.stringify(allQuizzes));
@@ -708,25 +629,7 @@
             } else {
                 console.log("❌ unlockAchievement not available");
             }
-            
-            console.log("=================================");
         }
-
-        // === EVENT LISTENERY ===
-        document.getElementById('navToggle').addEventListener('click', () => {
-            document.getElementById('navContent').classList.toggle('open');
-        });
-
-        document.getElementById('clearSelection').addEventListener('click', clearSelection);
-        document.getElementById('audioInfo').addEventListener('click', toggleAudioPlayPause);
-        document.getElementById('quizClose').addEventListener('click', closeQuiz);
-
-        document.addEventListener('click', (e) => {
-            const navPanel = document.querySelector('.navigation');
-            if (!navPanel.contains(e.target)) {
-                document.getElementById('navContent').classList.remove('open');
-            }
-        });
 
         // === TUTORIAL INICIALIZACE ===
         let tutorialInitialized = false;
@@ -780,9 +683,27 @@
             }, 3000);
         }
 
+        // Page visibility API pro pozastavení gamifikace
+        document.addEventListener('visibilitychange', () => {
+            if (typeof pauseTimeTracking === 'function' && typeof resumeTimeTracking === 'function') {
+                if (document.hidden) {
+                    pauseTimeTracking();
+                } else {
+                    resumeTimeTracking();
+                }
+            }
+        });
+
+        // Finalizace při odchodu ze stránky
+        window.addEventListener('beforeunload', () => {
+            if (typeof finalizeTimeTracking === 'function') {
+                finalizeTimeTracking(currentExpositionId, currentSceneId);
+            }
+        });
+
         // === HLAVNÍ INICIALIZACE ===
         window.addEventListener('load', () => {
-            console.log("🚀 Starting wine AR application with core-utils and ar-manager...");
+            console.log("🚀 Starting wine AR application with 3 modules...");
             
             // Počkej na načtení gamifikačních skriptů a pak inicializuj
             setTimeout(() => {
@@ -800,7 +721,10 @@
                 }, 1000);
                 
                 // Nastavení UI event listenerů
-                setupEventListeners();
+                AudioUI.setupUIEventListeners();
+                
+                // Přidání kvízového event listeneru
+                document.getElementById('quizClose').addEventListener('click', closeQuiz);
                 
                 // Nastavení rotace pomocí AR-Manager
                 ARManager.setupModelRotation();
@@ -848,7 +772,7 @@
             console.log("💡 AudioUI debug: AudioUI.debugAudioUIStatus(), AudioUI.testAudioPlayback('sud', markers)");
         });
 
-        console.log("🍇 Wine AR script with core-utils, ar-manager and audio-ui loaded successfully!");
+        console.log("🍇 Wine AR script with 3 modules (core-utils, ar-manager, audio-ui) loaded successfully!");
     </script>
 </body>
 </html>
