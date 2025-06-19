@@ -18,14 +18,11 @@
     <link rel="stylesheet" href="/css/tutorial.css">
     <script src="/tutorial.js"></script>
     
-    <!-- NOVÝ: Core utilities modul -->
+    <!-- MODULARIZOVANÉ SKRIPTY -->
     <script src="/assets/shared/js/core_utils.js"></script>
-    
-    <!-- NOVÝ: AR Manager modul -->
     <script src="/assets/shared/js/ar_manager.js"></script>
-    
-    <!-- NOVÝ: Audio-UI Manager modul -->
     <script src="/assets/shared/js/audio_ui.js"></script>
+    <script src="/assets/stezka_vino/js/wine_app.js"></script>
     
 </head>
 <body>
@@ -117,20 +114,10 @@
     </a-scene>
 
     <script>
-        // === GAMIFIKAČNÍ PROMĚNNÉ ===
-        let gamificationInitialized = false;
-        let currentExpositionId = 'stezka_vino';
-        let currentSceneId = '/assets/stezka_vino/stezka.html';
-        
-        // GPS a navigační proměnné
+        // === APLIKAČNÍ KONSTRANTY ===
         const PROXIMITY_THRESHOLD = 15;
         const AR_VISIBILITY_THRESHOLD = 30;
         const AUDIO_THRESHOLD = 15;
-        
-        // NOVÉ: Kvízový systém
-        const QUIZ_DISTANCE_STEP = 50; // každých 50m
-        let lastQuizMilestone = -1;
-        let currentQuiz = null;
         
         // Definice vinných markerů
         const markers = [
@@ -192,329 +179,12 @@
             }
         }
 
-        // === VINNÝ KVÍZOVÝ SYSTÉM ===
-        
-        // 20 vinařských kvízů s fakty
-        const WINE_QUIZZES = [
-            {
-                question: "🍇 Kolik hroznů je potřeba na jednu láhev vína?",
-                answers: ["A) 300 hroznů", "B) 600 hroznů", "C) 1200 hroznů"],
-                correct: 1,
-                explanation: "Na jednu láhev vína (0,75l) je potřeba přibližně 600 hroznů! To odpovídá zhruba 1,2-1,5 kg hroznů."
-            },
-            {
-                question: "🍷 Kolik druhů vína existuje na světě?",
-                answers: ["A) 1000 druhů", "B) 5000 druhů", "C) 10000 druhů"],
-                correct: 2,
-                explanation: "Na světě existuje přes 10 000 různých odrůd vinné révy! Komerčně se však pěstuje jen asi 1000 z nich."
-            },
-            {
-                question: "🌍 Která země je největším producentem vína?",
-                answers: ["A) Francie", "B) Itálie", "C) Španělsko"],
-                correct: 1,
-                explanation: "Itálie je největším producentem vína na světě! Následuje ji Francie a Španělsko."
-            },
-            {
-                question: "🍾 Kolik bublin obsahuje průměrná láhev šampaňského?",
-                answers: ["A) 10 milionů", "B) 49 milionů", "C) 100 milionů"],
-                correct: 1,
-                explanation: "Průměrná láhev šampaňského obsahuje přibližně 49 milionů bublin! Vznikají při druhé fermentaci."
-            },
-            {
-                question: "🌡️ Při jaké teplotě se podává červené víno?",
-                answers: ["A) 12-14°C", "B) 16-18°C", "C) 20-22°C"],
-                correct: 1,
-                explanation: "Červené víno se ideálně podává při teplotě 16-18°C. Příliš teplé víno ztrácí svou eleganci."
-            },
-            {
-                question: "🏺 Kolik let může víno zrát v sudu?",
-                answers: ["A) 1-2 roky", "B) 3-5 let", "C) 10-20 let"],
-                correct: 1,
-                explanation: "Kvalitní víno může zrát v dubových sudech 3-5 let, výjimečná vína i déle. Krátké zrání je 6-12 měsíců."
-            },
-            {
-                question: "🍇 Kolik kilogramů hroznů vyroste na jedné révě?",
-                answers: ["A) 2-3 kg", "B) 5-8 kg", "C) 10-15 kg"],
-                correct: 1,
-                explanation: "Jedna vinná réva vyprodukuje průměrně 5-8 kg hroznů ročně! To stačí na 3-6 lahví vína."
-            },
-            {
-                question: "🌿 Kolik let může žít vinná réva?",
-                answers: ["A) 30 let", "B) 60 let", "C) 100+ let"],
-                correct: 2,
-                explanation: "Vinná réva může žít přes 100 let! Nejstarší révy na světě mají dokonce přes 400 let."
-            },
-            {
-                question: "💎 Kolik obsahuje víno antioxidantů?",
-                answers: ["A) 200 sloučenin", "B) 500 sloučenin", "C) 1000 sloučenin"],
-                correct: 2,
-                explanation: "Víno obsahuje přes 1000 různých chemických sloučenin! Červené víno má více antioxidantů než bílé."
-            },
-            {
-                question: "🔍 Jak poznáme kvalitu vína podle barvy?",
-                answers: ["A) Podle intenzity", "B) Podle čirosti", "C) Podle obojího"],
-                correct: 2,
-                explanation: "Kvalita vína se pozná podle čirosti a intenzity barvy. Kalné víno nebo víno s hnědým nádechem může být vadné."
-            },
-            {
-                question: "🌡️ Při jaké teplotě fermentuje bílé víno?",
-                answers: ["A) 10-15°C", "B) 15-20°C", "C) 20-25°C"],
-                correct: 1,
-                explanation: "Bílé víno fermentuje při nižší teplotě 15-20°C pro zachování svěžích aromát. Červené při 25-30°C."
-            },
-            {
-                question: "👃 Kolik různých vůní lze rozpoznat ve víně?",
-                answers: ["A) 50 vůní", "B) 200 vůní", "C) 500 vůní"],
-                correct: 2,
-                explanation: "Ve víně lze rozpoznat přes 500 různých aromat! Profesionální someliéři jich dokáží identifikovat stovky."
-            },
-            {
-                question: "🍷 Kolik procent alkoholu má průměrné víno?",
-                answers: ["A) 8-10%", "B) 11-14%", "C) 15-18%"],
-                correct: 1,
-                explanation: "Průměrné víno má 11-14% alkoholu. Lehká vína mají 8-11%, silná vína až 15-16%."
-            },
-            {
-                question: "🌞 Kolik slunečných hodin potřebuje réva za rok?",
-                answers: ["A) 800 hodin", "B) 1300 hodin", "C) 2000 hodin"],
-                correct: 1,
-                explanation: "Vinná réva potřebuje minimálně 1300 slunečních hodin ročně pro kvalitní dozrání hroznů!"
-            },
-            {
-                question: "🍾 Jak dlouho se uchovává otevřené víno?",
-                answers: ["A) 1 den", "B) 3-5 dní", "C) 2 týdny"],
-                correct: 1,
-                explanation: "Otevřené víno se uchovává 3-5 dní v lednici. Červené vydrží o něco déle než bílé."
-            },
-            {
-                question: "🏺 Z jakého materiálu jsou nejlepší vinné sudy?",
-                answers: ["A) Akácie", "B) Dubu", "C) Kaštanu"],
-                correct: 1,
-                explanation: "Nejlepší vinné sudy jsou z dubu! Dubové dřevo dodává vínu komplexní chutě a umožňuje řízenou oxidaci."
-            },
-            {
-                question: "💪 Kolik kilogramů hroznů unese sběrač za den?",
-                answers: ["A) 50 kg", "B) 200 kg", "C) 500 kg"],
-                correct: 1,
-                explanation: "Zkušený sběrač hroznů dokáže za den nasbírat 200-300 kg hroznů! Ruční sběr je stále nejšetrnější metoda."
-            },
-            {
-                question: "🛡️ Co je sulfitan ve víně?",
-                answers: ["A) Konzervant", "B) Barvivo", "C) Chuťová přísada"],
-                correct: 0,
-                explanation: "Sulfitany jsou přírodní konzervant, který brání oxidaci a růstu bakterií. Jsou ve víně přirozeně i uměle."
-            },
-            {
-                question: "⏰ Kdy se hrozny sklízí nejlépe?",
-                answers: ["A) Ráno", "B) Poledne", "C) Večer"],
-                correct: 0,
-                explanation: "Hrozny se nejlépe sklízí časně ráno, kdy jsou chladné a obsahují nejvíce kyselin a aromát."
-            },
-            {
-                question: "🌙 Jak dlouho trvá vinifikace?",
-                answers: ["A) 1 týden", "B) 1 měsíc", "C) 3-6 měsíců"],
-                correct: 2,
-                explanation: "Celá vinifikace trvá 3-6 měsíců! Samotná fermentace 1-3 týdny, pak následuje dozrávání a ležení."
-            }
-        ];
-        
-        // Systém pro správu kvízů
-        function getCompletedQuizzes() {
-            const completed = localStorage.getItem('wineQuizzesCompleted');
-            return completed ? JSON.parse(completed) : [];
-        }
-        
-        function markQuizCompleted(quizIndex) {
-            const completed = getCompletedQuizzes();
-            console.log(`🍇 markQuizCompleted called for quiz ${quizIndex}`);
-            
-            if (!completed.includes(quizIndex)) {
-                completed.push(quizIndex);
-                localStorage.setItem('wineQuizzesCompleted', JSON.stringify(completed));
-                console.log(`✅ Quiz ${quizIndex} added. New total: ${completed.length}/${WINE_QUIZZES.length}`);
-            }
-            
-            const finalCompleted = getCompletedQuizzes();
-            
-            if (finalCompleted.length === WINE_QUIZZES.length) {
-                console.log('🏆 All 20 quizzes completed! Activating quiz achievement...');
-                
-                if (typeof isAchievementUnlocked === 'function' && isAchievementUnlocked('wine_quiz_master')) {
-                    console.log('ℹ️ wine_quiz_master already unlocked');
-                    return;
-                }
-                
-                if (typeof unlockAchievement === 'function') {
-                    const success = unlockAchievement('wine_quiz_master');
-                    console.log('✅ unlockAchievement result:', success);
-                    
-                    if (success) {
-                        console.log('🎉 Kvízový achievement úspěšně aktivován!');
-                    }
-                } else {
-                    console.error("❌ unlockAchievement function not found");
-                }
-            }
-        }
-        
-        function getRandomUncompletedQuiz() {
-            const completed = getCompletedQuizzes();
-            const available = WINE_QUIZZES.map((_, index) => index).filter(index => !completed.includes(index));
-            
-            if (available.length === 0) {
-                console.log('🍇 All quizzes completed!');
-                return null;
-            }
-            
-            const randomIndex = available[Math.floor(Math.random() * available.length)];
-            return { quiz: WINE_QUIZZES[randomIndex], index: randomIndex };
-        }
-        
-        function checkDistanceForQuiz() {
-            const userPos = CoreUtils.getUserPosition();
-            const startPos = CoreUtils.getStartPosition();
-            
-            if (!userPos || !startPos) {
-                return;
-            }
-            
-            const distanceFromStart = CoreUtils.calculateDistance(
-                startPos.lat, startPos.lng,
-                userPos.lat, userPos.lng
-            );
-            
-            const currentMilestone = Math.floor(distanceFromStart / QUIZ_DISTANCE_STEP);
-            
-            if (currentMilestone > lastQuizMilestone && currentMilestone > 0) {
-                console.log(`🎯 New milestone reached: ${currentMilestone * QUIZ_DISTANCE_STEP}m - showing quiz!`);
-                lastQuizMilestone = currentMilestone;
-                showRandomQuiz();
-            }
-        }
-        
-        function showRandomQuiz() {
-            const quizData = getRandomUncompletedQuiz();
-            if (!quizData) {
-                console.log('🎯 No more quizzes available - all completed!');
-                return;
-            }
-            
-            const { quiz, index } = quizData;
-            currentQuiz = { ...quiz, index };
-            
-            document.getElementById('quizQuestion').textContent = quiz.question;
-            
-            const answersContainer = document.getElementById('quizAnswers');
-            answersContainer.innerHTML = '';
-            
-            quiz.answers.forEach((answer, answerIndex) => {
-                const button = document.createElement('div');
-                button.className = 'quiz-answer';
-                button.textContent = answer;
-                button.onclick = () => selectAnswer(answerIndex);
-                answersContainer.appendChild(button);
-            });
-            
-            const completed = getCompletedQuizzes();
-            const userPos = CoreUtils.getUserPosition();
-            const startPos = CoreUtils.getStartPosition();
-            
-            const distanceFromStart = startPos && userPos ? CoreUtils.calculateDistance(
-                startPos.lat, startPos.lng,
-                userPos.lat, userPos.lng
-            ) : 0;
-            
-            document.getElementById('quizProgress').textContent = 
-                `Kvíz ${completed.length + 1}/${WINE_QUIZZES.length} • Vzdálenost: ${distanceFromStart.toFixed(0)}m`;
-            
-            document.getElementById('wineQuiz').style.display = 'block';
-            console.log(`🍇 Showing quiz ${index}: ${quiz.question.substring(0, 50)}...`);
-        }
-        
-        function selectAnswer(selectedIndex) {
-            if (!currentQuiz) return;
-            
-            const answers = document.querySelectorAll('.quiz-answer');
-            const explanationDiv = document.getElementById('quizExplanation');
-            
-            answers.forEach((answer, index) => {
-                if (index === currentQuiz.correct) {
-                    answer.classList.add('correct');
-                } else if (index === selectedIndex && index !== currentQuiz.correct) {
-                    answer.classList.add('incorrect');
-                }
-                answer.onclick = null;
-            });
-            
-            explanationDiv.textContent = currentQuiz.explanation;
-            explanationDiv.style.display = 'block';
-            
-            markQuizCompleted(currentQuiz.index);
-            
-            console.log(`🍇 Answer selected: ${selectedIndex}, correct: ${currentQuiz.correct}`);
-        }
-        
-        function closeQuiz() {
-            document.getElementById('wineQuiz').style.display = 'none';
-            document.getElementById('quizExplanation').style.display = 'none';
-            currentQuiz = null;
-        }
-
-        // === GAMIFIKAČNÍ FUNKCE ===
-        
-        function initializeGameification() {
-            console.log("🎮 Initializing gamification for vinařská stezka...");
-            
-            if (typeof SCENE_CONFIG === 'undefined' || typeof ACHIEVEMENTS_CONFIG === 'undefined') {
-                console.log("⏳ Waiting for gamification config...");
-                setTimeout(initializeGameification, 500);
-                return;
-            }
-            
-            console.log("📊 Scene config:", SCENE_CONFIG);
-            console.log("🏆 Achievements config:", ACHIEVEMENTS_CONFIG);
-            console.log("🏛️ Exposition registry:", EXPOSITION_REGISTRY);
-            
-            if (typeof EXPOSITION_REGISTRY !== 'undefined' && EXPOSITION_REGISTRY['stezka_vino']) {
-                console.log("✅ Vinařská stezka exposition is registered");
-            } else {
-                console.warn("⚠️ Vinařská stezka exposition not found in registry");
-                setTimeout(initializeGameification, 1000);
-                return;
-            }
-            
-            if (typeof initializeTimeTracking === 'function') {
-                initializeTimeTracking(currentExpositionId, currentSceneId);
-                console.log("⏱️ Time tracking initialized");
-            } else {
-                console.error("❌ initializeTimeTracking function not found");
-            }
-            
-            gamificationInitialized = true;
-            console.log("✅ Gamification initialized successfully for vinařská stezka");
-        }
-
-        function recordWineMarkerActivation(markerId) {
-            if (!gamificationInitialized) {
-                console.warn("⚠️ Gamification not initialized yet, skipping marker activation");
-                return;
-            }
-            
-            console.log(`🍇 Recording wine marker activation: ${markerId} in exposition ${currentExpositionId}, scene ${currentSceneId}`);
-            
-            if (typeof recordMarkerActivation === 'function') {
-                recordMarkerActivation(currentExpositionId, currentSceneId, markerId);
-            } else {
-                console.error("❌ recordMarkerActivation function not found");
-            }
-        }
-
-        // === HLAVNÍ FUNKCE S POUŽITÍM MODULŮ ===
+        // === HLAVNÍ FUNKCE APLIKACE ===
         function checkProximityToMarkers() {
             const userPos = CoreUtils.getUserPosition();
             if (!userPos) return;
             
-            console.log("Checking proximity with modular management...");
+            console.log("Checking proximity with full modular system...");
             let shouldStopAudio = true;
             let markersActivatedThisCheck = [];
             
@@ -547,7 +217,7 @@
                 if (distance <= PROXIMITY_THRESHOLD && isCurrentlyInScene) {
                     console.log(`🎯 Wine marker activated: ${marker.id}`);
                     markersActivatedThisCheck.push(marker.id);
-                    recordWineMarkerActivation(marker.id);
+                    WineApp.recordWineMarkerActivation(marker.id);
                 }
             });
             
@@ -559,7 +229,7 @@
             console.log(`📊 Wine AR Status: ${activeCount} objects in scene`);
         }
 
-        // === NAVIGACE A UI (DELEGOVÁNO NA AUDIO-UI) ===
+        // === UI FUNKCIONALITA (DELEGOVÁNO NA MODULY) ===
         function updateNavigation() {
             AudioUI.updateNavigation(markers, CoreUtils.formatDistance, CoreUtils.calculateDistance);
             updateDistanceDisplay();
@@ -571,12 +241,7 @@
                 AR_VISIBILITY_THRESHOLD
             };
             
-            const getQuizProgress = () => ({
-                completed: getCompletedQuizzes().length,
-                total: WINE_QUIZZES.length
-            });
-            
-            AudioUI.updateDistanceDisplay(markers, CoreUtils.formatDistance, CoreUtils.calculateDistance, thresholds, getQuizProgress);
+            AudioUI.updateDistanceDisplay(markers, CoreUtils.formatDistance, CoreUtils.calculateDistance, thresholds, WineApp.getQuizProgress);
         }
 
         function selectTarget(targetId) {
@@ -598,135 +263,35 @@
             ARManager.forceCleanARScene();
         }
 
-        function debugAudioUI() {
-            return AudioUI.debugAudioUIStatus();
+        function debugWineApp() {
+            return WineApp.debugWineAppStatus();
         }
-
-        function debugGetCompletedQuizzes() {
-            console.log("=== DEBUG getCompletedQuizzes ===");
-            
-            const rawData = localStorage.getItem('wineQuizzesCompleted');
-            console.log("Raw localStorage data:", rawData);
-            
-            const completed = getCompletedQuizzes();
-            console.log("getCompletedQuizzes() returns:", completed);
-            console.log("Type:", typeof completed);
-            console.log("Is array:", Array.isArray(completed));
-            
-            console.log("===============================");
-        }
-
-        function directActivateWineQuizAchievement() {
-            console.log("🎯 DIRECT ACHIEVEMENT ACTIVATION");
-            
-            const allQuizzes = Array.from({length: WINE_QUIZZES.length}, (_, i) => i);
-            localStorage.setItem('wineQuizzesCompleted', JSON.stringify(allQuizzes));
-            
-            if (typeof unlockAchievement === 'function') {
-                console.log("🏆 Calling unlockAchievement directly...");
-                const result = unlockAchievement('wine_quiz_master');
-                console.log("Result:", result);
-            } else {
-                console.log("❌ unlockAchievement not available");
-            }
-        }
-
-        // === TUTORIAL INICIALIZACE ===
-        let tutorialInitialized = false;
-
-        async function initializeTutorial() {
-            if (tutorialInitialized) return;
-            
-            try {
-                console.log("🎓 Loading tutorial config...");
-                
-                const script = document.createElement('script');
-                script.src = '/assets/stezka_vino/tutorial/config_vino.js';
-                
-                await new Promise((resolve, reject) => {
-                    script.onload = resolve;
-                    script.onerror = reject;
-                    document.head.appendChild(script);
-                });
-                
-                await new Promise(resolve => setTimeout(resolve, 200));
-                
-                console.log("✅ Tutorial config loaded, creating instance...");
-                
-                if (typeof ARTutorial !== 'undefined' && typeof tutorialConfig !== 'undefined') {
-                    window.arTutorial = ARTutorial.create(tutorialConfig);
-                    tutorialInitialized = true;
-                    console.log("✅ Tutorial initialized successfully");
-                    return true;
-                } else {
-                    console.error("❌ Tutorial dependencies not loaded");
-                    return false;
-                }
-                
-            } catch (error) {
-                console.error("❌ Tutorial initialization failed:", error);
-                return false;
-            }
-        }
-
-        function startTutorialWhenReady() {
-            setTimeout(async () => {
-                console.log("🎓 Starting tutorial initialization...");
-                
-                const success = await initializeTutorial();
-                if (success && window.arTutorial) {
-                    setTimeout(() => {
-                        console.log("🎓 Starting tutorial...");
-                        window.arTutorial.start();
-                    }, 1000);
-                }
-            }, 3000);
-        }
-
-        // Page visibility API pro pozastavení gamifikace
-        document.addEventListener('visibilitychange', () => {
-            if (typeof pauseTimeTracking === 'function' && typeof resumeTimeTracking === 'function') {
-                if (document.hidden) {
-                    pauseTimeTracking();
-                } else {
-                    resumeTimeTracking();
-                }
-            }
-        });
-
-        // Finalizace při odchodu ze stránky
-        window.addEventListener('beforeunload', () => {
-            if (typeof finalizeTimeTracking === 'function') {
-                finalizeTimeTracking(currentExpositionId, currentSceneId);
-            }
-        });
 
         // === HLAVNÍ INICIALIZACE ===
         window.addEventListener('load', () => {
-            console.log("🚀 Starting wine AR application with 3 modules...");
+            console.log("🚀 Starting modular wine AR application...");
+            console.log("📦 Modules loaded: CoreUtils, ARManager, AudioUI, WineApp");
             
-            // Počkej na načtení gamifikačních skriptů a pak inicializuj
+            // Inicializace gamifikace
             setTimeout(() => {
-                initializeGameification();
+                WineApp.initializeGameification();
             }, 2000);
             
             // Počkáme na A-Frame
             document.querySelector('a-scene').addEventListener('loaded', () => {
                 console.log("A-Frame scene loaded");
                 
-                // Inicializace AR scény pomocí AR-Manager
+                // Inicializace AR scény
                 setTimeout(() => {
                     ARManager.initializeARScene(markers, getGLBModelForMarker, getScaleForMarker);
-                    console.log("🍷 Wine AR scene initialized via AR-Manager");
+                    console.log("🍷 Wine AR scene initialized");
                 }, 1000);
                 
-                // Nastavení UI event listenerů
+                // Nastavení event listenerů
                 AudioUI.setupUIEventListeners();
+                WineApp.setupWineAppEventListeners();
                 
-                // Přidání kvízového event listeneru
-                document.getElementById('quizClose').addEventListener('click', closeQuiz);
-                
-                // Nastavení rotace pomocí AR-Manager
+                // Nastavení rotace modelů
                 ARManager.setupModelRotation();
                 
                 // GPS inicializace
@@ -745,34 +310,42 @@
                     }
                 );
                 
+                // Sledování GPS pozice
                 CoreUtils.watchPosition((position) => {
                     checkProximityToMarkers();
                     updateNavigation();
-                    checkDistanceForQuiz();
+                    WineApp.checkDistanceForQuiz();
                 });
                 
-                startTutorialWhenReady();
+                // Spuštění tutorialu
+                WineApp.startTutorialWhenReady();
                 
                 // Pravidelná kontrola kvízů
                 setInterval(() => {
-                    checkDistanceForQuiz();
+                    WineApp.checkDistanceForQuiz();
                 }, 3000);
             });
             
             // Debug funkce do globálního scope
             window.getWineARStatus = getWineARSceneStatus;
             window.forceCleanWineARScene = forceCleanWineARScene;
-            window.debugAudioUI = debugAudioUI;
-            window.debugGetCompletedQuizzes = debugGetCompletedQuizzes;
-            window.directActivateWineQuizAchievement = directActivateWineQuizAchievement;
-            window.markQuizCompleted = markQuizCompleted;
+            window.debugWineApp = debugWineApp;
+            window.debugQuizzes = WineApp.debugQuizSystem;
+            window.resetQuizzes = WineApp.resetAllQuizzes;
+            window.activateQuizAchievement = WineApp.directActivateWineQuizAchievement;
             
-            console.log("💡 Debug commands: getWineARStatus(), forceCleanWineARScene(), debugAudioUI()");
-            console.log("💡 ARManager debug: ARManager.debugARSceneStatus(), ARManager.testARObjectToggle('sud')");
-            console.log("💡 AudioUI debug: AudioUI.debugAudioUIStatus(), AudioUI.testAudioPlayback('sud', markers)");
+            console.log("💡 Debug commands available:");
+            console.log("   • getWineARStatus() - AR objekty status");
+            console.log("   • debugWineApp() - kompletní wine app status");
+            console.log("   • debugQuizzes() - kvízový systém debug");
+            console.log("   • resetQuizzes() - reset všech kvízů");
+            console.log("   • CoreUtils.debugGPSStatus() - GPS debug");
+            console.log("   • ARManager.testARObjectToggle('sud') - test AR objektů");
+            console.log("   • AudioUI.testAudioPlayback('sud', markers) - test audia");
         });
 
-        console.log("🍇 Wine AR script with 3 modules (core-utils, ar-manager, audio-ui) loaded successfully!");
+        console.log("🍇 Modular Wine AR application loaded successfully!");
+        console.log("📦 Active modules: CoreUtils, ARManager, AudioUI, WineApp");
     </script>
 </body>
 </html>
