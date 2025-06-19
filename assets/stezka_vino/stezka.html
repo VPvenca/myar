@@ -21,6 +21,9 @@
     <!-- NOVÝ: Core utilities modul -->
     <script src="/assets/shared/js/core_utils.js"></script>
     
+    <!-- NOVÝ: AR Manager modul -->
+    <script src="/assets/shared/js/ar_manager.js"></script>
+    
 </head>
 <body>
     <!-- UI Elementy -->
@@ -111,10 +114,6 @@
     </a-scene>
 
     <script>
-        // === NOVÉ: FYZICKÁ SPRÁVA AR OBJEKTŮ ===
-        const arObjectDefinitions = new Map();
-        const activeArObjects = new Set();
-
         // === GAMIFIKAČNÍ PROMĚNNÉ ===
         let gamificationInitialized = false;
         let currentExpositionId = 'stezka_vino';
@@ -133,12 +132,6 @@
         const QUIZ_DISTANCE_STEP = 50; // každých 50m
         let lastQuizMilestone = -1;
         let currentQuiz = null;
-        
-        // Proměnné pro rotaci modelů
-        let modelRotationY = 30;
-        let isRotating = false;
-        let startX = 0;
-        let rotationHintShown = false;
         
         // Definice vinných markerů
         const markers = [
@@ -176,30 +169,7 @@
             }
         ];
 
-        // === NOVÉ: FUNKCE PRO FYZICKOU SPRÁVU OBJEKTŮ ===
-
-        function initializeEmptyARScene() {
-            // Najdi všechny existující AR objekty a odstraň je
-            const existingObjects = document.querySelectorAll('[data-marker-id]');
-            existingObjects.forEach(obj => {
-                console.log(`🗑️ Removing existing AR object: ${obj.getAttribute('data-marker-id')}`);
-                obj.parentNode.removeChild(obj);
-            });
-            
-            // Uložení definic objektů pro pozdější použití
-            markers.forEach(marker => {
-                arObjectDefinitions.set(marker.id, {
-                    lat: marker.lat,
-                    lng: marker.lng,
-                    audioId: marker.audioId,
-                    glbModel: getGLBModelForMarker(marker.id),
-                    scale: getScaleForMarker(marker.id),
-                    rotation: "0 30 0"
-                });
-            });
-            
-            console.log("✅ Wine AR scene cleared, object definitions stored");
-        }
+        // === NOVÉ: FUNKCE PRO FYZICKOU SPRÁVU OBJEKTŮ (PŘESUNUTÉ DO AR-MANAGER) ===
 
         function getGLBModelForMarker(markerId) {
             switch(markerId) {
@@ -221,65 +191,6 @@
                     return "8 8 8";
                 default: 
                     return "7 7 7";
-            }
-        }
-
-        function addARObjectToScene(markerId) {
-            if (activeArObjects.has(markerId)) {
-                console.log(`⚠️ AR object ${markerId} already in scene`);
-                return;
-            }
-            
-            const definition = arObjectDefinitions.get(markerId);
-            if (!definition) {
-                console.error(`❌ No definition found for marker ${markerId}`);
-                return;
-            }
-            
-            const scene = document.querySelector('a-scene');
-            if (!scene) {
-                console.error("❌ A-Frame scene not found");
-                return;
-            }
-            
-            // Vytvoř nový AR entity
-            const arEntity = document.createElement('a-entity');
-            arEntity.setAttribute('gps-entity-place', `latitude: ${definition.lat}; longitude: ${definition.lng}`);
-            arEntity.setAttribute('data-marker-id', markerId);
-            arEntity.setAttribute('data-audio-id', definition.audioId);
-            arEntity.setAttribute('visible', 'true');
-            
-            // Vytvoř GLB model
-            const glbModel = document.createElement('a-gltf-model');
-            glbModel.id = `wine-model-${markerId}-gltf`;
-            glbModel.setAttribute('src', definition.glbModel);
-            glbModel.setAttribute('position', '0 0 0');
-            glbModel.setAttribute('scale', definition.scale);
-            glbModel.setAttribute('rotation', `0 ${modelRotationY} 0`);
-            glbModel.setAttribute('animation-mixer', '');
-            
-            // Přidej model do entity
-            arEntity.appendChild(glbModel);
-            
-            // Přidej entity do scény
-            scene.appendChild(arEntity);
-            
-            // Zaznamenej jako aktivní
-            activeArObjects.add(markerId);
-            
-            console.log(`➕ Wine AR object ${markerId} added to scene at ${definition.lat}, ${definition.lng}`);
-        }
-
-        function removeARObjectFromScene(markerId) {
-            if (!activeArObjects.has(markerId)) {
-                return; // Už není ve scéně
-            }
-            
-            const arEntity = document.querySelector(`[data-marker-id="${markerId}"]`);
-            if (arEntity && arEntity.parentNode) {
-                arEntity.parentNode.removeChild(arEntity);
-                activeArObjects.delete(markerId);
-                console.log(`➖ Wine AR object ${markerId} removed from scene`);
             }
         }
 
@@ -662,16 +573,16 @@
                     marker.lat, marker.lng
                 );
                 
-                const isCurrentlyInScene = activeArObjects.has(marker.id);
+                const isCurrentlyInScene = ARManager.isARObjectInScene(marker.id);
                 const shouldBeInScene = distance <= AR_VISIBILITY_THRESHOLD;
                 
                 console.log(`${marker.id}: distance=${distance.toFixed(1)}m, inScene=${isCurrentlyInScene}, shouldBe=${shouldBeInScene}`);
                 
                 // FYZICKÉ PŘIDÁNÍ/ODSTRANĚNÍ OBJEKTŮ
                 if (shouldBeInScene && !isCurrentlyInScene) {
-                    addARObjectToScene(marker.id);
+                    ARManager.addARObjectToScene(marker.id);
                 } else if (!shouldBeInScene && isCurrentlyInScene) {
-                    removeARObjectFromScene(marker.id);
+                    ARManager.removeARObjectFromScene(marker.id);
                 }
                 
                 // Audio logika (pouze pro objekty ve scéně)
@@ -694,7 +605,7 @@
             }
             
             // Počet objektů ve scéně
-            const activeCount = activeArObjects.size;
+            const activeCount = ARManager.getActiveARObjectsCount();
             console.log(`📊 Wine AR Status: ${activeCount} objects in scene`);
         }
 
@@ -889,12 +800,24 @@
 
         // === AKTUALIZOVANÉ ROTACE MODELŮ ===
         function setupModelRotation() {
-            let touchStarted = false;
-            let rotationActive = false;
-            
-            document.addEventListener('touchstart', (e) => {
-                if (CoreUtils.isTouchingUI(e.target)) return;
-                if (!isAnyModelVisible()) return;
+            // Deleguj na ARManager
+            ARManager.setupModelRotation();
+        }
+
+        // === AKTUALIZOVANÁ FUNKCE ROTACE ===
+        function updateModelRotation() {
+            // Deleguj na ARManager
+            ARManager.updateModelRotation();
+        }
+
+        // === AKTUALIZOVANÁ FUNKCE VIDITELNOSTI ===
+        function isAnyModelVisible() {
+            return ARManager.isAnyARModelVisible();
+        }
+
+        function showRotationHintOnce() {
+            ARManager.showRotationHintOnce();
+        };
                 
                 touchStarted = true;
                 rotationActive = true;
@@ -1130,7 +1053,7 @@
                 
                 // === NOVÉ: INICIALIZACE PRÁZDNÉ SCÉNY ===
                 setTimeout(() => {
-                    initializeEmptyARScene();
+                    ARManager.initializeARScene(markers, getGLBModelForMarker, getScaleForMarker);
                     console.log("🍷 Wine AR scene cleared, empty scene initialized");
                 }, 1000);
                 
@@ -1174,6 +1097,7 @@
             window.markQuizCompleted = markQuizCompleted; // Pro testování
             
             console.log("💡 Debug commands: getWineARStatus(), forceCleanWineARScene(), debugGetCompletedQuizzes()");
+            console.log("💡 ARManager debug: ARManager.debugARSceneStatus(), ARManager.testARObjectToggle('sud')");
         });
 
         console.log("🍇 Wine AR script with PHYSICAL object management, quiz system and gamification loaded successfully!");
