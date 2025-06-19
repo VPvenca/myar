@@ -179,7 +179,7 @@ function updateNavigation(markers, formatDistanceCallback, calculateDistanceCall
         
         html += `
             <div class="${cssClass}" data-target-id="${marker.id}">
-                <div style="font-weight: bold;">${marker.name} ${isSelected ? '🎯' : ''}</div>
+                <div style="font-weight: bold;">${marker.name} ${isSelected ? '🎯' : ''} ${isActivated ? '✅' : ''}</div>
                 <div style="font-size: 12px; color: #666;">${formatDistanceCallback(marker.distance)} - ${marker.description}</div>
             </div>
         `;
